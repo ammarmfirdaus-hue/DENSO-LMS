@@ -2,7 +2,7 @@
 /**
  * Student Riwayat Controller
  */
-class DX_LMS_M_Student_Riwayat extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_Riwayat extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Riwayat Belajar Student

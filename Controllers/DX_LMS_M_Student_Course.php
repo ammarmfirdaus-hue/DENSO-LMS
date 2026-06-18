@@ -2,7 +2,7 @@
 /**
  * Student Course Controller
  */
-class DX_LMS_M_Student_Course extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_Course extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Daftar Course Student

@@ -3,7 +3,7 @@
  * Base Controller
  * Menyediakan fungsi-fungsi dasar untuk me-load Model dan View
  */
-class DX_LMS_M_Controller {
+class DX_LMS_Controller {
     
     /**
      * Memuat file View dan mengirimkan data ke View

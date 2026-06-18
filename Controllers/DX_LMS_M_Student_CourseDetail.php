@@ -2,11 +2,11 @@
 /**
  * Controller for Course Detail
  */
-class DX_LMS_M_Student_CourseDetail extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_CourseDetail extends DX_LMS_Controller {
 
     /**
-     * Metode index
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Menampilkan halaman detail course beserta tab Materi, Quiz, dan Forum.
+     * Memuat data course berdasarkan ID, mengevaluasi status sesi, dan menentukan tab aktif.
      */
     public function index() {
         session_start();

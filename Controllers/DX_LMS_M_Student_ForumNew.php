@@ -1,13 +1,12 @@
 <?php
 /**
  * Controller for Creating New Forum Topic
+ * Menangani pembuatan topik diskusi baru pada forum course.
  */
-
+class DX_LMS_M_Student_ForumNew extends DX_LMS_Controller {
     /**
-     * Kelas DX_LMS_M_Student_ForumNew
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Menampilkan halaman form pembuatan topik forum baru.
      */
-class DX_LMS_M_Student_ForumNew {
     public function index() {
         require_once __DIR__ . '/../Views/DX_LMS_M_Student_ForumNew.php';
     }

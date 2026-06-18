@@ -3,7 +3,7 @@
  * Controller Autentikasi
  * Menangani proses Login, Logout, dan Pemilihan Peran
  */
-class DX_LMS_M_Auth extends DX_LMS_M_Controller {
+class DX_LMS_M_Auth extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Login

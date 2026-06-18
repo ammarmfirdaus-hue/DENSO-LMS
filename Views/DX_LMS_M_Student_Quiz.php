@@ -12,7 +12,7 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
 <head>
     <?php 
     $page_title = 'PT. LMS - ' . e($title);
-    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }

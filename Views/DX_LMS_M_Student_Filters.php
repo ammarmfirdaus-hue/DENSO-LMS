@@ -3,7 +3,7 @@
 <head>
     <?php 
     $page_title = 'Filter Course - LMS';
-    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
     ?>
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">

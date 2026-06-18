@@ -2,7 +2,7 @@
 /**
  * Student Notifikasi Controller
  */
-class DX_LMS_M_Student_Notifikasi extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_Notifikasi extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Notifikasi Student

@@ -2,11 +2,11 @@
 /**
  * Controller for Riwayat Detail
  */
-class DX_LMS_M_Student_RiwayatDetail extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_RiwayatDetail extends DX_LMS_Controller {
 
     /**
-     * Metode index
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Menampilkan halaman detail riwayat course yang telah diselesaikan Student.
+     * Memuat data course, skor akhir, dan status penyelesaian berdasarkan ID.
      */
     public function index() {
         session_start();

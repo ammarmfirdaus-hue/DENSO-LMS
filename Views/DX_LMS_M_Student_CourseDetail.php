@@ -9,7 +9,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
 <head>
     <?php 
     $page_title = 'PT. LMS - Course Detail';
-    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }

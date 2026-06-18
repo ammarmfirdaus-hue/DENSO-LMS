@@ -2,11 +2,11 @@
 /**
  * Student Filters Controller
  */
-class DX_LMS_M_Student_Filters extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_Filters extends DX_LMS_Controller {
     
     /**
-     * Metode index
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Menampilkan halaman filter course lengkap dengan semua kategori tag.
+     * Memungkinkan Student memilih filter untuk menyaring daftar course.
      */
     public function index() {
         session_start();

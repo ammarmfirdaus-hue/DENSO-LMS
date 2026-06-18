@@ -3,7 +3,7 @@
  * Core Router
  * Handles URI mapping to Controllers
  */
-class DX_LMS_M_Router {
+class DX_LMS_Router {
     private $routes = [];
 
     /**

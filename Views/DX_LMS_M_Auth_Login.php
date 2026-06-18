@@ -17,7 +17,7 @@ $error_message = isset($_GET['error']) ? 'NPK dan Password wajib diisi / Salah.'
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <?php include __DIR__ . '/../includes/components/DX_LMS_M_Head.php'; ?>
+    <?php include __DIR__ . '/../includes/components/DX_LMS_Head.php'; ?>
 </head>
 <body class="bg-background">
 

@@ -3,7 +3,7 @@
  * Master Employee Model
  * Mmerepresentasikan tabel LMS_M_Employee di database DX_LMS
  */
-class DX_LMS_M_Employees extends DX_LMS_M_Model {
+class DX_LMS_M_Employees extends DX_LMS_Model {
     protected $table = 'LMS_M_Employee';
     protected $primaryKey = 'npk';
 

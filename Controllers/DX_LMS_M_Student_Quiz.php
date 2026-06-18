@@ -2,7 +2,7 @@
 /**
  * Controller for Student Quiz View
  */
-class DX_LMS_M_Student_Quiz extends DX_LMS_M_Controller {
+class DX_LMS_M_Student_Quiz extends DX_LMS_Controller {
     
     public function index() {
         session_start();

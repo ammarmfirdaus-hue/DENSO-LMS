@@ -14,7 +14,7 @@ if (!defined('DLS_ROOT')) {
 // ============================================================
 define('DB_HOST', 'localhost');           // Host SQL Server
 define('DB_PORT', '1433');               // Port SQL Server
-define('DB_NAME', 'denso_lms');          // Nama Database
+define('DB_NAME', 'DX_LMS');          // Nama Database (standar: DX_[NamaSistem])
 define('DB_USER', 'sa');                 // Pengguna Database
 define('DB_PASS', '');                   // Password Database
 

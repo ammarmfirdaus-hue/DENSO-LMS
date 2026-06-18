@@ -7,7 +7,7 @@
 <!DOCTYPE html><html lang="id" style=""><head>
     <?php 
     $page_title = 'Notifikasi - LMS Learning System';
-    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }

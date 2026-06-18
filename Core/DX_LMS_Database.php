@@ -3,7 +3,7 @@
  * Database Connection Helper
  * Menggunakan PDO untuk SQL Server
  */
-class DX_LMS_M_Database {
+class DX_LMS_Database {
     private static $instance = null;
     private $conn;
 
@@ -13,8 +13,10 @@ class DX_LMS_M_Database {
     private $password = 'Your_Password123'; // Ganti dengan password SQL Server Anda
 
     /**
-     * Metode __construct
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Inisialisasi koneksi database menggunakan PDO.
+     * Menggunakan pattern Singleton — constructor bersifat private.
+     * Saat ini menggunakan SQLite in-memory sebagai fallback karena driver SQLSRV belum tersedia.
+     * @throws PDOException Jika koneksi gagal dibuat
      */
     private function __construct() {
         try {
@@ -39,19 +41,21 @@ class DX_LMS_M_Database {
     }
 
     /**
-     * Metode getInstance
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Mendapatkan instance tunggal dari DX_LMS_Database (Singleton Pattern).
+     * Jika belum ada instance, buat baru. Jika sudah ada, kembalikan yang sama.
+     * @return DX_LMS_Database Instance database
      */
     public static function getInstance() {
         if (!self::$instance) {
-            self::$instance = new DX_LMS_M_Database();
+            self::$instance = new DX_LMS_Database();
         }
         return self::$instance;
     }
 
     /**
-     * Metode getConnection
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Mendapatkan objek PDO connection yang aktif.
+     * Digunakan oleh Model untuk menjalankan query ke database.
+     * @return PDO Objek koneksi PDO
      */
     public function getConnection() {
         return $this->conn;

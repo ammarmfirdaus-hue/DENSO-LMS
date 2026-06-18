@@ -10,8 +10,8 @@
  */
 
     /**
-     * Kelas DX_StudentData
-     * Didokumentasikan sesuai Panduan Program Standar.
+     * Kelas DX_StudentData — Single Source of Truth data dummy Student.
+     * Menyediakan seluruh data mock untuk module Student (Course, Session, Quiz, Forum).
      */
 class DX_StudentData
 {
