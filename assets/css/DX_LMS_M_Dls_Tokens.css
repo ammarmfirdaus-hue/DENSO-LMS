@@ -1,0 +1,296 @@
+/**
+ * DX_LMS_M_Dls_Tokens.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   DLS Design Tokens — Sistem Pembelajaran Denso
+   Sumber: Desain referensi folder "Design Student - Denso"
+   ============================================================ */
+
+/* === Font Face Declarations === */
+/* Removed local font-face declarations to use Google Fonts instead */
+
+/* === Material Symbols Base Style === */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-rendering: grayscale;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* === Root CSS Custom Properties === */
+:root {
+    /* --- Color Tokens (Material Design 3) --- */
+    /* Primary */
+    --dls-primary: #b4000b;
+    --dls-primary-container: #e20613;
+    --dls-on-primary: #ffffff;
+    --dls-on-primary-container: #fff3f2;
+    --dls-primary-fixed: #ffdad5;
+    --dls-primary-fixed-dim: #ffb4aa;
+    --dls-on-primary-fixed: #410001;
+    --dls-on-primary-fixed-variant: #930007;
+    --dls-inverse-primary: #ffb4aa;
+
+    /* Secondary */
+    --dls-secondary: #4355b9;
+    --dls-secondary-container: #8596ff;
+    --dls-on-secondary: #ffffff;
+    --dls-on-secondary-container: #11278e;
+    --dls-secondary-fixed: #dee0ff;
+    --dls-secondary-fixed-dim: #bac3ff;
+    --dls-on-secondary-fixed: #00105c;
+    --dls-on-secondary-fixed-variant: #293ca0;
+
+    /* Tertiary */
+    --dls-tertiary: #00671a;
+    --dls-tertiary-container: #178229;
+    --dls-on-tertiary: #ffffff;
+    --dls-on-tertiary-container: #deffd6;
+    --dls-tertiary-fixed: #94f990;
+    --dls-tertiary-fixed-dim: #78dc77;
+    --dls-on-tertiary-fixed: #002204;
+    --dls-on-tertiary-fixed-variant: #005313;
+
+    /* Error */
+    --dls-error: #ba1a1a;
+    --dls-error-container: #ffdad6;
+    --dls-on-error: #ffffff;
+    --dls-on-error-container: #93000a;
+
+    /* Surface */
+    --dls-surface: #fcf9f8;
+    --dls-surface-dim: #dcd9d9;
+    --dls-surface-bright: #fcf9f8;
+    --dls-surface-container-lowest: #ffffff;
+    --dls-surface-container-low: #f6f3f2;
+    --dls-surface-container: #f0eded;
+    --dls-surface-container-high: #eae7e7;
+    --dls-surface-container-highest: #e5e2e1;
+    --dls-surface-variant: #e5e2e1;
+    --dls-surface-tint: #c0000d;
+
+    /* On Surface */
+    --dls-on-surface: #1b1c1c;
+    --dls-on-surface-variant: #5e3f3b;
+    --dls-on-background: #1b1c1c;
+
+    /* Background */
+    --dls-background: #fcf9f8;
+
+    /* Outline */
+    --dls-outline: #936e69;
+    --dls-outline-variant: #e9bcb6;
+
+    /* Inverse */
+    --dls-inverse-surface: #303030;
+    --dls-inverse-on-surface: #f3f0ef;
+
+    /* --- Typography Tokens --- */
+    --dls-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Headline */
+    --dls-headline-lg-size: 28px;
+    --dls-headline-lg-line: 34px;
+    --dls-headline-lg-weight: 700;
+    --dls-headline-lg-spacing: -0.02em;
+
+    --dls-headline-md-size: 22px;
+    --dls-headline-md-line: 28px;
+    --dls-headline-md-weight: 700;
+    --dls-headline-md-spacing: -0.01em;
+
+    --dls-headline-sm-size: 18px;
+    --dls-headline-sm-line: 24px;
+    --dls-headline-sm-weight: 700;
+
+    /* Body */
+    --dls-body-lg-size: 16px;
+    --dls-body-lg-line: 24px;
+    --dls-body-lg-weight: 400;
+
+    --dls-body-md-size: 14px;
+    --dls-body-md-line: 20px;
+    --dls-body-md-weight: 400;
+
+    /* Label */
+    --dls-label-md-size: 14px;
+    --dls-label-md-line: 20px;
+    --dls-label-md-weight: 500;
+
+    --dls-label-sm-size: 12px;
+    --dls-label-sm-line: 16px;
+    --dls-label-sm-weight: 500;
+    --dls-label-sm-spacing: 0.02em;
+
+    /* --- Spacing Tokens --- */
+    --dls-base: 8px;
+    --dls-stack-sm: 8px;
+    --dls-stack-md: 16px;
+    --dls-stack-lg: 24px;
+    --dls-container-margin: 16px;
+    --dls-gutter: 16px;
+
+    /* --- Border Radius Tokens --- */
+    --dls-radius-sm: 4px;
+    --dls-radius-md: 8px;
+    --dls-radius-lg: 12px;
+    --dls-radius-xl: 16px;
+    --dls-radius-2xl: 24px;
+    --dls-radius-full: 9999px;
+
+    /* --- Shadow Tokens --- */
+    --dls-shadow-sm: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+    --dls-shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
+    --dls-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
+    --dls-shadow-nav: 0 -4px 12px 0 rgba(0, 0, 0, 0.05);
+
+    /* --- App Bar Heights --- */
+    --dls-topbar-height: 56px;
+    --dls-bottomnav-height: 72px;
+}
+
+/* === Typography Utility Classes === */
+.dls-headline-lg {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-lg-size);
+    line-height: var(--dls-headline-lg-line);
+    font-weight: var(--dls-headline-lg-weight);
+    letter-spacing: var(--dls-headline-lg-spacing);
+}
+
+.dls-headline-md {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-md-size);
+    line-height: var(--dls-headline-md-line);
+    font-weight: var(--dls-headline-md-weight);
+    letter-spacing: var(--dls-headline-md-spacing);
+}
+
+.dls-headline-sm {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-sm-size);
+    line-height: var(--dls-headline-sm-line);
+    font-weight: var(--dls-headline-sm-weight);
+}
+
+.dls-body-lg {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-lg-size);
+    line-height: var(--dls-body-lg-line);
+    font-weight: var(--dls-body-lg-weight);
+}
+
+.dls-body-md {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    line-height: var(--dls-body-md-line);
+    font-weight: var(--dls-body-md-weight);
+}
+
+.dls-label-md {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    line-height: var(--dls-label-md-line);
+    font-weight: var(--dls-label-md-weight);
+}
+
+.dls-label-sm {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    line-height: var(--dls-label-sm-line);
+    font-weight: var(--dls-label-sm-weight);
+    letter-spacing: var(--dls-label-sm-spacing);
+}
+
+/* === Color Utility Classes === */
+/* Text colors */
+.text-primary { color: var(--dls-primary) !important; }
+.text-secondary { color: var(--dls-secondary) !important; }
+.text-tertiary { color: var(--dls-tertiary) !important; }
+.text-error { color: var(--dls-error) !important; }
+.text-on-surface { color: var(--dls-on-surface) !important; }
+.text-on-surface-variant { color: var(--dls-on-surface-variant) !important; }
+.text-on-primary { color: var(--dls-on-primary) !important; }
+.text-on-secondary { color: var(--dls-on-secondary) !important; }
+.text-on-tertiary { color: var(--dls-on-tertiary) !important; }
+.text-on-error { color: var(--dls-on-error) !important; }
+.text-on-primary-container { color: var(--dls-on-primary-container) !important; }
+.text-on-secondary-container { color: var(--dls-on-secondary-container) !important; }
+.text-on-tertiary-container { color: var(--dls-on-tertiary-container) !important; }
+
+/* Background colors */
+.bg-surface { background-color: var(--dls-surface) !important; }
+.bg-surface-container { background-color: var(--dls-surface-container) !important; }
+.bg-surface-container-low { background-color: var(--dls-surface-container-low) !important; }
+.bg-surface-container-high { background-color: var(--dls-surface-container-high) !important; }
+.bg-surface-container-lowest { background-color: var(--dls-surface-container-lowest) !important; }
+.bg-surface-container-highest { background-color: var(--dls-surface-container-highest) !important; }
+.bg-surface-variant { background-color: var(--dls-surface-variant) !important; }
+.bg-background { background-color: var(--dls-background) !important; }
+.bg-primary { background-color: var(--dls-primary) !important; }
+.bg-primary-container { background-color: var(--dls-primary-container) !important; }
+.bg-secondary { background-color: var(--dls-secondary) !important; }
+.bg-secondary-container { background-color: var(--dls-secondary-container) !important; }
+.bg-tertiary { background-color: var(--dls-tertiary) !important; }
+.bg-tertiary-container { background-color: var(--dls-tertiary-container) !important; }
+.bg-error { background-color: var(--dls-error) !important; }
+.bg-error-container { background-color: var(--dls-error-container) !important; }
+
+/* Border colors */
+.border-outline-variant { border-color: var(--dls-outline-variant) !important; }
+.border-surface-variant { border-color: var(--dls-surface-variant) !important; }
+.border-primary { border-color: var(--dls-primary) !important; }
+.border-secondary { border-color: var(--dls-secondary) !important; }
+.border-error { border-color: var(--dls-error) !important; }
+
+/* === Global Base Styles === */
+body {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    line-height: var(--dls-body-md-line);
+    font-weight: var(--dls-body-md-weight);
+    color: var(--dls-on-background);
+    background-color: var(--dls-background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-rendering: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 100dvh;
+}
+
+/* Safe area padding (iOS) */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+/* === Page Transition === */
+/* Fade-in on page load */
+@keyframes dls-page-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body {
+    animation: dls-page-fade-in 0.25s ease-out both;
+}
+
+/* Fade-out class applied via JS before navigating */
+body.dls-navigating {
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+}

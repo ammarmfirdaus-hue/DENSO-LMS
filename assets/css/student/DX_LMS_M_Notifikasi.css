@@ -1,0 +1,56 @@
+/**
+ * DX_LMS_M_Notifikasi.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Notifikasi Page Styles — DLS
+   Ref: notifikasi_karyawan_gaya_terstruktur
+   ============================================================ */
+
+.notif-section-label {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    font-weight: var(--dls-label-sm-weight);
+    color: var(--dls-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 8px;
+    margin-bottom: var(--dls-stack-sm);
+}
+
+.notif-item {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.notif-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notif-item-icon.materi {
+    background-color: rgba(133, 150, 255, 0.2);
+    color: var(--dls-secondary);
+}
+
+.notif-item-icon.course {
+    background-color: rgba(23, 130, 41, 0.1);
+    color: var(--dls-tertiary);
+}
+
+.notif-item-icon.quiz {
+    background-color: rgba(226, 6, 19, 0.1);
+    color: var(--dls-primary);
+}
+
+.notif-item-icon.video {
+    background-color: rgba(133, 150, 255, 0.2);
+    color: var(--dls-secondary);
+}

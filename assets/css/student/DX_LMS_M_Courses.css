@@ -1,0 +1,225 @@
+/**
+ * DX_LMS_M_Courses.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Courses List Page Styles
+   Sistem Pembelajaran Denso
+   ============================================================ */
+
+/* Header Area (Search and Filters) */
+.courses-header {
+    background-color: var(--dls-surface);
+    padding: var(--dls-stack-sm) var(--dls-container-margin) var(--dls-stack-md);
+    border-bottom: 1px solid var(--dls-outline-variant);
+    position: sticky;
+    top: var(--dls-topbar-height);
+    z-index: 10;
+}
+
+.courses-search {
+    position: relative;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.courses-search .material-symbols-outlined {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dls-on-surface-variant);
+    font-size: 20px;
+}
+
+.courses-search-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 40px;
+    border: 1px solid var(--dls-outline);
+    border-radius: var(--dls-radius-full);
+    background-color: var(--dls-surface-container-lowest);
+    color: var(--dls-on-surface);
+    font-family: inherit;
+    font-size: var(--dls-body-md-size);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.courses-search-input:focus {
+    outline: none;
+    border-color: var(--dls-primary);
+    box-shadow: 0 0 0 4px rgba(216, 27, 43, 0.1);
+}
+
+/* Filter Chips (Horizontal Scroll) */
+.courses-filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px; /* for scrollbar */
+    scrollbar-width: none; /* Firefox */
+}
+
+.courses-filters::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.filter-chip {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 16px;
+    border: 1px solid var(--dls-outline);
+    border-radius: var(--dls-radius-full);
+    background-color: transparent;
+    color: var(--dls-on-surface-variant);
+    font-family: inherit;
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip.active {
+    background-color: var(--dls-primary);
+    border-color: var(--dls-primary);
+    color: #ffffff;
+}
+
+/* Course List Container */
+.courses-list {
+    padding: var(--dls-stack-md) var(--dls-container-margin);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dls-stack-md);
+    background-color: var(--dls-background);
+}
+
+/* Enhanced Course Card */
+.course-card {
+    background-color: var(--dls-surface);
+    border: 1px solid var(--dls-outline-variant);
+    border-radius: var(--dls-radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card:hover, .course-card:active {
+    transform: translateY(-2px);
+    box-shadow: var(--dls-elevation-2);
+}
+
+.course-card-thumbnail {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, var(--dls-surface-container-high) 0%, var(--dls-surface-container) 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.course-card-status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 8px;
+    border-radius: var(--dls-radius-sm);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(4px);
+}
+
+.status-not-started {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: var(--dls-on-surface-variant);
+}
+
+.status-in-progress {
+    background-color: rgba(216, 27, 43, 0.95);
+    color: #ffffff;
+}
+
+.status-completed {
+    background-color: rgba(18, 181, 105, 0.95); /* A nice green */
+    color: #ffffff;
+}
+
+.course-card-body {
+    padding: var(--dls-stack-md);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.course-card-title {
+    font-family: inherit;
+    font-size: var(--dls-title-md-size);
+    font-weight: var(--dls-title-md-weight);
+    line-height: var(--dls-title-md-line);
+    color: var(--dls-on-surface);
+    margin: 0 0 4px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.course-card-desc {
+    font-family: inherit;
+    font-size: var(--dls-body-sm-size);
+    line-height: var(--dls-body-sm-line);
+    color: var(--dls-on-surface-variant);
+    margin: 0 0 var(--dls-stack-md) 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Progress Area */
+.course-card-progress {
+    margin-top: auto;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.course-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.course-progress-label {
+    font-family: inherit;
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+}
+
+.course-progress-value {
+    font-family: inherit;
+    font-size: var(--dls-label-sm-size);
+    font-weight: 600;
+    color: var(--dls-primary);
+}
+
+/* Action Area */
+.course-card-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--dls-outline-variant);
+    padding-top: var(--dls-stack-md);
+}

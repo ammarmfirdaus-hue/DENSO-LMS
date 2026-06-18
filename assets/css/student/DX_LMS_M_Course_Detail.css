@@ -1,0 +1,454 @@
+/**
+ * DX_LMS_M_Course_Detail.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Course Detail Page Styles — DLS
+   Ref: detail_course_karyawan_materi_terkonsolidasi
+        detail_course_karyawan_tab_quiz
+        detail_course_karyawan_forum_navigasi_rapi
+   ============================================================ */
+
+/* === Hero Banner === */
+.course-hero {
+    position: relative;
+    width: calc(100% + 2 * var(--dls-container-margin));
+    margin-left: calc(-1 * var(--dls-container-margin));
+    margin-top: calc(-1 * var(--dls-stack-md));
+    height: 200px;
+    overflow: hidden;
+}
+
+.course-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.course-hero-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-hero-placeholder .material-symbols-outlined {
+    font-size: 64px;
+    color: rgba(255, 255, 255, 0.15);
+}
+
+.course-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%);
+}
+
+.course-hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--dls-stack-md) var(--dls-container-margin);
+}
+
+.course-hero-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-md-size);
+    font-weight: var(--dls-headline-md-weight);
+    color: #ffffff;
+    margin: 0 0 4px;
+    letter-spacing: var(--dls-headline-md-spacing);
+}
+
+.course-hero-subtitle {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 8px;
+}
+
+.course-hero-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.course-hero-progress .dls-progress {
+    flex: 1;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.course-hero-progress .dls-progress-bar {
+    background-color: #ffffff;
+}
+
+.course-hero-progress-text {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+}
+
+/* === Tab Content === */
+.tab-content-panel {
+    display: none;
+    padding-top: var(--dls-stack-md);
+}
+
+.tab-content-panel.active {
+    display: block;
+}
+
+/* === Session Card (Materi Tab) === */
+.session-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-lg);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-outline-variant);
+    overflow: hidden;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dls-stack-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.session-header:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+.session-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-sm);
+}
+
+.session-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.session-number.completed {
+    background-color: rgba(23, 130, 41, 0.15);
+    color: var(--dls-tertiary);
+}
+
+.session-number.active {
+    background-color: rgba(67, 85, 185, 0.15);
+    color: var(--dls-secondary);
+}
+
+.session-number.locked {
+    background-color: var(--dls-surface-container-high);
+    color: var(--dls-on-surface-variant);
+}
+
+.session-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface);
+}
+
+.session-items {
+    padding: 0 var(--dls-stack-md) var(--dls-stack-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dls-stack-sm);
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-sm);
+    padding: 10px 12px;
+    background-color: var(--dls-surface-container-low);
+    border-radius: var(--dls-radius-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.session-item:hover {
+    background-color: var(--dls-surface-container);
+}
+
+.session-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.session-item-icon.video {
+    background-color: rgba(67, 85, 185, 0.1);
+    color: var(--dls-secondary);
+}
+
+.session-item-icon.doc {
+    background-color: rgba(226, 6, 19, 0.08);
+    color: var(--dls-primary);
+}
+
+.session-item-icon.link {
+    background-color: rgba(23, 130, 41, 0.1);
+    color: var(--dls-tertiary);
+}
+
+.session-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.session-item-name {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.session-item-meta {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+}
+
+.session-item-status {
+    flex-shrink: 0;
+}
+
+/* === Quiz Card (Quiz Tab) === */
+.quiz-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-lg);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-outline-variant);
+    padding: var(--dls-stack-md);
+    margin-bottom: var(--dls-stack-md);
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-md);
+}
+
+.quiz-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--dls-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.quiz-card-icon.available {
+    background-color: rgba(67, 85, 185, 0.1);
+    color: var(--dls-secondary);
+}
+
+.quiz-card-icon.completed {
+    background-color: rgba(23, 130, 41, 0.1);
+    color: var(--dls-tertiary);
+}
+
+.quiz-card-icon.locked {
+    background-color: var(--dls-surface-container-high);
+    color: var(--dls-on-surface-variant);
+    opacity: 0.5;
+}
+
+.quiz-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.quiz-card-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface);
+    margin: 0 0 2px;
+}
+
+.quiz-card-meta {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+}
+
+.quiz-card-action {
+    flex-shrink: 0;
+}
+
+/* === Forum Card === */
+.forum-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-lg);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-surface-variant);
+    padding: var(--dls-stack-md);
+    margin-bottom: var(--dls-stack-md);
+    display: flex;
+    gap: var(--dls-stack-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.forum-card:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+.forum-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dls-radius-lg);
+    background-color: var(--dls-surface-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--dls-on-surface-variant);
+}
+
+.forum-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.forum-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.forum-card-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.forum-card-time {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.forum-card-desc {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.forum-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.forum-card-avatars {
+    display: flex;
+    align-items: center;
+}
+
+.forum-card-avatars .avatar-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--dls-surface-container-high);
+    border: 2px solid var(--dls-surface-container-lowest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--dls-on-surface-variant);
+    margin-left: -6px;
+}
+
+.forum-card-avatars .avatar-circle:first-child {
+    margin-left: 0;
+}
+
+.forum-card-replies {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-secondary);
+    font-weight: var(--dls-label-sm-weight);
+}
+
+/* === New Topic Button === */
+.forum-new-topic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: none;
+    border: 1px dashed var(--dls-outline-variant);
+    border-radius: var(--dls-radius-full);
+    color: var(--dls-secondary);
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: var(--dls-stack-md) auto;
+}
+
+.forum-new-topic:hover {
+    background-color: rgba(67, 85, 185, 0.05);
+    border-color: var(--dls-secondary);
+}
+
+/* === Section subheader (e.g. "Forum Diskusi · 2 Forum Tersedia") === */
+.section-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.section-subheader-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-sm-size);
+    font-weight: var(--dls-headline-sm-weight);
+    color: var(--dls-on-surface);
+}
+
+.section-subheader-count {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+}

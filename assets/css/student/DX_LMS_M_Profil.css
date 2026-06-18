@@ -1,0 +1,81 @@
+/**
+ * DX_LMS_M_Profil.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Profil Page Styles — DLS
+   Ref: menu_profil_ubah_peran
+   ============================================================ */
+
+.profil-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-lg);
+    padding: var(--dls-stack-md);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-surface-variant);
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-md);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: var(--dls-stack-lg);
+}
+
+/* Decorative blur */
+.profil-card::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 128px;
+    height: 128px;
+    background: var(--dls-secondary-container);
+    opacity: 0.2;
+    border-radius: 50%;
+    filter: blur(32px);
+    pointer-events: none;
+}
+
+.profil-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--dls-surface-container-high);
+    background-color: var(--dls-surface-container-high);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profil-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profil-avatar .material-symbols-outlined {
+    font-size: 32px;
+    color: var(--dls-on-surface-variant);
+}
+
+.profil-info {
+    flex: 1;
+    z-index: 1;
+}
+
+.profil-name {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-sm-size);
+    font-weight: var(--dls-headline-sm-weight);
+    color: var(--dls-on-surface);
+    margin: 0 0 4px;
+}
+
+.profil-npk {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    margin: 0 0 8px;
+}

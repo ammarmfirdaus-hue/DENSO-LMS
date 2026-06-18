@@ -1,0 +1,660 @@
+/**
+ * DX_LMS_M_Dls_Components.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   DLS Components — Reusable UI Components
+   Sistem Pembelajaran Denso
+   ============================================================ */
+
+/* === Card Component === */
+.dls-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-lg);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-surface-variant);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.dls-card:hover {
+    box-shadow: var(--dls-shadow-md);
+}
+
+.dls-card-body {
+    padding: var(--dls-stack-md);
+}
+
+.dls-card-image {
+    width: 100%;
+    height: 128px;
+    object-fit: cover;
+    background-color: var(--dls-surface-container-high);
+}
+
+/* === Button Components === */
+.dls-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    line-height: var(--dls-label-md-line);
+    height: 44px;
+    padding: 0 24px;
+    border-radius: var(--dls-radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dls-btn:active {
+    transform: scale(0.95);
+}
+
+.dls-btn-primary {
+    background-color: var(--dls-primary-container);
+    color: var(--dls-on-primary);
+    box-shadow: 0 4px 12px rgba(226, 6, 19, 0.25);
+}
+
+.dls-btn-primary:hover {
+    background-color: var(--dls-primary);
+    color: var(--dls-on-primary);
+}
+
+.dls-btn-secondary {
+    background-color: var(--dls-secondary);
+    color: var(--dls-on-secondary);
+    box-shadow: 0 4px 12px rgba(67, 85, 185, 0.2);
+}
+
+.dls-btn-secondary:hover {
+    background-color: var(--dls-on-secondary-fixed-variant);
+    color: var(--dls-on-secondary);
+}
+
+.dls-btn-outline {
+    background-color: transparent;
+    color: var(--dls-on-surface);
+    border: 1px solid var(--dls-outline-variant);
+}
+
+.dls-btn-outline:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+.dls-btn-block {
+    width: 100%;
+}
+
+.dls-btn-rounded {
+    border-radius: var(--dls-radius-full);
+}
+
+/* === Badge/Pill Components === */
+.dls-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: var(--dls-radius-full);
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    font-weight: var(--dls-label-sm-weight);
+    line-height: var(--dls-label-sm-line);
+    letter-spacing: var(--dls-label-sm-spacing);
+    white-space: nowrap;
+}
+
+.dls-badge-success {
+    background-color: rgba(23, 130, 41, 0.1);
+    color: var(--dls-tertiary);
+}
+
+.dls-badge-primary {
+    background-color: rgba(226, 6, 19, 0.1);
+    color: var(--dls-primary);
+}
+
+.dls-badge-secondary {
+    background-color: rgba(133, 150, 255, 0.2);
+    color: var(--dls-secondary);
+}
+
+.dls-badge-surface {
+    background-color: var(--dls-surface-container-high);
+    color: var(--dls-on-surface);
+}
+
+.dls-badge-tertiary-container {
+    background-color: var(--dls-tertiary-container);
+    color: var(--dls-on-tertiary-container);
+}
+
+/* === Progress Bar === */
+.dls-progress {
+    width: 100%;
+    height: 6px;
+    background-color: var(--dls-surface-container-high);
+    border-radius: var(--dls-radius-full);
+    overflow: hidden;
+}
+
+.dls-progress-bar {
+    height: 100%;
+    border-radius: var(--dls-radius-full);
+    transition: width 0.5s ease;
+}
+
+.dls-progress-bar-primary {
+    background-color: var(--dls-primary-container);
+}
+
+.dls-progress-bar-secondary {
+    background-color: var(--dls-secondary);
+}
+
+.dls-progress-bar-tertiary {
+    background-color: var(--dls-tertiary);
+}
+
+/* === Tab Navigation === */
+.dls-tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--dls-outline-variant);
+    background-color: var(--dls-surface);
+    position: sticky;
+    top: var(--dls-topbar-height);
+    z-index: 30;
+}
+
+.dls-tab-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface-variant);
+    text-decoration: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.dls-tab-item:hover {
+    color: var(--dls-on-surface);
+    background-color: var(--dls-surface-container-low);
+}
+
+.dls-tab-item.active {
+    color: var(--dls-secondary);
+    border-bottom-color: var(--dls-secondary);
+    font-weight: 700;
+}
+
+/* === Top App Bar === */
+.dls-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    background-color: var(--dls-surface);
+    border-bottom: 1px solid var(--dls-outline-variant);
+    height: var(--dls-topbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--dls-container-margin);
+}
+
+.dls-topbar-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-md-size);
+    font-weight: var(--dls-headline-md-weight);
+    color: var(--dls-primary);
+    letter-spacing: -0.01em;
+}
+
+.dls-topbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dls-radius-full);
+    border: none;
+    background: none;
+    color: var(--dls-on-surface-variant);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    position: relative;
+}
+
+.dls-topbar-btn:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+.dls-topbar-btn:active {
+    transform: scale(0.95);
+}
+
+.dls-topbar-btn .material-symbols-outlined {
+    color: var(--dls-primary);
+}
+
+/* Notification badge dot */
+.dls-notif-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--dls-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--dls-on-primary);
+}
+
+/* === Bottom Navigation Bar === */
+.dls-bottomnav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    background-color: var(--dls-surface);
+    box-shadow: var(--dls-shadow-nav);
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 8px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.dls-bottomnav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 16px;
+    border-radius: var(--dls-radius-lg);
+    text-decoration: none;
+    color: var(--dls-on-surface-variant);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.dls-bottomnav-item:hover {
+    background-color: var(--dls-surface-container-high);
+}
+
+.dls-bottomnav-item:active {
+    transform: scale(0.9);
+}
+
+.dls-bottomnav-item .material-symbols-outlined {
+    margin-bottom: 2px;
+}
+
+.dls-bottomnav-item span:last-child {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    font-weight: var(--dls-label-sm-weight);
+    line-height: var(--dls-label-sm-line);
+}
+
+.dls-bottomnav-item.active {
+    color: var(--dls-secondary);
+    background-color: rgba(133, 150, 255, 0.2);
+    border-radius: var(--dls-radius-lg);
+}
+
+.dls-bottomnav-item.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+/* === Notification Bubble === */
+.dls-notif-bubble {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: 16px;
+    border-top-left-radius: 4px;
+    padding: 16px;
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-surface-variant);
+    position: relative;
+}
+
+.dls-notif-bubble .dls-unread-dot {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--dls-primary);
+    border-radius: 50%;
+}
+
+/* === Modal/Dialog === */
+.dls-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+}
+
+.dls-modal-overlay.show {
+    display: flex;
+}
+
+.dls-modal-content {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: 24px 24px 24px 24px;
+    padding: 32px 24px 24px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    animation: dls-modal-slide-up 0.3s ease;
+}
+
+@keyframes dls-modal-slide-up {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.dls-modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.dls-modal-icon.primary {
+    background-color: rgba(226, 6, 19, 0.1);
+    color: var(--dls-primary);
+}
+
+.dls-modal-icon.secondary {
+    background-color: rgba(67, 85, 185, 0.1);
+    color: var(--dls-secondary);
+}
+
+.dls-modal-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-sm-size);
+    font-weight: var(--dls-headline-sm-weight);
+    color: var(--dls-on-surface);
+    margin-bottom: 8px;
+}
+
+.dls-modal-desc {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    margin-bottom: 24px;
+}
+
+/* === Input Components === */
+.dls-input-group {
+    position: relative;
+    width: 100%;
+}
+
+.dls-input {
+    width: 100%;
+    height: 52px;
+    padding: 14px 16px 14px 48px;
+    background-color: var(--dls-surface-container-lowest);
+    border: 1px solid var(--dls-outline-variant);
+    border-radius: var(--dls-radius-lg);
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-lg-size);
+    color: var(--dls-on-surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+}
+
+.dls-input::placeholder {
+    color: var(--dls-on-surface-variant);
+    opacity: 0.6;
+}
+
+.dls-input:focus {
+    border-color: var(--dls-secondary);
+    box-shadow: 0 0 0 2px rgba(67, 85, 185, 0.15);
+}
+
+.dls-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dls-on-surface-variant);
+}
+
+.dls-input-action {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--dls-on-surface-variant);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dls-input-action:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+/* === Role Selection Card === */
+.dls-role-card {
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-md);
+    padding: var(--dls-stack-md);
+    background-color: var(--dls-surface-container-lowest);
+    border: 2px solid var(--dls-outline-variant);
+    border-radius: var(--dls-radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.dls-role-card:hover {
+    border-color: var(--dls-on-surface-variant);
+}
+
+.dls-role-card.selected {
+    border-color: var(--dls-primary-container);
+    background-color: rgba(226, 6, 19, 0.04);
+}
+
+.dls-role-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dls-role-card-check {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+}
+
+.dls-role-card.selected .dls-role-card-check {
+    display: flex;
+}
+
+/* === Menu List Item === */
+.dls-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--dls-stack-md);
+    background-color: var(--dls-surface-container-lowest);
+    border: none;
+    border-bottom: 1px solid var(--dls-surface-variant);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dls-menu-item:hover {
+    background-color: var(--dls-surface-container-low);
+}
+
+.dls-menu-item:last-child {
+    border-bottom: none;
+}
+
+.dls-menu-item-left {
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-md);
+}
+
+.dls-menu-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dls-surface-container);
+    color: var(--dls-secondary);
+    transition: background-color 0.2s ease;
+}
+
+.dls-menu-item:hover .dls-menu-item-icon {
+    background-color: rgba(133, 150, 255, 0.2);
+}
+
+.dls-menu-item-label {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface);
+}
+
+/* Highlighted menu item */
+.dls-menu-item.highlighted {
+    background-color: rgba(133, 150, 255, 0.1);
+    position: relative;
+}
+
+.dls-menu-item.highlighted::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--dls-secondary);
+}
+
+.dls-menu-item.highlighted .dls-menu-item-label {
+    font-weight: 700;
+}
+
+.dls-menu-item.highlighted .dls-menu-item-icon {
+    background-color: rgba(133, 150, 255, 0.3);
+}
+
+/* Danger menu item */
+.dls-menu-item.danger:hover {
+    background-color: rgba(255, 218, 214, 0.2);
+}
+
+.dls-menu-item.danger .dls-menu-item-icon {
+    background-color: rgba(255, 218, 214, 0.3);
+    color: var(--dls-error);
+}
+
+.dls-menu-item.danger .dls-menu-item-label {
+    color: var(--dls-error);
+}
+
+/* === Line Clamp === */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* === Scrollbar Hide === */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* === Ring/Circle Progress (SVG based) === */
+.dls-ring-progress {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dls-ring-progress svg {
+    transform: rotate(-90deg);
+}
+
+.dls-ring-progress .dls-ring-value {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

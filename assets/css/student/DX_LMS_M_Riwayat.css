@@ -1,0 +1,96 @@
+/**
+ * DX_LMS_M_Riwayat.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Riwayat Belajar Page Styles — DLS
+   Ref: riwayat_belajar_karyawan_extended_layout
+   ============================================================ */
+
+/* === Stats Hero Card === */
+.riwayat-stats-card {
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-xl);
+    box-shadow: var(--dls-shadow-md);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    border: 1px solid var(--dls-surface-container-low);
+    transition: box-shadow 0.3s ease;
+}
+
+.riwayat-stats-card:hover {
+    box-shadow: var(--dls-shadow-lg);
+}
+
+.riwayat-stats-label {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-md-size);
+    font-weight: var(--dls-label-md-weight);
+    color: var(--dls-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.riwayat-stats-value {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.riwayat-stats-number {
+    font-family: var(--dls-font-family);
+    font-size: 48px;
+    line-height: 48px;
+    font-weight: 700;
+    color: var(--dls-tertiary);
+    letter-spacing: -0.02em;
+}
+
+.riwayat-stats-icon {
+    font-size: 32px;
+    color: var(--dls-tertiary);
+}
+
+/* === Course History Card === */
+.riwayat-course-card {
+    background-color: var(--dls-surface);
+    border-radius: var(--dls-radius-lg);
+    box-shadow: var(--dls-shadow-sm);
+    border: 1px solid var(--dls-surface-variant);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--dls-stack-md);
+}
+
+.riwayat-course-img {
+    height: 128px;
+    background-color: var(--dls-surface-container-high);
+    position: relative;
+    overflow: hidden;
+}
+
+.riwayat-course-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.riwayat-course-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.riwayat-course-body {
+    padding: var(--dls-stack-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dls-stack-sm);
+}

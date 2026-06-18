@@ -1,0 +1,139 @@
+/**
+ * DX_LMS_M_Login.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Login Page Styles — DLS
+   Ref: login_screen_clean_header
+   ============================================================ */
+
+.login-wrapper {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px var(--dls-container-margin);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background decorative blurs */
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -80px;
+    width: 200px;
+    height: 200px;
+    background: var(--dls-primary-container);
+    opacity: 0.08;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+}
+
+.login-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -60px;
+    width: 160px;
+    height: 160px;
+    background: var(--dls-secondary-container);
+    opacity: 0.1;
+    border-radius: 50%;
+    filter: blur(50px);
+    pointer-events: none;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo-text {
+    font-family: var(--dls-font-family);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--dls-primary);
+    letter-spacing: -0.02em;
+}
+
+.login-logo-subtitle {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+    margin-top: 4px;
+    letter-spacing: var(--dls-label-sm-spacing);
+}
+
+.login-heading {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-heading h1 {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-lg-size);
+    font-weight: var(--dls-headline-lg-weight);
+    color: var(--dls-on-surface);
+    letter-spacing: var(--dls-headline-lg-spacing);
+    margin: 0 0 8px;
+}
+
+.login-heading p {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    margin: 0;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dls-stack-md);
+    z-index: 1;
+}
+
+.login-forgot {
+    text-align: right;
+    margin-top: -8px;
+}
+
+.login-forgot a {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    font-weight: var(--dls-label-sm-weight);
+    color: var(--dls-secondary);
+    text-decoration: none;
+}
+
+.login-forgot a:hover {
+    text-decoration: underline;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+    z-index: 1;
+}
+
+.login-footer p {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-label-sm-size);
+    color: var(--dls-on-surface-variant);
+    margin: 0;
+}
+
+.login-footer a {
+    color: var(--dls-secondary);
+    font-weight: var(--dls-label-md-weight);
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}

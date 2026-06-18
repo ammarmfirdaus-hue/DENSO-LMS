@@ -1,0 +1,260 @@
+/**
+ * DX_LMS_M_Pilih_Peran.css
+ * Dokumentasi standar untuk aset
+ */
+/* ============================================================
+   Pilih Peran Page Styles — DLS
+   Ref: pilih_peran
+   ============================================================ */
+
+.pilih-peran-wrapper {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px var(--dls-container-margin);
+}
+
+.pilih-peran-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.pilih-peran-header .logo-text {
+    font-family: var(--dls-font-family);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--dls-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+}
+
+.pilih-peran-header h1 {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-lg-size);
+    font-weight: var(--dls-headline-lg-weight);
+    color: var(--dls-on-surface);
+    letter-spacing: var(--dls-headline-lg-spacing);
+    margin: 0 0 8px;
+}
+
+.pilih-peran-header p {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    margin: 0;
+}
+
+.pilih-peran-cards {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dls-stack-md);
+    margin-bottom: 24px;
+}
+
+.pilih-peran-remember {
+    display: flex;
+    align-items: center;
+    gap: var(--dls-stack-sm);
+    margin-bottom: 24px;
+}
+
+.pilih-peran-remember input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--dls-secondary);
+    border-radius: var(--dls-radius-sm);
+}
+
+.pilih-peran-remember label {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    cursor: pointer;
+}
+
+.pilih-peran-actions {
+    width: 100%;
+    max-width: 400px;
+    padding-bottom: 24px;
+}
+
+/* Custom Vertical Role Card */
+.pilih-peran-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dls-surface-container-lowest);
+    border-radius: var(--dls-radius-xl);
+    padding: var(--dls-container-margin);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--dls-outline-variant);
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.pilih-peran-card:hover {
+    border-color: var(--dls-primary);
+}
+
+.pilih-peran-card.selected {
+    background-color: rgba(255, 218, 213, 0.2); /* primary-fixed/20 approximate */
+    border: 2px solid var(--dls-primary);
+    padding: calc(var(--dls-container-margin) - 1px); /* Adjust padding for border width change */
+}
+
+.pilih-peran-img-container {
+    width: 100%;
+    height: 160px;
+    border-radius: var(--dls-radius-lg);
+    margin-bottom: var(--dls-stack-md);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(233, 188, 182, 0.3); /* outline-variant/30 */
+    background-color: var(--dls-surface-container-low);
+}
+
+.pilih-peran-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.pilih-peran-img-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(255,255,255,0.8), transparent);
+}
+
+.pilih-peran-card-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    transition: opacity 0.2s ease;
+}
+
+.pilih-peran-card:not(.selected) .pilih-peran-card-content {
+    opacity: 0.8;
+}
+
+.pilih-peran-card:not(.selected):hover .pilih-peran-card-content {
+    opacity: 1;
+}
+
+.pilih-peran-card-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.pilih-peran-card-title {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-headline-md-size);
+    font-weight: var(--dls-headline-md-weight);
+    color: var(--dls-on-surface);
+    margin-bottom: var(--dls-base);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pilih-peran-card-desc {
+    font-family: var(--dls-font-family);
+    font-size: var(--dls-body-md-size);
+    color: var(--dls-on-surface-variant);
+    line-height: 1.5;
+}
+
+.pilih-peran-indicator {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-left: 16px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dls-outline);
+    transition: all 0.2s ease;
+}
+
+.pilih-peran-card:hover .pilih-peran-indicator {
+    border-color: var(--dls-primary);
+}
+
+.pilih-peran-card.selected .pilih-peran-indicator {
+    background-color: var(--dls-primary);
+    border-color: var(--dls-primary);
+}
+
+.pilih-peran-indicator .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--dls-on-primary);
+    display: none;
+    font-weight: 700;
+}
+
+.pilih-peran-card.selected .pilih-peran-indicator .material-symbols-outlined {
+    display: block;
+}
+
+/* Custom Checkbox */
+.pilih-peran-checkbox-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pilih-peran-checkbox-wrapper input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.pilih-peran-checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--dls-outline);
+    border-radius: 4px;
+    background-color: var(--dls-surface-container-lowest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.pilih-peran-checkbox-wrapper input:checked ~ .pilih-peran-checkmark {
+    background-color: var(--dls-primary);
+    border-color: var(--dls-primary);
+}
+
+.pilih-peran-checkmark .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--dls-on-primary);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+    font-weight: 700;
+}
+
+.pilih-peran-checkbox-wrapper input:checked ~ .pilih-peran-checkmark .material-symbols-outlined {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.pilih-peran-remember label {
+    transition: color 0.2s ease;
+}
+
+.pilih-peran-remember:hover label {
+    color: var(--dls-on-surface);
+}
