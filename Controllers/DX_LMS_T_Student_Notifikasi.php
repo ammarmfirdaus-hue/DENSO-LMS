@@ -2,7 +2,7 @@
 /**
  * Student Notifikasi Controller
  */
-class DX_LMS_M_Student_Notifikasi extends DX_LMS_Controller {
+class DX_LMS_T_Student_Notifikasi extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Notifikasi Student
@@ -18,6 +18,6 @@ class DX_LMS_M_Student_Notifikasi extends DX_LMS_Controller {
             'notifications' => $notifications,
         ];
 
-        $this->view('DX_LMS_M_Student_Notifikasi', $data);
+        $this->view('DX_LMS_T_Student_Notifikasi', $data);
     }
 }

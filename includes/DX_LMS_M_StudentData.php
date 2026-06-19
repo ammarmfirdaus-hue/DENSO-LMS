@@ -27,7 +27,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS001',
                 'title'            => 'Dasar-dasar K3 Produksi',
-                'description'      => 'Pelajari prosedur Keselamatan dan Kesehatan Kerja (K3) standar yang berlaku di seluruh area produksi.',
+                'description'      => 'Modul komprehensif yang dirancang untuk membekali karyawan dengan pemahaman mendalam mengenai standar operasional Keselamatan dan Kesehatan Kerja (K3) yang berlaku di seluruh area produksi PT Denso Indonesia.',
                 'thumbnail'        => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAiRV2Li9BIGOpv0Km6rF-20aWJBG8EEIyvIXbnT54btkPKnKo8vnxBMo7j7rPbYExTKJAhReZSrMMNZyvKokC4v-uFsvM-fzXVNpRrVG_Y328Aa2WteHU4K0QmfguLzX-5Uu61S84rYo_h6-reiOq_foZCdFswCLovNNrKvsYx6slO8zezYtdRbc_7FvP2LTv1d8I6jxNqWO6XSLafhKUIkkfMUvFN-SyhFjfe-YKRUlpfgLtaBDyeCC0nq8ztKPdzao-1Fqsse1I',
                 'category'         => 'Wajib',
                 'filters'          => ['Hard Skill', 'Safety', 'Technical'],
@@ -103,7 +103,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS002',
                 'title'            => 'Pengenalan 5S Area Produksi',
-                'description'      => 'Materi pengenalan 5S (Seiri, Seiton, Seiso, Seiketsu, Shitsuke) untuk budaya kerja yang lebih baik.',
+                'description'      => 'Program fundamental mengenai implementasi prinsip 5S (Seiri, Seiton, Seiso, Seiketsu, Shitsuke) guna membangun budaya kerja yang terstruktur, efisien, dan berorientasi pada keunggulan operasional.',
                 'thumbnail'        => null, // Menggunakan icon placeholder
                 'thumbnail_icon'   => 'precision_manufacturing',
                 'category'         => 'Wajib',
@@ -180,7 +180,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS003',
                 'title'            => 'Quality Control Basic',
-                'description'      => 'Dasar-dasar pengendalian kualitas produk sesuai dengan standar Perusahaan.',
+                'description'      => 'Materi esensial terkait prinsip dan prosedur pengendalian mutu (Quality Control) guna memastikan standar kualitas produk tetap terjaga sesuai dengan regulasi dan spesifikasi perusahaan.',
                 'thumbnail'        => 'https://lh3.googleusercontent.com/aida-public/AB6AXuD-XQBb8vaUq4XtbvXn4rFJ4HhWf6gmgXidOMH0HgAdDCtY3J_mtzxLGQEuWPSSQyRNey1xCsZsplG2WxOJwjbo8SmEswrT_HnA4KMdILsw5RFSSWZt2oSGC5J7rf_2He-KZwzWONcgwrm-je-SUy6SF0AQ1Hn2UmHY1EBHYihXK68a_mUfDNAYUBWgEoNgOvVUfeZErJBdI5UFZK7G0_gDzXxL-nMtzQg5DfySaiKKDPfDHW4i200YsgCYkiNowXxWsHoovCiH1Fw',
                 'category'         => 'Wajib',
                 'filters'          => ['Hard Skill', 'Quality', 'Technical'],
@@ -256,7 +256,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS004',
                 'title'            => 'Production System',
-                'description'      => 'Pelajari filosofi monozukuri dan sistem produksi efisien.',
+                'description'      => 'Pembelajaran komprehensif mengenai filosofi Monozukuri dan pengenalan sistem manufaktur yang efisien untuk mengoptimalkan alur kerja dan meningkatkan produktivitas.',
                 'thumbnail'        => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBWyQL0ji0nP7bRKeShqCA1ircNDVY8x7Ybh2Oiqw10CTr8OBpvd8hpFXaVhC7DRbT4DpYzXUAwXahdzRAHiGXnxXq-ScIo_UHhrBcaEy8BDQVtw5YY2fFfhr580Hr1gdnl5XcbGeDlXOD9l3wN6yluYNh784CSWpxWgIcdu2MLaq8KKvbhqzJX4jMZvluNRZ7gtjkmJXbvio77ssVuHU9WEfS-z0OCN-TDbVwhwZOm-wjnm6nVuCfm7gtyK5NcR9kMb66Uzh-59tU',
                 'category'         => 'Wajib',
                 'filters'          => ['Hard Skill', 'Management', 'Engineering'],
@@ -332,7 +332,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS005',
                 'title'            => 'Safety Awareness Training',
-                'description'      => 'Pahami prosedur keselamatan dasar di area produksi untuk meminimalisir risiko kecelakaan kerja.',
+                'description'      => 'Program edukasi preventif yang difokuskan pada identifikasi dan mitigasi risiko keselamatan dasar di area kerja guna menciptakan lingkungan produksi yang aman dan terhindar dari kecelakaan kerja.',
                 'thumbnail'        => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDo82B72H4r9ssnhe7RS3Smf8PvEQRRjEIr465LZfNy4AKhbarW3lk4teJafdpV6telDUS5YQGHBH54FySi8MOTQVcMKy5UqzU-hMIIZvYNmFPlYhVppyI7zCRfaYgLZlXgzW10dUfF21TbwUssyTOsMF6ubm7_IKOhbJKDn_byoxR4sLBFVijnEhmCvVSwDrr1ylY2isMvi_UMv2VyXRlxLOElIijUv8Rjv-cP1NuoWvaDobAZU24Tl4t1YUT5IwcSAmxL83fP7rA',
                 'category'         => 'Wajib',
                 'filters'          => ['Soft Skill', 'Safety', 'Leadership'],
@@ -408,7 +408,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS006',
                 'title'            => 'Dasar Pemrograman Web',
-                'description'      => 'Pengenalan teknologi dasar pengembangan web untuk kebutuhan sistem otomasi industri.',
+                'description'      => 'Pengenalan teknologi dan arsitektur pengembangan sistem berbasis web sebagai fondasi dalam mendukung digitalisasi dan otomatisasi industri di lingkungan perusahaan.',
                 'thumbnail'        => null,
                 'thumbnail_icon'   => 'code',
                 'category'         => 'Wajib',
@@ -485,7 +485,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS007',
                 'title'            => 'Advanced Leadership Program',
-                'description'      => 'Program pengembangan kepemimpinan lanjutan untuk menyiapkan calon supervisor yang tangguh.',
+                'description'      => 'Program pengembangan kepemimpinan tingkat lanjut yang dirancang khusus untuk membekali calon supervisor dengan keterampilan manajerial, pengambilan keputusan, dan pengelolaan tim yang tangguh.',
                 'thumbnail'        => null,
                 'thumbnail_icon'   => 'groups',
                 'category'         => 'Wajib',
@@ -562,7 +562,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS008',
                 'title'            => 'Lean Manufacturing Principles',
-                'description'      => 'Prinsip-prinsip manufaktur ramping (Lean) untuk meminimalisir pemborosan dalam proses produksi.',
+                'description'      => 'Panduan strategis mengenai penerapan prinsip manufaktur ramping (Lean Manufacturing) untuk meminimalkan aktivitas bernilai tambah rendah (waste) dan meningkatkan efisiensi proses produksi.',
                 'thumbnail'        => null,
                 'thumbnail_icon'   => 'trending_up',
                 'category'         => 'Wajib',
@@ -639,7 +639,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS009',
                 'title'            => 'Basic Data Analytics',
-                'description'      => 'Belajar mengolah data produksi menggunakan tools analisis data dasar untuk pengambilan keputusan.',
+                'description'      => 'Pelatihan dasar analitik data yang memandu peserta dalam mengumpulkan, mengolah, dan menganalisis data produksi untuk mendukung pengambilan keputusan yang tangkas dan berbasis pada fakta empiris.',
                 'thumbnail'        => null,
                 'thumbnail_icon'   => 'bar_chart',
                 'category'         => 'Wajib',
@@ -716,7 +716,7 @@ class DX_StudentData
             [
                 'id'               => 'CRS010',
                 'title'            => 'Komunikasi Efektif di Lingkungan Kerja',
-                'description'      => 'Teknik komunikasi asertif antar departemen demi terciptanya lingkungan kerja yang harmonis.',
+                'description'      => 'Materi pengembangan soft skill yang berfokus pada strategi komunikasi asertif antar departemen untuk menumbuhkan kolaborasi sinergis dan lingkungan kerja yang profesional dan harmonis.',
                 'thumbnail'        => null,
                 'thumbnail_icon'   => 'forum',
                 'category'         => 'Wajib',

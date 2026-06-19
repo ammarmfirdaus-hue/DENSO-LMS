@@ -2,7 +2,7 @@
 /**
  * Controller for Riwayat Detail
  */
-class DX_LMS_M_Student_RiwayatDetail extends DX_LMS_Controller {
+class DX_LMS_T_Student_Riwayat_Detail extends DX_LMS_Controller {
 
     /**
      * Menampilkan halaman detail riwayat course yang telah diselesaikan Student.
@@ -24,6 +24,6 @@ class DX_LMS_M_Student_RiwayatDetail extends DX_LMS_Controller {
             'course' => $course,
         ];
 
-        $this->view('DX_LMS_M_Student_RiwayatDetail', $data);
+        $this->view('DX_LMS_T_Student_Riwayat_Detail', $data);
     }
 }

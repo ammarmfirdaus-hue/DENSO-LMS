@@ -1,6 +1,6 @@
 -- ============================================================
 -- DX_LMS — Database Definition Language (DDL)
--- PT Denso Indonesia — Learning Management System
+-- Learning Management System
 -- Standar: Gambar Referensi + AGENTS.md
 -- DBMS: Microsoft SQL Server
 -- ============================================================

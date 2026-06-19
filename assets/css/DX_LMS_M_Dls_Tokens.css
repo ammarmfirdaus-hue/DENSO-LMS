@@ -3,8 +3,8 @@
  * Dokumentasi standar untuk aset
  */
 /* ============================================================
-   DLS Design Tokens — Sistem Pembelajaran Denso
-   Sumber: Desain referensi folder "Design Student - Denso"
+   DLS Design Tokens — Learning Management System
+   Sumber: Desain referensi folder "Design Student"
    ============================================================ */
 
 /* === Font Face Declarations === */
@@ -275,22 +275,5 @@ body {
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 
 /* === Page Transition === */
-/* Fade-in on page load */
-@keyframes dls-page-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-body {
-    animation: dls-page-fade-in 0.25s ease-out both;
-}
-
-/* Fade-out class applied via JS before navigating */
-body.dls-navigating {
-    opacity: 0;
-    transition: opacity 0.15s ease-in;
-}
+/* Transisi halaman sekarang dikelola sepenuhnya oleh FOUC Preventer di DX_LMS_Tailwind_Head.php */
+/* JANGAN tambahkan animasi/transition body di sini agar tidak bentrok */

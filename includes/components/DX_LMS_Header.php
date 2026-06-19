@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS TopAppBar Component
- * Sistem Pembelajaran Denso
+ * Learning Management System
  * 
  * Matches: TopAppBar dari semua desain referensi Student
  * Layout: [Business Icon] --- [LMS Title] --- [Notification Bell]

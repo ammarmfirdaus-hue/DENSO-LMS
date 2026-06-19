@@ -4,7 +4,7 @@
  */
 /* ============================================================
    DLS Layout Utilities
-   Sistem Pembelajaran Denso
+   Learning Management System
    ============================================================ */
 
 /* === Main Content Area === */
@@ -69,7 +69,7 @@
     gap: var(--dls-stack-md);
 }
 
-/* === Flex Utilities (extending Bootstrap) === */
+/* === Flex Utilities === */
 .dls-flex-center {
     display: flex;
     align-items: center;
@@ -118,10 +118,23 @@
 
 /* App shell wrapper for mobile-first layout */
 .dls-app-shell {
-    max-width: 480px;
+    max-width: 100%;
     margin: 0 auto;
     position: relative;
     min-height: 100dvh;
+}
+
+/* On tablet+, constrain to comfortable reading width */
+@media (min-width: 768px) {
+    .dls-app-shell {
+        max-width: 640px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .dls-app-shell {
+        max-width: 768px;
+    }
 }
 
 /* === Hero Banner (Course Detail) === */

@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS Student Notifikasi View
- * Sistem Pembelajaran Denso
+ * Learning Management System
  */
 ?>
 <!DOCTYPE html><html lang="id" style=""><head>

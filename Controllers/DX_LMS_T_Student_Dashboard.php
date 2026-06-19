@@ -2,7 +2,7 @@
 /**
  * Student Dashboard Controller
  */
-class DX_LMS_M_Student_Dashboard extends DX_LMS_Controller {
+class DX_LMS_T_Student_Dashboard extends DX_LMS_Controller {
     
     /**
      * Menampilkan halaman Beranda (Dashboard) Student
@@ -25,6 +25,6 @@ class DX_LMS_M_Student_Dashboard extends DX_LMS_Controller {
             'activeCourses'  => $activeCourses,
         ];
 
-        $this->view('DX_LMS_M_Student_Dashboard', $data);
+        $this->view('DX_LMS_T_Student_Dashboard', $data);
     }
 }

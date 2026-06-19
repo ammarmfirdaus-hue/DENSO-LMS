@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS Configuration
- * Sistem Pembelajaran Denso - PT Denso Indonesia
+ * Learning Management System
  */
 
 // Mencegah akses langsung

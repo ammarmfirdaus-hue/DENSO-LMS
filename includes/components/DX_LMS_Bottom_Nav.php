@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS BottomNavBar Component
- * Sistem Pembelajaran Denso
+ * Learning Management System
  * 
  * Matches: BottomNavBar dari semua desain referensi Student
  * 5 tabs: Beranda, Course, Riwayat, Notifikasi, Profil

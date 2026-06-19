@@ -1,7 +1,7 @@
 <?php
 /**
  * Front Controller Utama
- * PT Denso Standard Program MVC
+ * DLS Standard Program MVC — Learning Management System
  */
 
 // Jika me-request file statis, biarkan web server yang menangani (untuk php -S)
@@ -37,18 +37,18 @@ $router->add('/pilih-peran', 'DX_LMS_M_Auth@roleSelection');
 $router->add('/auth/set-role', 'DX_LMS_M_Auth@setRole');
 
 // Routes untuk Student
-$router->add('/student', 'DX_LMS_M_Student_Dashboard@index');
+$router->add('/student', 'DX_LMS_T_Student_Dashboard@index');
 $router->add('/student/courses', 'DX_LMS_M_Student_Course@index');
 $router->add('/student/courses/filters', 'DX_LMS_M_Student_Filters@index');
-$router->add('/student/riwayat', 'DX_LMS_M_Student_Riwayat@index');
-$router->add('/student/notifikasi', 'DX_LMS_M_Student_Notifikasi@index');
+$router->add('/student/riwayat', 'DX_LMS_T_Student_Riwayat@index');
+$router->add('/student/notifikasi', 'DX_LMS_T_Student_Notifikasi@index');
 $router->add('/student/profil', 'DX_LMS_M_Student_Profil@index');
-$router->add('/student/course/detail', 'DX_LMS_M_Student_CourseDetail@index');
-$router->add('/student/forum/thread', 'DX_LMS_M_Student_ForumThread@index');
-$router->add('/student/forum/new', 'DX_LMS_M_Student_ForumNew@index');
-$router->add('/student/riwayat/detail', 'DX_LMS_M_Student_RiwayatDetail@index');
-$router->add('/student/learning', 'DX_LMS_M_Student_Learning@index');
-$router->add('/student/quiz', 'DX_LMS_M_Student_Quiz@index');
+$router->add('/student/course/detail', 'DX_LMS_M_Student_Course_Detail@index');
+$router->add('/student/forum/thread', 'DX_LMS_T_Student_Forum_Thread@index');
+$router->add('/student/forum/new', 'DX_LMS_T_Student_Forum_New@index');
+$router->add('/student/riwayat/detail', 'DX_LMS_T_Student_Riwayat_Detail@index');
+$router->add('/student/learning', 'DX_LMS_T_Student_Learning@index');
+$router->add('/student/quiz', 'DX_LMS_T_Student_Quiz@index');
 
 // Menjalankan request
 $route = $_GET['route'] ?? '/';

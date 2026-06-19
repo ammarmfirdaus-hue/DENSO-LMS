@@ -1,7 +1,7 @@
 <?php
 /**
  * Manajemen Session DLS
- * Sistem Pembelajaran Denso
+ * Learning Management System
  */
 
 require_once __DIR__ . '/config.php';

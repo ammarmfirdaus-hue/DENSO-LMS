@@ -2,7 +2,7 @@
 /**
  * Controller for Course Detail
  */
-class DX_LMS_M_Student_CourseDetail extends DX_LMS_Controller {
+class DX_LMS_M_Student_Course_Detail extends DX_LMS_Controller {
 
     /**
      * Menampilkan halaman detail course beserta tab Materi, Quiz, dan Forum.
@@ -40,6 +40,6 @@ class DX_LMS_M_Student_CourseDetail extends DX_LMS_Controller {
             'all_sessions_completed' => $all_sessions_completed,
         ];
 
-        $this->view('DX_LMS_M_Student_CourseDetail', $data);
+        $this->view('DX_LMS_M_Student_Course_Detail', $data);
     }
 }

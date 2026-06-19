@@ -4,7 +4,7 @@
  */
 /* ============================================================
    DLS Components — Reusable UI Components
-   Sistem Pembelajaran Denso
+   Learning Management System
    ============================================================ */
 
 /* === Card Component === */
@@ -290,6 +290,13 @@
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
+/* Hide bottom nav on tablet+ screens */
+@media (min-width: 768px) {
+    .dls-bottomnav {
+        display: none;
+    }
+}
+
 .dls-bottomnav-item {
     display: flex;
     flex-direction: column;
@@ -299,7 +306,7 @@
     border-radius: var(--dls-radius-lg);
     text-decoration: none;
     color: var(--dls-on-surface-variant);
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: background-color 0.1s ease; /* Hanya transisi warna singkat, tanpa transform animasi */
     cursor: pointer;
     border: none;
     background: none;
@@ -309,9 +316,7 @@
     background-color: var(--dls-surface-container-high);
 }
 
-.dls-bottomnav-item:active {
-    transform: scale(0.9);
-}
+/* Dihapus: efek :active transform scale(0.9) agar klik terasa instan */
 
 .dls-bottomnav-item .material-symbols-outlined {
     margin-bottom: 2px;
@@ -355,79 +360,10 @@
     border-radius: 50%;
 }
 
-/* === Modal/Dialog === */
-.dls-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 100;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 16px;
-}
-
-.dls-modal-overlay.show {
-    display: flex;
-}
-
-.dls-modal-content {
-    background-color: var(--dls-surface-container-lowest);
-    border-radius: 24px 24px 24px 24px;
-    padding: 32px 24px 24px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    animation: dls-modal-slide-up 0.3s ease;
-}
-
-@keyframes dls-modal-slide-up {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.dls-modal-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-}
-
-.dls-modal-icon.primary {
-    background-color: rgba(226, 6, 19, 0.1);
-    color: var(--dls-primary);
-}
-
-.dls-modal-icon.secondary {
-    background-color: rgba(67, 85, 185, 0.1);
-    color: var(--dls-secondary);
-}
-
-.dls-modal-title {
-    font-family: var(--dls-font-family);
-    font-size: var(--dls-headline-sm-size);
-    font-weight: var(--dls-headline-sm-weight);
-    color: var(--dls-on-surface);
-    margin-bottom: 8px;
-}
-
-.dls-modal-desc {
-    font-family: var(--dls-font-family);
-    font-size: var(--dls-body-md-size);
-    color: var(--dls-on-surface-variant);
-    margin-bottom: 24px;
-}
+/* === Modal/Dialog ===
+ * NOTE: Modals are now handled by SweetAlert2.
+ * See DLS.confirm(), DLS.success(), DLS.error(), DLS.toast() in DX_LMS_Tailwind_Head.php
+ */
 
 /* === Input Components === */
 .dls-input-group {
@@ -626,6 +562,7 @@
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

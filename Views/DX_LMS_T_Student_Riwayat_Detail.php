@@ -81,7 +81,7 @@
                 <div class="p-stack-md bg-surface-container-lowest flex flex-col gap-stack-md">
                     <div>
                         <p class="font-label-md text-label-md text-on-surface">Sertifikat Kelulusan</p>
-                        <p class="font-body-md text-body-md text-on-surface-variant">Diterbitkan oleh LMS PT. Denso</p>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Diterbitkan oleh LMS</p>
                     </div>
                     <button class="w-full bg-secondary text-on-secondary font-label-md text-label-md h-[44px] rounded-lg flex items-center justify-center gap-2 shadow-[0_4px_12px_0_rgba(67,85,185,0.2)] hover:bg-on-secondary-fixed-variant transition-colors active:scale-95">
                         <span class="material-symbols-outlined">download</span>

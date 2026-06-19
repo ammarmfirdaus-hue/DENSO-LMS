@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS Student Dashboard View
- * Sistem Pembelajaran Denso
+ * Learning Management System
  */
 
 // Inisialisasi variabel jika diperlukan

@@ -1,7 +1,7 @@
 <?php
 /**
  * DLS Helper Functions
- * Sistem Pembelajaran Denso
+ * Learning Management System
  */
 
 /**

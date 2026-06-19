@@ -11,7 +11,7 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
 <html lang="id">
 <head>
     <?php 
-    $page_title = 'PT. LMS - ' . e($title);
+    $page_title = 'LMS - ' . e($title);
     include 'includes/components/DX_LMS_Tailwind_Head.php'; 
     ?>
     <style>
@@ -98,38 +98,24 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
         </div>
     </main>
 
-    <!-- Modal Success Template (Hidden) -->
-    <div id="resultModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-container-margin">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="relative bg-surface rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center animate-fade-in-up">
-            <div class="w-20 h-20 bg-tertiary-container rounded-full flex items-center justify-center mb-5 shadow-inner">
-                <span class="material-symbols-outlined text-tertiary text-5xl">task_alt</span>
-            </div>
-            <h3 class="font-headline-lg text-headline-lg font-bold text-on-surface mb-2">Selesai!</h3>
-            <p class="font-body-md text-on-surface-variant mb-6">Jawaban Anda telah berhasil dikirim. Anda akan diarahkan kembali ke halaman course.</p>
-            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden mb-6">
-                <div class="bg-tertiary h-full w-full animate-progress"></div>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .animate-progress { animation: progress 2s linear forwards; }
-        @keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(0); } }
-    </style>
-
     <script>
         function submitQuiz(e) {
             e.preventDefault();
-            // Tampilkan modal loading / success
-            document.getElementById('resultModal').classList.remove('hidden');
             
-            // Redirect setelah 2 detik
-            setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Selesai!',
+                text: 'Jawaban Anda telah berhasil dikirim. Anda akan diarahkan kembali ke halaman course.',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            }).then(() => {
                 window.location.href = "?route=/student/course/detail&id=<?= e($course['id']) ?>";
-            }, 2000);
+            });
         }
     </script>
 </body>

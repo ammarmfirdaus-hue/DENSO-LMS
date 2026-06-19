@@ -2,7 +2,7 @@
 /**
  * Controller for Student Quiz View
  */
-class DX_LMS_M_Student_Quiz extends DX_LMS_Controller {
+class DX_LMS_T_Student_Quiz extends DX_LMS_Controller {
     
     public function index() {
         session_start();
@@ -52,6 +52,6 @@ class DX_LMS_M_Student_Quiz extends DX_LMS_Controller {
             'type' => $type
         ];
 
-        $this->view('DX_LMS_M_Student_Quiz', $data);
+        $this->view('DX_LMS_T_Student_Quiz', $data);
     }
 }

@@ -2,7 +2,7 @@
 /**
  * Controller for Student Learning View
  */
-class DX_LMS_M_Student_Learning extends DX_LMS_Controller {
+class DX_LMS_T_Student_Learning extends DX_LMS_Controller {
     
     public function index() {
         session_start();
@@ -64,6 +64,6 @@ class DX_LMS_M_Student_Learning extends DX_LMS_Controller {
             'nextUrl' => $nextUrl
         ];
 
-        $this->view('DX_LMS_M_Student_Learning', $data);
+        $this->view('DX_LMS_T_Student_Learning', $data);
     }
 }

@@ -56,6 +56,18 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             </div>
         </div>
 
+        <!-- Description Section -->
+        <?php if (!empty($course['description'])): ?>
+        <div class="w-full bg-surface px-container-margin py-5 border-b border-surface-variant flex flex-col gap-2 relative z-20">
+            <h3 class="font-label-lg text-on-surface font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings: 'FILL' 1;">info</span> Deskripsi Course
+            </h3>
+            <p class="font-body-md text-on-surface-variant leading-relaxed text-justify">
+                <?= nl2br(e($course['description'])) ?>
+            </p>
+        </div>
+        <?php endif; ?>
+
         <!-- Tags Section -->
         <?php if (!empty($course['filters'])): ?>
         <div class="w-full bg-surface px-container-margin py-4 border-b border-surface-variant flex items-center flex-wrap gap-2 shadow-sm relative z-20">
