@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <?php 
+<?php 
+    $active_tab = 'riwayat';
     $page_title = 'Detail Riwayat - LMS';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -11,9 +12,9 @@
         body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="bg-background text-on-background antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
+<body class="dls-app-shell bg-background text-on-background antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
     <!-- TopAppBar -->
-    <header class="bg-surface flex justify-between items-center w-full px-container-margin h-14 border-b border-outline-variant sticky top-0 z-40 transition-all duration-200">
+    <header class="dls-topbar bg-surface flex justify-between items-center w-full px-container-margin h-14 border-b border-outline-variant sticky top-0 z-40 transition-all duration-200">
         <a href="?route=/student/riwayat" class="text-on-surface p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors duration-200 active:scale-95 flex items-center justify-center">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
@@ -22,7 +23,7 @@
     </header>
 
     <!-- Main Content Canvas -->
-    <main class="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg">
+    <main class="dls-main flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg">
         <!-- Course Header Info -->
         <section class="flex flex-col gap-stack-sm">
             <div class="inline-flex items-center gap-2 bg-tertiary-container/10 text-tertiary px-3 py-1 rounded-full self-start">
@@ -93,27 +94,6 @@
     </main>
 
     <!-- BottomNavBar -->
-    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface dark:bg-on-background shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] rounded-t-xl md:hidden">
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student">
-            <span class="material-symbols-outlined" data-icon="home">home</span>
-            <span class="font-label-sm text-label-sm mt-1">Beranda</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/courses">
-            <span class="material-symbols-outlined" data-icon="school">school</span>
-            <span class="font-label-sm text-label-sm mt-1">Course</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/riwayat">
-            <span class="material-symbols-outlined" data-icon="history" data-weight="fill">history</span>
-            <span class="font-label-sm text-label-sm mt-1">Riwayat</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/notifikasi">
-            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-            <span class="font-label-sm text-label-sm mt-1">Notifikasi</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/profil">
-            <span class="material-symbols-outlined" data-icon="person">person</span>
-            <span class="font-label-sm text-label-sm mt-1">Profil</span>
-        </a>
-    </nav>
+    <?php include 'includes/components/DX_LMS_M_Bottom_Nav.php'; ?>
 </body>
 </html>

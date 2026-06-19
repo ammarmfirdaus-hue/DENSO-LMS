@@ -1,7 +1,9 @@
 <?php
 /**
- * DLS Student Dashboard View
- * Learning Management System
+ * Tampilan Dasbor Siswa DLS (DLS Student Dashboard View).
+ * 
+ * Halaman utama (beranda) untuk siswa yang menyajikan ringkasan 
+ * aktivitas belajar, pelatihan aktif, serta kemajuan (progress).
  */
 
 // Inisialisasi variabel jika diperlukan
@@ -11,7 +13,7 @@ $userRole = 'Student'; // Peran default pada view ini
 <!DOCTYPE html><html class="light" lang="id" style=""><head>
     <?php 
     $page_title = 'Dashboard LMS Karyawan';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -19,22 +21,16 @@ $userRole = 'Student'; // Peran default pada view ini
         body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">
+<body class="dls-app-shell bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">
 <!-- TopAppBar Shared Component -->
-<header class="bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
-<div class="flex justify-between items-center w-full px-container-margin h-14">
-<button class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">business</span>
-</button>
-<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">LMS</div>
-<a href="?route=/student/notifikasi" onclick="markNotificationsRead()" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
-<span class="notification-dot absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-</a>
-</div>
-</header>
+<?php 
+$header_title = 'LMS';
+$notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
+include 'includes/components/DX_LMS_M_Header.php'; 
+?>
+
 <!-- Main Content Canvas -->
-<main class="flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg mt-stack-md">
+<main class="dls-main flex-1 overflow-y-auto space-y-stack-lg">
 <!-- Greeting Section -->
 <section class="space-y-stack-sm min-w-0">
 <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface whitespace-nowrap overflow-hidden">
@@ -59,14 +55,14 @@ $userRole = 'Student'; // Peran default pada view ini
 </script>
 
 <!-- Summary Cards (Bento Grid Style) -->
-<section class="grid grid-cols-2 gap-gutter">
+<section class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
 <div class="col-span-2 bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant flex items-center space-x-stack-md">
-<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex shrink-0 items-center justify-center text-on-secondary-container">
 <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">play_lesson</span>
 </div>
-<div>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Sedang Dipelajari</p>
-<p class="font-headline-sm text-headline-sm text-on-surface"><?= e((string)$stats['active_count']) ?> Course Aktif</p>
+<div class="min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">Sedang Dipelajari</p>
+<p class="font-headline-sm text-headline-sm text-on-surface truncate"><?= e((string)$stats['active_count']) ?> Course Aktif</p>
 </div>
 </div>
 <div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant flex flex-col justify-center items-center text-center space-y-stack-sm">
@@ -127,31 +123,10 @@ $userRole = 'Student'; // Peran default pada view ini
 </section>
 </main>
 <!-- BottomNavBar Shared Component -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe shadow-lg dark:shadow-none bg-surface dark:bg-on-background shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] rounded-t-xl md:hidden">
-<!-- Active Tab: Beranda -->
-<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 1;">home</span>
-<span class="font-label-sm text-label-sm">Beranda</span>
-</a>
-<!-- Inactive Tabs -->
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/courses">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">school</span>
-<span class="font-label-sm text-label-sm">Course</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/riwayat">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">history</span>
-<span class="font-label-sm text-label-sm">Riwayat</span>
-</a>
-<a onclick="markNotificationsRead()" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant relative" href="?route=/student/notifikasi">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
-<span class="font-label-sm text-label-sm">Notifikasi</span>
-<span class="notification-dot absolute top-1 right-4 w-2 h-2 bg-error rounded-full"></span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/profil">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">person</span>
-<span class="font-label-sm text-label-sm">Profil</span>
-</a>
-</nav>
+<?php 
+$active_tab = 'beranda';
+include 'includes/components/DX_LMS_M_Bottom_Nav.php'; 
+?>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {

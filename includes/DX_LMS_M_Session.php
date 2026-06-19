@@ -1,7 +1,9 @@
 <?php
 /**
- * Manajemen Session DLS
- * Learning Management System
+ * Manajemen Sesi Pengguna DLS (DLS Session Management).
+ * 
+ * Bertanggung jawab atas pengelolaan data sesi pengguna (login/logout), 
+ * hak akses peran, serta pemeriksaan keamanan autentikasi pada sistem LMS.
  */
 
 require_once __DIR__ . '/config.php';
@@ -13,8 +15,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * Memeriksa apakah pengguna sudah login
- * @return bool
+ * Memeriksa Status Log Masuk Pengguna.
+ * 
+ * Mengevaluasi apakah pengguna saat ini telah memiliki sesi aktif dan ID yang valid.
+ * 
+ * @return bool `true` jika pengguna sudah login, `false` jika sebaliknya.
  */
 function isLoggedIn(): bool
 {
@@ -22,8 +27,12 @@ function isLoggedIn(): bool
 }
 
 /**
- * Mendapatkan data pengguna saat ini dari session
- * @return array|null
+ * Mendapatkan Identitas Pengguna Aktif.
+ * 
+ * Menarik kumpulan data pribadi dan akses terkait pengguna yang sedang login.
+ * Mengambil informasi langsung dari variabel `$_SESSION`.
+ * 
+ * @return array|null Mengembalikan struktur data pengguna, atau `null` jika tidak ada sesi aktif.
  */
 function getCurrentUser(): ?array
 {
@@ -41,8 +50,13 @@ function getCurrentUser(): ?array
 }
 
 /**
- * Mengatur session pengguna setelah login
- * @param array $user_data
+ * Menginisialisasi Sesi Pasca-Autentikasi.
+ * 
+ * Mengatur seluruh parameter sesi yang dibutuhkan sistem setelah pengguna
+ * dinyatakan lolos verifikasi kredensial saat login.
+ * 
+ * @param array $user_data Data lengkap pengguna dari basis data.
+ * @return void
  */
 function setUserSession(array $user_data): void
 {
@@ -57,8 +71,13 @@ function setUserSession(array $user_data): void
 }
 
 /**
- * Mengganti peran pengguna
- * @param string $role ('student' or 'teacher')
+ * Mengganti Peran Sesi Pengguna (Switch Role).
+ * 
+ * Mengalihkan mode hak akses pengguna, misalnya dari 'student' ke 'teacher'.
+ * Hanya menerima nilai peran yang diizinkan oleh sistem.
+ * 
+ * @param string $role Peran baru yang akan diaktifkan ('student' atau 'teacher').
+ * @return void
  */
 function switchRole(string $role): void
 {
@@ -68,8 +87,9 @@ function switchRole(string $role): void
 }
 
 /**
- * Mendapatkan peran saat ini
- * @return string
+ * Mendapatkan Peran Sesi Aktif.
+ * 
+ * @return string Teks jenis peran ('student' atau 'teacher'). Default 'student'.
  */
 function getCurrentRole(): string
 {
@@ -77,7 +97,12 @@ function getCurrentRole(): string
 }
 
 /**
- * Menghancurkan session (logout)
+ * Menghentikan Sesi Pengguna (Logout).
+ * 
+ * Menghapus seluruh variabel yang terkait dengan sesi pengguna saat ini 
+ * dan memusnahkan sesi dari peladen.
+ * 
+ * @return void
  */
 function logout(): void
 {
@@ -86,8 +111,13 @@ function logout(): void
 }
 
 /**
- * Mewajibkan login - arahkan ke halaman login jika belum login
- * @param string $redirect_url
+ * Memaksa Autentikasi Pengguna (Require Login Gate).
+ * 
+ * Melindungi rute dari pengunjung anonim. Jika tidak ditemukan sesi aktif,
+ * skrip akan dihentikan dan sistem mengarahkan pengunjung ke halaman login.
+ * 
+ * @param string $redirect_url (Opsional) Rute modifikasi untuk URL dasar.
+ * @return void
  */
 function requireLogin(string $redirect_url = ''): void
 {

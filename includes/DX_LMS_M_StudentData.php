@@ -1,25 +1,28 @@
 <?php
 /**
- * DX_LMS_M_StudentData
- * Single Source of Truth untuk seluruh data dummy Student LMS.
+ * DX_LMS_M_StudentData (Data Statis Siswa).
  * 
- * File ini menjadi satu-satunya sumber data yang dipakai oleh semua halaman Student:
- * Dashboard, Course, Riwayat, Notifikasi, CourseDetail, dan RiwayatDetail.
- * 
- * Ketika nanti diganti ke database asli, cukup ganti isi method-method di class ini.
+ * Sumber Kebenaran Tunggal (Single Source of Truth) untuk pengelolaan 
+ * data percobaan (dummy/mock data) pada modul LMS Siswa. File ini 
+ * menjadi fondasi data yang digunakan oleh berbagai Halaman Siswa seperti 
+ * Dasbor, Kursus, Riwayat, Pemberitahuan, dsb. sebelum sepenuhnya 
+ * bermigrasi ke basis data dinamis.
  */
 
     /**
-     * Kelas DX_StudentData — Single Source of Truth data dummy Student.
-     * Menyediakan seluruh data mock untuk module Student (Course, Session, Quiz, Forum).
+     * Kelas Repositori Data Sementara Siswa (Student Data Mock Class).
+     * 
+     * Menyediakan pemanggilan statis (static calls) untuk mendapatkan daftar kursus, sesi, kuis, dan interaksi.
      */
 class DX_StudentData
 {
     /**
-     * Mendapatkan seluruh daftar course.
-     * Ini adalah data master yang direferensikan oleh semua halaman.
+     * Mendapatkan Daftar Seluruh Pelatihan.
+     * 
+     * Berfungsi sebagai basis data referensial makro yang memuat informasi terperinci
+     * setiap kursus, termasuk sesi, materi, dan evaluasi.
      *
-     * @return array
+     * @return array Struktur data hierarkis seluruh pelatihan.
      */
     public static function getCourses(): array
     {

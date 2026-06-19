@@ -1,23 +1,40 @@
 <?php
 /**
- * Core Router
- * Handles URI mapping to Controllers
+ * Kelas Pengatur Jalur (Core Router).
+ * 
+ * Kelas ini bertanggung jawab atas sistem perutean (routing) URL pada aplikasi.
+ * Ia akan memetakan permintaan URI (Uniform Resource Identifier) dari peramban ke pengontrol
+ * (Controller) dan metode pengontrol yang telah ditentukan secara spesifik.
  */
 class DX_LMS_Router {
     private $routes = [];
 
     /**
-     * Menambahkan route baru
-     * @param string $path URL path
-     * @param string $action Controller@Method
+     * Menambahkan Rute (Route) Baru ke dalam Daftar Rute.
+     * 
+     * Fungsi ini menyimpan pemetaan antara jalur URL dengan aksi (Controller@Method) 
+     * ke dalam array memori untuk dicocokkan saat ada permintaan (request) masuk.
+     * 
+     * @param string $path Jalur URL yang diakses (misal: '/login', '/student').
+     * @param string $action Format aksi yang dieksekusi berupa 'NamaController@namaMetode'.
+     * 
+     * @return void
      */
     public function add($path, $action) {
         $this->routes[$path] = $action;
     }
 
     /**
-     * Memproses request URI ke Controller yang tepat
-     * @param string $uri The requested URI
+     * Menyalurkan dan Memproses Permintaan (Dispatch).
+     * 
+     * Fungsi mesin utama yang membedah URI permintaan, menyingkirkan subdirektori 
+     * jika aplikasi tidak berjalan pada root, dan mencocokkan URI bersih ke dalam
+     * daftar rute yang telah diregistrasi. Apabila cocok, fungsi ini memuat file 
+     * Controller, menginisialisasi kelasnya, dan mengeksekusi metode terkait.
+     * 
+     * @param string $uri The requested URI dari variabel global $_SERVER['REQUEST_URI'].
+     * 
+     * @return void Menghentikan (die) alur jika file/kelas/metode tidak ditemukan, atau menghasilkan 404.
      */
     public function dispatch($uri) {
         // Hapus query string jika ada

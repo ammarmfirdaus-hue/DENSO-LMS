@@ -1,11 +1,19 @@
 <?php
 /**
- * Student Riwayat Controller
+ * Kelas Pengontrol Riwayat Pembelajaran (Student History Controller).
+ * 
+ * Menangani rekapitulasi data pelatihan yang telah diselesaikan (lulus) oleh siswa
+ * beserta representasi statistik performa belajarnya.
  */
 class DX_LMS_T_Student_Riwayat extends DX_LMS_Controller {
     
     /**
-     * Menampilkan halaman Riwayat Belajar Student
+     * Menampilkan Halaman Riwayat Belajar.
+     * 
+     * Mengambil daftar pelatihan dengan status penyelesaian 100% (selesai) 
+     * dari basis data siswa, dan menampilkan antarmuka riwayat lengkap.
+     * 
+     * @return void
      */
     public function index() {
         session_start();

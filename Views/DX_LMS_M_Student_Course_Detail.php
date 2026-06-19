@@ -9,7 +9,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
 <head>
     <?php 
     $page_title = 'PT. LMS - Course Detail';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -19,9 +19,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
+<body class="dls-app-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
     <!-- TopAppBar -->
-    <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 sticky top-0 z-40">
+    <header class="dls-topbar bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14">
         <a href="?route=/student/courses" class="p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-all duration-200 active:scale-95 text-on-surface-variant">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
@@ -31,7 +31,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         </a>
     </header>
 
-    <main class="flex-1 w-full bg-surface-container-low">
+    <main class="dls-main flex-1 w-full bg-surface-container-low">
         <!-- Hero Banner -->
         <div class="relative w-full h-56 md:h-72 bg-surface-variant">
             <?php if (!empty($course['thumbnail'])): ?>
@@ -348,28 +348,10 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         <?php endif; ?>
     </main>
 
-    <!-- BottomNavBar -->
-    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface dark:bg-on-background shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] rounded-t-xl md:hidden border-t border-outline-variant/30">
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student">
-            <span class="material-symbols-outlined" data-icon="home">home</span>
-            <span class="font-label-sm text-label-sm mt-1">Beranda</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/courses">
-            <span class="material-symbols-outlined" data-icon="school" data-weight="fill">school</span>
-            <span class="font-label-sm text-label-sm mt-1">Course</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/riwayat">
-            <span class="material-symbols-outlined" data-icon="history">history</span>
-            <span class="font-label-sm text-label-sm mt-1">Riwayat</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/notifikasi">
-            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-            <span class="font-label-sm text-label-sm mt-1">Notifikasi</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-transform duration-200 active:scale-90" href="?route=/student/profil">
-            <span class="material-symbols-outlined" data-icon="person">person</span>
-            <span class="font-label-sm text-label-sm mt-1">Profil</span>
-        </a>
-    </nav>
+    <!-- BottomNavBar Shared Component -->
+    <?php 
+    $active_tab = 'course';
+    include 'includes/components/DX_LMS_M_Bottom_Nav.php'; 
+    ?>
 </body>
 </html>

@@ -1,7 +1,10 @@
 <?php
 /**
- * DLS Configuration
- * Learning Management System
+ * Berkas Konfigurasi Utama (Main Configuration File).
+ * 
+ * Memuat semua definisi konstanta lingkungan yang digunakan oleh sistem 
+ * Denso Learning System (DLS). Termasuk pengaturan basis data, sesi, 
+ * hingga aturan unggah berkas.
  */
 
 // Mencegah akses langsung

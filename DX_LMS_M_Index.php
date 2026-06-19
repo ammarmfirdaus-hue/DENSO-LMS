@@ -9,11 +9,11 @@ if (php_sapi_name() === 'cli-server' && is_file(__DIR__ . $_SERVER['REQUEST_URI'
     return false;
 }
 
-require_once 'includes/DX_LMS_Config.php';
-require_once 'Core/DX_LMS_Router.php';
-require_once 'Core/DX_LMS_Controller.php';
-require_once 'Core/DX_LMS_Model.php';
-require_once 'includes/DX_LMS_Functions.php';
+require_once 'includes/DX_LMS_M_Config.php';
+require_once 'Core/DX_LMS_M_Router.php';
+require_once 'Core/DX_LMS_M_Controller.php';
+require_once 'Core/DX_LMS_M_Model.php';
+require_once 'includes/DX_LMS_M_Functions.php';
 require_once 'includes/DX_LMS_M_StudentData.php';
 
 // Auto-detect and set Timezone from cookie if available

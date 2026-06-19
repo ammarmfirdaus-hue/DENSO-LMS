@@ -1,1 +1,44 @@
+# Environment Files
+.env
+.env.local
+.env.*
+
+# Project Documentation
+AGENTS.md
+DESIGN.md
+PRD.md
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE and Editor Directories
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+error_log
+
+# User Uploads / Temp Data (Adjust if needed)
+/uploads/
+/storage/
+*.tmp
+*.bak
+*.swp
+
+# Specific Project Exclusions
 /php-8.3.31/

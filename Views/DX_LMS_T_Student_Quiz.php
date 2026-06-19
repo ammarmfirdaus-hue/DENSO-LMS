@@ -12,7 +12,7 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
 <head>
     <?php 
     $page_title = 'LMS - ' . e($title);
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -29,9 +29,9 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
         }
     </style>
 </head>
-<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
+<body class="dls-app-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
     <!-- TopAppBar -->
-    <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 sticky top-0 z-40 shadow-sm">
+    <header class="dls-topbar bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 shadow-sm">
         <a href="?route=/student/course/detail&id=<?= e($course['id']) ?>" class="p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-all duration-200 active:scale-95 text-on-surface-variant">
             <span class="material-symbols-outlined">close</span>
         </a>
@@ -39,7 +39,7 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
         <div class="w-10"></div> <!-- Spacer -->
     </header>
 
-    <main class="flex-1 w-full bg-surface-container-low p-container-margin">
+    <main class="dls-main flex-1 w-full bg-surface-container-low p-container-margin">
         <div class="max-w-3xl mx-auto mt-4 mb-8">
             <div class="bg-surface rounded-2xl p-6 shadow-sm border border-outline-variant/30 mb-6">
                 <div class="flex items-center gap-3 mb-4">

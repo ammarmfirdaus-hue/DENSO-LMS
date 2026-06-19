@@ -6,7 +6,7 @@
 <head>
     <?php 
     $page_title = 'PT. LMS - Pembelajaran: ' . e($material['title']);
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -19,7 +19,7 @@
         .content-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-surface text-on-surface antialiased h-screen flex flex-col pt-safe overflow-hidden">
+<body class="dls-app-shell bg-surface text-on-surface antialiased h-screen flex flex-col pt-safe overflow-hidden">
     <!-- TopAppBar -->
     <header class="bg-surface border-b border-outline-variant flex items-center w-full px-container-margin h-14 shrink-0">
         <a href="?route=/student/course/detail&id=<?= e($course['id']) ?>" class="p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-all duration-200 active:scale-95 text-on-surface-variant shrink-0">

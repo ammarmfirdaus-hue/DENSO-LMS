@@ -3,7 +3,7 @@
 <head>
     <?php 
     $page_title = 'Detail Diskusi - LMS';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -11,9 +11,9 @@
         body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="bg-background text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col pb-[140px] md:pb-[80px]">
+<body class="dls-app-shell bg-background text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col pb-[140px] md:pb-[80px]">
     <!-- TopAppBar -->
-    <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 sticky top-0 z-40 transition-all duration-200">
+    <header class="dls-topbar bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 sticky top-0 z-40 transition-all duration-200">
         <a href="?route=/student/course/detail&tab=forum" class="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2 -ml-2 transition-colors flex items-center justify-center">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
@@ -22,7 +22,7 @@
     </header>
 
     <!-- Main Canvas -->
-    <main class="flex-1 w-full max-w-3xl mx-auto px-container-margin py-stack-md flex flex-col gap-stack-lg relative">
+    <main class="dls-main flex-1 w-full max-w-3xl mx-auto px-container-margin py-stack-md flex flex-col gap-stack-lg relative">
         <!-- Original Post Section -->
         <section class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-container-low relative">
             <div class="flex items-start gap-stack-sm mb-stack-sm">

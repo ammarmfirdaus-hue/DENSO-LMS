@@ -1,9 +1,24 @@
 <?php
 /**
- * Controller for Student Learning View
+ * Kelas Pengontrol Pembelajaran Interaktif (Student Learning Controller).
+ * 
+ * Merupakan mesin utama (core engine) saat siswa sedang berada dalam mode "Belajar" 
+ * (menonton video materi atau membaca modul). Kelas ini secara cerdas mengatur 
+ * rute (routing) ke materi berikutnya (next) atau materi sebelumnya (prev),
+ * serta memastikan urutan materi diakses dengan benar sebelum melakukan Post-Test.
  */
 class DX_LMS_T_Student_Learning extends DX_LMS_Controller {
     
+    /**
+     * Menampilkan Antarmuka Mode Belajar (Learning Mode).
+     * 
+     * Mengambil parameter dari URL (ID Pelatihan, ID Sesi, Indeks Materi), 
+     * memvalidasi ketersediaannya, dan secara dinamis menghitung rute (URL) 
+     * untuk tombol "Sebelumnya" dan "Selanjutnya". Jika ini materi terakhir,
+     * tombol "Selanjutnya" akan otomatis diarahkan ke rute Post-Test.
+     * 
+     * @return void Merender antarmuka mode fokus belajar (Learning Viewer).
+     */
     public function index() {
         session_start();
 

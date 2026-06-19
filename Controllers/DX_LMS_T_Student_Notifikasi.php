@@ -1,11 +1,19 @@
 <?php
 /**
- * Student Notifikasi Controller
+ * Kelas Pengontrol Notifikasi Siswa (Student Notification Controller).
+ * 
+ * Bertanggung jawab dalam mengambil dan menampilkan daftar pemberitahuan 
+ * terbaru untuk siswa, seperti kursus baru, hasil kuis, atau pembaruan materi.
  */
 class DX_LMS_T_Student_Notifikasi extends DX_LMS_Controller {
     
     /**
-     * Menampilkan halaman Notifikasi Student
+     * Menampilkan Halaman Pusat Pemberitahuan (Notification Center).
+     * 
+     * Mengambil daftar seluruh notifikasi yang berkaitan dengan siswa dari basis data,
+     * kemudian merendernya pada antarmuka daftar notifikasi.
+     * 
+     * @return void
      */
     public function index() {
         session_start();

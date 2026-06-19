@@ -15,6 +15,19 @@
     padding-left: var(--dls-container-margin);
     padding-right: var(--dls-container-margin);
     min-height: 100dvh;
+    transition: padding 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .dls-main {
+        padding-left: calc(100px + var(--dls-container-margin));
+        padding-bottom: var(--dls-stack-lg);
+    }
+}
+@media (min-width: 1024px) {
+    .dls-main {
+        padding-left: calc(256px + var(--dls-container-margin));
+    }
 }
 
 /* Main without bottom nav (login, pilih peran) */
@@ -35,6 +48,19 @@
     padding-left: var(--dls-container-margin);
     padding-right: var(--dls-container-margin);
     min-height: 100dvh;
+    transition: padding 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .dls-main-sub {
+        padding-left: calc(100px + var(--dls-container-margin));
+        padding-bottom: var(--dls-stack-lg);
+    }
+}
+@media (min-width: 1024px) {
+    .dls-main-sub {
+        padding-left: calc(256px + var(--dls-container-margin));
+    }
 }
 
 /* === Stack Spacing (vertical gaps) === */
@@ -108,32 +134,37 @@
     margin-bottom: var(--dls-stack-lg);
 }
 
-/* === Responsive Breakpoint === */
+/* === Responsive Breakpoint & App Shell === */
 /* Hide on desktop (md+), show only on mobile */
 @media (min-width: 768px) {
     .dls-mobile-only {
         display: none !important;
     }
 }
+/* Hide on mobile, show only on desktop */
+@media (max-width: 767px) {
+    .dls-desktop-only {
+        display: none !important;
+    }
+}
 
 /* App shell wrapper for mobile-first layout */
 .dls-app-shell {
-    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
     position: relative;
     min-height: 100dvh;
 }
 
-/* On tablet+, constrain to comfortable reading width */
-@media (min-width: 768px) {
+/* Constrain ultra-wide screens for reading comfort */
+@media (min-width: 1440px) {
     .dls-app-shell {
-        max-width: 640px;
+        max-width: 1440px;
+        box-shadow: 0 0 40px rgba(0,0,0,0.05);
+        background-color: var(--dls-surface);
     }
-}
-
-@media (min-width: 1024px) {
-    .dls-app-shell {
-        max-width: 768px;
+    body {
+        background-color: var(--dls-surface-container-lowest);
     }
 }
 

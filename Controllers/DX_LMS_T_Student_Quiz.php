@@ -1,9 +1,21 @@
 <?php
 /**
- * Controller for Student Quiz View
+ * Kelas Pengontrol Evaluasi dan Kuis (Student Quiz Controller).
+ * 
+ * Pusat logika untuk merender berbagai jenis evaluasi pembelajaran, termasuk 
+ * Pre-Test, Post-Test, kuis reguler (Kuis Modul), dan Ujian Akhir (Final Assessment).
  */
 class DX_LMS_T_Student_Quiz extends DX_LMS_Controller {
     
+    /**
+     * Menyiapkan dan Menampilkan Antarmuka Kuis/Ujian.
+     * 
+     * Mendeteksi jenis evaluasi (type) dari parameter URL, kemudian mencari
+     * dan merender kumpulan soal yang relevan dari sesi atau pelatihan terkait.
+     * Mencegah akses ke evaluasi yang statusnya masih 'terkunci'.
+     * 
+     * @return void Merender tampilan kuis, atau mengalihkan kembali ke rincian kursus jika tidak valid.
+     */
     public function index() {
         session_start();
 

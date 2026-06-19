@@ -3,7 +3,7 @@
 <head>
     <?php 
     $page_title = 'Mulai Topik Baru - LMS';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
     <style>
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -11,9 +11,9 @@
         body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-lg pt-safe">
+<body class="dls-app-shell bg-background text-on-background antialiased min-h-screen flex flex-col font-body-lg pt-safe">
     <!-- Top Navigation Area -->
-    <header class="bg-surface border-b border-outline-variant sticky top-0 z-10">
+    <header class="dls-topbar bg-surface border-b border-outline-variant sticky top-0 z-10">
         <div class="flex items-center w-full px-container-margin h-14 max-w-3xl mx-auto">
             <a href="?route=/student/course/detail&tab=forum" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
                 <span class="material-symbols-outlined">arrow_back</span>
@@ -23,7 +23,7 @@
     </header>
 
     <!-- Main Content Canvas -->
-    <main class="flex-grow px-container-margin py-stack-lg max-w-3xl mx-auto w-full">
+    <main class="dls-main flex-grow px-container-margin py-stack-lg max-w-3xl mx-auto w-full">
         <!-- Form Container -->
         <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-6 space-y-6">
             <!-- Context Hint -->

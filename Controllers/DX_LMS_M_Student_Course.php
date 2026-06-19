@@ -1,11 +1,20 @@
 <?php
 /**
- * Student Course Controller
+ * Kelas Pengontrol Modul Pembelajaran (Student Course Controller).
+ * 
+ * Menangani logika tampilan dan pengelolaan daftar pelatihan (course)
+ * yang dapat diakses oleh pengguna dengan peran sebagai 'Student'.
  */
 class DX_LMS_M_Student_Course extends DX_LMS_Controller {
     
     /**
-     * Menampilkan halaman Daftar Course Student
+     * Menampilkan Halaman Utama Daftar Pelatihan (Course).
+     * 
+     * Mengambil daftar seluruh pelatihan yang tersedia (atau yang terdaftar untuk siswa),
+     * menyaring pelatihan yang belum selesai, dan menyiapkan filter pencarian secara acak
+     * sebelum merender tampilan utama daftar kelas.
+     * 
+     * @return void Merender antarmuka daftar pelatihan untuk entitas siswa.
      */
     public function index() {
         session_start();

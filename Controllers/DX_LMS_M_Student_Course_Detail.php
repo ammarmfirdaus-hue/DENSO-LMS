@@ -1,12 +1,21 @@
 <?php
 /**
- * Controller for Course Detail
+ * Kelas Pengontrol Rincian Pelatihan (Course Detail Controller).
+ * 
+ * Bertanggung jawab untuk menyajikan antarmuka rincian dari sebuah pelatihan spesifik,
+ * mengelola navigasi antar tab (Materi, Kuis, Forum), dan memastikan kelengkapan sesi
+ * sebelum memperbolehkan akses ke fitur evaluasi (Kuis/Assessment).
  */
 class DX_LMS_M_Student_Course_Detail extends DX_LMS_Controller {
 
     /**
-     * Menampilkan halaman detail course beserta tab Materi, Quiz, dan Forum.
-     * Memuat data course berdasarkan ID, mengevaluasi status sesi, dan menentukan tab aktif.
+     * Menampilkan Halaman Rincian Pelatihan (Detail Course).
+     * 
+     * Memuat objek data pelatihan secara spesifik berdasarkan parameter ID (course_id).
+     * Metode ini juga mengevaluasi kemajuan (progress) dari seluruh sesi pembelajaran
+     * dan meneruskan konfirmasi (flag) ke View untuk mengontrol visibilitas tab.
+     * 
+     * @return void Merender antarmuka detail pelatihan lengkap dengan sesi dan materi.
      */
     public function index() {
         session_start();

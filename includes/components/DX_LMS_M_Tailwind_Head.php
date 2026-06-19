@@ -264,7 +264,7 @@ tailwind.config = {
 </script>
 
 <!-- SweetAlert2 Offline -->
-<script src="<?= $base_path ?>assets/js/DX_LMS_SweetAlert2.min.js"></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js"></script>
 
 <!-- SweetAlert2 DLS Theme Override -->
 <style>
@@ -364,3 +364,14 @@ tailwind.config = {
         }
     };
 </script>
+
+<style type="text/tailwindcss">
+    @layer utilities {
+        .dls-main {
+            @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+        }
+        .dls-main-sub {
+            @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+        }
+    }
+</style>

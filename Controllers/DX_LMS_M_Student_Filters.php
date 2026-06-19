@@ -1,12 +1,20 @@
 <?php
 /**
- * Student Filters Controller
+ * Kelas Pengontrol Penyaring Pelatihan (Student Filters Controller).
+ * 
+ * Bertanggung jawab dalam menyajikan antarmuka pencarian dan penyaringan (filter) 
+ * pelatihan tingkat lanjut, memungkinkan pengguna memfilter kursus berdasarkan kategori spesifik.
  */
 class DX_LMS_M_Student_Filters extends DX_LMS_Controller {
     
     /**
-     * Menampilkan halaman filter course lengkap dengan semua kategori tag.
-     * Memungkinkan Student memilih filter untuk menyaring daftar course.
+     * Menampilkan Halaman Filter Pelatihan.
+     * 
+     * Menyediakan antarmuka dengan semua kategori (tag) pelatihan yang tersedia di sistem.
+     * Metode ini akan memuat seluruh pelatihan aktif yang belum diselesaikan oleh siswa,
+     * kemudian menyajikannya ke tampilan beserta daftar kategori penyaring.
+     * 
+     * @return void Merender antarmuka pemilihan kategori penyaring kursus.
      */
     public function index() {
         session_start();

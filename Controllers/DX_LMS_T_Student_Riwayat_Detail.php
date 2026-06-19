@@ -1,12 +1,19 @@
 <?php
 /**
- * Controller for Riwayat Detail
+ * Kelas Pengontrol Rincian Riwayat (History Detail Controller).
+ * 
+ * Berfungsi untuk merender antarmuka evaluasi (sertifikat, rekap nilai kuis)
+ * dari sebuah pelatihan yang telah diselesaikan sebelumnya oleh siswa.
  */
 class DX_LMS_T_Student_Riwayat_Detail extends DX_LMS_Controller {
 
     /**
-     * Menampilkan halaman detail riwayat course yang telah diselesaikan Student.
-     * Memuat data course, skor akhir, dan status penyelesaian berdasarkan ID.
+     * Menampilkan Halaman Rincian Riwayat Pelatihan.
+     * 
+     * Memuat kembali seluruh histori pembelajaran pelatihan (course) spesifik 
+     * berdasarkan ID. Menyajikan status kelulusan, nilai akhir (skor), dan umpan balik.
+     * 
+     * @return void Merender tampilan detail pelatihan yang telah rampung.
      */
     public function index() {
         session_start();

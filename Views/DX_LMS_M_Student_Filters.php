@@ -3,12 +3,12 @@
 <head>
     <?php 
     $page_title = 'Filter Course - LMS';
-    include 'includes/components/DX_LMS_Tailwind_Head.php'; 
+    include 'includes/components/DX_LMS_M_Tailwind_Head.php'; 
     ?>
 </head>
-<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">
+<body class="dls-app-shell bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">
 <!-- TopAppBar Shared Component -->
-<header class="bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
+<header class="dls-topbar bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
     <div class="flex items-center w-full px-container-margin h-14">
         <a href="?route=/student/courses" class="text-on-surface hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center mr-2">
             <span class="material-symbols-outlined">arrow_back</span>
@@ -17,7 +17,7 @@
     </div>
 </header>
 
-<main class="flex-1 pt-[72px] pb-[88px] px-container-margin flex flex-col h-full mt-stack-sm">
+<main class="dls-main flex-1 pt-[72px] pb-[88px] px-container-margin flex flex-col h-full mt-stack-sm">
     <section class="flex-none">
         <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menampilkan course yang spesifik.</p>
         
