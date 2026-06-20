@@ -22,7 +22,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 ?>
 
 <!-- Main Content Canvas -->
-<main class="dls-main flex-1 overflow-y-auto space-y-stack-md">
+<main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px]">
 <!-- Header & Filters Section -->
 <section class="space-y-stack-sm">
 <h1 class="font-headline-md text-headline-md text-on-surface">Daftar Course</h1>
@@ -43,7 +43,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 </section>
 
 <!-- Courses List -->
-<section id="course-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2 pb-[88px]">
+<section id="course-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2">
 <?php foreach ($courses as $c): ?>
 <div class="course-card bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [])) ?>">
 <div class="h-32 bg-surface-container-high relative">
@@ -54,7 +54,9 @@ include 'includes/components/DX_LMS_M_Header.php';
     <span class="material-symbols-outlined text-[64px] text-on-secondary-container opacity-50"><?= e($c['thumbnail_icon'] ?? 'school') ?></span>
 </div>
 <?php endif; ?>
+<?php if (($c['category'] ?? '') === 'Wajib'): ?>
 <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>
+<?php endif; ?>
 <?php if ($c['status'] === 'selesai'): ?>
 <div class="absolute top-2 right-2 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-sm text-label-sm shadow-sm backdrop-blur-sm flex items-center gap-1">
     <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
@@ -110,7 +112,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 </section>
 
 <!-- Pagination Controls -->
-<div id="paginationContainer" class="flex justify-between items-center mt-6 hidden pb-4">
+<div id="paginationContainer" class="flex md:hidden justify-between items-center mt-6 hidden pb-4">
     <button id="prevPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">Sebelumnya</button>
     <span id="pageIndicator" class="font-label-md text-on-surface-variant">Halaman 1</span>
     <button id="nextPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">Selanjutnya</button>
@@ -165,9 +167,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let currentPage = 1;
-    const itemsPerPage = 5;
 
     function updateUI() {
+        const itemsPerPage = window.innerWidth >= 768 ? 9999 : 5;
         // Update tampilan chip
         chips.forEach(chip => {
             const f = chip.dataset.filter;
@@ -238,6 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
             pagContainer.classList.add('hidden');
         }
     }
+
+    // Handle resize untuk update itemsPerPage
+    window.addEventListener('resize', updateUI);
 
     // Event listener untuk klik chip
     chips.forEach(chip => {
