@@ -60,7 +60,11 @@ elseif ($type === 'final_assessment') $title = 'Final Assessment: ' . $course['t
 
             <!-- Formulir Soal -->
             <form id="quizForm" class="space-y-6" onsubmit="submitQuiz(event)">
-                <?php foreach ($quizData['questions'] as $index => $q): ?>
+                <?php 
+                    $questions = $quizData['questions'];
+                    shuffle($questions);
+                ?>
+                <?php foreach ($questions as $index => $q): ?>
                     <?php 
                         $isMock = !is_array($q);
                         $questionText = $isMock ? "Pertanyaan evaluasi nomor ".($index+1)." untuk bagian ini?" : $q['question'];

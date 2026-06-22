@@ -43,10 +43,13 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_Controller {
             $all_sessions_completed = false; // Jika tidak ada sesi, dianggap belum selesai (atau sesuai logic bisnis)
         }
 
+        $stats = DX_StudentData::getStats();
+
         $data = [
             'course' => $course,
             'tab'    => $tab,
             'all_sessions_completed' => $all_sessions_completed,
+            'stats'  => $stats,
         ];
 
         $this->view('DX_LMS_M_Student_Course_Detail', $data);

@@ -20,18 +20,11 @@ $active_tab = 'notifikasi';
 </head>
 <body class="dls-app-shell bg-background text-on-background min-h-screen font-body-md pt-safe flex flex-col">
 <!-- TopAppBar Shared Component -->
-<header class="dls-topbar bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
-<div class="flex justify-between items-center w-full px-container-margin h-14">
-<button class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">business</span>
-</button>
-<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">LMS</div>
-<a href="?route=/student/notifikasi" onclick="markNotificationsRead()" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
-<span class="notification-dot absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-</a>
-</div>
-</header>
+<?php 
+$header_title = 'LMS';
+$notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
+include 'includes/components/DX_LMS_M_Header.php'; 
+?>
 <!-- Main Content Canvas -->
 <main class="dls-main flex-1 pt-[72px] pb-[90px] px-container-margin">
 <div class="flex flex-col gap-stack-md">

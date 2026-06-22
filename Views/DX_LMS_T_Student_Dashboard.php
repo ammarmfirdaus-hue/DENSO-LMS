@@ -30,7 +30,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 ?>
 
 <!-- Main Content Canvas -->
-<main class="dls-main flex-1 overflow-y-auto space-y-stack-lg">
+<main class="dls-main flex-1 overflow-y-auto space-y-stack-lg pt-[72px] px-container-margin pb-[88px]">
 <!-- Greeting Section -->
 <section class="space-y-stack-sm min-w-0">
 <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface whitespace-nowrap overflow-hidden">
@@ -89,7 +89,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2" id="course-results">
 <?php foreach ($courses as $c): ?>
-<div class="course-card bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [])) ?>">
+<div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)) ?>">
 <div class="h-32 bg-surface-container-high relative">
 <?php if ($c['thumbnail']): ?>
 <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" src="<?= e($c['thumbnail']) ?>">
@@ -98,7 +98,7 @@ include 'includes/components/DX_LMS_M_Header.php';
     <span class="material-symbols-outlined text-[64px] text-on-secondary-container opacity-50"><?= e($c['thumbnail_icon'] ?? 'school') ?></span>
 </div>
 <?php endif; ?>
-<?php if (($c['category'] ?? '') === 'Wajib'): ?>
+<?php if ($c['status'] !== 'selesai'): ?>
 <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>
 <?php endif; ?>
 <?php if ($c['status'] === 'selesai'): ?>
@@ -107,18 +107,18 @@ include 'includes/components/DX_LMS_M_Header.php';
 </div>
 <?php endif; ?>
 </div>
-<div class="p-stack-md space-y-stack-sm">
+<div class="p-stack-md space-y-stack-sm flex flex-col flex-1">
 <div class="flex justify-between items-start">
 <div>
-<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title"><?= e($c['title']) ?></h3>
+<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title line-clamp-2" title="<?= e($c['title']) ?>" style="min-height: 2.5rem;"><?= e($c['title']) ?></h3>
 <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block"><?= e((string)$c['modules_count']) ?> Modul</span>
 </div>
 </div>
 <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2"><?= e($c['description']) ?></p>
 
-<div class="flex gap-1.5 flex-wrap pt-2">
+<div class="flex gap-1.5 flex-wrap pt-2 mt-auto h-[44px] overflow-hidden items-start">
     <?php foreach ($c['filters'] ?? [] as $f): ?>
-    <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase"><?= e($f) ?></span>
+    <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase whitespace-nowrap"><?= e($f) ?></span>
     <?php endforeach; ?>
 </div>
 <div class="pt-stack-sm space-y-2">
@@ -193,8 +193,8 @@ include 'includes/components/DX_LMS_M_Bottom_Nav.php';
         
         let visibleCards = Array.from(courseCards);
 
-        // Sembunyikan semua dulu
-        courseCards.forEach(card => card.style.display = 'none');
+        // Reset tampilan
+        courseCards.forEach(card => card.classList.add('dls-hidden'));
 
         // Pagination
         const maxPage = Math.ceil(visibleCards.length / itemsPerPage);
@@ -205,7 +205,7 @@ include 'includes/components/DX_LMS_M_Bottom_Nav.php';
         const endIdx = startIdx + itemsPerPage;
 
         visibleCards.slice(startIdx, endIdx).forEach(card => {
-            card.style.display = '';
+            card.classList.remove('dls-hidden');
         });
 
         const pagContainer = document.getElementById('paginationContainer');

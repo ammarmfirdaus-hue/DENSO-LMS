@@ -29,6 +29,19 @@ class DX_LMS_M_Student_Course extends DX_LMS_Controller {
             return $c['status'] !== 'selesai';
         }));
 
+        // Urutkan: 'sedang_dipelajari' di atas, lalu 'belum_dimulai'
+        usort($courses, function($a, $b) {
+            $statusOrder = ['sedang_dipelajari' => 1, 'belum_dimulai' => 2];
+            $orderA = $statusOrder[$a['status']] ?? 3;
+            $orderB = $statusOrder[$b['status']] ?? 3;
+            
+            if ($orderA !== $orderB) {
+                return $orderA <=> $orderB;
+            }
+            // Jika status sama, urutkan berdasarkan progress menurun
+            return ($b['progress'] ?? 0) <=> ($a['progress'] ?? 0);
+        });
+
         // Extract filter unik dan acak (maks 6)
         $allFilters = [];
         foreach ($allCourses as $c) {
@@ -43,11 +56,14 @@ class DX_LMS_M_Student_Course extends DX_LMS_Controller {
         shuffle($allFilters);
         $quickFilters = array_slice($allFilters, 0, 6);
 
+        $stats = DX_StudentData::getStats();
+
         $data = [
             'active_tab' => 'course',
             'base_path'  => '',
+            'filters'    => $quickFilters,
             'courses'    => $courses,
-            'filters'    => $quickFilters
+            'stats'      => $stats
         ];
 
         $this->view('DX_LMS_M_Student_Course', $data);

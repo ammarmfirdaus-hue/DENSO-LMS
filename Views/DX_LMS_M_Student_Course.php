@@ -18,11 +18,12 @@
 <!-- TopAppBar Shared Component -->
 <?php 
 $header_title = 'LMS';
+$notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
 include 'includes/components/DX_LMS_M_Header.php'; 
 ?>
 
 <!-- Main Content Canvas -->
-<main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px]">
+<main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px] pt-[72px] px-container-margin">
 <!-- Header & Filters Section -->
 <section class="space-y-stack-sm">
 <h1 class="font-headline-md text-headline-md text-on-surface">Daftar Course</h1>
@@ -33,8 +34,8 @@ include 'includes/components/DX_LMS_M_Header.php';
     <input type="text" id="searchInput" class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-full py-3 pl-12 pr-4 font-body-md shadow-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Cari judul course...">
 </div>
 <!-- Filter Chips -->
-<div class="flex flex-wrap gap-2 pb-2 pt-2">
-    <button class="filter-chip px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-md shadow-sm whitespace-nowrap" data-filter="Semua">Semua</button>
+<div id="chip-container" class="flex flex-wrap gap-2 pb-2 pt-2">
+    <button class="filter-chip px-4 py-1.5 rounded-full border border-primary bg-primary text-on-primary font-label-md shadow-sm whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="Semua">Semua</button>
     <?php foreach ($filters as $f): ?>
     <button class="filter-chip px-4 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-md whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="<?= e($f) ?>"><?= e($f) ?></button>
     <?php endforeach; ?>
@@ -45,7 +46,7 @@ include 'includes/components/DX_LMS_M_Header.php';
 <!-- Courses List -->
 <section id="course-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2">
 <?php foreach ($courses as $c): ?>
-<div class="course-card bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [])) ?>">
+<div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)) ?>">
 <div class="h-32 bg-surface-container-high relative">
 <?php if ($c['thumbnail']): ?>
 <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" src="<?= e($c['thumbnail']) ?>">
@@ -54,7 +55,7 @@ include 'includes/components/DX_LMS_M_Header.php';
     <span class="material-symbols-outlined text-[64px] text-on-secondary-container opacity-50"><?= e($c['thumbnail_icon'] ?? 'school') ?></span>
 </div>
 <?php endif; ?>
-<?php if (($c['category'] ?? '') === 'Wajib'): ?>
+<?php if ($c['status'] !== 'selesai'): ?>
 <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>
 <?php endif; ?>
 <?php if ($c['status'] === 'selesai'): ?>
@@ -63,18 +64,18 @@ include 'includes/components/DX_LMS_M_Header.php';
 </div>
 <?php endif; ?>
 </div>
-<div class="p-stack-md space-y-stack-sm">
+<div class="p-stack-md space-y-stack-sm flex flex-col flex-1">
 <div class="flex justify-between items-start">
 <div>
-<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title"><?= e($c['title']) ?></h3>
+<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title line-clamp-2" title="<?= e($c['title']) ?>" style="min-height: 2.5rem;"><?= e($c['title']) ?></h3>
 <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block"><?= e((string)$c['modules_count']) ?> Modul</span>
 </div>
 </div>
 <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2"><?= e($c['description']) ?></p>
 
-<div class="flex gap-1.5 flex-wrap pt-2">
+<div class="flex gap-1.5 flex-wrap pt-2 mt-auto h-[44px] overflow-hidden items-start">
     <?php foreach ($c['filters'] ?? [] as $f): ?>
-    <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase"><?= e($f) ?></span>
+    <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase whitespace-nowrap"><?= e($f) ?></span>
     <?php endforeach; ?>
 </div>
 <div class="pt-stack-sm space-y-2">
@@ -145,7 +146,7 @@ include 'includes/components/DX_LMS_M_Bottom_Nav.php';
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const courseCards = document.querySelectorAll('.course-card');
-    const chips = document.querySelectorAll('.filter-chip');
+    let chips = document.querySelectorAll('.filter-chip');
 
     let activeFilters = [];
     try {
@@ -166,6 +167,62 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("Gagal membaca filter dari session:", e);
     }
 
+    const chipContainer = document.getElementById('chip-container');
+    const semuaChip = chipContainer.querySelector('[data-filter="Semua"]');
+    
+    function syncChipsFromActiveFilters() {
+        activeFilters.forEach(filter => {
+            if (filter !== 'Semua') {
+                let targetChip = Array.from(chips).find(chip => chip.dataset.filter === filter);
+                
+                if (!targetChip) {
+                    targetChip = document.createElement('button');
+                    targetChip.className = 'filter-chip px-4 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-md whitespace-nowrap transition-all duration-200 active:scale-95';
+                    targetChip.dataset.filter = filter;
+                    targetChip.textContent = filter;
+                    
+                    targetChip.addEventListener('click', () => {
+                        const f = targetChip.dataset.filter;
+                        if (activeFilters.includes(f)) {
+                            activeFilters = activeFilters.filter(item => item !== f);
+                        } else {
+                            activeFilters = [f];
+                        }
+                        sessionStorage.setItem('studentFilters', JSON.stringify(activeFilters));
+                        updateUI();
+                    });
+                }
+                
+                if (semuaChip && semuaChip.nextSibling) {
+                    chipContainer.insertBefore(targetChip, semuaChip.nextSibling);
+                } else {
+                    chipContainer.appendChild(targetChip);
+                }
+            }
+        });
+        chips = document.querySelectorAll('.filter-chip');
+    }
+
+    syncChipsFromActiveFilters();
+
+    // Pastikan filter tetap valid jika user kembali (Back) dari halaman Semua Filter (menggunakan bfcache)
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            window.location.reload();
+        } else {
+            try {
+                const stored = sessionStorage.getItem('studentFilters');
+                if (stored) {
+                    activeFilters = JSON.parse(stored);
+                    syncChipsFromActiveFilters();
+                    updateUI();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    });
+
     let currentPage = 1;
 
     function updateUI() {
@@ -176,19 +233,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (f === 'Semua') {
                 if (activeFilters.length === 0) {
                     chip.classList.remove('bg-surface', 'text-on-surface-variant', 'border-outline-variant');
-                    chip.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-md');
+                    chip.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
                 } else {
                     chip.classList.add('bg-surface', 'text-on-surface-variant', 'border-outline-variant');
-                    chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-md');
+                    chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
                 }
                 return;
             }
             if (activeFilters.includes(f)) {
                 chip.classList.remove('bg-surface', 'text-on-surface-variant', 'border-outline-variant');
-                chip.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-md');
+                chip.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
             } else {
                 chip.classList.add('bg-surface', 'text-on-surface-variant', 'border-outline-variant');
-                chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-md');
+                chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
             }
         });
 
@@ -215,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (showBySearch && showByFilter) {
                 visibleCards.push(card);
             }
-            card.style.display = 'none'; // Sembunyikan semua dulu
+            card.classList.add('dls-hidden'); // Sembunyikan semua dulu
         });
 
         // Pagination
@@ -227,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const endIdx = startIdx + itemsPerPage;
 
         visibleCards.slice(startIdx, endIdx).forEach(card => {
-            card.style.display = '';
+            card.classList.remove('dls-hidden');
         });
 
         const pagContainer = document.getElementById('paginationContainer');
@@ -247,14 +304,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener untuk klik chip
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
-            const f = chip.dataset.filter;
-            if (f === 'Semua') {
+            const filter = chip.dataset.filter;
+            if (filter === 'Semua') {
                 activeFilters = [];
             } else {
-                if (activeFilters.includes(f)) {
-                    activeFilters = activeFilters.filter(x => x !== f);
+                if (activeFilters.includes(filter)) {
+                    activeFilters = activeFilters.filter(f => f !== filter);
                 } else {
-                    activeFilters.push(f);
+                    activeFilters = [filter];
                 }
             }
             sessionStorage.setItem('studentFilters', JSON.stringify(activeFilters));

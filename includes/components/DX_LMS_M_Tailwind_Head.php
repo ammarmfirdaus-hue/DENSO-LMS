@@ -149,10 +149,11 @@ $base_path = $base_path ?? '';
         }
     }, 500);
     
-    // Fix BFCache: pastikan halaman terlihat saat kembali dari cache
+    // Fix BFCache: pastikan halaman terlihat saat kembali dari cache dan refresh untuk mencegah DOM corruption
     window.addEventListener('pageshow', function(e) {
         if (e.persisted && document.body) {
             document.body.classList.add('dls-ready');
+            window.location.reload();
         }
     });
 })();
@@ -165,6 +166,15 @@ $base_path = $base_path ?? '';
 <script id="tailwind-config">
 tailwind.config = {
   darkMode: "class",
+  safelist: [
+    'grid',
+    'grid-cols-1',
+    'md:grid-cols-2',
+    'lg:grid-cols-3',
+    'gap-gutter',
+    'hidden',
+    'dls-hidden'
+  ],
   theme: {
     extend: {
       colors: {

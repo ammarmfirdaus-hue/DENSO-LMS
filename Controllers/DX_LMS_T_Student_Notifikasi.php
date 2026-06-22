@@ -20,10 +20,12 @@ class DX_LMS_T_Student_Notifikasi extends DX_LMS_Controller {
 
         // Ambil notifikasi dari Single Source of Truth
         $notifications = DX_StudentData::getNotifications();
+        $stats = DX_StudentData::getStats();
 
         $data = [
             'active_tab'    => 'notifikasi',
             'notifications' => $notifications,
+            'stats'         => $stats
         ];
 
         $this->view('DX_LMS_T_Student_Notifikasi', $data);

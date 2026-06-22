@@ -21,19 +21,12 @@ $active_tab = 'riwayat';
 </head>
 <body class="dls-app-shell bg-background text-on-background font-body-md min-h-screen flex flex-col">
 <!-- TopAppBar Shared Component -->
-<header class="dls-topbar bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
-<div class="flex justify-between items-center w-full px-container-margin h-14">
-<button class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">business</span>
-</button>
-<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">LMS</div>
-<a href="?route=/student/notifikasi" onclick="markNotificationsRead()" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative">
-<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
-<span class="notification-dot absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-</a>
-</div>
-</header>
-<main class="dls-main flex-1 pt-[72px] pb-32">
+<?php 
+$header_title = 'LMS';
+$notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
+include 'includes/components/DX_LMS_M_Header.php'; 
+?>
+<main class="dls-main flex-1 pt-[72px] pb-32 lg:ml-[240px] transition-all duration-300">
 <!-- Header & Stats Section -->
 <section class="px-container-margin py-6">
 <h1 class="font-headline-lg text-headline-lg text-on-background mb-1">Riwayat Belajar</h1>
@@ -57,32 +50,59 @@ $active_tab = 'riwayat';
 </div>
 </section>
 <!-- Course List -->
-<section class="px-container-margin flex flex-col gap-4">
+<section id="course-results" class="px-container-margin grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2">
 <?php foreach ($completedCourses as $c): ?>
-<div onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e($c['id']) ?>'" class="course-card bg-surface rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden flex flex-col cursor-pointer">
-<div class="h-32 bg-surface-container-high relative">
+<div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(json_encode($c['filters'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)) ?>">
+<div class="h-32 bg-surface-container-high relative shrink-0">
 <?php if ($c['thumbnail']): ?>
-<img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" src="<?= e($c['thumbnail']) ?>"/>
+<img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" src="<?= e($c['thumbnail']) ?>">
 <?php else: ?>
-<div class="w-full h-full bg-secondary-container flex items-center justify-center">
+<div class="w-full h-full bg-secondary-container relative flex items-center justify-center">
     <span class="material-symbols-outlined text-[64px] text-on-secondary-container opacity-50"><?= e($c['thumbnail_icon'] ?? 'school') ?></span>
 </div>
 <?php endif; ?>
 <div class="absolute top-2 right-2 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-sm text-label-sm shadow-sm backdrop-blur-sm flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]" style='font-variation-settings: "FILL" 1;'>check_circle</span>Selesai
+    <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
 </div>
 </div>
-<div class="p-stack-md space-y-stack-sm">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title"><?= e($c['title']) ?></h3>
-</div>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2"><?= e($c['description']) ?></p>
-</div>
+    <div class="p-stack-md flex flex-col flex-1">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title"><?= e($c['title']) ?></h3>
+                <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block"><?= e((string)$c['modules_count']) ?> Modul</span>
+            </div>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3"><?= e($c['description']) ?></p>
+
+        <div class="flex gap-1.5 flex-wrap">
+            <?php foreach ($c['filters'] ?? [] as $f): ?>
+            <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase"><?= e($f) ?></span>
+            <?php endforeach; ?>
+        </div>
+        
+        <div class="mt-auto pt-4 space-y-2">
+            <div class="flex justify-between font-label-sm text-label-sm">
+                <span class="text-on-surface-variant">Selesai</span>
+                <span class="text-tertiary font-bold">100%</span>
+            </div>
+            <div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+                <div class="bg-tertiary h-2 rounded-full" style="width: 100%"></div>
+            </div>
+            <button onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e($c['id']) ?>'" class="w-full mt-3 border border-outline-variant text-on-surface-variant bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-surface-container-low flex items-center justify-center gap-2">
+                Lihat Riwayat
+            </button>
+        </div>
+    </div>
 </div>
 <?php endforeach; ?>
 </section>
+
+<!-- Pagination Controls -->
+<div id="paginationContainer" class="flex md:hidden justify-between items-center mt-6 hidden pb-4 px-container-margin">
+    <button id="prevPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100 font-label-md">Prev</button>
+    <span id="pageIndicator" class="font-label-md text-on-surface-variant">Halaman 1</span>
+    <button id="nextPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100 font-label-md">Next</button>
+</div>
 </main>
 <!-- BottomNavBar Shared Component -->
 <?php include 'includes/components/DX_LMS_M_Bottom_Nav.php'; ?>
@@ -107,23 +127,78 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const courseCards = document.querySelectorAll('.course-card');
 
+    let currentPage = 1;
+
+    function updateUI() {
+        const itemsPerPage = window.innerWidth >= 768 ? 9999 : 5;
+        const query = (searchInput ? searchInput.value.toLowerCase().trim() : '');
+        
+        let visibleCards = [];
+
+        courseCards.forEach(card => {
+            let showBySearch = true;
+            if (query) {
+                const titleEl = card.querySelector('.course-title');
+                if (titleEl && !titleEl.textContent.toLowerCase().includes(query)) {
+                    showBySearch = false;
+                }
+            }
+
+            if (showBySearch) {
+                visibleCards.push(card);
+            }
+            card.classList.add('dls-hidden'); // Hide all initially
+        });
+
+        // Pagination logic
+        const maxPage = Math.ceil(visibleCards.length / itemsPerPage);
+        if (currentPage > maxPage) currentPage = maxPage;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = startIdx + itemsPerPage;
+
+        visibleCards.slice(startIdx, endIdx).forEach(card => {
+            card.classList.remove('dls-hidden');
+        });
+
+        const pagContainer = document.getElementById('paginationContainer');
+        if (maxPage > 1) {
+            pagContainer.classList.remove('hidden');
+            document.getElementById('pageIndicator').textContent = 'Halaman ' + currentPage + ' dari ' + maxPage;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === maxPage;
+        } else {
+            pagContainer.classList.add('hidden');
+        }
+    }
+
+    // Event Listeners
+    window.addEventListener('resize', updateUI);
+
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase().trim();
-            
-            courseCards.forEach(card => {
-                const titleEl = card.querySelector('.course-title');
-                if (titleEl) {
-                    const titleText = titleEl.textContent.toLowerCase();
-                    if (titleText.includes(query)) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                }
-            });
+            currentPage = 1;
+            updateUI();
         });
     }
+
+    document.getElementById('prevPageBtn').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateUI();
+            document.getElementById('course-results').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    document.getElementById('nextPageBtn').addEventListener('click', () => {
+        currentPage++;
+        updateUI();
+        document.getElementById('course-results').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Initial render
+    updateUI();
 });
 </script>
 

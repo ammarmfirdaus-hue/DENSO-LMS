@@ -3,8 +3,8 @@
  * Dokumentasi standar untuk aset
  */
 /* ============================================================
-   DLS Design Tokens — Learning Management System
-   Sumber: Desain referensi folder "Design Student"
+   DLS Design Tokens
+   Learning Management System
    ============================================================ */
 
 /* === Font Face Declarations === */
@@ -277,3 +277,6 @@ body {
 /* === Page Transition === */
 /* Transisi halaman sekarang dikelola sepenuhnya oleh FOUC Preventer di DX_LMS_Tailwind_Head.php */
 /* JANGAN tambahkan animasi/transition body di sini agar tidak bentrok */
+
+/* Custom Hidden Utility to prevent JS style.display overrides */
+.dls-hidden { display: none !important; }

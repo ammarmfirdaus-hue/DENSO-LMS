@@ -17,6 +17,8 @@ class DX_LMS_M_Student_Profil extends DX_LMS_Controller {
      */
     public function index() {
         session_start();
-        $this->view('DX_LMS_M_Student_Profil');
+        $stats = DX_StudentData::getStats();
+        $data = ['stats' => $stats];
+        $this->view('DX_LMS_M_Student_Profil', $data);
     }
 }

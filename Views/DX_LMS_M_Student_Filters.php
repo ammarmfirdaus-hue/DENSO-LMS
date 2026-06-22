@@ -8,17 +8,14 @@
 </head>
 <body class="dls-app-shell bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-safe">
 <!-- TopAppBar Shared Component -->
-<header class="dls-topbar bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe">
-    <div class="flex items-center w-full px-container-margin h-14">
-        <a href="?route=/student/courses" class="text-on-surface hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center mr-2">
-            <span class="material-symbols-outlined">arrow_back</span>
-        </a>
-        <h1 class="font-headline-sm text-headline-sm font-bold tracking-tight">Semua Filter</h1>
-    </div>
-</header>
+<?php 
+$show_back = true;
+$header_title = 'Semua Filter';
+include 'includes/components/DX_LMS_M_Header.php'; 
+?>
 
-<main class="dls-main flex-1 pt-[72px] pb-[88px] px-container-margin flex flex-col h-full mt-stack-sm">
-    <section class="flex-none">
+<main class="dls-main flex flex-col h-full pt-[72px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300">
+    <section class="flex-none pt-4">
         <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menampilkan course yang spesifik.</p>
         
         <div class="flex justify-between items-center mb-3">
@@ -46,12 +43,12 @@
     </section>
 
     <!-- Hasil Course dinamis -->
-    <section id="course-results" class="flex-1 overflow-y-auto space-y-stack-md pt-2 hide-scrollbar pb-4">
+    <section id="course-results" class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2 hide-scrollbar content-start pb-4">
         <!-- JS akan me-render course card di sini -->
     </section>
     
     <!-- Pagination Controls -->
-    <div id="paginationContainer" class="flex justify-between items-center mt-6 hidden pb-4">
+    <div id="paginationContainer" class="flex md:hidden justify-between items-center mt-6 hidden pb-4">
         <button id="prevPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">Sebelumnya</button>
         <span id="pageIndicator" class="font-label-md text-on-surface-variant">Halaman 1</span>
         <button id="nextPageBtn" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">Selanjutnya</button>
@@ -59,29 +56,10 @@
 </main>
 
 <!-- BottomNavBar Shared Component -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe shadow-lg dark:shadow-none bg-surface dark:bg-on-background shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] rounded-t-xl md:hidden border-t border-outline-variant">
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">home</span>
-<span class="font-label-sm text-label-sm">Beranda</span>
-</a>
-<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/courses">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 1;">school</span>
-<span class="font-label-sm text-label-sm">Course</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/riwayat">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">history</span>
-<span class="font-label-sm text-label-sm">Riwayat</span>
-</a>
-<a onclick="markNotificationsRead()" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant relative" href="?route=/student/notifikasi">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
-<span class="font-label-sm text-label-sm">Notifikasi</span>
-<span class="notification-dot absolute top-1 right-4 w-2 h-2 bg-error rounded-full"></span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 transition-transform duration-200 active:scale-90 hover:bg-surface-container-high dark:hover:bg-surface-variant" href="?route=/student/profil">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 0;">person</span>
-<span class="font-label-sm text-label-sm">Profil</span>
-</a>
-</nav>
+<?php 
+$active_tab = 'course';
+include 'includes/components/DX_LMS_M_Bottom_Nav.php'; 
+?>
 
 <script>
     function markNotificationsRead() {
@@ -89,7 +67,7 @@
         document.querySelectorAll('.notification-dot').forEach(dot => dot.classList.add('hidden'));
     }
 
-    const coursesData = <?= json_encode($courses) ?>;
+    const coursesData = <?= json_encode($courses, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     let activeFilters = [];
     
     // Load from session storage to maintain state between pages
@@ -119,7 +97,10 @@
 
         let currentFilteredCourses = [];
         let currentPage = 1;
-        const itemsPerPage = 5;
+        
+        function getItemsPerPage() {
+            return window.innerWidth >= 768 ? 9999 : 5;
+        }
 
         function renderCourses(resetPage = false) {
             const resultsContainer = document.getElementById('course-results');
@@ -159,8 +140,9 @@
         }
 
         function displayPage() {
+            const itemsPerPage = getItemsPerPage();
             const maxPage = Math.ceil(currentFilteredCourses.length / itemsPerPage);
-            if (currentPage > maxPage) currentPage = maxPage;
+            if (currentPage > maxPage && maxPage > 0) currentPage = maxPage;
             if (currentPage < 1) currentPage = 1;
 
             const startIdx = (currentPage - 1) * itemsPerPage;
@@ -201,18 +183,20 @@
                     btnHtml = `<button onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" class="w-full mt-stack-md bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded-lg shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] active:scale-95 transition-transform">Lanjutkan Belajar</button>`;
                 } else if (c.status === 'belum_dimulai') {
                     btnHtml = `<button onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" class="w-full mt-stack-md border-2 border-secondary text-secondary bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-secondary-container/10">Mulai Course</button>`;
+                } else {
+                    btnHtml = `<button onclick="window.location.href='?route=/student/riwayat/detail&id=${c.id}'" class="w-full mt-stack-md border border-outline-variant text-on-surface-variant bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-surface-container-low">Lihat Detail</button>`;
                 }
 
                 const tagsHtml = (c.filters || []).map(f => `<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase">${f}</span>`).join('');
 
                 return `
-                <div class="course-card bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border border-outline-variant transition-all hover:shadow-md cursor-pointer group" onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" data-filters='${JSON.stringify(c.filters||[])}'>
-                    <div class="relative h-40 w-full overflow-hidden">
+                <div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden cursor-pointer group" onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" data-filters='${JSON.stringify(c.filters||[])}'>
+                    <div class="h-32 bg-surface-container-high relative">
                         ${mediaHtml}
-                        <div class="absolute top-2 left-2 ${badgeClass} px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">${badgeText}</div>
+                        ${c.status !== 'selesai' ? `<div class="absolute top-2 left-2 ${badgeClass} px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">${badgeText}</div>` : ''}
                         ${statusBadge}
                     </div>
-                    <div class="p-stack-md space-y-stack-sm">
+                    <div class="p-stack-md space-y-stack-sm flex flex-col flex-1">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight group-hover:text-primary transition-colors">${c.title}</h3>
@@ -220,7 +204,7 @@
                             </div>
                         </div>
                         <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">${c.description}</p>
-                        <div class="flex gap-1.5 flex-wrap pt-2">
+                        <div class="flex gap-1.5 flex-wrap pt-2 mt-auto">
                             ${tagsHtml}
                         </div>
                         <div class="pt-stack-sm space-y-2">
@@ -253,6 +237,7 @@
         });
 
         document.getElementById('nextPageBtn').addEventListener('click', () => {
+            const itemsPerPage = getItemsPerPage();
             const maxPage = Math.ceil(currentFilteredCourses.length / itemsPerPage);
             if (currentPage < maxPage) {
                 currentPage++;
@@ -321,6 +306,27 @@
         sortSelect.addEventListener('change', () => {
             renderCourses();
         });
+
+        // Handle resize untuk update itemsPerPage
+        window.addEventListener('resize', () => {
+            renderCourses(true);
+        });
+
+        // Parse filter from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlFilter = urlParams.get('filter');
+        if (urlFilter) {
+            if (urlFilter === 'Semua') {
+                activeFilters = [];
+            } else {
+                activeFilters = [urlFilter];
+            }
+            saveFilters();
+            
+            // Clean up URL to avoid confusion if user refreshes later
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?route=/student/courses/filters";
+            window.history.replaceState({path: newUrl}, '', newUrl);
+        }
 
         // Init pertama kali
         updateUI();

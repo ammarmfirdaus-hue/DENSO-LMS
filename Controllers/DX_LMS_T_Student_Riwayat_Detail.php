@@ -27,8 +27,11 @@ class DX_LMS_T_Student_Riwayat_Detail extends DX_LMS_Controller {
             $course = DX_StudentData::getCourseById('CRS005');
         }
 
+        $stats = DX_StudentData::getStats();
+
         $data = [
             'course' => $course,
+            'stats'  => $stats,
         ];
 
         $this->view('DX_LMS_T_Student_Riwayat_Detail', $data);
