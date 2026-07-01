@@ -27,7 +27,11 @@
     font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-rendering: grayscale;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
 }
 
 /* === Root CSS Custom Properties === */
@@ -217,44 +221,112 @@
 
 /* === Color Utility Classes === */
 /* Text colors */
-.text-primary { color: var(--dls-primary) !important; }
-.text-secondary { color: var(--dls-secondary) !important; }
-.text-tertiary { color: var(--dls-tertiary) !important; }
-.text-error { color: var(--dls-error) !important; }
-.text-on-surface { color: var(--dls-on-surface) !important; }
-.text-on-surface-variant { color: var(--dls-on-surface-variant) !important; }
-.text-on-primary { color: var(--dls-on-primary) !important; }
-.text-on-secondary { color: var(--dls-on-secondary) !important; }
-.text-on-tertiary { color: var(--dls-on-tertiary) !important; }
-.text-on-error { color: var(--dls-on-error) !important; }
-.text-on-primary-container { color: var(--dls-on-primary-container) !important; }
-.text-on-secondary-container { color: var(--dls-on-secondary-container) !important; }
-.text-on-tertiary-container { color: var(--dls-on-tertiary-container) !important; }
+.text-primary {
+    color: var(--dls-primary) !important;
+}
+.text-secondary {
+    color: var(--dls-secondary) !important;
+}
+.text-tertiary {
+    color: var(--dls-tertiary) !important;
+}
+.text-error {
+    color: var(--dls-error) !important;
+}
+.text-on-surface {
+    color: var(--dls-on-surface) !important;
+}
+.text-on-surface-variant {
+    color: var(--dls-on-surface-variant) !important;
+}
+.text-on-primary {
+    color: var(--dls-on-primary) !important;
+}
+.text-on-secondary {
+    color: var(--dls-on-secondary) !important;
+}
+.text-on-tertiary {
+    color: var(--dls-on-tertiary) !important;
+}
+.text-on-error {
+    color: var(--dls-on-error) !important;
+}
+.text-on-primary-container {
+    color: var(--dls-on-primary-container) !important;
+}
+.text-on-secondary-container {
+    color: var(--dls-on-secondary-container) !important;
+}
+.text-on-tertiary-container {
+    color: var(--dls-on-tertiary-container) !important;
+}
 
 /* Background colors */
-.bg-surface { background-color: var(--dls-surface) !important; }
-.bg-surface-container { background-color: var(--dls-surface-container) !important; }
-.bg-surface-container-low { background-color: var(--dls-surface-container-low) !important; }
-.bg-surface-container-high { background-color: var(--dls-surface-container-high) !important; }
-.bg-surface-container-lowest { background-color: var(--dls-surface-container-lowest) !important; }
-.bg-surface-container-highest { background-color: var(--dls-surface-container-highest) !important; }
-.bg-surface-variant { background-color: var(--dls-surface-variant) !important; }
-.bg-background { background-color: var(--dls-background) !important; }
-.bg-primary { background-color: var(--dls-primary) !important; }
-.bg-primary-container { background-color: var(--dls-primary-container) !important; }
-.bg-secondary { background-color: var(--dls-secondary) !important; }
-.bg-secondary-container { background-color: var(--dls-secondary-container) !important; }
-.bg-tertiary { background-color: var(--dls-tertiary) !important; }
-.bg-tertiary-container { background-color: var(--dls-tertiary-container) !important; }
-.bg-error { background-color: var(--dls-error) !important; }
-.bg-error-container { background-color: var(--dls-error-container) !important; }
+.bg-surface {
+    background-color: var(--dls-surface) !important;
+}
+.bg-surface-container {
+    background-color: var(--dls-surface-container) !important;
+}
+.bg-surface-container-low {
+    background-color: var(--dls-surface-container-low) !important;
+}
+.bg-surface-container-high {
+    background-color: var(--dls-surface-container-high) !important;
+}
+.bg-surface-container-lowest {
+    background-color: var(--dls-surface-container-lowest) !important;
+}
+.bg-surface-container-highest {
+    background-color: var(--dls-surface-container-highest) !important;
+}
+.bg-surface-variant {
+    background-color: var(--dls-surface-variant) !important;
+}
+.bg-background {
+    background-color: var(--dls-background) !important;
+}
+.bg-primary {
+    background-color: var(--dls-primary) !important;
+}
+.bg-primary-container {
+    background-color: var(--dls-primary-container) !important;
+}
+.bg-secondary {
+    background-color: var(--dls-secondary) !important;
+}
+.bg-secondary-container {
+    background-color: var(--dls-secondary-container) !important;
+}
+.bg-tertiary {
+    background-color: var(--dls-tertiary) !important;
+}
+.bg-tertiary-container {
+    background-color: var(--dls-tertiary-container) !important;
+}
+.bg-error {
+    background-color: var(--dls-error) !important;
+}
+.bg-error-container {
+    background-color: var(--dls-error-container) !important;
+}
 
 /* Border colors */
-.border-outline-variant { border-color: var(--dls-outline-variant) !important; }
-.border-surface-variant { border-color: var(--dls-surface-variant) !important; }
-.border-primary { border-color: var(--dls-primary) !important; }
-.border-secondary { border-color: var(--dls-secondary) !important; }
-.border-error { border-color: var(--dls-error) !important; }
+.border-outline-variant {
+    border-color: var(--dls-outline-variant) !important;
+}
+.border-surface-variant {
+    border-color: var(--dls-surface-variant) !important;
+}
+.border-primary {
+    border-color: var(--dls-primary) !important;
+}
+.border-secondary {
+    border-color: var(--dls-secondary) !important;
+}
+.border-error {
+    border-color: var(--dls-error) !important;
+}
 
 /* === Global Base Styles === */
 body {
@@ -271,12 +343,18 @@ body {
 }
 
 /* Safe area padding (iOS) */
-.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
-.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+}
 
 /* === Page Transition === */
 /* Transisi halaman sekarang dikelola sepenuhnya oleh FOUC Preventer di DX_LMS_Tailwind_Head.php */
 /* JANGAN tambahkan animasi/transition body di sini agar tidak bentrok */
 
 /* Custom Hidden Utility to prevent JS style.display overrides */
-.dls-hidden { display: none !important; }
+.dls-hidden {
+    display: none !important;
+}

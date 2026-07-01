@@ -41,7 +41,9 @@
     color: var(--dls-on-surface);
     font-family: inherit;
     font-size: var(--dls-body-md-size);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .courses-search-input:focus {
@@ -105,10 +107,13 @@
     display: flex;
     flex-direction: column;
     text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
-.course-card:hover, .course-card:active {
+.course-card:hover,
+.course-card:active {
     transform: translateY(-2px);
     box-shadow: var(--dls-elevation-2);
 }

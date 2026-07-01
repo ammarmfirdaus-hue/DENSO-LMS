@@ -1,0 +1,28 @@
+{
+  "name": "learning-management-system",
+  "version": "1.0.0",
+  "description": "Learning Management System",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss -i ./assets/css/DX_LMS_W_Tailwind_Input.css -o ./assets/css/DX_LMS_M_Tailwind_Output.css -c ./assets/js/DX_LMS_W_Tailwind_Config.js --minify",
+    "watch": "tailwindcss -i ./assets/css/DX_LMS_W_Tailwind_Input.css -o ./assets/css/DX_LMS_M_Tailwind_Output.css -c ./assets/js/DX_LMS_W_Tailwind_Config.js --watch",
+    "dev": "tailwindcss -i ./assets/css/DX_LMS_W_Tailwind_Input.css -o ./assets/css/DX_LMS_M_Tailwind_Output.css -c ./assets/js/DX_LMS_W_Tailwind_Config.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sosusesa-bri/DENSO-LMS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sosusesa-bri/DENSO-LMS/issues"
+  },
+  "homepage": "https://github.com/sosusesa-bri/DENSO-LMS#readme",
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.25.0",
+    "prettier": "^3.9.4",
+    "tailwindcss": "^3.4.19"
+  }
+}

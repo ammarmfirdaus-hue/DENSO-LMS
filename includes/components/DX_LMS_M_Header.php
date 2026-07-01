@@ -1,16 +1,16 @@
 <?php
 /**
- * DLS TopAppBar Component
- * Learning Management System
- * 
- * Matches: TopAppBar dari semua desain referensi Student
- * Layout: [Business Icon] --- [LMS Title] --- [Notification Bell]
- * 
- * Variables expected:
- *   $base_path       - string: Relative path to root (e.g., '' or '../')
- *   $show_back       - bool (optional): Show back button instead of business icon
- *   $header_title    - string (optional): Custom title (default: 'LMS')
- *   $notif_count     - int (optional): Notification count badge
+ * Komponen Bilah Atas Aplikasi (Top App Bar) — DLS.
+ *
+ * Menyajikan header navigasi atas yang sesuai dengan desain referensi Student.
+ * Tata letak: [Ikon Bisnis] --- [Judul LMS] --- [Lonceng Notifikasi].
+ *
+ * Variabel yang Diterima:
+ *   $base_path       - string : Jalur relatif menuju direktori root (misal: '' atau '../').
+ *   $show_back       - bool   : (opsional) Tampilkan tombol kembali, bukan ikon bisnis.
+ *   $header_title    - string : (opsional) Judul kustom (bawaan: 'LMS').
+ *   $back_url        - string : (opsional) URL tujuan tombol kembali.
+ *   $notif_count     - int    : (opsional) Jumlah badge notifikasi.
  */
 
 $show_back = $show_back ?? false;
@@ -22,7 +22,8 @@ $base_path = $base_path ?? '';
     <div class="flex justify-between items-center w-full px-container-margin h-14">
         <!-- Left Action -->
         <?php if ($show_back): ?>
-        <a href="javascript:history.back()" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center" aria-label="Kembali">
+        <?php $back_link = isset($back_url) && $back_url ? htmlspecialchars($back_url) : 'javascript:history.back()'; ?>
+        <a href="<?= $back_link ?>" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center" aria-label="Kembali">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <?php else: ?>
@@ -32,13 +33,17 @@ $base_path = $base_path ?? '';
         <?php endif; ?>
 
         <!-- Center Title -->
-        <div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight"><?= htmlspecialchars($header_title) ?></div>
+        <div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight"><?= htmlspecialchars(
+            $header_title,
+        ) ?></div>
 
         <!-- Right Action: Notification Bell -->
         <a href="<?= $base_path ?>?route=/student/notifikasi" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative" aria-label="Notifikasi">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
             <?php if ($notif_count > 0): ?>
-            <span class="notification-dot absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+            <span class="notification-dot absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 min-w-[18px] h-[18px] bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-surface dark:border-on-background">
+                <?= $notif_count > 99 ? '99+' : $notif_count ?>
+            </span>
             <?php endif; ?>
         </a>
     </div>

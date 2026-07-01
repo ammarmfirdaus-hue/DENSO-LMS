@@ -1,14 +1,13 @@
 <?php
 /**
- * DLS BottomNavBar Component
- * Learning Management System
- * 
- * Matches: BottomNavBar dari semua desain referensi Student
- * 5 tabs: Beranda, Course, Riwayat, Notifikasi, Profil
- * 
- * Variables expected:
- *   $active_tab  - string: Active tab name ('beranda'|'course'|'riwayat'|'notifikasi'|'profil')
- *   $base_path   - string: Relative path to root (e.g., '' or '../')
+ * Komponen Navigasi Bawah (Bottom Navigation Bar) — DLS.
+ *
+ * Menyajikan bilah navigasi bawah dengan 5 tab utama yang sesuai
+ * dengan desain referensi Student: Beranda, Course, Riwayat, Notifikasi, Profil.
+ *
+ * Variabel yang Diterima:
+ *   $active_tab  - string : Nama tab aktif ('beranda'|'course'|'riwayat'|'notifikasi'|'profil').
+ *   $base_path   - string : Jalur relatif menuju direktori root (misal: '' atau '../').
  */
 
 $active_tab = $active_tab ?? 'beranda';
@@ -16,31 +15,31 @@ $base_path = $base_path ?? '';
 
 $tabs = [
     [
-        'id'   => 'beranda',
+        'id' => 'beranda',
         'icon' => 'home',
         'label' => 'Beranda',
         'href' => '?route=/student',
     ],
     [
-        'id'   => 'course',
+        'id' => 'course',
         'icon' => 'school',
         'label' => 'Course',
         'href' => '?route=/student/courses',
     ],
     [
-        'id'   => 'riwayat',
+        'id' => 'riwayat',
         'icon' => 'history',
         'label' => 'Riwayat',
         'href' => '?route=/student/riwayat',
     ],
     [
-        'id'   => 'notifikasi',
+        'id' => 'notifikasi',
         'icon' => 'notifications',
         'label' => 'Notifikasi',
         'href' => '?route=/student/notifikasi',
     ],
     [
-        'id'   => 'profil',
+        'id' => 'profil',
         'icon' => 'person',
         'label' => 'Profil',
         'href' => '?route=/student/profil',
@@ -56,11 +55,11 @@ $tabs = [
     </div>
 
     <?php foreach ($tabs as $tab): ?>
-    <?php 
-        $is_active = ($active_tab === $tab['id']); 
-        $active_class = $is_active 
-            ? 'text-secondary dark:text-secondary-fixed bg-secondary-container/20 lg:bg-secondary-container/30 font-semibold' 
-            : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
+    <?php
+    $is_active = $active_tab === $tab['id'];
+    $active_class = $is_active
+        ? 'text-secondary dark:text-secondary-fixed bg-secondary-container/20 lg:bg-secondary-container/30 font-semibold'
+        : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
     ?>
     <a href="<?= $tab['href'] ?>" 
        class="flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl px-4 py-1 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>" 

@@ -1,0 +1,11 @@
+node_modules/
+vendor/
+.git/
+assets/css/DX_LMS_M_Tailwind_Output.css
+assets/css/datatables.min.css
+assets/js/datatables.min.js
+assets/js/chart.umd.js
+assets/js/DX_LMS_M_SweetAlert2.min.js
+database/
+*.json
+*.bat

@@ -1,6 +1,6 @@
 -- =========================================================================================
 -- Author: Antigravity
--- Description: Skema Database dan Tabel untuk DENSO-LMS (Microsoft SQL Server)
+-- Description: Skema Database dan Tabel untuk LMS (Microsoft SQL Server)
 -- =========================================================================================
 
 -- Buat Database
@@ -52,7 +52,7 @@ BEGIN
         [npk], [fullname], [email], [password], [golongan], [jabatan], [bu_code], 
         [section], [department], [division], [directorate], [role], [status]
     ) VALUES (
-        '12345', 'Budi Santoso', 'budi.santoso@denso.co.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Gol 1', 'Operator', 101, 
+        '12345', 'Budi Santoso', 'budi.santoso@perusahaan.co.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Gol 1', 'Operator', 101, 
         'Production A', 'Manufacturing', 'Operation', 'Plant 1', 'student', 'Active'
     );
 END
@@ -63,7 +63,7 @@ BEGIN
         [npk], [fullname], [email], [password], [golongan], [jabatan], [bu_code], 
         [section], [department], [division], [directorate], [role], [status]
     ) VALUES (
-        '67890', 'Ahmad Rizal', 'ahmad.rizal@denso.co.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Gol 3', 'Leader', 101, 
+        '67890', 'Ahmad Rizal', 'ahmad.rizal@perusahaan.co.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Gol 3', 'Leader', 101, 
         'Production A', 'Manufacturing', 'Operation', 'Plant 1', 'teacher', 'Active'
     );
 END

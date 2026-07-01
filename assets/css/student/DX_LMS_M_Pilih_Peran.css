@@ -62,7 +62,7 @@
     margin-bottom: 24px;
 }
 
-.pilih-peran-remember input[type="checkbox"] {
+.pilih-peran-remember input[type='checkbox'] {
     width: 18px;
     height: 18px;
     accent-color: var(--dls-secondary);
@@ -92,7 +92,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid var(--dls-outline-variant);
-    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
 }
@@ -128,7 +128,7 @@
 .pilih-peran-img-gradient {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(255,255,255,0.8), transparent);
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
 }
 
 .pilih-peran-card-content {

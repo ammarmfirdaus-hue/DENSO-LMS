@@ -1,43 +1,66 @@
 <?php
 /**
- * DLS Learning Management System
- * Unified Head Component — Tailwind + SweetAlert2 + Local Fonts
+ * Komponen Unified Head — Learning Management System.
  *
- * Usage: include this in every page after setting $page_title
- * Variables expected:
- *   $page_title  - string: Title for <title> tag
- *   $base_path   - string (optional): Relative path to root
+ * Menyediakan elemen <head> standar untuk seluruh halaman aplikasi,
+ * termasuk pemuatan Tailwind CSS (build dari CLI), SweetAlert2,
+ * dan konfigurasi font lokal (Inter, Material Symbols).
+ *
+ * Variabel yang Diterima:
+ *   $page_title  - string  : Judul halaman untuk elemen <title>.
+ *   $base_path   - string  : (opsional) Jalur relatif menuju direktori root.
+ *
+ * CATATAN DEVELOPER:
+ * File ini menggunakan Tailwind CLI (bukan CDN).
+ * Jika Anda menambahkan class Tailwind baru yang di-assign secara dinamis via PHP variable,
+ * tambahkan class tersebut ke dalam "safelist" di tailwind.config.js,
+ * lalu jalankan: npm run build
  */
 
 $page_title = $page_title ?? 'LMS - Learning Management System';
 $base_path = $base_path ?? '';
 ?>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="description" content="Learning Management System">
 <title><?= htmlspecialchars($page_title) ?></title>
 
-<!-- Local Fonts (@font-face) -->
+<!-- =====================================================
+     Tailwind CSS (Build dari Tailwind CLI)
+     ===================================================== -->
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Tailwind_Output.css">
+
+<!-- =====================================================
+     Preload Fonts (Diletakkan di bawah CSS agar CSS diunduh pertama)
+     ===================================================== -->
+<link rel="preload" href="<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Medium.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="<?= $base_path ?>assets/fonts/DX_LMS_M_MaterialSymbolsOutlined.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+
+<!-- =====================================================
+     Local Fonts (@font-face)
+     ===================================================== -->
 <style>
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
-        font-display: swap;
+        font-display: optional;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Regular.ttf') format('truetype');
     }
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 500;
-        font-display: swap;
+        font-display: optional;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Medium.ttf') format('truetype');
     }
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
-        font-display: swap;
+        font-display: optional;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Bold.ttf') format('truetype');
     }
     @font-face {
@@ -67,213 +90,14 @@ $base_path = $base_path ?? '';
     }
 </style>
 
-<script>
-    if (localStorage.getItem('hasUnreadNotifications') === 'false') {
-        document.documentElement.classList.add('hide-notifications');
-    }
-    
-    // Auto-detect Timezone (WIB/WITA/WIT)
-    (function() {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (!document.cookie.includes('user_timezone')) {
-            document.cookie = "user_timezone=" + tz + "; path=/; max-age=31536000";
-            if (['Asia/Jakarta', 'Asia/Makassar', 'Asia/Jayapura'].includes(tz)) {
-                window.location.reload();
-            }
-        }
-    })();
-</script>
+<!-- =====================================================
+     Tailwind CSS (Build dari Tailwind CLI)
+     Sudah dimuat di atas bersama dengan preload.
+     ===================================================== -->
 
-<!-- DLS FOUC Prevention System v4 — Hide Until Tailwind Done -->
-<style id="dls-fouc-preventer">
-    /* Sembunyikan SELURUH konten body sampai Tailwind selesai memproses */
-    /* visibility:hidden tetap memungkinkan layout calculation tapi user tidak melihat apapun */
-    body:not(.dls-ready) {
-        visibility: hidden !important;
-    }
-    
-    /* Background html tetap tampil agar tidak ada flash putih */
-    html {
-        background-color: #fcf9f8;
-    }
-
-    .hide-notifications .notification-dot { display: none !important; }
-    
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-</style>
-
-<script>
-(function() {
-    // Tunggu sampai Tailwind Engine benar-benar selesai memproses SEMUA class.
-    // Tailwind Engine menambahkan/memodifikasi <style> di <head>.
-    // Kita menggunakan debounced MutationObserver — baru reveal body
-    // setelah <head> BERHENTI berubah selama 80ms (artinya Tailwind sudah selesai).
-    
-    var revealTimer = null;
-    
-    function revealPage() {
-        if (document.body) {
-            document.body.classList.add('dls-ready');
-        }
-        if (headObserver) headObserver.disconnect();
-    }
-    
-    var headObserver = new MutationObserver(function() {
-        // Setiap kali Tailwind menambah/mengubah style, reset timer
-        clearTimeout(revealTimer);
-        revealTimer = setTimeout(revealPage, 20);
-    });
-    
-    // Mulai observe <head> untuk mendeteksi kapan Tailwind selesai inject styles
-    if (document.head) {
-        headObserver.observe(document.head, { childList: true, subtree: true, characterData: true });
-    }
-    
-    // Fallback: jika tidak ada perubahan di head sama sekali (misal cache), reveal setelah 300ms
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            if (!document.body.classList.contains('dls-ready')) {
-                revealPage();
-            }
-        }, 100);
-    });
-    
-    // Fallback absolut: jangan pernah biarkan halaman tersembunyi lebih dari 1 detik
-    setTimeout(function() {
-        if (document.body && !document.body.classList.contains('dls-ready')) {
-            revealPage();
-        }
-    }, 500);
-    
-    // Fix BFCache: pastikan halaman terlihat saat kembali dari cache dan refresh untuk mencegah DOM corruption
-    window.addEventListener('pageshow', function(e) {
-        if (e.persisted && document.body) {
-            document.body.classList.add('dls-ready');
-            window.location.reload();
-        }
-    });
-})();
-</script>
-
-<!-- Tailwind Offline Script -->
-<script src="<?= $base_path ?>assets/js/DX_LMS_M_Tailwind_Engine.js"></script>
-
-<!-- Tailwind Config -->
-<script id="tailwind-config">
-tailwind.config = {
-  darkMode: "class",
-  safelist: [
-    'grid',
-    'grid-cols-1',
-    'md:grid-cols-2',
-    'lg:grid-cols-3',
-    'gap-gutter',
-    'hidden',
-    'dls-hidden'
-  ],
-  theme: {
-    extend: {
-      colors: {
-        "tertiary-container": "#178229",
-        "tertiary-fixed": "#94f990",
-        "on-secondary-fixed": "#00105c",
-        "on-tertiary-fixed-variant": "#005313",
-        "error": "#ba1a1a",
-        "tertiary-fixed-dim": "#78dc77",
-        "on-primary-fixed-variant": "#930007",
-        "on-primary-fixed": "#410001",
-        "primary-container": "#e20613",
-        "on-tertiary-container": "#deffd6",
-        "on-background": "#1b1c1c",
-        "on-tertiary-fixed": "#002204",
-        "on-error": "#ffffff",
-        "on-error-container": "#93000a",
-        "on-primary": "#ffffff",
-        "surface-container-lowest": "#ffffff",
-        "inverse-primary": "#ffb4aa",
-        "primary": "#b4000b",
-        "surface-container-low": "#f6f3f2",
-        "on-tertiary": "#ffffff",
-        "on-secondary-container": "#11278e",
-        "surface": "#fcf9f8",
-        "primary-fixed-dim": "#ffb4aa",
-        "secondary-fixed": "#dee0ff",
-        "outline-variant": "#e9bcb6",
-        "surface-variant": "#e5e2e1",
-        "secondary-fixed-dim": "#bac3ff",
-        "error-container": "#ffdad6",
-        "surface-container": "#f0eded",
-        "secondary-container": "#8596ff",
-        "secondary": "#4355b9",
-        "primary-fixed": "#ffdad5",
-        "on-surface-variant": "#5e3f3b",
-        "inverse-surface": "#303030",
-        "on-secondary-fixed-variant": "#293ca0",
-        "surface-container-high": "#eae7e7",
-        "inverse-on-surface": "#f3f0ef",
-        "surface-bright": "#fcf9f8",
-        "tertiary": "#00671a",
-        "surface-dim": "#dcd9d9",
-        "on-primary-container": "#fff3f2",
-        "surface-tint": "#c0000d",
-        "on-secondary": "#ffffff",
-        "background": "#fcf9f8",
-        "outline": "#936e69",
-        "on-surface": "#1b1c1c",
-        "surface-container-highest": "#e5e2e1"
-      },
-      borderRadius: {
-        "DEFAULT": "0.25rem",
-        "lg": "0.5rem",
-        "xl": "0.75rem",
-        "2xl": "1rem",
-        "3xl": "1.5rem",
-        "full": "9999px"
-      },
-      spacing: {
-        "container-margin": "16px",
-        "stack-md": "16px",
-        "stack-sm": "8px",
-        "stack-lg": "24px",
-        "gutter": "16px",
-        "base": "8px"
-      },
-      fontFamily: {
-        "sans": ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        "headline-lg": ["Inter", "sans-serif"],
-        "headline-md": ["Inter", "sans-serif"],
-        "body-lg": ["Inter", "sans-serif"],
-        "headline-sm": ["Inter", "sans-serif"],
-        "body-md": ["Inter", "sans-serif"],
-        "label-sm": ["Inter", "sans-serif"],
-        "label-md": ["Inter", "sans-serif"]
-      },
-      fontSize: {
-        "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
-        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
-        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
-        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
-      },
-      screens: {
-        "xs": "375px",
-        "sm": "640px",
-        "md": "768px",
-        "lg": "1024px",
-        "xl": "1280px"
-      }
-    }
-  }
-}
-</script>
-
-<!-- SweetAlert2 Offline -->
+<!-- =====================================================
+     SweetAlert2 CSS (Offline)
+     ===================================================== -->
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js"></script>
 
 <!-- SweetAlert2 DLS Theme Override -->
@@ -375,13 +199,23 @@ tailwind.config = {
     };
 </script>
 
-<style type="text/tailwindcss">
-    @layer utilities {
-        .dls-main {
-            @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
-        }
-        .dls-main-sub {
-            @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
-        }
+<!-- Auto-detect Timezone (WIB/WITA/WIT) -->
+<script>
+(function() {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!document.cookie.includes('user_timezone')) {
+        document.cookie = "user_timezone=" + tz + "; path=/; max-age=31536000";
+        /** Pembaruan halaman dinonaktifkan untuk mencegah kilatan visual (flicker). */
     }
-</style>
+    if (localStorage.getItem('hasUnreadNotifications') === 'false') {
+        document.documentElement.classList.add('hide-notifications');
+    }
+
+    /** Menangani masalah cache peramban agar desain tidak hilang saat tombol kembali digunakan. */
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+})();
+</script>

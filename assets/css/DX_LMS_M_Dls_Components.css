@@ -14,7 +14,9 @@
     box-shadow: var(--dls-shadow-sm);
     border: 1px solid var(--dls-surface-variant);
     overflow: hidden;
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    transition:
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
 }
 
 .dls-card:hover {
@@ -216,7 +218,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--dls-container-margin);
-    transition: left 0.3s ease, width 0.3s ease;
+    transition:
+        left 0.3s ease,
+        width 0.3s ease;
 }
 
 @media (min-width: 768px) {
@@ -254,7 +258,9 @@
     background: none;
     color: var(--dls-on-surface-variant);
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
     position: relative;
 }
 
@@ -433,7 +439,9 @@
     font-family: var(--dls-font-family);
     font-size: var(--dls-body-lg-size);
     color: var(--dls-on-surface);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     outline: none;
 }
 

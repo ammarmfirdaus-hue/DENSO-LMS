@@ -1,6 +1,6 @@
 @echo off
 echo =======================================================
-echo Menjalankan DENSO-LMS dengan PHP 8.3.31 (Portable Workspace)
+echo Menjalankan LMS dengan PHP 8.3.31 (Portable Workspace)
 echo =======================================================
 echo.
 
@@ -10,7 +10,7 @@ set PHP_PATH=%~dp0php-8.3.31\php.exe
 if not exist "%PHP_PATH%" (
     echo [ERROR] PHP 8.3.31 tidak ditemukan di:
     echo %PHP_PATH%
-    echo Silakan ekstrak folder download PHP 8.3.31 Anda ke dalam folder "DENSO-LMS"
+    echo Silakan ekstrak folder download PHP 8.3.31 Anda ke dalam folder "LMS"
     echo dan pastikan nama foldernya adalah "php-8.3.31".
     pause
     exit /b

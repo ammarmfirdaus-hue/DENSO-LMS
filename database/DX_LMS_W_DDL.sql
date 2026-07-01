@@ -14,41 +14,104 @@
 -- ============================================================
 -- 1. MASTER TABLES (M)
 -- Data jarang berubah (user, course, dst.)
+-- Prefix: DX_LMS_M_
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 1.1 LMS_M_Employee — Tabel Master Karyawan
+-- 1.1 DX_LMS_M_Employees — Tabel Master Karyawan
 -- Sumber: Gambar Referensi "Employee Master DB Scheme"
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Employee (
-    npk             VARCHAR(50)     NOT NULL,   -- PK, Min. 7 Digit, bisa angka/huruf (AD1234567, 7654321)
+CREATE TABLE DX_LMS_M_Employees (
+    npk             VARCHAR(50)     NOT NULL,   -- NPK Karyawan (bisa alphanumeric) - PRIMARY KEY
     fullname        VARCHAR(150)    NOT NULL,   -- String nama karyawan
-    golongan        VARCHAR(50)     NOT NULL,   -- Bisa angka/huruf, format: [huruf]–[angka] (II-2)
-    bu_code         INT             NOT NULL,   -- Business Unit Code
-    section         VARCHAR(150)    NOT NULL,   -- String nama seksi
-    department      VARCHAR(150)    NOT NULL,   -- String nama departemen
-    division        VARCHAR(150)    NOT NULL,   -- String nama divisi
-    directorate     VARCHAR(150)    NOT NULL,   -- String nama direktorat
     email           VARCHAR(150)    NOT NULL,   -- String email karyawan
-    status          VARCHAR(50)     NOT NULL,   -- String status karyawan (Active / Inactive)
     password        VARCHAR(255)    NOT NULL,   -- Password hash karyawan (bcrypt)
+    position_id     BIGINT          NOT NULL,   -- Relasi ke Jabatan (Operator, Staff, Leader, SPV)
+    golongan_id     BIGINT          NOT NULL,   -- Relasi ke Golongan (I, II, III, IV)
+    department_id   BIGINT          NOT NULL,   -- Relasi ke Departemen
+    division_id     BIGINT          NOT NULL,   -- Relasi ke Divisi
+    section_id      BIGINT          NOT NULL,   -- Relasi ke Seksi
+    status          VARCHAR(50)     NOT NULL DEFAULT 'Active', -- Active / Inactive
     role            VARCHAR(20)     NOT NULL DEFAULT 'student', -- Role: admin, teacher, student
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Employee PRIMARY KEY (npk)
+    CONSTRAINT PK_DX_LMS_M_Employees PRIMARY KEY (npk)
 );
 
--- Index untuk pencarian umum
-CREATE INDEX IX_LMS_M_Employee_email ON LMS_M_Employee (email);
-CREATE INDEX IX_LMS_M_Employee_status ON LMS_M_Employee (status);
-CREATE INDEX IX_LMS_M_Employee_bu_code ON LMS_M_Employee (bu_code);
-CREATE INDEX IX_LMS_M_Employee_department ON LMS_M_Employee (department);
+CREATE INDEX IX_DX_LMS_M_Employees_email ON DX_LMS_M_Employees (email);
 
 -- ------------------------------------------------------------
--- 1.2 LMS_M_Course — Tabel Master Course
+-- 1.2 DX_LMS_M_Positions — Tabel Master Jabatan
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Course (
+CREATE TABLE DX_LMS_M_Positions (
+    position_id     BIGINT IDENTITY(1,1) NOT NULL,
+    position_name   VARCHAR(100)    NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_M_Positions PRIMARY KEY (position_id)
+);
+
+-- ------------------------------------------------------------
+-- 1.3 DX_LMS_M_Golongan — Tabel Master Golongan
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_M_Golongan (
+    golongan_id     BIGINT IDENTITY(1,1) NOT NULL,
+    golongan_name   VARCHAR(50)     NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_M_Golongan PRIMARY KEY (golongan_id)
+);
+
+-- ------------------------------------------------------------
+-- 1.4 DX_LMS_M_Departments — Tabel Master Departemen
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_M_Departments (
+    department_id   BIGINT IDENTITY(1,1) NOT NULL,
+    department_name VARCHAR(150)    NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_M_Departments PRIMARY KEY (department_id)
+);
+
+-- ------------------------------------------------------------
+-- 1.5 DX_LMS_M_Divisions — Tabel Master Divisi
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_M_Divisions (
+    division_id     BIGINT IDENTITY(1,1) NOT NULL,
+    division_name   VARCHAR(150)    NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_M_Divisions PRIMARY KEY (division_id)
+);
+
+-- ------------------------------------------------------------
+-- 1.6 DX_LMS_M_Sections — Tabel Master Seksi
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_M_Sections (
+    section_id      BIGINT IDENTITY(1,1) NOT NULL,
+    section_name    VARCHAR(150)    NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_M_Sections PRIMARY KEY (section_id)
+);
+
+-- Tambahkan FK ke Employees setelah tabel master referensi dibuat
+ALTER TABLE DX_LMS_M_Employees ADD CONSTRAINT FK_DX_LMS_M_Employees_Position FOREIGN KEY (position_id) REFERENCES DX_LMS_M_Positions(position_id);
+ALTER TABLE DX_LMS_M_Employees ADD CONSTRAINT FK_DX_LMS_M_Employees_Golongan FOREIGN KEY (golongan_id) REFERENCES DX_LMS_M_Golongan(golongan_id);
+ALTER TABLE DX_LMS_M_Employees ADD CONSTRAINT FK_DX_LMS_M_Employees_Department FOREIGN KEY (department_id) REFERENCES DX_LMS_M_Departments(department_id);
+ALTER TABLE DX_LMS_M_Employees ADD CONSTRAINT FK_DX_LMS_M_Employees_Division FOREIGN KEY (division_id) REFERENCES DX_LMS_M_Divisions(division_id);
+ALTER TABLE DX_LMS_M_Employees ADD CONSTRAINT FK_DX_LMS_M_Employees_Section FOREIGN KEY (section_id) REFERENCES DX_LMS_M_Sections(section_id);
+
+-- ------------------------------------------------------------
+-- 1.7 DX_LMS_M_Courses — Tabel Master Course
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_M_Courses (
     course_id       BIGINT IDENTITY(1,1) NOT NULL,
     course_code     VARCHAR(20)     NOT NULL,       -- Kode unik course (CRS001)
     title           NVARCHAR(255)   NOT NULL,       -- Judul course
@@ -57,24 +120,24 @@ CREATE TABLE LMS_M_Course (
     thumbnail       NVARCHAR(500)   NULL,           -- URL gambar thumbnail
     modules_count   INT             NOT NULL DEFAULT 0,
     course_status   VARCHAR(20)     NOT NULL DEFAULT 'Active', -- Active / Inactive
-    created_by      VARCHAR(50)     NULL,           -- NPK pembuat (FK ke LMS_M_Employee)
-    updated_by      VARCHAR(50)     NULL,           -- NPK pengubah (FK ke LMS_M_Employee)
+    created_by      VARCHAR(50)     NULL,           -- FK ke Employees (NPK)
+    updated_by      VARCHAR(50)     NULL,           -- FK ke Employees (NPK)
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Course PRIMARY KEY (course_id),
-    CONSTRAINT UQ_LMS_M_Course_code UNIQUE (course_code),
-    CONSTRAINT FK_LMS_M_Course_created_by FOREIGN KEY (created_by) REFERENCES LMS_M_Employee(npk),
-    CONSTRAINT FK_LMS_M_Course_updated_by FOREIGN KEY (updated_by) REFERENCES LMS_M_Employee(npk)
+    CONSTRAINT PK_DX_LMS_M_Courses PRIMARY KEY (course_id),
+    CONSTRAINT UQ_DX_LMS_M_Courses_code UNIQUE (course_code),
+    CONSTRAINT FK_DX_LMS_M_Courses_created_by FOREIGN KEY (created_by) REFERENCES DX_LMS_M_Employees(npk),
+    CONSTRAINT FK_DX_LMS_M_Courses_updated_by FOREIGN KEY (updated_by) REFERENCES DX_LMS_M_Employees(npk)
 );
 
-CREATE INDEX IX_LMS_M_Course_code ON LMS_M_Course (course_code);
-CREATE INDEX IX_LMS_M_Course_status ON LMS_M_Course (course_status);
+CREATE INDEX IX_DX_LMS_M_Courses_code ON DX_LMS_M_Courses (course_code);
+CREATE INDEX IX_DX_LMS_M_Courses_status ON DX_LMS_M_Courses (course_status);
 
 -- ------------------------------------------------------------
--- 1.3 LMS_M_Course_Session — Tabel Master Sesi Course
+-- 1.8 DX_LMS_M_Course_Sessions — Tabel Master Sesi Course
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Course_Session (
+CREATE TABLE DX_LMS_M_Course_Sessions (
     session_id      BIGINT IDENTITY(1,1) NOT NULL,
     course_id       BIGINT          NOT NULL,
     title           NVARCHAR(255)   NOT NULL,
@@ -83,16 +146,16 @@ CREATE TABLE LMS_M_Course_Session (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Course_Session PRIMARY KEY (session_id),
-    CONSTRAINT FK_LMS_M_Course_Session_course FOREIGN KEY (course_id) REFERENCES LMS_M_Course(course_id)
+    CONSTRAINT PK_DX_LMS_M_Course_Sessions PRIMARY KEY (session_id),
+    CONSTRAINT FK_DX_LMS_M_Course_Sessions_course FOREIGN KEY (course_id) REFERENCES DX_LMS_M_Courses(course_id)
 );
 
-CREATE INDEX IX_LMS_M_Course_Session_course ON LMS_M_Course_Session (course_id);
+CREATE INDEX IX_DX_LMS_M_Course_Sessions_course ON DX_LMS_M_Course_Sessions (course_id);
 
 -- ------------------------------------------------------------
--- 1.4 LMS_M_Course_Material — Tabel Master Materi
+-- 1.9 DX_LMS_M_Course_Materials — Tabel Master Materi
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Course_Material (
+CREATE TABLE DX_LMS_M_Course_Materials (
     material_id     BIGINT IDENTITY(1,1) NOT NULL,
     session_id      BIGINT          NOT NULL,
     title           NVARCHAR(255)   NOT NULL,
@@ -105,20 +168,19 @@ CREATE TABLE LMS_M_Course_Material (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Course_Material PRIMARY KEY (material_id),
-    CONSTRAINT FK_LMS_M_Course_Material_session FOREIGN KEY (session_id) REFERENCES LMS_M_Course_Session(session_id)
+    CONSTRAINT PK_DX_LMS_M_Course_Materials PRIMARY KEY (material_id),
+    CONSTRAINT FK_DX_LMS_M_Course_Materials_session FOREIGN KEY (session_id) REFERENCES DX_LMS_M_Course_Sessions(session_id)
 );
 
-CREATE INDEX IX_LMS_M_Course_Material_session ON LMS_M_Course_Material (session_id);
+CREATE INDEX IX_DX_LMS_M_Course_Materials_session ON DX_LMS_M_Course_Materials (session_id);
 
 -- ------------------------------------------------------------
--- 1.5 LMS_M_Quiz — Tabel Master Quiz
--- quiz_type: 'pre_test', 'post_test', 'quiz', 'final_assessment'
+-- 1.10 DX_LMS_M_Quizzes — Tabel Master Quiz
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Quiz (
+CREATE TABLE DX_LMS_M_Quizzes (
     quiz_id         BIGINT IDENTITY(1,1) NOT NULL,
     course_id       BIGINT          NOT NULL,
-    session_id      BIGINT          NULL,           -- NULL untuk quiz course-level dan final assessment
+    session_id      BIGINT          NULL,           -- NULL untuk final_assessment
     quiz_type       VARCHAR(30)     NOT NULL,       -- pre_test, post_test, quiz, final_assessment
     title           NVARCHAR(255)   NOT NULL,
     passing_score   INT             NOT NULL DEFAULT 75,
@@ -127,19 +189,19 @@ CREATE TABLE LMS_M_Quiz (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Quiz PRIMARY KEY (quiz_id),
-    CONSTRAINT FK_LMS_M_Quiz_course FOREIGN KEY (course_id) REFERENCES LMS_M_Course(course_id),
-    CONSTRAINT FK_LMS_M_Quiz_session FOREIGN KEY (session_id) REFERENCES LMS_M_Course_Session(session_id)
+    CONSTRAINT PK_DX_LMS_M_Quizzes PRIMARY KEY (quiz_id),
+    CONSTRAINT FK_DX_LMS_M_Quizzes_course FOREIGN KEY (course_id) REFERENCES DX_LMS_M_Courses(course_id),
+    CONSTRAINT FK_DX_LMS_M_Quizzes_session FOREIGN KEY (session_id) REFERENCES DX_LMS_M_Course_Sessions(session_id)
 );
 
-CREATE INDEX IX_LMS_M_Quiz_course ON LMS_M_Quiz (course_id);
-CREATE INDEX IX_LMS_M_Quiz_session ON LMS_M_Quiz (session_id);
-CREATE INDEX IX_LMS_M_Quiz_type ON LMS_M_Quiz (quiz_type);
+CREATE INDEX IX_DX_LMS_M_Quizzes_course ON DX_LMS_M_Quizzes (course_id);
+CREATE INDEX IX_DX_LMS_M_Quizzes_session ON DX_LMS_M_Quizzes (session_id);
+CREATE INDEX IX_DX_LMS_M_Quizzes_type ON DX_LMS_M_Quizzes (quiz_type);
 
 -- ------------------------------------------------------------
--- 1.6 LMS_M_Quiz_Question — Tabel Master Pertanyaan Quiz
+-- 1.11 DX_LMS_M_Quiz_Questions — Tabel Master Pertanyaan Quiz
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Quiz_Question (
+CREATE TABLE DX_LMS_M_Quiz_Questions (
     question_id     BIGINT IDENTITY(1,1) NOT NULL,
     quiz_id         BIGINT          NOT NULL,
     question_text   NVARCHAR(MAX)   NOT NULL,
@@ -147,16 +209,16 @@ CREATE TABLE LMS_M_Quiz_Question (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Quiz_Question PRIMARY KEY (question_id),
-    CONSTRAINT FK_LMS_M_Quiz_Question_quiz FOREIGN KEY (quiz_id) REFERENCES LMS_M_Quiz(quiz_id)
+    CONSTRAINT PK_DX_LMS_M_Quiz_Questions PRIMARY KEY (question_id),
+    CONSTRAINT FK_DX_LMS_M_Quiz_Questions_quiz FOREIGN KEY (quiz_id) REFERENCES DX_LMS_M_Quizzes(quiz_id)
 );
 
-CREATE INDEX IX_LMS_M_Quiz_Question_quiz ON LMS_M_Quiz_Question (quiz_id);
+CREATE INDEX IX_DX_LMS_M_Quiz_Questions_quiz ON DX_LMS_M_Quiz_Questions (quiz_id);
 
 -- ------------------------------------------------------------
--- 1.7 LMS_M_Quiz_Choice — Tabel Master Pilihan Jawaban
+-- 1.12 DX_LMS_M_Quiz_Choices — Tabel Master Pilihan Jawaban
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Quiz_Choice (
+CREATE TABLE DX_LMS_M_Quiz_Choices (
     choice_id       BIGINT IDENTITY(1,1) NOT NULL,
     question_id     BIGINT          NOT NULL,
     choice_text     NVARCHAR(MAX)   NOT NULL,
@@ -164,38 +226,40 @@ CREATE TABLE LMS_M_Quiz_Choice (
     sort_order      INT             NOT NULL DEFAULT 0,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Quiz_Choice PRIMARY KEY (choice_id),
-    CONSTRAINT FK_LMS_M_Quiz_Choice_question FOREIGN KEY (question_id) REFERENCES LMS_M_Quiz_Question(question_id)
+    CONSTRAINT PK_DX_LMS_M_Quiz_Choices PRIMARY KEY (choice_id),
+    CONSTRAINT FK_DX_LMS_M_Quiz_Choices_question FOREIGN KEY (question_id) REFERENCES DX_LMS_M_Quiz_Questions(question_id)
 );
 
-CREATE INDEX IX_LMS_M_Quiz_Choice_question ON LMS_M_Quiz_Choice (question_id);
+CREATE INDEX IX_DX_LMS_M_Quiz_Choices_question ON DX_LMS_M_Quiz_Choices (question_id);
 
 -- ------------------------------------------------------------
--- 1.8 LMS_M_Course_Target — Target Jabatan/Golongan Course
+-- 1.13 DX_LMS_M_Course_Targets — Target Jabatan/Golongan Course
 -- ------------------------------------------------------------
-CREATE TABLE LMS_M_Course_Target (
+CREATE TABLE DX_LMS_M_Course_Targets (
     target_id       BIGINT IDENTITY(1,1) NOT NULL,
     course_id       BIGINT          NOT NULL,
-    target_golongan VARCHAR(50)     NULL,       -- Golongan target (II-2, III-1, dst.)
-    target_section  VARCHAR(150)    NULL,       -- Seksi target
+    position_id     BIGINT          NULL,
+    golongan_id     BIGINT          NULL,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_M_Course_Target PRIMARY KEY (target_id),
-    CONSTRAINT FK_LMS_M_Course_Target_course FOREIGN KEY (course_id) REFERENCES LMS_M_Course(course_id)
+    CONSTRAINT PK_DX_LMS_M_Course_Targets PRIMARY KEY (target_id),
+    CONSTRAINT FK_DX_LMS_M_Course_Targets_course FOREIGN KEY (course_id) REFERENCES DX_LMS_M_Courses(course_id),
+    CONSTRAINT FK_DX_LMS_M_Course_Targets_position FOREIGN KEY (position_id) REFERENCES DX_LMS_M_Positions(position_id),
+    CONSTRAINT FK_DX_LMS_M_Course_Targets_golongan FOREIGN KEY (golongan_id) REFERENCES DX_LMS_M_Golongan(golongan_id)
 );
 
-CREATE INDEX IX_LMS_M_Course_Target_course ON LMS_M_Course_Target (course_id);
-
+CREATE INDEX IX_DX_LMS_M_Course_Targets_course ON DX_LMS_M_Course_Targets (course_id);
 
 -- ============================================================
 -- 2. TRANSACTION TABLES (T)
 -- Data sering berubah (course progress, enrollment, dll.)
+-- Prefix: DX_LMS_T_
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 2.1 LMS_T_Course_Enrollment — Pendaftaran Student ke Course
+-- 2.1 DX_LMS_T_Course_Enrollments — Pendaftaran Student ke Course
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Course_Enrollment (
+CREATE TABLE DX_LMS_T_Course_Enrollments (
     enrollment_id   BIGINT IDENTITY(1,1) NOT NULL,
     employee_npk    VARCHAR(50)     NOT NULL,
     course_id       BIGINT          NOT NULL,
@@ -206,19 +270,18 @@ CREATE TABLE LMS_T_Course_Enrollment (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_T_Course_Enrollment PRIMARY KEY (enrollment_id),
-    CONSTRAINT FK_LMS_T_Enrollment_employee FOREIGN KEY (employee_npk) REFERENCES LMS_M_Employee(npk),
-    CONSTRAINT FK_LMS_T_Enrollment_course FOREIGN KEY (course_id) REFERENCES LMS_M_Course(course_id)
+    CONSTRAINT PK_DX_LMS_T_Course_Enrollments PRIMARY KEY (enrollment_id),
+    CONSTRAINT FK_DX_LMS_T_Course_Enrollments_employee FOREIGN KEY (employee_npk) REFERENCES DX_LMS_M_Employees(npk),
+    CONSTRAINT FK_DX_LMS_T_Course_Enrollments_course FOREIGN KEY (course_id) REFERENCES DX_LMS_M_Courses(course_id)
 );
 
-CREATE INDEX IX_LMS_T_Enrollment_employee ON LMS_T_Course_Enrollment (employee_npk);
-CREATE INDEX IX_LMS_T_Enrollment_course ON LMS_T_Course_Enrollment (course_id);
+CREATE INDEX IX_DX_LMS_T_Course_Enrollments_employee ON DX_LMS_T_Course_Enrollments (employee_npk);
+CREATE INDEX IX_DX_LMS_T_Course_Enrollments_course ON DX_LMS_T_Course_Enrollments (course_id);
 
 -- ------------------------------------------------------------
--- 2.2 LMS_T_Course_History — Histori Penyelesaian Course
--- Sumber: Gambar Referensi "LMS_T_Course_History"
+-- 2.2 DX_LMS_T_Course_Histories — Histori Penyelesaian Course
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Course_History (
+CREATE TABLE DX_LMS_T_Course_Histories (
     history_id      BIGINT IDENTITY(1,1) NOT NULL,
     employee_npk    VARCHAR(50)     NOT NULL,
     course_id       BIGINT          NOT NULL,
@@ -227,17 +290,17 @@ CREATE TABLE LMS_T_Course_History (
     certificate_url NVARCHAR(500)   NULL,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_T_Course_History PRIMARY KEY (history_id),
-    CONSTRAINT FK_LMS_T_History_employee FOREIGN KEY (employee_npk) REFERENCES LMS_M_Employee(npk),
-    CONSTRAINT FK_LMS_T_History_course FOREIGN KEY (course_id) REFERENCES LMS_M_Course(course_id)
+    CONSTRAINT PK_DX_LMS_T_Course_Histories PRIMARY KEY (history_id),
+    CONSTRAINT FK_DX_LMS_T_Course_Histories_employee FOREIGN KEY (employee_npk) REFERENCES DX_LMS_M_Employees(npk),
+    CONSTRAINT FK_DX_LMS_T_Course_Histories_course FOREIGN KEY (course_id) REFERENCES DX_LMS_M_Courses(course_id)
 );
 
-CREATE INDEX IX_LMS_T_History_employee ON LMS_T_Course_History (employee_npk);
+CREATE INDEX IX_DX_LMS_T_Course_Histories_employee ON DX_LMS_T_Course_Histories (employee_npk);
 
 -- ------------------------------------------------------------
--- 2.3 LMS_T_Material_Progress — Progress Materi per Student
+-- 2.3 DX_LMS_T_Material_Progress — Progress Materi per Student
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Material_Progress (
+CREATE TABLE DX_LMS_T_Material_Progress (
     progress_id     BIGINT IDENTITY(1,1) NOT NULL,
     employee_npk    VARCHAR(50)     NOT NULL,
     material_id     BIGINT          NOT NULL,
@@ -246,17 +309,17 @@ CREATE TABLE LMS_T_Material_Progress (
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_T_Material_Progress PRIMARY KEY (progress_id),
-    CONSTRAINT FK_LMS_T_MatProgress_employee FOREIGN KEY (employee_npk) REFERENCES LMS_M_Employee(npk),
-    CONSTRAINT FK_LMS_T_MatProgress_material FOREIGN KEY (material_id) REFERENCES LMS_M_Course_Material(material_id)
+    CONSTRAINT PK_DX_LMS_T_Material_Progress PRIMARY KEY (progress_id),
+    CONSTRAINT FK_DX_LMS_T_Material_Progress_employee FOREIGN KEY (employee_npk) REFERENCES DX_LMS_M_Employees(npk),
+    CONSTRAINT FK_DX_LMS_T_Material_Progress_material FOREIGN KEY (material_id) REFERENCES DX_LMS_M_Course_Materials(material_id)
 );
 
-CREATE INDEX IX_LMS_T_MatProgress_employee ON LMS_T_Material_Progress (employee_npk);
+CREATE INDEX IX_DX_LMS_T_Material_Progress_employee ON DX_LMS_T_Material_Progress (employee_npk);
 
 -- ------------------------------------------------------------
--- 2.4 LMS_T_Quiz_Attempt — Percobaan Pengerjaan Quiz
+-- 2.4 DX_LMS_T_Quiz_Attempts — Percobaan Pengerjaan Quiz
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Quiz_Attempt (
+CREATE TABLE DX_LMS_T_Quiz_Attempts (
     attempt_id      BIGINT IDENTITY(1,1) NOT NULL,
     employee_npk    VARCHAR(50)     NOT NULL,
     quiz_id         BIGINT          NOT NULL,
@@ -265,18 +328,18 @@ CREATE TABLE LMS_T_Quiz_Attempt (
     started_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
     completed_at    DATETIME2       NULL,
 
-    CONSTRAINT PK_LMS_T_Quiz_Attempt PRIMARY KEY (attempt_id),
-    CONSTRAINT FK_LMS_T_QuizAttempt_employee FOREIGN KEY (employee_npk) REFERENCES LMS_M_Employee(npk),
-    CONSTRAINT FK_LMS_T_QuizAttempt_quiz FOREIGN KEY (quiz_id) REFERENCES LMS_M_Quiz(quiz_id)
+    CONSTRAINT PK_DX_LMS_T_Quiz_Attempts PRIMARY KEY (attempt_id),
+    CONSTRAINT FK_DX_LMS_T_Quiz_Attempts_employee FOREIGN KEY (employee_npk) REFERENCES DX_LMS_M_Employees(npk),
+    CONSTRAINT FK_DX_LMS_T_Quiz_Attempts_quiz FOREIGN KEY (quiz_id) REFERENCES DX_LMS_M_Quizzes(quiz_id)
 );
 
-CREATE INDEX IX_LMS_T_QuizAttempt_employee ON LMS_T_Quiz_Attempt (employee_npk);
-CREATE INDEX IX_LMS_T_QuizAttempt_quiz ON LMS_T_Quiz_Attempt (quiz_id);
+CREATE INDEX IX_DX_LMS_T_Quiz_Attempts_employee ON DX_LMS_T_Quiz_Attempts (employee_npk);
+CREATE INDEX IX_DX_LMS_T_Quiz_Attempts_quiz ON DX_LMS_T_Quiz_Attempts (quiz_id);
 
 -- ------------------------------------------------------------
--- 2.5 LMS_T_Quiz_Answer — Jawaban Detail per Soal
+-- 2.5 DX_LMS_T_Quiz_Answers — Jawaban Detail per Soal
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Quiz_Answer (
+CREATE TABLE DX_LMS_T_Quiz_Answers (
     answer_id       BIGINT IDENTITY(1,1) NOT NULL,
     attempt_id      BIGINT          NOT NULL,
     question_id     BIGINT          NOT NULL,
@@ -284,18 +347,18 @@ CREATE TABLE LMS_T_Quiz_Answer (
     is_correct      BIT             NOT NULL DEFAULT 0,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_T_Quiz_Answer PRIMARY KEY (answer_id),
-    CONSTRAINT FK_LMS_T_QuizAnswer_attempt FOREIGN KEY (attempt_id) REFERENCES LMS_T_Quiz_Attempt(attempt_id),
-    CONSTRAINT FK_LMS_T_QuizAnswer_question FOREIGN KEY (question_id) REFERENCES LMS_M_Quiz_Question(question_id),
-    CONSTRAINT FK_LMS_T_QuizAnswer_choice FOREIGN KEY (selected_choice_id) REFERENCES LMS_M_Quiz_Choice(choice_id)
+    CONSTRAINT PK_DX_LMS_T_Quiz_Answers PRIMARY KEY (answer_id),
+    CONSTRAINT FK_DX_LMS_T_Quiz_Answers_attempt FOREIGN KEY (attempt_id) REFERENCES DX_LMS_T_Quiz_Attempts(attempt_id),
+    CONSTRAINT FK_DX_LMS_T_Quiz_Answers_question FOREIGN KEY (question_id) REFERENCES DX_LMS_M_Quiz_Questions(question_id),
+    CONSTRAINT FK_DX_LMS_T_Quiz_Answers_choice FOREIGN KEY (selected_choice_id) REFERENCES DX_LMS_M_Quiz_Choices(choice_id)
 );
 
-CREATE INDEX IX_LMS_T_QuizAnswer_attempt ON LMS_T_Quiz_Answer (attempt_id);
+CREATE INDEX IX_DX_LMS_T_Quiz_Answers_attempt ON DX_LMS_T_Quiz_Answers (attempt_id);
 
 -- ------------------------------------------------------------
--- 2.6 LMS_T_Activity_Log — Log Aktivitas User
+-- 2.6 DX_LMS_T_Activity_Logs — Log Aktivitas User
 -- ------------------------------------------------------------
-CREATE TABLE LMS_T_Activity_Log (
+CREATE TABLE DX_LMS_T_Activity_Logs (
     log_id          BIGINT IDENTITY(1,1) NOT NULL,
     employee_npk    VARCHAR(50)     NOT NULL,
     activity_type   VARCHAR(50)     NOT NULL,   -- login, view_course, start_quiz, complete_material, dll.
@@ -304,25 +367,25 @@ CREATE TABLE LMS_T_Activity_Log (
     ip_address      VARCHAR(45)     NULL,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_T_Activity_Log PRIMARY KEY (log_id),
-    CONSTRAINT FK_LMS_T_ActivityLog_employee FOREIGN KEY (employee_npk) REFERENCES LMS_M_Employee(npk)
+    CONSTRAINT PK_DX_LMS_T_Activity_Logs PRIMARY KEY (log_id),
+    CONSTRAINT FK_DX_LMS_T_Activity_Logs_employee FOREIGN KEY (employee_npk) REFERENCES DX_LMS_M_Employees(npk)
 );
 
-CREATE INDEX IX_LMS_T_ActivityLog_employee ON LMS_T_Activity_Log (employee_npk);
-CREATE INDEX IX_LMS_T_ActivityLog_type ON LMS_T_Activity_Log (activity_type);
-CREATE INDEX IX_LMS_T_ActivityLog_date ON LMS_T_Activity_Log (created_at);
+CREATE INDEX IX_DX_LMS_T_Activity_Logs_employee ON DX_LMS_T_Activity_Logs (employee_npk);
+CREATE INDEX IX_DX_LMS_T_Activity_Logs_type ON DX_LMS_T_Activity_Logs (activity_type);
+CREATE INDEX IX_DX_LMS_T_Activity_Logs_date ON DX_LMS_T_Activity_Logs (created_at);
 
 
 -- ============================================================
 -- 3. WORK / TEMPORARY TABLES (W)
 -- Data sementara yang tidak disimpan permanen
--- Sumber: Gambar Referensi "LMS_W_Staging_Import"
+-- Prefix: DX_LMS_W_
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 3.1 LMS_W_Staging_Import — Staging Data Import
+-- 3.1 DX_LMS_W_Staging_Import — Staging Data Import
 -- ------------------------------------------------------------
-CREATE TABLE LMS_W_Staging_Import (
+CREATE TABLE DX_LMS_W_Staging_Import (
     staging_id      BIGINT IDENTITY(1,1) NOT NULL,
     import_type     VARCHAR(50)     NOT NULL,   -- employee, course, enrollment
     raw_data        NVARCHAR(MAX)   NULL,       -- Data mentah (JSON/CSV row)
@@ -331,14 +394,10 @@ CREATE TABLE LMS_W_Staging_Import (
     imported_by     VARCHAR(50)     NULL,
     created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
 
-    CONSTRAINT PK_LMS_W_Staging_Import PRIMARY KEY (staging_id)
+    CONSTRAINT PK_DX_LMS_W_Staging_Import PRIMARY KEY (staging_id)
 );
 
 
 -- ============================================================
 -- SELESAI — DDL DX_LMS
--- Total Tabel: 14
---   Master  (M): 8 tabel
---   Transaction (T): 6 tabel
---   Work    (W): 1 tabel
 -- ============================================================

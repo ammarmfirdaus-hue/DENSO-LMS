@@ -1,0 +1,59 @@
+/* =======================================================
+   LMS (Learning Management System) — Tailwind CSS Input
+   
+   File ini adalah sumber utama CSS untuk build Tailwind CLI.
+   Jangan hapus tiga baris @tailwind di bawah.
+   ======================================================= */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =======================================================
+   Custom Utilities (dulu ada di <style type="text/tailwindcss">)
+   ======================================================= */
+@layer utilities {
+    /* Layout utama student — main content area */
+    .dls-main {
+        @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+    }
+
+    /* Layout sub-halaman (sama dengan dls-main saat ini) */
+    .dls-main-sub {
+        @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+    }
+
+    /* Menyembunyikan elemen (utility custom) */
+    .dls-hidden {
+        @apply hidden;
+    }
+
+    /* Menyembunyikan scrollbar */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Menyembunyikan notifikasi dot */
+    .hide-notifications .notification-dot {
+        @apply hidden;
+    }
+}
+
+/* =======================================================
+   DLS App Shell — Struktur layout global
+   ======================================================= */
+@layer components {
+    /* Topbar header yang sticky */
+    .dls-topbar {
+        @apply sticky top-0 z-50 bg-surface border-b border-outline-variant shadow-sm;
+    }
+
+    /* App shell wrapper */
+    .dls-app-shell {
+        @apply bg-surface text-on-surface antialiased min-h-screen;
+    }
+}
