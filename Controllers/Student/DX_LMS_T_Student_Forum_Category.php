@@ -89,6 +89,16 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
 
         $threads = $forumData['threads'] ?? [];
 
-        require_once __DIR__ . '/../Views/DX_LMS_T_Student_Forum_Category.php';
+        $this->view('DX_LMS_T_Student_Forum_Category', [
+            'courseId' => $courseId,
+            'categoryType' => $categoryType,
+            'sessionId' => $sessionId,
+            'isRiwayat' => $isRiwayat,
+            'course' => $course,
+            'categoryTitle' => $categoryTitle,
+            'isLocked' => $isLocked,
+            'hasCreatedThread' => $hasCreatedThread,
+            'threads' => $threads
+        ]);
     }
 }

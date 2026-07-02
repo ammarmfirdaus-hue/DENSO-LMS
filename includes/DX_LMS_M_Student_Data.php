@@ -135,6 +135,98 @@ class DX_LMS_M_Student_Data
             'belum_dimulai',
             0,
         );
+
+        /** Tambahan Data Dummy Baru */
+        self::generateCourse(
+            'CRS-SPC-011',
+            'Statistical Process Control (SPC) Dasar',
+            'Memahami teknik statistik untuk memonitor dan mengontrol proses agar sesuai standar. Belajar membaca control chart dan menghitung kapabilitas proses (Cp, Cpk).',
+            'Wajib',
+            ['Quality', 'Engineering'],
+            'selesai',
+            100,
+        );
+        self::generateCourse(
+            'CRS-SMED-012',
+            'Single Minute Exchange of Die (SMED)',
+            'Teknik mengurangi waktu setup dan changeover mesin untuk meningkatkan fleksibilitas produksi tanpa mengorbankan kualitas.',
+            'Pilihan',
+            ['Productivity', 'Maintenance'],
+            'sedang_dipelajari',
+            35,
+        );
+        self::generateCourse(
+            'CRS-PKB-013',
+            'Pencegahan Kebakaran di Area Produksi',
+            'Pelatihan esensial penanganan bahan mudah terbakar, penggunaan APAR, dan rute evakuasi. Simulasi pemadaman api secara virtual.',
+            'Wajib',
+            ['Safety', 'Compliance'],
+            'sedang_dipelajari',
+            90,
+        );
+        self::generateCourse(
+            'CRS-EHS-014',
+            'Environmental, Health, and Safety (EHS) Awareness',
+            'Sistem terintegrasi mengenai kesehatan kerja dan kepedulian lingkungan. Pemahaman dasar pengelolaan limbah B3 di pabrik.',
+            'Wajib',
+            ['Safety', 'Compliance'],
+            'belum_dimulai',
+            0,
+        );
+        self::generateCourse(
+            'CRS-DMAIC-015',
+            'Metodologi Six Sigma DMAIC',
+            'Define, Measure, Analyze, Improve, Control. Metodologi terstruktur untuk mengurangi cacat produk hingga titik paling minim.',
+            'Pilihan',
+            ['Quality', 'Problem Solving'],
+            'sedang_dipelajari',
+            50,
+        );
+        self::generateCourse(
+            'CRS-PKA-016',
+            'Pelatihan Keterampilan Assembling',
+            'Standar prosedur assembling komponen otomotif. Fokus pada ergonomi kerja, kecepatan, dan menghindari kesalahan perakitan (poka-yoke).',
+            'Wajib',
+            ['Core', 'Productivity'],
+            'selesai',
+            100,
+        );
+        self::generateCourse(
+            'CRS-TQM-017',
+            'Total Quality Management (TQM)',
+            'Membangun komitmen perusahaan secara keseluruhan untuk secara berkesinambungan memperbaiki kualitas proses dan produk demi kepuasan pelanggan.',
+            'Wajib',
+            ['Management', 'Quality'],
+            'sedang_dipelajari',
+            75,
+        );
+        self::generateCourse(
+            'CRS-SCM-018',
+            'Supply Chain Management Basic',
+            'Aliran material dari supplier hingga barang jadi ke customer. Memahami Just-In-Time (JIT) dan pengaturan Kanban system.',
+            'Pilihan',
+            ['Management', 'Productivity'],
+            'belum_dimulai',
+            0,
+        );
+        self::generateCourse(
+            'CRS-IoT-019',
+            'Industrial IoT & Industry 4.0',
+            'Pengenalan sensor cerdas dan analisis data langsung di line produksi (Real-time monitoring).',
+            'Pilihan',
+            ['Automation', 'Engineering'],
+            'sedang_dipelajari',
+            25,
+        );
+        self::generateCourse(
+            'CRS-GMP-020',
+            'Good Manufacturing Practices (GMP)',
+            'Standar praktik manufaktur yang baik untuk mencegah kontaminasi dan mempertahankan kualitas produk.',
+            'Wajib',
+            ['Quality', 'Compliance'],
+            'sedang_dipelajari',
+            10,
+        );
     }
 
     private static function generateCourse($id, $title, $description, $category, $filters, $status, $progress)
@@ -152,6 +244,16 @@ class DX_LMS_M_Student_Data
             'CRS-LDR-008' => 'groups', /** Pemetaan ikon untuk kategori Kepemimpinan. */
             'CRS-ISO-009' => 'gavel', /** Pemetaan ikon untuk kategori Kepatuhan Regulasi. */
             'CRS-ENV-010' => 'eco', /** Pemetaan ikon untuk kategori Manajemen Lingkungan. */
+            'CRS-SPC-011' => 'bar_chart',
+            'CRS-SMED-012' => 'timer',
+            'CRS-PKB-013' => 'local_fire_department',
+            'CRS-EHS-014' => 'health_and_safety',
+            'CRS-DMAIC-015' => 'timeline',
+            'CRS-PKA-016' => 'precision_manufacturing',
+            'CRS-TQM-017' => 'verified',
+            'CRS-SCM-018' => 'inventory',
+            'CRS-IoT-019' => 'router',
+            'CRS-GMP-020' => 'factory',
         ];
 
         $thumbnail = null; /** Membersihkan referensi menuju miniatur (thumbnail) eksternal. */
@@ -207,11 +309,9 @@ class DX_LMS_M_Student_Data
             $course['final_assessment'] = $faData; /** Kondisi saat modul belum dimulai. */
         }
 
-        self::$courses[] = $course;
+        $course['forums'] = self::generateForumData($id, $title, $sessions, $progress > 0);
 
-        if ($progress > 0) {
-            self::generateForumThreadsForCourse($id, $title);
-        }
+        self::$courses[] = $course;
 
         self::generateNotificationsForCourse($id, $title, $status, $quizScore);
     }
@@ -522,10 +622,8 @@ class DX_LMS_M_Student_Data
         ];
     }
 
-    private static function generateForumThreadsForCourse($courseId, $courseTitle)
+    private static function generateForumData($courseId, $courseTitle, $sessions, $hasProgress)
     {
-        $threadCount = rand(1, 4);
-
         $topicIdeas = [
             'Pertanyaan terkait detail parameter setting mesin pada modul ini',
             'Sharing pengalaman Kaizen di divisi Assembling',
@@ -534,24 +632,70 @@ class DX_LMS_M_Student_Data
             'Mohon contoh riil defect rate pada bulan lalu',
             'Diskusi: Mengapa OEE sering drop di shift malam?',
             'Mohon arahan terkait standar APD terbaru',
+            'Bagaimana cara perhitungan Control Chart jika datanya outlier?',
+            'Ada yang punya form checklist LOTO versi excel terbaru?',
+            'Batas toleransi downtime mesin per shift idealnya berapa?',
+            'Saran penerapan Poka-Yoke di perakitan part B-34',
+            'Menanggapi video materi sesi 2, apakah prakteknya mudah?',
+            'Tips menghafal 8 pilar TPM bagi operator baru',
+            'Bagaimana mengatasi resistensi tim saat implementasi 5S?',
+            'Sharing: Penggunaan IoT sensor suhu pada mesin injection'
         ];
 
-        for ($i = 0; $i < $threadCount; $i++) {
-            $hasUnread = rand(0, 1) === 1;
-            self::$forums[] = [
-                'id' => 'FRM-' . $courseId . '-' . $i,
-                'course_id' => $courseId,
-                'course_title' => $courseTitle,
-                'title' => $topicIdeas[array_rand($topicIdeas)],
-                'author' => ['Budi Santoso', 'Siti Aminah', 'Rudi Hermawan', 'Dewi Lestari', 'Agus Supriyadi'][
-                    rand(0, 4)
-                ],
-                'role' => ['Teacher', 'Student', 'Admin'][rand(0, 2)],
-                'replies_count' => rand(2, 25),
-                'last_reply_time' => date('Y-m-d H:i', strtotime('-' . rand(1, 72) . ' hours')),
-                'is_unread' => $hasUnread,
+        $forums = [
+            'materi' => [],
+            'quiz' => ['threads' => [], 'has_created_thread' => false],
+            'final_assessment' => ['threads' => [], 'has_created_thread' => false],
+        ];
+
+        if (!$hasProgress) {
+            foreach ($sessions as $session) {
+                $forums['materi'][$session['id']] = ['threads' => [], 'has_created_thread' => false];
+            }
+            return $forums;
+        }
+
+        $createThreads = function($prefix) use ($courseId, $courseTitle, $topicIdeas) {
+            $threads = [];
+            $threadCount = rand(2, 5);
+            for ($i = 0; $i < $threadCount; $i++) {
+                $hasUnread = rand(0, 1) === 1;
+                $thread = [
+                    'id' => 'FRM-' . $courseId . '-' . $prefix . '-' . $i,
+                    'course_id' => $courseId,
+                    'course_title' => $courseTitle,
+                    'title' => $topicIdeas[array_rand($topicIdeas)],
+                    'author' => ['Budi Santoso', 'Siti Aminah', 'Rudi Hermawan', 'Dewi Lestari', 'Agus Supriyadi', 'Eko Prasetyo', 'Nurul Huda', 'Iwan Fals', 'Rina Nose', 'Joko Widodo'][rand(0, 9)],
+                    'role' => ['Teacher', 'Student', 'Student', 'Student', 'Admin'][rand(0, 4)],
+                    'replies_count' => rand(5, 45),
+                    'last_reply_time' => date('Y-m-d H:i', strtotime('-' . rand(1, 72) . ' hours')),
+                    'is_unread' => $hasUnread,
+                ];
+                $threads[] = $thread;
+                // Add to global forums array for backward compatibility
+                self::$forums[] = $thread;
+            }
+            return $threads;
+        };
+
+        foreach ($sessions as $session) {
+            $forums['materi'][$session['id']] = [
+                'has_created_thread' => rand(0, 1) === 1,
+                'threads' => $createThreads('S' . $session['id'])
             ];
         }
+
+        $forums['quiz'] = [
+            'has_created_thread' => rand(0, 1) === 1,
+            'threads' => $createThreads('QZ')
+        ];
+
+        $forums['final_assessment'] = [
+            'has_created_thread' => rand(0, 1) === 1,
+            'threads' => $createThreads('FA')
+        ];
+
+        return $forums;
     }
 
     private static function generateNotificationsForCourse($courseId, $courseTitle, $status, $quizScore)

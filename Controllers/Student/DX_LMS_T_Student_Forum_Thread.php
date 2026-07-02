@@ -19,6 +19,6 @@ class DX_LMS_T_Student_Forum_Thread extends DX_LMS_M_Controller
     public function index()
     {
         $isRiwayat = isset($_GET['is_riwayat']) && $_GET['is_riwayat'] === 'true';
-        require_once __DIR__ . '/../Views/DX_LMS_T_Student_Forum_Thread.php';
+        $this->view('DX_LMS_T_Student_Forum_Thread', ['isRiwayat' => $isRiwayat]);
     }
 }
