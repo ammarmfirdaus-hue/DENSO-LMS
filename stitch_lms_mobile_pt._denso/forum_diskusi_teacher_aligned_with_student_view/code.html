@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Forum Diskusi - DENSO Learning</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f0eded",
+                        "background": "#fcf9f8",
+                        "surface-variant": "#e5e2e1",
+                        "secondary-fixed": "#dee0ff",
+                        "on-secondary-container": "#11278e",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#dcd9d9",
+                        "outline": "#936e69",
+                        "tertiary-fixed-dim": "#78dc77",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdad5",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#303030",
+                        "on-surface": "#1b1c1c",
+                        "on-secondary-fixed-variant": "#293ca0",
+                        "outline-variant": "#e9bcb6",
+                        "on-tertiary-fixed": "#002204",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-tertiary-fixed-variant": "#005313",
+                        "secondary-container": "#8596ff",
+                        "inverse-on-surface": "#f3f0ef",
+                        "on-primary-container": "#fff3f2",
+                        "tertiary-container": "#178229",
+                        "inverse-primary": "#ffb4aa",
+                        "secondary": "#4355b9",
+                        "surface-bright": "#fcf9f8",
+                        "primary-fixed-dim": "#ffb4aa",
+                        "on-background": "#1b1c1c",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-fixed-dim": "#bac3ff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#5e3f3b",
+                        "on-tertiary-container": "#deffd6",
+                        "surface": "#fcf9f8",
+                        "on-primary-fixed": "#410001",
+                        "on-secondary-fixed": "#00105c",
+                        "tertiary-fixed": "#94f990",
+                        "primary-container": "#e20613",
+                        "primary": "#b4000b",
+                        "surface-container-high": "#eae7e7",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#00671a",
+                        "on-primary-fixed-variant": "#930007",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#c0000d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "container-margin": "16px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-sans antialiased">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background border-b border-surface-variant dark:border-outline-variant docked full-width top-0 sticky z-50 flex justify-between items-center px-container-margin h-14 w-full transition-colors duration-200"><button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low active:scale-95 text-on-surface-variant transition-transform"><span class="material-symbols-outlined text-[#b4000b] text-[28px]" data-icon="business">business</span></button><div class="font-headline-md text-headline-md font-bold tracking-tight text-primary">LMS</div><button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low active:scale-95 text-on-surface-variant transition-transform"><span class="material-symbols-outlined text-[#b4000b] text-[28px]" data-icon="notifications">notifications</span></button></header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-container-margin py-stack-md pb-24"><div class="relative w-full h-[200px] bg-surface-container-highest overflow-hidden group mb-stack-lg"><img alt="Hero Image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW1fgUdPxMTCM-yuroWPtGbaln8gZmEJb6SzOHj1tgFr9lJA41f8KUusVm-hFPExD1xvylo68wO2kT656_i8BhKrr6Uq66IhXfjw6MH6zlF1X7x_r7lVWrqGTK2kvvX8HFr6O0h-qvMJusQZiJfC8NdxHCQhe8S_-5Dfge3ayZSuHZVVuLCjK0OlEUHbQR_R3Yrq2VAlBpceT8u6Ge4WobqlD1AnZEMykMDFF30PrXsUFQPyILz5zF4j4Q7cNU-LzhcuB_cSF1_44"/><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div><div class="absolute bottom-0 left-0 w-full p-container-margin"><h1 class="font-headline-lg text-headline-lg text-white mb-1 drop-shadow-md">Safety Awareness Training</h1><p class="font-body-md text-body-md text-white/90">Pelatihan Keselamatan Kerja Dasar</p></div></div>
+<div class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-sm">Forum Diskusi</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Bergabunglah dalam diskusi untuk memperdalam pemahaman materi.</p>
+</div>
+<!-- Section 1 -->
+<div class="mb-stack-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md border-l-4 border-primary pl-3 py-1">Sesi 1: Pengenalan 5S</h3>
+<div class="space-y-stack-md">
+<!-- Discussion Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex justify-between items-start mb-base">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Tanya Jawab K3</h4>
+<span class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">chat</span> 12
+                        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
+                        Apakah ada standar khusus untuk penempatan alat pelindung diri di area produksi perakitan?
+                    </p>
+<div class="flex items-center gap-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full" data-alt="A small circular profile picture of a male professional smiling gently, set against a clean white background, maintaining the bright and modern corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGOtMajQ4UDLlx6h6Pz7qv6BfXeGaE5HNdz4hEVRzgyDRxacfNSi-Kz-5X1ANN42efmfAbbJlywGoDnvVIjh-llWetjzafrQIuGXgzv3TT2774c0FStcI_mmv_OY6zUR9_IIgvnbVJYWOirGcdjmXT3Z6O5cdnNDRm3B-JEEzg0dBGQUPj8AHSeu6R-V6m4fuihXQZKJJZilDGcOlRcUrj406cBndUtcGof6jke1rU4v788yQxbIl3lxFnygw6oyCg1ZMssAEilps"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Budi Santoso • 2 jam lalu</span>
+</div>
+</div>
+<!-- Discussion Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex justify-between items-start mb-base">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Implementasi Seiri</h4>
+<span class="bg-surface-container-high text-on-surface font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">chat</span> 5
+                        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
+                        Bagaimana cara memilah barang yang jarang digunakan namun bernilai tinggi di gudang?
+                    </p>
+<div class="flex items-center gap-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full" data-alt="A small circular profile picture of a female professional smiling gently, set against a clean white background, maintaining the bright and modern corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFyoubV-7gxDRGN20dtggLpFBxHJe4T3h43UJttVMIFPiXrHRgS3gdZRtsuAGI6Lh5-YVge1__Glgc5uXWnFVhbGMAzFwVGbYaP272rZmGAxfZ_NUgTxEZYVolc75Kq150O45BSFDS0_vAuKP5S7INzTBmZbbaUmBNBwUEqpnK2e1XwefD23CqhCMMExxZpyV7v-eEyoU7uihmRI0DrHVwBAbjtwAHuLLcnmfKZgUNy-PhvGC2Ae7qaJ6MwAoysU1F_1X9Lwp8Y2o"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Siti Aminah • 5 jam lalu</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2 -->
+<div class="mb-stack-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md border-l-4 border-secondary pl-3 py-1">Sesi 2: Prosedur Evakuasi</h3>
+<div class="space-y-stack-md">
+<!-- Discussion Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex justify-between items-start mb-base">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Jalur Evakuasi Area B</h4>
+<span class="bg-surface-container-high text-on-surface font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">chat</span> 0
+                        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
+                        Mengingat ada perbaikan jalur di Area B, ke mana titik kumpul alternatif saat keadaan darurat?
+                    </p>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
+                            A
+                        </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Agus Pratama • 1 hari lalu</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button for New Topic -->
+<div class="pt-4 flex justify-center pb-8"><button class="flex items-center gap-2 bg-white border border-secondary text-secondary px-6 py-3 rounded-full font-label-md text-label-md hover:bg-secondary-fixed/30 active:scale-95 transition-all shadow-sm"><span class="material-symbols-outlined text-[20px]" data-icon="add_comment">add_comment</span> Mulai Topik Baru</button></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-on-background px-2 py-3 pb-safe shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:bg-on-background"><button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl"><span class="material-symbols-outlined" data-icon="home">home</span><span class="font-label-sm text-label-sm mt-1">Beranda</span></button><button class="flex flex-col items-center justify-center text-secondary bg-secondary-container/20 rounded-xl px-4 py-1 transition-transform duration-200 active:scale-90"><span class="material-symbols-outlined" data-icon="school" data-weight="fill">school</span><span class="font-label-sm text-label-sm mt-1">Course</span></button><button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl"><span class="material-symbols-outlined" data-icon="assignment">assignment</span><span class="font-label-sm text-label-sm mt-1">Aktivitas</span></button><button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl"><span class="material-symbols-outlined" data-icon="notifications">notifications</span><span class="font-label-sm text-label-sm mt-1">Notifikasi</span></button><button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl"><span class="material-symbols-outlined" data-icon="person">person</span><span class="font-label-sm text-label-sm mt-1">Profil</span></button></nav>
+</body></html>

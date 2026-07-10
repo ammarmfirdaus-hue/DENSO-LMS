@@ -65,7 +65,7 @@ $active_tab = 'profil'; ?>
     ?>
 
     <!-- Bottom Nav -->
-    <?php include 'includes/components/DX_LMS_M_Bottom_Nav.php'; ?>
+    <?php include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
 
     <!-- Main Content -->
     <main class="dls-main flex-1 px-container-margin py-5 flex flex-col gap-5 pb-32 mt-14 lg:ml-[240px] lg:w-[calc(100%-240px)]">
@@ -444,6 +444,11 @@ $active_tab = 'profil'; ?>
             });
         });
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

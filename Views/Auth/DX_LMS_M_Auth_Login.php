@@ -229,6 +229,10 @@ $base_path = '';
         });
     </script>
 
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="<?= $base_path ?>assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

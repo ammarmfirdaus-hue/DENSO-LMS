@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Dashboard Teacher - LMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#178229",
+                      "tertiary-fixed": "#94f990",
+                      "on-secondary-fixed": "#00105c",
+                      "on-tertiary-fixed-variant": "#005313",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#78dc77",
+                      "on-primary-fixed-variant": "#930007",
+                      "on-primary-fixed": "#410001",
+                      "primary-container": "#e20613",
+                      "on-tertiary-container": "#deffd6",
+                      "on-background": "#1b1c1c",
+                      "on-tertiary-fixed": "#002204",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#ffb4aa",
+                      "primary": "#b4000b",
+                      "surface-container-low": "#f6f3f2",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#11278e",
+                      "surface": "#fcf9f8",
+                      "primary-fixed-dim": "#ffb4aa",
+                      "secondary-fixed": "#dee0ff",
+                      "outline-variant": "#e9bcb6",
+                      "surface-variant": "#e5e2e1",
+                      "secondary-fixed-dim": "#bac3ff",
+                      "error-container": "#ffdad6",
+                      "surface-container": "#f0eded",
+                      "secondary-container": "#8596ff",
+                      "secondary": "#4355b9",
+                      "primary-fixed": "#ffdad5",
+                      "on-surface-variant": "#5e3f3b",
+                      "inverse-surface": "#303030",
+                      "on-secondary-fixed-variant": "#293ca0",
+                      "surface-container-high": "#eae7e7",
+                      "inverse-on-surface": "#f3f0ef",
+                      "surface-bright": "#fcf9f8",
+                      "tertiary": "#00671a",
+                      "surface-dim": "#dcd9d9",
+                      "on-primary-container": "#fff3f2",
+                      "surface-tint": "#c0000d",
+                      "on-secondary": "#ffffff",
+                      "background": "#fcf9f8",
+                      "outline": "#936e69",
+                      "on-surface": "#1b1c1c",
+                      "surface-container-highest": "#e5e2e1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-margin": "16px",
+                      "stack-md": "16px",
+                      "stack-sm": "8px",
+                      "stack-lg": "24px",
+                      "gutter": "16px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "34px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "22px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans pb-[84px]">
+<!-- Status Bar iOS -->
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin h-14 sticky z-40 transition-all duration-200 top-0">
+<button class="text-primary hover:bg-surface-container-low p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">business</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">LMS</h1>
+<button class="text-primary hover:bg-surface-container-low p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col w-full max-w-3xl mx-auto pb-safe">
+<!-- Header Section -->
+<section class="px-container-margin pb-stack-md flex flex-col gap-stack-sm pt-4">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Selamat pagi, Budi Santoso</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Leader • Departemen Produksi</p>
+</section>
+<!-- Role Toggle Pills -->
+<section class="px-container-margin flex justify-center py-2">
+<div class="flex bg-surface-container-low rounded-full p-1 shadow-sm w-fit">
+<div class="px-6 py-2 rounded-full bg-secondary text-on-secondary font-label-md text-label-md text-center shadow-sm transition-all cursor-pointer">
+                Teacher
+            </div>
+<div class="px-6 py-2 rounded-full text-on-surface-variant font-label-md text-label-md text-center transition-all cursor-pointer">Student</div>
+</div>
+</section>
+<!-- Summary Metrics Bento Grid -->
+<section class="px-container-margin grid grid-cols-2 gap-gutter py-2">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] flex flex-col gap-2">
+<div class="w-8 h-8 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">5</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Course Diampu</div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] flex flex-col gap-2">
+<div class="w-8 h-8 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">120</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Peserta</div>
+</div>
+</div>
+<!-- Metric 3 (Full width) -->
+
+</section>
+<!-- Managed Courses Section -->
+<section class="px-container-margin flex flex-col gap-stack-md py-2">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Course yang Anda Kelola</h3>
+<button class="text-secondary font-label-md text-label-md hover:underline">Lihat Semua</button>
+</div>
+<!-- Course Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] overflow-hidden flex flex-col active:scale-[0.98] transition-transform duration-200">
+<div class="h-32 bg-surface-container-high relative w-full" data-alt="A high-quality, professional photograph of a modern manufacturing production line. The setting is clean, bright, and organized, representing a pristine corporate industrial environment. Subtle lighting highlights metallic surfaces and advanced machinery. The overall aesthetic is reliable and efficient, perfectly matching a professional corporate learning module for SS Implementation." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDQb7UJk2i2CM8OC2bpNgql4EOCePBNc1iDn2_0vRQWzwkqu-MvoOkcrNxLlRZJ6hu_wpsk5Q2LPDUiYJtga5CEtG7HifiaFjwCjYpwccSm_o_Dbhs_wMSQGyOczze704u_J6w5NFvCBmfBqUL2L9AEXD6VYc8CnToIt9g1GNREdVdQnNdXPZ4a2KOG6IQYRjyI4oLLais9yvSdF3YgGfYdP93mYSwsO5MSDlfXWj0BNONjTvErzXEQZhuPqO-lsQqPJ_QaVdimrvg&quot;); background-size: cover; background-position: center center;">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 bg-tertiary-container text-on-tertiary px-2 py-1 rounded-md font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Aktif
+                    </div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">SS Implementation Batch 4</h4>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md">45 Peserta</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">update</span>
+<span class="font-label-md text-label-md">Diperbarui 2 hari lalu</span>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<button class="flex-1 bg-surface-container border border-outline-variant text-on-surface py-2 rounded-lg font-label-md text-label-md font-semibold text-center hover:bg-surface-container-high transition-colors">
+                            Kelola Nilai
+                        </button>
+<button class="flex-1 bg-secondary text-on-secondary py-2 rounded-lg font-label-md text-label-md font-semibold text-center hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-[0_2px_8px_0_rgba(67,85,185,0.2)]">
+                            Materi
+                        </button>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] overflow-hidden flex flex-col active:scale-[0.98] transition-transform duration-200">
+<div class="h-32 bg-surface-container-high relative w-full" data-alt="A clean, brightly lit corporate classroom setting. Desks are arranged neatly, and a presentation screen is visible in the background, out of focus. The environment looks professional, modern, and ready for a training session. The lighting is soft and inviting, representing a high-quality educational environment for a manufacturing company." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBMLtDDQWbqcazAWo18OxRnYfbK4K_h3Ztywa98NCfG05-Juaha_AoafZRTBGZXuhkc6qnZRjgsmA5r9CdPt0HtAk1LI-aolNkxZTsXdkoMzdYNgNdc4h7gnEtFxiYhlVlC-rIEveI1jUC-9Clbxp09KwDhWwsu23iWzxwig7ldf5E3AGEjyKZZIQzWu_vX7dqHYxuQNDO_hLTev8lLTOi7VbQOI9synJa9TId23SR0W_pUB_owYmwDBX23Y5e0QpG6g7JGJ5Mvqgw&quot;); background-size: cover; background-position: center center;">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 bg-surface-container border border-outline-variant text-on-surface px-2 py-1 rounded-md font-label-sm text-label-sm flex items-center gap-1">
+                         Draft
+                    </div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Dasar Keselamatan Kerja</h4>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md">0 Peserta</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">update</span>
+<span class="font-label-md text-label-md">Diperbarui 1 minggu lalu</span>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<button class="flex-1 bg-surface-container border border-outline-variant text-on-surface py-2 rounded-lg font-label-md text-label-md font-semibold text-center hover:bg-surface-container-high transition-colors">
+                            Edit Draft
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-24 right-4 z-40 bg-secondary text-on-secondary h-14 px-5 rounded-2xl shadow-[0_4px_12px_0_rgba(67,85,185,0.3)] flex items-center gap-2 hover:bg-secondary-container hover:text-on-secondary-container transition-all duration-200 active:scale-95 md:right-8">
+<span class="material-symbols-outlined text-[24px]">add</span>
+<span class="font-label-md text-label-md font-semibold">Tambah Materi</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="bg-surface shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] rounded-t-xl fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe md:hidden">
+<!-- Tab 1: Beranda (Active) -->
+<button class="flex flex-col items-center justify-center text-secondary bg-secondary-container/20 rounded-xl px-4 py-1 transition-transform duration-200 active:scale-90">
+<span class="material-symbols-outlined fill text-[24px]">home</span>
+<span class="font-label-sm text-label-sm mt-1">Beranda</span>
+</button>
+<!-- Tab 2: Course -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl">
+<span class="material-symbols-outlined text-[24px]">school</span>
+<span class="font-label-sm text-label-sm mt-1">Course</span>
+</button>
+<!-- Tab 3: Riwayat -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl">
+<span class="material-symbols-outlined text-[24px]">history</span>
+<span class="font-label-sm text-label-sm mt-1">Aktivitas</span>
+</button>
+<!-- Tab 4: Notifikasi -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="font-label-sm text-label-sm mt-1">Notifikasi</span>
+</button>
+<!-- Tab 5: Profil -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-transform duration-200 active:scale-90 rounded-xl">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profil</span>
+</button>
+</nav>
+<!-- SafeArea Padding for Mobile -->
+<div class="h-[env(safe-area-inset-bottom)] bg-surface w-full fixed bottom-0 z-40 md:hidden"></div>
+
+
+
+
+
+
+</body></html>

@@ -54,6 +54,21 @@ $router->add('/student/riwayat/detail', 'DX_LMS_T_Student_Riwayat_Detail@index')
 $router->add('/student/learning', 'DX_LMS_T_Student_Learning@index');
 $router->add('/student/quiz', 'DX_LMS_T_Student_Quiz@index');
 
+/** Mendefinisikan rute khusus untuk pengguna Pengajar (Teacher). */
+$router->add('/teacher', 'DX_LMS_M_Teacher_Dashboard@index');
+$router->add('/teacher/aktivitas', 'DX_LMS_T_Teacher_Activity@index');
+$router->add('/teacher/courses', 'DX_LMS_M_Teacher_Course@index');
+$router->add('/teacher/course/session', 'DX_LMS_M_Teacher_Course@session');
+$router->add('/teacher/course/material', 'DX_LMS_M_Teacher_Course@material');
+$router->add('/teacher/course/add-material', 'DX_LMS_M_Teacher_Course@addMaterial');
+$router->add('/teacher/grade', 'DX_LMS_T_Teacher_Grade@index');
+$router->add('/teacher/forum', 'DX_LMS_T_Teacher_Forum@index');
+$router->add('/teacher/notifikasi', 'DX_LMS_T_Student_Notifikasi@index');
+$router->add('/teacher/profil', 'DX_LMS_M_Student_Profil@index');
+$router->add('/teacher/profil/detail', 'DX_LMS_M_Student_Profil@detail');
+$router->add('/teacher/profil/pengaturan', 'DX_LMS_M_Student_Profil@pengaturan');
+$router->add('/teacher/profil/bantuan', 'DX_LMS_M_Student_Profil@bantuan');
+
 /** Menjalankan permintaan yang masuk berdasarkan rute yang sesuai. */
 $route = $_GET['route'] ?? '/';
 $router->dispatch($route);

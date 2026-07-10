@@ -497,7 +497,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
                                     <span class="px-2.5 py-1 bg-error-container/50 text-on-error-container text-[11px] font-bold rounded-md flex items-center gap-1 shrink-0 border border-error/10">
                                         <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span> Hot Topic
                                     </span>
-                                    <?php elseif ($th['replies'] == 0): ?>
+                                    <?php elseif ($th['replies_count'] == 0): ?>
                                     <span class="px-2.5 py-1 bg-surface-variant text-on-surface-variant text-[11px] font-bold rounded-md shrink-0 border border-outline-variant/30">
                                         Baru
                                     </span>
@@ -516,16 +516,16 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
                                 <div class="flex items-center gap-4 md:gap-6 font-label-md text-on-surface-variant">
                                     <div class="flex items-center gap-1.5" title="Waktu Posting">
                                         <span class="material-symbols-outlined text-[18px]">schedule</span>
-                                        <span class="text-[13px]"><?= e($th['last_active']) ?></span>
+                                        <span class="text-[13px]"><?= e($th['last_reply_time']) ?></span>
                                     </div>
-                                    <div class="flex items-center gap-1.5 <?= $th['replies'] > 0
+                                    <div class="flex items-center gap-1.5 <?= $th['replies_count'] > 0
                                         ? 'text-tertiary'
                                         : '' ?>" title="Balasan">
-                                        <span class="material-symbols-outlined text-[18px] <?= $th['replies'] > 0
+                                        <span class="material-symbols-outlined text-[18px] <?= $th['replies_count'] > 0
                                             ? 'text-tertiary'
                                             : '' ?>">forum</span>
-                                        <span class="font-bold <?= $th['replies'] > 0 ? 'text-tertiary' : '' ?>"><?= e(
-    $th['replies'],
+                                        <span class="font-bold <?= $th['replies_count'] > 0 ? 'text-tertiary' : '' ?>"><?= e(
+    $th['replies_count'],
 ) ?></span>
                                         <span class="text-[13px] hidden sm:inline">Balasan</span>
                                     </div>
@@ -583,7 +583,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
     <!-- Bottom Navigation Shared Component -->
     <?php
     $active_tab = $isRiwayat ? 'riwayat' : 'courses';
-    include 'includes/components/DX_LMS_M_Bottom_Nav.php';
+    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
 
     <?php if (!$isLocked && count($threads) > 0): ?>
@@ -619,6 +619,11 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
         });
     </script>
     <?php endif; ?>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

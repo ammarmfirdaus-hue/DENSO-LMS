@@ -1,6 +1,6 @@
 <?php
 /**
- * Komponen Navigasi Bawah (Bottom Navigation Bar) — DLS.
+ * Komponen Navigasi Bawah (Bottom Navigation Bar) â€” DLS.
  *
  * Menyajikan bilah navigasi bawah dengan 5 tab utama yang sesuai
  * dengan desain referensi Student: Beranda, Course, Riwayat, Notifikasi, Profil.
@@ -12,41 +12,42 @@
 
 $active_tab = $active_tab ?? 'beranda';
 $base_path = $base_path ?? '';
+$route_prefix = '/student';
 
 $tabs = [
     [
         'id' => 'beranda',
         'icon' => 'home',
         'label' => 'Beranda',
-        'href' => '?route=/student',
+        'href' => '?route=' . $route_prefix,
     ],
     [
         'id' => 'course',
         'icon' => 'school',
         'label' => 'Course',
-        'href' => '?route=/student/courses',
+        'href' => '?route=' . $route_prefix . '/courses',
     ],
     [
         'id' => 'riwayat',
         'icon' => 'history',
         'label' => 'Riwayat',
-        'href' => '?route=/student/riwayat',
+        'href' => '?route=' . $route_prefix . '/riwayat',
     ],
     [
         'id' => 'notifikasi',
         'icon' => 'notifications',
         'label' => 'Notifikasi',
-        'href' => '?route=/student/notifikasi',
+        'href' => '?route=' . $route_prefix . '/notifikasi',
     ],
     [
         'id' => 'profil',
         'icon' => 'person',
         'label' => 'Profil',
-        'href' => '?route=/student/profil',
+        'href' => '?route=' . $route_prefix . '/profil',
     ],
 ];
 ?>
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:flex-col lg:justify-start lg:w-[240px] lg:h-screen lg:top-0 lg:left-0 lg:rounded-none lg:border-r border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-4 lg:pt-8 lg:gap-2 transition-all duration-300" id="bottomNavBar">
+<nav class="fixed bottom-0 left-0 w-full z-50 flex items-stretch px-0 h-[76px] shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:h-screen lg:flex-col lg:justify-start lg:w-[240px] lg:top-0 lg:left-0 lg:rounded-none lg:border-r border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-4 lg:pt-8 lg:gap-2 transition-all duration-300" id="bottomNavBar">
     
     <!-- Logo placeholder for Desktop only -->
     <div class="hidden lg:flex items-center space-x-2 mb-8 px-4 w-full">
@@ -62,7 +63,7 @@ $tabs = [
         : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
     ?>
     <a href="<?= $tab['href'] ?>" 
-       class="flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl px-4 py-1 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>" 
+       class="flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>" 
        id="nav-<?= $tab['id'] ?>"
        aria-label="<?= $tab['label'] ?>">
         

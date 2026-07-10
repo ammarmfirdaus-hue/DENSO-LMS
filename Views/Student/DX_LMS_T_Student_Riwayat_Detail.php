@@ -193,23 +193,20 @@ $courseId = $course['id'] ?? 'CRS001';
         <!-- Content Area: Capaian Pembelajaran -->
         <?php
         $nilaiFa = (int) ($course['quiz_score'] ?? 100);
-        $isFaLulus =
-            $nilaiFa >=
-            75; /** Implementasi nilai historis positif untuk menangani kelengkapan data sistem secara responsif. */
+        $isFaLulus = $nilaiFa >= 75;
         $progress = 100;
         $is100 = true;
-        $isCoursePassed = true; /** Validasi berbasis riwayat memastikan pengguna lolos evaluasi pembelajaran. */
+        $isCoursePassed = true;
         $completionDate = formatDateID($course['completion_date'] ?? '2025-06-20');
 
-        /** Menentukan indikator warna visual untuk hasil skor. */
         $scoreColorClass = 'text-error';
-        $scoreStrokeColor = '#BA1A1A'; /** Konfigurasi tema merah (error). */
+        $scoreStrokeColor = '#BA1A1A';
         if ($nilaiFa >= 75) {
             $scoreColorClass = 'text-tertiary';
-            $scoreStrokeColor = '#4A6546'; /** Konfigurasi tema tersier fungsional basis sistem. */
+            $scoreStrokeColor = '#4A6546';
         } elseif ($nilaiFa >= 50) {
             $scoreColorClass = 'text-[#D4A017]';
-            $scoreStrokeColor = '#D4A017'; /** Konfigurasi tema kuning peringatan (amber) sistem. */
+            $scoreStrokeColor = '#D4A017';
         }
         ?>
         <div class="p-container-margin flex flex-col gap-stack-lg mt-4 pb-8 animate-fade-in-up">
@@ -321,23 +318,7 @@ $courseId = $course['id'] ?? 'CRS001';
                 </div>
             </section>
         </div>
-          /**  */<?php
-            /** Penggalian metadata dari layanan basis data sebelum pencetakan UI interaksi forum diskusi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            elseif ($tab === 'materi'): ?>
+        <?php elseif ($tab === 'materi'): ?>
         <!-- Content Area: Materi (Read Only, All Completed) -->
         <div class="p-container-margin flex flex-col gap-stack-md mt-4 animate-fade-in-up">
             <div class="flex flex-col gap-stack-lg">
@@ -1175,10 +1156,9 @@ $courseId = $course['id'] ?? 'CRS001';
     </main>
 
     <!-- BottomNavBar -->
-    <?php include 'includes/components/DX_LMS_M_Bottom_Nav.php'; ?>
+    <?php include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
 
     <script>
-        /** Menyimpan koordinat gulir (scroll) untuk kenyamanan transisi perpindahan tab. */
         window.addEventListener('beforeunload', () => {
             sessionStorage.setItem('riwayatDetailScrollPos', window.scrollY);
         });
@@ -1190,7 +1170,6 @@ $courseId = $course['id'] ?? 'CRS001';
                 sessionStorage.removeItem('riwayatDetailScrollPos');
             }
         });
-        /** Manipulasi status pada panel akordeon fungsional yang membentang riwayat diskusi atau sesi pelengkap. */
         function toggleAccordion(elementOrId) {
             if (typeof elementOrId === 'string') {
                 const body = document.getElementById(elementOrId);
@@ -1205,7 +1184,6 @@ $courseId = $course['id'] ?? 'CRS001';
                     chevron.style.transform = 'rotate(-90deg)';
                 }
             } else {
-                /** Proses penanganan aksi instruksional interaktif terhadap bagian seksi percakapan. */
                 const header = elementOrId;
                 const body = header.nextElementSibling;
                 const chevron = header.querySelector('.material-symbols-outlined:last-child');
@@ -1222,7 +1200,6 @@ $courseId = $course['id'] ?? 'CRS001';
             }
         }
 
-        /** Menangani fungsi perpindahan antarmuka tab diskusi. */
         function switchForumTab(tabName) {
             const btnMateri = document.getElementById('btn-forum-materi');
             const btnQuiz = document.getElementById('btn-forum-quiz');
@@ -1242,7 +1219,6 @@ $courseId = $course['id'] ?? 'CRS001';
             }
         }
 
-        /** Melaksanakan fungsionalitas penelusuran instan untuk diskusi forum. */
         function searchForum() {
             const input = document.getElementById('search-forum-input').value.toLowerCase();
             const forumItems = document.querySelectorAll('.forum-thread-item');
@@ -1256,7 +1232,6 @@ $courseId = $course['id'] ?? 'CRS001';
                 }
             });
 
-            /** Evaluasi parameter kosong pada status tampilan setelah skema indeks berbasis penelusuran. */
             document.querySelectorAll('.forum-section-wrapper').forEach(wrapper => {
                 const visibleItems = wrapper.querySelectorAll('.forum-thread-item[style="display: flex;"], .forum-thread-item:not([style*="display: none"])');
                 let emptyState = wrapper.querySelector('.empty-state-search');
@@ -1276,7 +1251,6 @@ $courseId = $course['id'] ?? 'CRS001';
             });
         }
 
-        /** Menampilkan atau menyembunyikan item pelengkap pada senarai. */
         function toggleShowAll(listId, btn) {
             const list = document.getElementById(listId);
             if (!list) return;
@@ -1303,6 +1277,11 @@ $courseId = $course['id'] ?? 'CRS001';
             }
         }
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

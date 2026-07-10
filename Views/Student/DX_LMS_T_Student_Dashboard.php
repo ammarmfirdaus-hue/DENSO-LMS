@@ -225,7 +225,7 @@ $userRole = 'Student';
     <!-- BottomNavBar Shared Component -->
     <?php
     $active_tab = 'beranda';
-    include 'includes/components/DX_LMS_M_Bottom_Nav.php';
+    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
 
     <script>
@@ -305,6 +305,11 @@ $userRole = 'Student';
 
         updateUI();
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

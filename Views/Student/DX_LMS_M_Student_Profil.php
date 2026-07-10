@@ -50,9 +50,27 @@ $active_tab = 'profil'; ?>
                     <div class="absolute right-0 top-0 w-64 h-64 bg-error-container/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
 
                     <div class="w-24 h-24 rounded-full overflow-hidden shrink-0 border-4 border-surface shadow-sm relative z-10">
-                        <img alt="<?= e($profile['name'] ?? '') ?>" class="w-full h-full object-cover" src="<?= e(
-    $profile['photo_url'] ?? '',
-) ?>">
+                        <?php
+                        $photoUrl = $profile['photo_url'] ?? '';
+                        $profileName = $profile['name'] ?? 'U';
+                        $initials = '';
+                        $nameParts = explode(' ', trim($profileName));
+                        foreach (array_slice($nameParts, 0, 2) as $part) {
+                            $initials .= strtoupper(substr($part, 0, 1));
+                        }
+                        ?>
+                        <?php if (!empty($photoUrl)): ?>
+                        <img alt="<?= e($profileName) ?>" class="w-full h-full object-cover" 
+                             src="<?= e($photoUrl) ?>"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center" style="display:none;">
+                            <span class="text-white font-bold text-2xl"><?= e($initials) ?></span>
+                        </div>
+                        <?php else: ?>
+                        <div class="w-full h-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
+                            <span class="text-white font-bold text-2xl"><?= e($initials) ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="flex-1 flex flex-col justify-center relative z-10 text-center sm:text-left mt-2 sm:mt-0">
@@ -323,7 +341,7 @@ $active_tab = 'profil'; ?>
         </div>
     </main>
     <!-- BottomNavBar Shared Component -->
-    <?php include 'includes/components/DX_LMS_M_Bottom_Nav.php'; ?>
+    <?php include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
 
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js"></script>
     <script>
@@ -393,6 +411,11 @@ $active_tab = 'profil'; ?>
             document.querySelectorAll('.notification-dot').forEach(dot => dot.classList.add('hidden'));
         }
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

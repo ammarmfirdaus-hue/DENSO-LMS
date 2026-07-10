@@ -1,0 +1,183 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Tambah Materi - LMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e5e2e1",
+                        "primary": "#b4000b",
+                        "secondary": "#4355b9",
+                        "tertiary-container": "#178229",
+                        "on-primary-fixed": "#410001",
+                        "secondary-fixed": "#dee0ff",
+                        "surface-dim": "#dcd9d9",
+                        "outline-variant": "#e9bcb6",
+                        "on-tertiary-fixed-variant": "#005313",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#293ca0",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#deffd6",
+                        "inverse-on-surface": "#f3f0ef",
+                        "secondary-container": "#8596ff",
+                        "background": "#fcf9f8",
+                        "surface-bright": "#fcf9f8",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#ffb4aa",
+                        "surface": "#fcf9f8",
+                        "tertiary-fixed": "#94f990",
+                        "surface-container": "#f0eded",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdad5",
+                        "outline": "#936e69",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#11278e",
+                        "on-tertiary-fixed": "#002204",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "surface-container-high": "#eae7e7",
+                        "primary-container": "#e20613",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e5e2e1",
+                        "surface-tint": "#c0000d",
+                        "on-surface": "#1b1c1c",
+                        "on-primary-container": "#fff3f2",
+                        "tertiary": "#00671a",
+                        "inverse-primary": "#ffb4aa",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#303030",
+                        "tertiary-fixed-dim": "#78dc77",
+                        "secondary-fixed-dim": "#bac3ff",
+                        "on-secondary-fixed": "#00105c",
+                        "on-primary-fixed-variant": "#930007",
+                        "on-background": "#1b1c1c",
+                        "on-surface-variant": "#5e3f3b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "stack-lg": "24px",
+                        "container-margin": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "headline-md": ["Inter", "sans-serif"],
+                        "label-sm": ["Inter", "sans-serif"],
+                        "headline-sm": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-[88px] md:pb-0">
+<!-- TopAppBar (Task-Focused: Sub-page with Back Action) -->
+<header class="bg-surface flex justify-between items-center w-full px-container-margin h-14 border-b border-outline-variant sticky top-0 z-40">
+<button aria-label="Go Back" class="w-10 h-10 flex items-center justify-start text-on-surface hover:text-primary transition-colors focus:outline-none rounded-full">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface text-center flex-1 pr-10"></h1>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-3xl mx-auto px-container-margin py-stack-lg flex flex-col gap-stack-lg">
+<!-- Basic Info Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm shadow-[0_2px_8px_0_rgba(0,0,0,0.02)]">
+<label class="font-label-md text-label-md text-on-surface" for="judul-materi">Judul Materi</label>
+<input class="w-full h-12 bg-surface border border-outline-variant rounded-lg px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="judul-materi" placeholder="Masukkan judul materi pembelajaran" type="text">
+</section>
+<!-- Content Builder Area (Bento Layout) -->
+<div class="flex flex-col gap-stack-md md:grid md:grid-cols-2">
+<!-- File Upload Area (Full Width on mobile, spans 2 cols on md) -->
+<section class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm shadow-[0_2px_8px_0_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-xl" style="font-variation-settings: &quot;FILL&quot; 1;">description</span>
+<h2 class="font-label-md text-label-md text-on-surface">Unggah Dokumen</h2>
+</div>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-stack-lg flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center mb-stack-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-on-secondary-fixed text-2xl">upload_file</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">Pilih file atau tarik kesini</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-center mt-1">Format PDF, PPT, DOCX (Maks. 10MB)</span>
+</div>
+</section>
+<!-- Video URL Input -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm shadow-[0_2px_8px_0_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: &quot;FILL&quot; 1;">smart_display</span>
+<h2 class="font-label-md text-label-md text-on-surface">Tautan Video</h2>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">link</span>
+<input class="w-full h-11 bg-surface border border-outline-variant rounded-lg pl-10 pr-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="https://youtube.com/..." type="url">
+</div>
+</section>
+<!-- Supplementary Input (To balance the grid on desktop) -->
+
+<!-- Rich Text Area (Full Width) -->
+<section class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm shadow-[0_2px_8px_0_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-on-surface text-xl" style="font-variation-settings: &quot;FILL&quot; 1;">notes</span>
+<h2 class="font-label-md text-label-md text-on-surface">Isi Materi (Teks)</h2>
+</div>
+<!-- Pseudo Toolbar -->
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2 mb-2">
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface"><span class="material-symbols-outlined text-sm">format_bold</span></button>
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface"><span class="material-symbols-outlined text-sm">format_italic</span></button>
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface"><span class="material-symbols-outlined text-sm">format_list_bulleted</span></button>
+</div>
+<textarea class="w-full bg-surface border-none rounded-b-lg px-2 py-2 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none resize-y" placeholder="Tuliskan materi atau instruksi tambahan disini..." rows="5"></textarea>
+</section>
+</div>
+</main>
+<!-- Bottom Action Bar (Fixed on mobile, sticky on web) -->
+<div class="fixed bottom-0 left-0 w-full p-container-margin bg-surface border-t border-outline-variant shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] md:sticky md:bg-transparent md:border-none md:shadow-none md:p-0 md:max-w-3xl md:mx-auto md:pb-stack-lg md:px-container-margin z-40">
+<button class="w-full h-12 bg-primary text-on-primary font-label-md text-label-md rounded-xl flex items-center justify-center shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-colors active:scale-[0.98]">
+            Simpan Materi
+        </button>
+</div>
+
+
+
+
+
+
+
+
+</body></html>

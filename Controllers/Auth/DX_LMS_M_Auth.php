@@ -111,8 +111,9 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             $_SESSION['active_role'] = $_POST['role'];
             if ($_POST['role'] === 'student') {
                 header('Location: ?route=/student');
+            } elseif ($_POST['role'] === 'teacher') {
+                header('Location: ?route=/teacher');
             } else {
-                /** Modul Pengajar/Admin belum diimplementasikan pada versi ini. */
                 header('Location: ?route=/pilih-peran');
             }
             exit();

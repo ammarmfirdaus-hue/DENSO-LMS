@@ -11,7 +11,7 @@
 
 <head>
     <?php
-    $page_title = 'Daftar Course - LMS';
+    $page_title = 'My Course - LMS';
     include 'includes/components/DX_LMS_M_Tailwind_Head.php';
     ?>
 </head>
@@ -28,7 +28,7 @@
     <main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px] pt-[72px] px-container-margin">
         <!-- Header & Filters Section -->
         <section class="space-y-stack-sm">
-            <h1 class="font-headline-md text-headline-md text-on-surface">Daftar Course</h1>
+            <h1 class="font-headline-md text-headline-md text-on-surface">My Course</h1>
             <p class="font-body-md text-body-md text-on-surface-variant">Pilih dan temukan course yang sesuai untuk pengembangan Anda.</p>
             <!-- Search Bar -->
             <div class="relative pt-2">
@@ -171,7 +171,7 @@
     <!-- BottomNavBar Shared Component -->
     <?php
     $active_tab = 'course';
-    include 'includes/components/DX_LMS_M_Bottom_Nav.php';
+    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -397,6 +397,10 @@
             updateUI();
         });
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
 
 </body>
 

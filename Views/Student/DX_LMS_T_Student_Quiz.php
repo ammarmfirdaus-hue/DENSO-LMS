@@ -327,7 +327,7 @@ if ($isHistoryMode) {
     <!-- BottomNavBar Shared Component (Desktop Sidebar + Mobile Bottom Nav) -->
     <?php
     $active_tab = isset($course['status']) && $course['status'] === 'selesai' ? 'riwayat' : 'course';
-    include 'includes/components/DX_LMS_M_Bottom_Nav.php';
+    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
 
     <?php if (!$isHistoryMode): ?>
@@ -388,6 +388,11 @@ if ($isHistoryMode) {
         }
     </script>
     <?php endif; ?>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+
 </body>
 
 </html>

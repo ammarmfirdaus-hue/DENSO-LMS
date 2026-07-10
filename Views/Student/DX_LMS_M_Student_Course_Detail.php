@@ -1,5 +1,4 @@
 <?php
-/** Menerima operan variabel data dari sistem pengontrol (Controller). */
 $tab = $tab ?? ($_GET['tab'] ?? 'materi');
 $courseId = $course['id'] ?? 'CRS001';
 $all_sessions_completed = $all_sessions_completed ?? false;
@@ -255,7 +254,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                                 <p class="font-label-sm text-on-surface-variant">
                                     <?= count($preTest['questions']) ?> Soal
                                     <?= $preTest['status'] === 'selesai'
-                                        ? "â€¢ Skor Tertinggi: {$preTest['score']}"
+                                        ? "• Skor Tertinggi: {$preTest['score']}"
                                         : '' ?>
                                 </p>
                             </div>
@@ -350,7 +349,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                                 <p class="font-label-sm text-on-surface-variant">
                                     <?= count($postTest['questions']) ?> Soal
                                     <?= $postTest['status'] === 'selesai'
-                                        ? "â€¢ Skor Tertinggi: {$postTest['score']}"
+                                        ? "• Skor Tertinggi: {$postTest['score']}"
                                         : '' ?>
                                 </p>
                             </div>
@@ -377,486 +376,102 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         </div>
 
         <?php
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-
-            /** Kelompok Data: Evaluasi Awal. */
-
-            /** Kelompok Data: Evaluasi Akhir. */
-
-            /** Kelompok Data: Kuis Pembelajaran. */
-
-            /** Kelompok Data: Penilaian Akhir. */
-
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
-            /** Menyiapkan himpunan data untuk ditampilkan. */
-            /** Kelompok Data: Aktivitas dan materi siswa. */
-            /** Menyediakan data tanggal artifisial untuk materi pembelajaran. */
-            /** Kelompok Data: Evaluasi Awal. */
-            /** Kelompok Data: Evaluasi Akhir. */
-            /** Kelompok Data: Kuis Pembelajaran. */
-            /** Kelompok Data: Penilaian Akhir. */
-            /** Mengurutkan daftar aktivitas berdasarkan aturan spesifik. */
-            /** Menentukan indikator warna visual untuk hasil skor. */
-            /** Indikator warna untuk status peringatan (Error). */
-            /** Indikator warna tersier untuk status sukses. */
-            /** Indikator warna kuning (Amber) untuk status transisi. */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             elseif ($tab === 'riwayat'): ?>
         <!-- Content Area: Riwayat -->
         <div class="p-container-margin flex flex-col gap-stack-lg mt-4 pb-8 animate-fade-in-up">
@@ -1339,7 +954,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         </div>
                         <p class="font-body-md text-body-md text-on-surface-variant">
                             <?= count($quiz['questions']) ?> Pertanyaan
-                            <?= $quiz['status'] === 'selesai' ? "â€¢ Skor Tertinggi: {$quiz['score']}" : '' ?>
+                            <?= $quiz['status'] === 'selesai' ? "• Skor Tertinggi: {$quiz['score']}" : '' ?>
                         </p>
                     </div>
                     <div class="shrink-0">
@@ -1400,7 +1015,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         </div>
                         <p class="font-body-md text-body-md text-on-surface-variant">
                             <?= count($fa['questions']) ?> Pertanyaan
-                            <?= $fa['nilai'] !== null ? "â€¢ Nilai Akhir: {$fa['nilai']}" : '' ?>
+                            <?= $fa['nilai'] !== null ? "• Nilai Akhir: {$fa['nilai']}" : '' ?>
                         </p>
                     </div>
                     <div class="shrink-0">
@@ -1729,23 +1344,21 @@ $all_sessions_completed = $all_sessions_completed ?? false;
     <!-- BottomNavBar Shared Component -->
     <?php
     $active_tab = 'course';
-    include 'includes/components/DX_LMS_M_Bottom_Nav.php';
+    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
 
     <script>
-        /** Menyimpan koordinat gulir (scroll) untuk kenyamanan transisi perpindahan tab. */
-        window.addEventListener('beforeunload', () => {
-            sessionStorage.setItem('courseDetailScrollPos', window.scrollY);
+        // Save scroll position saat klik tab
+        document.addEventListener('DOMContentLoaded', function() {
+            var tabLinks = document.querySelectorAll('nav a[href*="tab="]');
+            
+            tabLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('courseDetailScrollPos', window.scrollY.toString());
+                });
+            });
         });
-
-        window.addEventListener('load', () => {
-            const scrollPos = sessionStorage.getItem('courseDetailScrollPos');
-            if (scrollPos !== null) {
-                window.scrollTo(0, parseInt(scrollPos));
-                sessionStorage.removeItem('courseDetailScrollPos');
-            }
-        });
-        /** Mengelola fungsionalitas buka-tutup (toggle) pada bagian riwayat. */
+        
         function toggleAccordion(id) {
             const body = document.getElementById(id);
             const chevron = document.getElementById(id + '-chevron');
@@ -1760,7 +1373,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             }
         }
 
-        /** Menangani fungsi perpindahan antarmuka tab diskusi. */
         function switchForumTab(tabName) {
             const btnMateri = document.getElementById('btn-forum-materi');
             const btnQuiz = document.getElementById('btn-forum-quiz');
@@ -1780,7 +1392,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             }
         }
 
-        /** Melaksanakan fungsionalitas penelusuran instan untuk diskusi forum. */
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('forum-search-input');
             if (searchInput) {
@@ -1794,7 +1405,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
 
                         threads.forEach(thread => {
                             const title = thread.querySelector('.forum-title').textContent.toLowerCase();
-                            /** Aturan penelusuran: jika kosong tampilkan seluruh data, jika sesuai tampilkan, jika tidak sembunyikan. */
                             if (term === '' || title.includes(term)) {
                                 thread.style.display = 'flex';
                                 hasVisibleThread = true;
@@ -1806,10 +1416,8 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         const emptyState = section.querySelector('.empty-state');
                         if (emptyState) {
                             if (term === '') {
-                                /** Perilaku bawaan: menampilkan layar status kosong jika tidak ditemukan topik. */
                                 emptyState.style.display = threads.length === 0 ? 'block' : 'none';
                             } else {
-                                /** Menangani kondisi ketika hasil pencarian tidak memberikan keluaran data. */
                                 emptyState.style.display = hasVisibleThread ? 'none' : 'block';
                             }
                         }
@@ -1818,7 +1426,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             }
         });
 
-        /** Menampilkan atau menyembunyikan item pelengkap pada senarai. */
         function toggleShowAll(listId, btn) {
             const list = document.getElementById(listId);
             if (!list) return;
@@ -1827,20 +1434,17 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             const isShowingAll = btn.getAttribute('data-showing') === 'true';
 
             if (isShowingAll) {
-                /** Mengembalikan antarmuka pada posisi tersembunyi. */
                 hiddenItems.forEach(item => {
                     item.style.display = 'none';
                 });
                 btn.setAttribute('data-showing', 'false');
                 btn.querySelector('.material-symbols-outlined').textContent = 'unfold_more';
 
-                /** Mempertahankan format teks bawaan dari sumber aslinya. */
                 if (!btn.hasAttribute('data-original-text')) {
                     btn.setAttribute('data-original-text', btn.querySelector('.btn-text').textContent);
                 }
                 btn.querySelector('.btn-text').textContent = btn.getAttribute('data-original-text');
             } else {
-                /** Memperluas antarmuka untuk menampilkan seluruh item. */
                 hiddenItems.forEach(item => {
                     item.style.display = ''; /** Mengembalikan konfigurasi properti tampilan CSS ke setelan semula. */
                 });
