@@ -12,10 +12,7 @@ class DX_LMS_M_Database
     private static $instance = null;
     private $conn;
 
-    private $host = 'localhost\SQLEXPRESS';
-    private $db_name = 'DX_LMS';
-    private $username = '';
-    private $password = '';
+
 
     /**
      * Konstruktor Kelas Basis Data.
@@ -31,9 +28,9 @@ class DX_LMS_M_Database
         try {
             /** Menggunakan string koneksi (DSN) untuk pengolahan SQL Server. */
             /** Memastikan ekstensi driver pdo_sqlsrv telah dipasang dan diaktifkan. */
-            $dsn = 'sqlsrv:Server=' . $this->host . ';Database=' . $this->db_name . ';TrustServerCertificate=1';
+            $dsn = 'sqlsrv:Server=' . DB_SERVER . ';Database=' . DB_NAME . ';TrustServerCertificate=1';
 
-            $this->conn = new PDO($dsn, $this->username, $this->password);
+            $this->conn = new PDO($dsn, DB_USER, DB_PASS);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

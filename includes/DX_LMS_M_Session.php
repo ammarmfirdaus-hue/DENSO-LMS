@@ -125,7 +125,7 @@ function requireLogin(string $redirect_url = ''): void
 {
     if (!isLoggedIn()) {
         $base = $redirect_url ?: (defined('BASE_URL') ? BASE_URL : '/');
-        header('Location: ' . $base . 'login.php');
+        header('Location: ' . $base . 'login');
         exit();
     }
 }

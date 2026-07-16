@@ -15,8 +15,7 @@ if (!defined('DLS_ROOT')) {
 /** ============================================================ */
 /** Konfigurasi parameter koneksi basis data. */
 /** ============================================================ */
-define('DB_HOST', 'localhost'); /** Alamat host basis data. */
-define('DB_PORT', '1433'); /** Nomor port koneksi basis data. */
+define('DB_SERVER', 'localhost\SQLEXPRESS'); /** Alamat host basis data. */
 define('DB_NAME', 'DX_LMS'); /** Nama basis data yang digunakan. */
 define('DB_USER', 'sa'); /** Nama pengguna untuk autentikasi basis data. */
 define('DB_PASS', ''); /** Kata sandi otorisasi basis data. */
@@ -29,7 +28,7 @@ define('APP_SHORT', 'DLS');
 define('APP_VERSION', '1.0.0');
 
 /** URL dasar sistem yang dapat disesuaikan menurut lingkungan pengembangan. */
-define('BASE_URL', '/DENSO-LMS/');
+define('BASE_URL', '/');
 
 /** ============================================================ */
 /** Parameter pengaturan untuk manajemen sesi pengguna. */

@@ -22,7 +22,7 @@ function getDBConnection(): ?PDO
 
     if ($pdo === null) {
         try {
-            $dsn = 'sqlsrv:Server=' . DB_HOST . ',' . DB_PORT . ';Database=' . DB_NAME;
+            $dsn = 'sqlsrv:Server=' . DB_SERVER . ';Database=' . DB_NAME . ';TrustServerCertificate=1';
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
