@@ -30,31 +30,61 @@ Sebelum melakukan konfigurasi proyek, pastikan mesin pengembangan yang Anda guna
 
 ## Panduan Instalasi dan Konfigurasi
 
-Ikuti instruksi langkah demi langkah di bawah ini untuk mengatur lingkungan pengembangan lokal di perangkat Anda:
+Selamat datang di tim pengembangan DLS! Bagian ini disusun secara khusus untuk memandu Anda, sebagai anggota tim baru, agar dapat melakukan pengaturan lingkungan pengembangan di mesin lokal Anda dari nol hingga aplikasi siap berjalan. Silakan ikuti setiap instruksi secara runut dan teliti.
 
-### 1. Konfigurasi Basis Data
-1. Jalankan aplikasi Microsoft SQL Server Management Studio (SSMS).
-2. Buat basis data baru yang benar-benar kosong dan berikan nama `DX_LMS`.
-3. Buka direktori proyek Anda dan navigasikan ke dalam berkas `database/DX_LMS_W_Schema.sql`.
-4. Salin dan eksekusi skrip SQL tersebut pada basis data `DX_LMS` yang baru saja dibuat. Skrip ini dirancang untuk menghasilkan seluruh skema tabel struktural, mendefinisikan kunci utama (Primary Key), serta memetakan batasan relasi antar tabel (Foreign Key Constraints) yang krusial bagi sistem.
+### Tahap 1: Persiapan Lingkungan dan Basis Data (Microsoft SQL Server)
+Aplikasi ini beroperasi menggunakan Microsoft SQL Server. Oleh karena itu, pengaturan basis data merupakan langkah pertama yang paling krusial.
+1. **Buka SQL Server Management Studio (SSMS)**: Pastikan layanan SQL Server sudah berjalan di latar belakang mesin Anda (biasanya bernama `MSSQLSERVER` atau `SQLEXPRESS` pada layanan sistem Windows). Buka aplikasi SSMS dan masuk menggunakan autentikasi Windows (*Windows Authentication*) atau autentikasi SQL Server (*SQL Server Authentication*).
+2. **Pembuatan Basis Data**:
+   - Pada panel *Object Explorer* di sebelah kiri, klik kanan pada folder **Databases**, lalu pilih **New Database...**
+   - Pada kolom masukan *Database name*, masukkan nama persis: `DX_LMS`.
+   - Biarkan pengaturan lainnya secara bawaan (*default*), lalu klik **OK**.
+3. **Injeksi Skema Basis Data**:
+   - Buka direktori proyek lokal Anda menggunakan *File Explorer*, lalu cari direktori `database/`.
+   - Di dalamnya terdapat berkas bernama `DX_LMS_W_Schema.sql`. Seret (*drag*) berkas tersebut ke dalam jendela bidang kerja utama SSMS Anda.
+   - Pastikan menu tarik-turun (*dropdown*) basis data di bilah alat SSMS (bagian atas) menunjukkan `DX_LMS`, bukan `master`.
+   - Klik tombol **Execute** (atau tekan tombol `F5` pada papan ketik).
+   - Pastikan tab *Messages* di bagian bawah menampilkan tulisan *Command(s) completed successfully*. Skrip ini akan secara otomatis mendirikan seluruh tabel beserta relasi (*Foreign Keys*) yang dibutuhkan aplikasi.
 
-### 2. Pengaturan Kredensial Aplikasi
-1. Gunakan aplikasi editor teks atau *IDE* (Integrated Development Environment) untuk membuka berkas `includes/DX_LMS_M_Config.php`.
-2. Temukan bagian pengaturan koneksi basis data yang diwakili oleh blok konstanta `DB_SERVER`, `DB_NAME`, `DB_USER`, dan `DB_PASS`.
-3. Sesuaikan nilai konstanta tersebut agar koheren dengan informasi kredensial layanan SQL Server lokal Anda. Pastikan untuk menambahkan atribut `TrustServerCertificate => true` ke dalam konfigurasi opsi peladen Anda menggunakan sertifikat berlapis SSL sementara secara lokal.
+### Tahap 2: Pengaturan Kredensial Akses Aplikasi
+Aplikasi perlu mengetahui cara untuk berkomunikasi dengan basis data lokal Anda.
+1. **Lokasi File Konfigurasi**: Buka proyek menggunakan kode editor atau IDE andalan Anda (seperti Visual Studio Code atau PhpStorm). Navigasikan ke dalam direktori `includes/` dan buka berkas `DX_LMS_M_Config.php`.
+2. **Penyelarasan Kredensial**: Temukan blok kode pendefinisian konstanta koneksi basis data. Anda perlu menyesuaikan parameter berikut sesuai konfigurasi SQL Server Anda:
+   - `DB_SERVER`: Alamat server Anda (biasanya `localhost`, `127.0.0.1`, atau `.\SQLEXPRESS`).
+   - `DB_NAME`: Pastikan nilainya tetap `'DX_LMS'`.
+   - `DB_USER`: Nama pengguna SQL (contoh: `'sa'`). Jika Anda sepenuhnya menggunakan metode autentikasi Windows untuk server pengembangan, pengaturan ini mungkin berbeda bergantung implementasi pembungkus data.
+   - `DB_PASS`: Kata sandi untuk pengguna SQL tersebut.
+3. **Konfigurasi SSL Terpercaya (Opsional namun Penting)**: Apabila Anda mendapati pesan galat koneksi terkait SSL ketika aplikasi dijalankan, pastikan untaian (*string*) koneksi PDO (yang terletak di berkas `DX_LMS_M_Db.php`) memiliki parameter `TrustServerCertificate => true`.
 
-### 3. Kompilasi Aset Frontend (Tailwind CSS)
-Mengingat aplikasi wajib berjalan di lingkungan internal yang bisa jadi tidak memiliki sambungan web, seluruh aturan kerangka kerja CSS wajib dibangun ke dalam satu berkas statis.
-1. Buka antarmuka baris perintah (Terminal atau Command Prompt) pada direktori *root* proyek.
-2. Jalankan instruksi `npm install` untuk mengunduh modul-modul pengembang secara utuh (Tailwind CSS, Plugin tambahan, dan Prettier).
-3. Jalankan perintah `npm run build` untuk menghasilkan berkas keluaran (*output*) CSS untuk pertama kalinya. 
-4. Jika Anda terlibat aktif dalam merancang komponen antarmuka, disarankan untuk membiarkan perintah `npm run dev` berjalan di jendela konsol terpisah. Perintah ini mengaktifkan mode pemantauan (*watch mode*) yang akan mengompilasi setiap kali terjadi perubahan kode kelas (*classes*).
+### Tahap 3: Instalasi dan Kompilasi Aset Frontend (Tailwind CSS)
+DLS tidak bergantung pada CDN (*Content Delivery Network*) eksternal demi memastikan ketersediaan aplikasi saat luring (*offline*) secara total. Seluruh kerangka kerja CSS wajib dibangun secara lokal.
+1. **Membuka Terminal**: Buka antarmuka baris perintah (Terminal bawaan IDE, Command Prompt, atau PowerShell) dan pastikan Anda berada tepat di direktori *root* proyek (yaitu folder `DENSO-LMS/`).
+2. **Instalasi Modul Node**:
+   - Ketikkan perintah `npm install` dan tekan *Enter*. 
+   - Sistem akan mengunduh Tailwind CSS, instrumen *PostCSS*, dan *Prettier* sesuai dengan definisi di berkas `package.json`. Tunggu hingga proses instalasi mencapai 100% dan menghasilkan direktori baru bernama `node_modules/`.
+3. **Kompilasi Berkas CSS Awal**:
+   - Eksekusi perintah `npm run build`.
+   - Perintah ini akan memindai seluruh *file* berekstensi `.php` yang ada di proyek, mengekstrak kelas-kelas Tailwind yang dideklarasikan, dan menyatukannya ke dalam berkas statis `assets/css/DX_LMS_M_Tailwind_Output.css`.
+4. **Mode Pengembangan Aktif (*Watch Mode*)**:
+   - Jika penugasan harian Anda mengharuskan adanya modifikasi kode antarmuka (*UI styling*), sangat disarankan untuk menjalankan perintah `npm run dev` pada jendela terminal yang dibiarkan terbuka. Terminal ini akan memantau perubahan kelas Tailwind yang Anda ketik dan mengompilasinya secara waktu nyata (*real-time*).
 
-### 4. Menjalankan Server Pengembangan Lokal
-1. Pastikan validasi bahwa direktori `php-8.3.31/` (yang berisi instrumen modul PHP portabel) telah tersemat di dalam direktori *root* proyek.
-2. Buka jendela *File Explorer* dan eksekusi berkas `DX_LMS_W_Start_Server.bat` dengan cara melakukan klik ganda. Skrip bawaan Windows ini akan merutekan lalu lintas HTTP pada lingkungan *Built-in Web Server* milik eksekusi antarmuka PHP.
-3. Buka peramban web (browser) favorit Anda dan navigasikan ke alamat `http://localhost:8080`.
-4. Untuk menghentikan operasional peladen secara paksa, klik pada jendela konsol perintah terminal yang berjalan, kemudian eksekusi kombinasi tombol `CTRL+C` pada papan ketik.
+### Tahap 4: Mengaktifkan Server Pengembangan Lokal
+Proyek ini mengimplementasikan interpreter PHP secara portabel, mengeliminasi kebutuhan bagi anggota tim baru untuk mengonfigurasi Apache, Nginx, XAMPP, atau variabel lingkungan (*Environment Variables*) sistem operasi secara merepotkan.
+1. **Verifikasi Modul PHP**: Periksa bahwa folder bernama `php-8.3.31/` telah tersedia di dalam direktori *root* proyek. Folder ini memuat biner PHP yang telah disesuaikan dan dikonfigurasi bersama ekstensi SQLSRV untuk lingkungan Windows.
+2. **Peluncuran Server**:
+   - Lewat *File Explorer*, cari dan eksekusi (klik ganda) berkas skrip *batch* bernama `DX_LMS_W_Start_Server.bat`.
+   - Jendela konsol *Command Prompt* berlatar hitam akan langsung muncul. Jendela ini bertindak sebagai log proses peladen web. **Jangan tutup jendela ini** selama Anda masih berencana mengoperasikan aplikasi di browser.
+3. **Akses Aplikasi**:
+   - Buka peramban web (seperti Google Chrome atau Microsoft Edge).
+   - Ketikkan alamat URL `http://localhost:8080` pada bilah alamat. 
+   - Jika semua tahapan di atas berhasil, Anda seharusnya akan disambut oleh visualisasi halaman otentikasi (Login) DLS.
+4. **Terminasi Server**: Untuk mematikan server secara aman saat jadwal pengembangan Anda usai, aktifkan fokus ke jendela hitam *Command Prompt* peladen tadi, lalu tekan kombinasi `CTRL + C` di papan ketik. Jika diminta persetujuan pemutusan tugas, ketik huruf `Y` dan tekan *Enter*.
+
+### Tahap 5: Pemecahan Masalah Umum (Troubleshooting Lanjutan)
+Sebagai anggota tim baru, mungkin saja Anda akan menemui rintangan saat konfigurasi pertama kali. Berikut ini adalah kompilasi masalah lazim dan jalan keluarnya:
+- **Port 8080 Bentrok (Server Gagal Jalan)**: Jika jendela hitam `DX_LMS_W_Start_Server.bat` tertutup sekejap mata sesaat setelah dibuka, kemungkinan besar ada aplikasi lain di mesin Anda yang sedang memonopoli *port* `8080`. Sunting file *batch* tersebut dengan *Notepad* dan ubah angka `8080` menjadi angka lain (misal: `8000`), simpan, lalu coba jalankan kembali.
+- **Kesalahan Pengandar PDO (Fatal Error PDO Exception)**: Ini mengindikasikan koneksi terputus. Periksa ulang bahwa variabel koneksi di `DX_LMS_M_Config.php` sudah merepresentasikan spesifikasi SQL Server Anda yang menyala aktif.
+- **Tampilan Antarmuka Hancur Berantakan**: Pertanda mutlak bahwa kompilasi *stylesheet* utilitas CSS Anda gagal, belum pernah dijalankan, atau terminal `npm run dev` Anda mengalami kebuntuan fatal. Kembalilah mereferensi ke Tahap 3 dan pastikan Anda mengeksekusi ulang komando `npm run build`.
 
 ## Arsitektur Sistem
 
