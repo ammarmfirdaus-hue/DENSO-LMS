@@ -17,8 +17,8 @@ if (!defined('DLS_ROOT')) {
 /** ============================================================ */
 define('DB_SERVER', 'localhost\SQLEXPRESS'); /** Alamat host basis data. */
 define('DB_NAME', 'DX_LMS'); /** Nama basis data yang digunakan. */
-define('DB_USER', 'sa'); /** Nama pengguna untuk autentikasi basis data. */
-define('DB_PASS', ''); /** Kata sandi otorisasi basis data. */
+define('DB_USER', ''); /** Nama pengguna untuk autentikasi basis data (kosongkan untuk Autentikasi Windows). */
+define('DB_PASS', ''); /** Kata sandi otorisasi basis data (kosongkan untuk Autentikasi Windows). */
 
 /** ============================================================ */
 /** Pengaturan global sistem aplikasi. */

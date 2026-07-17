@@ -12,8 +12,6 @@ class DX_LMS_M_Database
     private static $instance = null;
     private $conn;
 
-
-
     /**
      * Konstruktor Kelas Basis Data.
      *
@@ -30,7 +28,9 @@ class DX_LMS_M_Database
             /** Memastikan ekstensi driver pdo_sqlsrv telah dipasang dan diaktifkan. */
             $dsn = 'sqlsrv:Server=' . DB_SERVER . ';Database=' . DB_NAME . ';TrustServerCertificate=1';
 
-            $this->conn = new PDO($dsn, DB_USER, DB_PASS);
+            $user = DB_USER === '' ? null : DB_USER;
+            $pass = DB_PASS === '' ? null : DB_PASS;
+            $this->conn = new PDO($dsn, $user, $pass);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

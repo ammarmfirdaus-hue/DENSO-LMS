@@ -69,6 +69,13 @@ $router->add('/teacher/profil/detail', 'DX_LMS_M_Student_Profil@detail');
 $router->add('/teacher/profil/pengaturan', 'DX_LMS_M_Student_Profil@pengaturan');
 $router->add('/teacher/profil/bantuan', 'DX_LMS_M_Student_Profil@bantuan');
 
+/** Mendefinisikan rute khusus untuk pengguna Admin (MVP Tahap 1). */
+$router->add('/admin', 'DX_LMS_M_Admin_Dashboard@index');
+$router->add('/admin/user', 'DX_LMS_M_Admin_User@index');
+$router->add('/admin/course', 'DX_LMS_M_Admin_Course@index');
+$router->add('/admin/role', 'DX_LMS_M_Admin_Role@index');
+$router->add('/admin/assignment', 'DX_LMS_M_Admin_Assignment@index');
+
 /** Menjalankan permintaan yang masuk berdasarkan rute yang sesuai. */
 $route = $_GET['route'] ?? '/';
 $router->dispatch($route);

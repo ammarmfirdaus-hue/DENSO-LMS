@@ -29,7 +29,9 @@ function getDBConnection(): ?PDO
                 PDO::SQLSRV_ATTR_ENCODING => PDO::SQLSRV_ENCODING_UTF8,
             ];
 
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            $user = DB_USER === '' ? null : DB_USER;
+            $pass = DB_PASS === '' ? null : DB_PASS;
+            $pdo = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
             /** Mencatat rincian kesalahan ke dalam log dan menyembunyikannya dari pengguna akhir. */
             if (defined('E_ALL') && error_reporting() === E_ALL) {
