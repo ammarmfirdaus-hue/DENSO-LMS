@@ -162,6 +162,77 @@ $active_tab = 'beranda';
             </div>
         </section>
 
+        <!-- Notification Highlights (Stage 2 Integration) -->
+        <?php if (!empty($notifications)): ?>
+        <section class="mt-stack-xl space-y-stack-md">
+            <div class="flex justify-between items-center">
+                <h2 class="font-headline-sm font-bold text-on-surface">Peringatan Operasional (Top Priority)</h2>
+                <a href="?route=/admin/notification" class="font-label-md text-secondary">Lihat Semua</a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                <?php foreach ($notifications as $notif): ?>
+                    <?php
+                    $t_color =
+                        $notif['type'] === 'Warning'
+                            ? 'bg-warning-container text-on-warning-container border-warning/50'
+                            : 'bg-surface-container-high text-on-surface border-outline-variant';
+                    $icon = $notif['type'] === 'Warning' ? 'warning' : 'info';
+                    $icon_color = $notif['type'] === 'Warning' ? 'text-warning' : 'text-primary';
+                    ?>
+                    <div class="<?= $t_color ?> border rounded-xl p-4 flex gap-3 items-start shadow-sm hover:shadow-md transition-shadow">
+                        <span class="material-symbols-outlined <?= $icon_color ?> mt-0.5" style="font-variation-settings: 'FILL' 1;"><?= $icon ?></span>
+                        <div class="flex-1">
+                            <h3 class="font-label-md font-bold mb-1"><?= e($notif['title']) ?></h3>
+                            <p class="font-body-sm opacity-90"><?= e($notif['message']) ?></p>
+                            <span class="font-label-sm text-[10px] bg-surface/50 px-2 py-0.5 rounded-sm border border-outline-variant/50 inline-block mt-2"><?= e(
+                                $notif['time'],
+                            ) ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- Activity Timeline Snippet (Stage 2 Integration) -->
+        <section class="mt-stack-xl space-y-stack-md">
+            <div class="flex justify-between items-center">
+                <h2 class="font-headline-sm font-bold text-on-surface">Timeline Sistem Terkini</h2>
+                <a href="?route=/admin/activity" class="font-label-md text-secondary border border-outline-variant px-3 py-1.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-1">Log Penuh <span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+            </div>
+
+            <div class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-sm overflow-hidden">
+                <div class="relative before:content-[''] before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-outline-variant before:z-0 ml-1">
+                    <?php foreach ($recent_activities as $act): ?>
+                        <div class="relative pl-10 py-3 group -ml-1 z-10 border-b border-surface-variant last:border-0 last:pb-0">
+                            <div class="absolute w-10 h-10 rounded-full left-0 bg-surface border-2 border-<?= $act[
+                                'color'
+                            ] ?> text-<?= $act['color'] ?> flex items-center justify-center top-2 shadow-sm">
+                                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;"><?= e(
+                                    $act['icon'],
+                                ) ?></span>
+                            </div>
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="font-body-sm text-on-surface max-w-[85%]">
+                                    <span class="font-label-md font-bold text-on-surface"><?= e($act['user']) ?></span> 
+                                    <span class="bg-<?= $act['color'] ?>/10 text-<?= $act[
+    'color'
+] ?> px-1.5 py-0.5 rounded text-[10px] uppercase font-bold mx-1 border border-<?= $act['color'] ?>/20"><?= e(
+    $act['role'],
+) ?></span> 
+                                    <?= e($act['action']) ?> "<?= e($act['target']) ?>"
+                                </div>
+                                <span class="font-label-sm text-[10px] text-on-surface-variant whitespace-nowrap"><?= e(
+                                    $act['time'],
+                                ) ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Bottom Nav untuk Handphone -->

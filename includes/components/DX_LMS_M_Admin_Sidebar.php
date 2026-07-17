@@ -3,7 +3,7 @@
  * Komponen Sidebar Admin untuk tampilan layat lebar (desktop/laptop).
  *
  * Variabel bawaan:
- * - $active_tab: String (beranda|user|course|assignment|role)
+ * - $active_tab: String (beranda|user|course|assignment|role|monitoring|score|activity|notification)
  */
 
 $active_tab = $active_tab ?? 'beranda'; ?>
@@ -78,6 +78,48 @@ $active_tab = $active_tab ?? 'beranda'; ?>
                 ? '1'
                 : '0' ?>;">admin_panel_settings</span>
             <span class="font-label-md">Control Role & Akses</span>
+        </a>
+
+        <div class="px-3 pb-2 pt-4 text-[11px] font-bold tracking-wider uppercase text-on-surface-variant/70">Operasional & Laporan</div>
+
+        <a href="?route=/admin/monitoring" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
+        'monitoring'
+            ? 'bg-primary-container text-on-primary-container font-bold'
+            : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface' ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab ===
+            'monitoring'
+                ? '1'
+                : '0' ?>;">insert_chart</span>
+            <span class="font-label-md">Learning Monitoring</span>
+        </a>
+        <a href="?route=/admin/score" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
+        'score'
+            ? 'bg-primary-container text-on-primary-container font-bold'
+            : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface' ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab === 'score'
+                ? '1'
+                : '0' ?>;">fact_check</span>
+            <span class="font-label-md">Attedance & Score</span>
+        </a>
+        <a href="?route=/admin/activity" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
+        'activity'
+            ? 'bg-primary-container text-on-primary-container font-bold'
+            : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface' ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab ===
+            'activity'
+                ? '1'
+                : '0' ?>;">history</span>
+            <span class="font-label-md">Activity Log</span>
+        </a>
+        <a href="?route=/admin/notification" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
+        'notification'
+            ? 'bg-primary-container text-on-primary-container font-bold'
+            : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface' ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab ===
+            'notification'
+                ? '1'
+                : '0' ?>;">notifications</span>
+            <span class="font-label-md">Pusat Notifikasi</span>
         </a>
     </nav>
     

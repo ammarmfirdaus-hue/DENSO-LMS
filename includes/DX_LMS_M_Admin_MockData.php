@@ -239,4 +239,160 @@ class DX_LMS_M_Admin_MockData
             ],
         ];
     }
+    public static function getMonitoringData()
+    {
+        return [
+            [
+                'id' => 'mon_1',
+                'course_id' => 101,
+                'course_title' => 'Dasar Keselamatan Kerja (K3)',
+                'teacher' => 'Ahmad Rizal',
+                'enrolled' => 110,
+                'in_progress' => 30,
+                'completed' => 80,
+                'lagging' => 5,
+                'completion_rate' => 72,
+                'status' => 'Active',
+            ],
+            [
+                'id' => 'mon_2',
+                'course_id' => 103,
+                'course_title' => 'Basic Programmable Logic Controller',
+                'teacher' => 'Tono Wijaya',
+                'enrolled' => 24,
+                'in_progress' => 14,
+                'completed' => 10,
+                'lagging' => 4,
+                'completion_rate' => 41,
+                'status' => 'Active',
+            ],
+            [
+                'id' => 'mon_3',
+                'course_id' => 104,
+                'course_title' => '5S & Kaizen Fundamentals',
+                'teacher' => 'Rina Kartika',
+                'enrolled' => 120,
+                'in_progress' => 0,
+                'completed' => 120,
+                'lagging' => 0,
+                'completion_rate' => 100,
+                'status' => 'Completed',
+            ],
+        ];
+    }
+
+    public static function getScoreData()
+    {
+        return [
+            [
+                'id' => 'scr_1',
+                'course_title' => 'Dasar Keselamatan Kerja (K3)',
+                'student_name' => 'Budi Santoso',
+                'student_npk' => '12345',
+                'attendance' => '100%',
+                'pre_test' => 70,
+                'quiz' => 85,
+                'post_test' => 90,
+                'final_score' => 88,
+                'status' => 'Lulus',
+            ],
+            [
+                'id' => 'scr_2',
+                'course_title' => 'Dasar Keselamatan Kerja (K3)',
+                'student_name' => 'Asep Sudrajat',
+                'student_npk' => '54321',
+                'attendance' => '80%',
+                'pre_test' => 60,
+                'quiz' => 65,
+                'post_test' => 70,
+                'final_score' => 68,
+                'status' => 'Remedial',
+            ],
+            [
+                'id' => 'scr_3',
+                'course_title' => 'Basic Programmable Logic Controller',
+                'student_name' => 'Siti Aminah',
+                'student_npk' => '11223',
+                'attendance' => '100%',
+                'pre_test' => 85,
+                'quiz' => 90,
+                'post_test' => 95,
+                'final_score' => 92,
+                'status' => 'Lulus',
+            ],
+        ];
+    }
+
+    public static function getActivityLogs()
+    {
+        return [
+            [
+                'id' => 'act_1',
+                'user' => 'Budi Santoso',
+                'role' => 'Student',
+                'action' => 'menyelesaikan quiz',
+                'target' => 'Safety Quiz 1',
+                'time' => '10 menit lalu',
+                'icon' => 'task_alt',
+                'color' => 'success',
+            ],
+            [
+                'id' => 'act_2',
+                'user' => 'Tono Wijaya',
+                'role' => 'Admin',
+                'action' => 'mendesain assignment',
+                'target' => 'Engineering Dept',
+                'time' => '1 jam lalu',
+                'icon' => 'assignment_ind',
+                'color' => 'primary',
+            ],
+            [
+                'id' => 'act_3',
+                'user' => 'Ahmad Rizal',
+                'role' => 'Teacher',
+                'action' => 'memperbarui materi',
+                'target' => 'Video Safety',
+                'time' => '3 jam lalu',
+                'icon' => 'update',
+                'color' => 'secondary',
+            ],
+            [
+                'id' => 'act_4',
+                'user' => 'Siti Aminah',
+                'role' => 'Student',
+                'action' => 'bertanya di forum',
+                'target' => 'PLC Logic Issue',
+                'time' => '1 hari lalu',
+                'icon' => 'forum',
+                'color' => 'warning',
+            ],
+        ];
+    }
+
+    public static function getNotifications()
+    {
+        return [
+            [
+                'id' => 'not_1',
+                'type' => 'Warning',
+                'title' => 'Pending Assignment',
+                'message' => 'Course "Pengenalan ISO 9001:2015" menunggu persetujuan delegasi audiens.',
+                'time' => '5 Jam lalu',
+            ],
+            [
+                'id' => 'not_2',
+                'type' => 'Info',
+                'title' => 'Course Selesai',
+                'message' => 'Course "5S & Kaizen" telah diarsipkan otomatis setelah seluruh peserta tuntas 100%.',
+                'time' => '1 Hari lalu',
+            ],
+            [
+                'id' => 'not_3',
+                'type' => 'Success',
+                'title' => 'Assessment Direview',
+                'message' => 'Teacher Rina Kartika telah menyelesaikan scoring untuk 24 siswa PLC.',
+                'time' => '2 Hari lalu',
+            ],
+        ];
+    }
 }
