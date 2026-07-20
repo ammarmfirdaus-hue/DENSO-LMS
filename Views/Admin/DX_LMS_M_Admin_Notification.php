@@ -68,7 +68,7 @@ $active_tab = 'notification';
                 ?>
                 <div class="<?= $t['bg'] ?> <?= $t[
      'border'
- ] ?> rounded-xl p-4 border flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+ ] ?> rounded-xl p-4 border flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer hover:border-primary/50" onclick="window.location.href='?route=/admin/course/detail&id=101'">
                     <div class="mt-1">
                         <span class="material-symbols-outlined text-[28px] <?= $t[
                             'iconColor'

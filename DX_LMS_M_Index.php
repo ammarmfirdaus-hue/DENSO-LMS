@@ -80,6 +80,9 @@ $router->add('/admin/score', 'DX_LMS_M_Admin_Score@index');
 $router->add('/admin/activity', 'DX_LMS_M_Admin_Activity@index');
 $router->add('/admin/notification', 'DX_LMS_M_Admin_Notification@index');
 
+$router->add('/admin/user/detail', 'DX_LMS_M_Admin_User_Detail@index');
+$router->add('/admin/course/detail', 'DX_LMS_M_Admin_Course_Detail@index');
+
 /** Menjalankan permintaan yang masuk berdasarkan rute yang sesuai. */
 $route = $_GET['route'] ?? '/';
 $router->dispatch($route);

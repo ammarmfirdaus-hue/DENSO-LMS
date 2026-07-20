@@ -83,15 +83,21 @@ $active_tab = 'score';
                             <tr class="hover:bg-surface transition-colors">
                                 <td class="px-4 py-3">
                                     <div class="font-label-md font-bold text-on-surface flex items-center gap-2">
-                                        <?= e(
+                                        <a href="?route=/admin/user/detail&id=1" class="hover:text-primary hover:underline"><?= e(
                                             $score['student_name'],
-                                        ) ?> <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">NPK <?= e(
-     $score['student_npk'],
- ) ?></span>
+                                        ) ?></a> <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">NPK <?= e(
+    $score['student_npk'],
+) ?></span>
                                     </div>
-                                    <div class="font-label-sm text-on-surface-variant opacity-80 mt-1 truncate max-w-xs" title="<?= e(
+                                    <div class="font-label-sm mt-1 truncate max-w-xs" title="<?= e(
                                         $score['course_title'],
-                                    ) ?>"><?= e($score['course_title']) ?></div>
+                                    ) ?>">
+                                        <a href="?route=/admin/course/detail&id=<?= $score[
+                                            'course_id'
+                                        ] ?>" class="text-on-surface-variant opacity-80 hover:text-primary hover:opacity-100 hover:underline"><?= e(
+    $score['course_title'],
+) ?></a>
+                                    </div>
                                 </td>
                                 <td class="px-3 py-3 text-center">
                                     <span class="inline-flex items-center gap-1 font-label-md font-bold text-primary">

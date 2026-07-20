@@ -70,7 +70,9 @@ $active_tab = 'course';
                 $icon = $c['thumbnail_icon'] ?? 'school';
                 $grad = $iconGradients[$icon] ?? 'from-primary/70 to-primary';
                 ?>
-                <div class="flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden hover:shadow-md transition-shadow group">
+                <div class="flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden hover:shadow-md transition-shadow group cursor-pointer hover:border-primary/50 transition-colors" onclick="window.location.href='?route=/admin/course/detail&id=<?= $c[
+                    'id'
+                ] ?>'">
                     <div class="h-32 relative bg-gradient-to-br <?= $grad ?> flex items-center justify-center">
                         <span class="material-symbols-outlined text-white/80" style="font-size: 56px; font-variation-settings: 'FILL' 1;"><?= e(
                             $icon,

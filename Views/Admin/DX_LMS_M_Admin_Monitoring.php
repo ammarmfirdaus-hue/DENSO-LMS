@@ -87,9 +87,11 @@ $active_tab = 'monitoring';
                             <?php endif; ?>
                             <span class="font-label-sm text-on-surface-variant">ID-<?= e($mon['course_id']) ?></span>
                         </div>
-                        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface line-clamp-1 truncate mb-2"><?= e(
-                            $mon['course_title'],
-                        ) ?></h3>
+                        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface line-clamp-1 truncate mb-2">
+                            <a href="?route=/admin/course/detail&id=<?= e(
+                                $mon['course_id'],
+                            ) ?>" class="hover:text-primary hover:underline"><?= e($mon['course_title']) ?></a>
+                        </h3>
                         <p class="font-body-sm text-on-surface-variant">Penanggung Jawab (Teacher): <span class="font-label-sm font-bold opacity-80"><?= e(
                             $mon['teacher'],
                         ) ?></span></p>

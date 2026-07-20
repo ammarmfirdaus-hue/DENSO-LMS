@@ -144,12 +144,16 @@ $active_tab = 'beranda';
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                 <?php foreach ($recent_users as $user): ?>
-                    <div class="bg-surface-container-lowest p-4 rounded-xl border border-surface-variant shadow-sm flex gap-4 items-center hover:shadow-md transition-shadow">
-                        <div class="w-12 h-12 flex-shrink-0 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                    <a href="?route=/admin/user/detail&id=<?= $user[
+                        'id'
+                    ] ?>" class="bg-surface-container-lowest p-4 rounded-xl border border-surface-variant shadow-sm flex gap-4 items-center hover:shadow-md hover:border-primary/50 transition-all group">
+                        <div class="w-12 h-12 flex-shrink-0 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold group-hover:bg-primary group-hover:text-on-primary transition-colors">
                             <?= substr($user['name'], 0, 1) ?>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-label-md font-bold text-on-surface truncate"><?= $user['name'] ?></h3>
+                            <h3 class="font-label-md font-bold text-on-surface group-hover:text-primary transition-colors truncate"><?= $user[
+                                'name'
+                            ] ?></h3>
                             <p class="font-body-sm text-on-surface-variant truncate"><?= $user[
                                 'jabatan'
                             ] ?> • <?= $user['role'] ?></p>
@@ -157,7 +161,7 @@ $active_tab = 'beranda';
                                 'last_login'
                             ] ?></p>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
         </section>
@@ -215,13 +219,24 @@ $active_tab = 'beranda';
                             </div>
                             <div class="flex justify-between items-start gap-4">
                                 <div class="font-body-sm text-on-surface max-w-[85%]">
-                                    <span class="font-label-md font-bold text-on-surface"><?= e($act['user']) ?></span> 
+                                    <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ??
+                                        1 ?>" class="font-label-md font-bold text-on-surface hover:text-primary hover:underline"><?= e(
+    $act['user'],
+) ?></a> 
                                     <span class="bg-<?= $act['color'] ?>/10 text-<?= $act[
     'color'
 ] ?> px-1.5 py-0.5 rounded text-[10px] uppercase font-bold mx-1 border border-<?= $act['color'] ?>/20"><?= e(
     $act['role'],
 ) ?></span> 
-                                    <?= e($act['action']) ?> "<?= e($act['target']) ?>"
+                                    <?= e($act['action']) ?> 
+                                    <?php if (isset($act['target_type']) && $act['target_type'] === 'course'): ?>
+                                        <a href="?route=/admin/course/detail&id=<?= $act['target_id'] ??
+                                            101 ?>" class="font-bold hover:text-primary hover:underline">"<?= e(
+    $act['target'],
+) ?>"</a>
+                                    <?php else: ?>
+                                        "<?= e($act['target']) ?>"
+                                    <?php endif; ?>
                                 </div>
                                 <span class="font-label-sm text-[10px] text-on-surface-variant whitespace-nowrap"><?= e(
                                     $act['time'],

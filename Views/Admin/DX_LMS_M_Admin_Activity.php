@@ -50,7 +50,9 @@ $active_tab = 'activity';
                         <div class="bg-surface-container p-stack-sm rounded-lg border border-surface-variant shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                             <div class="flex justify-between items-start gap-4 mb-1">
                                 <div class="font-body-sm text-on-surface max-w-[85%]">
-                                    <span class="font-label-md font-bold text-on-surface"><?= e($act['user']) ?></span> 
+                                    <a href="?route=/admin/user/detail&id=1" class="font-label-md font-bold text-on-surface hover:text-primary hover:underline"><?= e(
+                                        $act['user'],
+                                    ) ?></a> 
                                     <span class="bg-<?= $act['color'] ?>/10 text-<?= $act[
     'color'
 ] ?> px-1.5 py-0.5 rounded text-[10px] uppercase font-bold mx-1 border border-<?= $act['color'] ?>/20"><?= e(
@@ -58,9 +60,9 @@ $active_tab = 'activity';
 ) ?></span> 
                                     <?= e(
                                         $act['action'],
-                                    ) ?> pada <span class="font-label-sm font-bold text-on-surface-variant/80 italic">"<?= e(
+                                    ) ?> pada <a href="?route=/admin/course/detail&id=101" class="font-label-sm font-bold text-on-surface-variant/80 italic hover:text-primary hover:underline">"<?= e(
      $act['target'],
- ) ?>"</span>
+ ) ?>"</a>
                                 </div>
                                 <span class="font-label-sm text-[10px] text-on-surface-variant shrink-0 bg-surface px-2 py-1 rounded-full border border-outline-variant/30"><?= e(
                                     $act['time'],

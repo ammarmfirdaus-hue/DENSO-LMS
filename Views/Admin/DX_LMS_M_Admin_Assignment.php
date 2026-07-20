@@ -33,7 +33,7 @@ $active_tab = 'assignment';
                 <p class="font-body-md text-on-surface-variant">Assign target partisipan per course sesuai jabatan dan golongan.</p>
             </div>
             
-            <button class="bg-secondary text-on-secondary font-label-md px-4 py-2.5 rounded-lg active:scale-95 transition-transform hover:shadow-md flex items-center gap-2" onclick="alert('Buka dialog assignment')">
+            <button class="bg-secondary text-on-secondary font-label-md px-4 py-2.5 rounded-lg active:scale-95 transition-transform hover:shadow-md flex items-center gap-2" onclick="Swal.fire({title: 'Buat Penugasan Baru', html: '<div class=\'text-left mt-4\'><label class=\'font-label-sm text-on-surface mb-2 block\'>Pilih Course Target</label><select class=\'swal2-select w-full m-0 p-2\'><option>Dasar Keselamatan Kerja & K3</option><option>Pengenalan ISO 9001:2015</option></select></div><div class=\'text-left mt-4\'><label class=\'font-label-sm text-on-surface mb-2 block\'>Tentukan Audiens / Area</label><select class=\'swal2-select w-full m-0 p-2\'><option>Seluruh Operator Line A</option><option>Tim Maintenance (Staff & Leader)</option></select></div>', confirmButtonText: 'Beri Penugasan', customClass: {confirmButton: 'bg-primary text-white rounded-lg px-6 py-2 border-0', cancelButton: 'bg-surface border border-outline-variant text-on-surface px-6 py-2 rounded-lg ml-2'}, showCancelButton: true, cancelButtonText: 'Batal'})">
                 <span class="material-symbols-outlined">add_task</span> Buat Penugasan Baru
             </button>
         </div>
@@ -61,7 +61,7 @@ $active_tab = 'assignment';
                             <?php foreach ($assignments as $asg): ?>
                                 <tr class="hover:bg-surface group transition-colors">
                                     <td class="px-4 py-4">
-                                        <div class="font-label-md font-bold text-primary group-hover:underline cursor-pointer truncate max-w-[200px]" onclick="window.location.href='?route=/admin/course'"><?= e(
+                                        <div class="font-label-md font-bold text-primary group-hover:underline cursor-pointer truncate max-w-[200px]" onclick="window.location.href='?route=/admin/course/detail&id=101'"><?= e(
                                             $asg['course_title'],
                                         ) ?></div>
                                         <div class="font-body-sm text-on-surface-variant mt-1"><?= e(
@@ -83,7 +83,7 @@ $active_tab = 'assignment';
                                         <?php if ($asg['status'] === 'Active'): ?>
                                             <span class="bg-success-container/30 text-success border border-success/30 px-3 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider">Tersalurkan</span>
                                         <?php else: ?>
-                                            <span class="bg-warning-container text-on-warning-container border border-warning/50 px-3 py-1 text-[11px] font-bold rounded-full flex gap-1 items-center justify-center uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">sandclock_initial</span> Draft</span>
+                                            <span class="bg-warning-container text-on-warning-container border border-warning/50 px-3 py-1 text-[11px] font-bold rounded-full flex gap-1 items-center justify-center uppercase tracking-wider w-fit mx-auto"><span class="material-symbols-outlined text-[14px]">pending_actions</span> Draft</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>

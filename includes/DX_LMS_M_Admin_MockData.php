@@ -395,4 +395,82 @@ class DX_LMS_M_Admin_MockData
             ],
         ];
     }
+
+    // ======== DRILL DOWN CONTEXT PROVIDERS (STAGE 2) ========
+
+    public static function getUserDetail($id)
+    {
+        $users = self::getUsers();
+        $user = null;
+        foreach ($users as $u) {
+            if ((string) $u['id'] === (string) $id) {
+                $user = $u;
+                break;
+            }
+        }
+
+        if (!$user) {
+            return null;
+        }
+
+        // Dummy associations based on role
+        if ($user['role'] === 'Student') {
+            $user['enrolled_courses'] = [
+                [
+                    'title' => 'Dasar Keselamatan Kerja (K3)',
+                    'progress' => 80,
+                    'status' => 'In Progress',
+                    'course_id' => 101,
+                ],
+                ['title' => '5S & Kaizen Fundamentals', 'progress' => 100, 'status' => 'Completed', 'course_id' => 104],
+            ];
+            $user['recent_activities'] = [
+                ['action' => 'Menyelesaikan Quiz', 'target' => 'Safety Quiz 1', 'time' => '10 menit lalu'],
+                ['action' => 'Bertanya di Forum', 'target' => 'Materi K3', 'time' => '1 hari lalu'],
+            ];
+        } else {
+            $user['teaching_courses'] = [
+                ['title' => 'Dasar Keselamatan Kerja (K3)', 'students' => 110, 'course_id' => 101],
+            ];
+            $user['recent_activities'] = [
+                ['action' => 'Mengupdate Materi', 'target' => 'Video Safety', 'time' => '3 jam lalu'],
+            ];
+        }
+
+        return $user;
+    }
+
+    public static function getCourseDetail($id)
+    {
+        $courses = self::getCourses();
+        $course = null;
+        foreach ($courses as $c) {
+            if ((string) $c['id'] === (string) $id) {
+                $course = $c;
+                break;
+            }
+        }
+
+        if (!$course) {
+            return null;
+        }
+
+        // Dummy contextual drill-down data
+        $course['syllabus'] = [
+            ['title' => 'Pendahuluan & Konsep Dasar', 'type' => 'Video', 'duration' => '15 Menit'],
+            ['title' => 'Quiz Modul 1', 'type' => 'Quiz', 'duration' => '10 Soal'],
+            ['title' => 'Studi Kasus Keselamatan', 'type' => 'Reading', 'duration' => '20 Menit'],
+        ];
+
+        $course['top_students'] = [
+            ['name' => 'Budi Santoso', 'progress' => 100, 'score' => 90, 'user_id' => 1],
+            ['name' => 'Siti Aminah', 'progress' => 80, 'score' => 'N/A', 'user_id' => 3],
+        ];
+
+        $course['lagging_students'] = [
+            ['name' => 'Asep Sudrajat', 'progress' => 10, 'lag_reason' => 'Belum Login 5 Hari', 'user_id' => 999],
+        ];
+
+        return $course;
+    }
 }
