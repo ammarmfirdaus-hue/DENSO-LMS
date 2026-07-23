@@ -20,4 +20,4 @@ echo Menjalankan server pada http://localhost:8080
 echo Tekan CTRL+C untuk berhenti.
 echo.
 
-"%PHP_PATH%" -S localhost:8080
+"%PHP_PATH%" -c "%~dp0php-8.3.31\php.ini" -S localhost:8080
