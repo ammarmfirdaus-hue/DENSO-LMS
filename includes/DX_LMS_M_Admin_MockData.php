@@ -286,6 +286,7 @@ class DX_LMS_M_Admin_MockData
         return [
             [
                 'id' => 'scr_1',
+                'course_id' => 101,
                 'course_title' => 'Dasar Keselamatan Kerja (K3)',
                 'student_name' => 'Budi Santoso',
                 'student_npk' => '12345',
@@ -298,6 +299,7 @@ class DX_LMS_M_Admin_MockData
             ],
             [
                 'id' => 'scr_2',
+                'course_id' => 101,
                 'course_title' => 'Dasar Keselamatan Kerja (K3)',
                 'student_name' => 'Asep Sudrajat',
                 'student_npk' => '54321',
@@ -310,6 +312,7 @@ class DX_LMS_M_Admin_MockData
             ],
             [
                 'id' => 'scr_3',
+                'course_id' => 102,
                 'course_title' => 'Basic Programmable Logic Controller',
                 'student_name' => 'Siti Aminah',
                 'student_npk' => '11223',

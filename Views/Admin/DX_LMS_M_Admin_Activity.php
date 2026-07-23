@@ -25,7 +25,7 @@ $active_tab = 'activity';
     <?php include 'includes/components/DX_LMS_M_Admin_Sidebar.php'; ?>
     <?php include 'includes/components/DX_LMS_M_Header.php'; ?>
 
-    <main class="dls-main flex-1 overflow-y-auto pt-[72px] px-container-margin pb-[88px] lg:ml-[240px]">
+    <main class="dls-main flex-1 overflow-y-auto pt-[96px] px-container-margin pb-[88px] lg:ml-[240px]">
         
         <div class="mb-stack-lg max-w-4xl mx-auto">
             <h1 class="font-headline-lg font-bold text-on-surface text-center md:text-left">Activity Hub LMS</h1>
