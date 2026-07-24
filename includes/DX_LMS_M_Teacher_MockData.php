@@ -47,7 +47,7 @@ class DX_LMS_M_Teacher_MockData
     public static function initData()
     {
         $courses = self::getStorage('courses', null);
-        if ($courses === null) {
+        if ($courses === null || count($courses) < 6) {
             $defaultCourses = [
                 [
                     'id' => 1,
@@ -59,6 +59,9 @@ class DX_LMS_M_Teacher_MockData
                     'icon' => 'health_and_safety',
                     'participants' => 45,
                     'pending_reviews' => 2,
+                    'sessions' => 6,
+                    'assessments' => 1,
+                    'progress' => 60,
                     'avg_score' => 88,
                     'updated_at' => '2 Jam yang lalu',
                 ],
@@ -72,6 +75,9 @@ class DX_LMS_M_Teacher_MockData
                     'icon' => 'manufacturing',
                     'participants' => 30, // Recommended count
                     'pending_reviews' => 0,
+                    'sessions' => 4,
+                    'assessments' => 0,
+                    'progress' => 10,
                     'avg_score' => 0,
                     'updated_at' => 'Kemarin',
                 ],
@@ -85,8 +91,59 @@ class DX_LMS_M_Teacher_MockData
                     'icon' => 'fact_check',
                     'participants' => 0,
                     'pending_reviews' => 0,
+                    'sessions' => 2,
+                    'assessments' => 1,
+                    'progress' => 0,
                     'avg_score' => 0,
                     'updated_at' => '3 Hari yang lalu',
+                ],
+                [
+                    'id' => 4,
+                    'code' => 'LEAN-401',
+                    'title' => 'Lean Manufacturing Essentials',
+                    'description' => 'Mewujudkan sistem produksi bebas waste.',
+                    'category' => 'Production',
+                    'status' => self::STATUS_COMPLETED,
+                    'icon' => 'build_circle',
+                    'participants' => 120,
+                    'pending_reviews' => 0,
+                    'sessions' => 8,
+                    'assessments' => 2,
+                    'progress' => 100,
+                    'avg_score' => 92,
+                    'updated_at' => 'Bulan lalu',
+                ],
+                [
+                    'id' => 5,
+                    'code' => 'SAFE-102',
+                    'title' => 'Advanced Safety Protocols',
+                    'description' => 'Penanganan insiden kimia dan pemadaman api tingkat lanjut.',
+                    'category' => 'HSE',
+                    'status' => self::STATUS_RUNNING,
+                    'icon' => 'local_fire_department',
+                    'participants' => 22,
+                    'pending_reviews' => 5,
+                    'sessions' => 4,
+                    'assessments' => 1,
+                    'progress' => 45,
+                    'avg_score' => 81,
+                    'updated_at' => '4 Jam yang lalu',
+                ],
+                [
+                    'id' => 6,
+                    'code' => 'MGT-501',
+                    'title' => 'Shopfloor Leadership',
+                    'description' => 'Pelatihan kepemimpinan dan komunikasi untuk Leader produksi.',
+                    'category' => 'Leadership',
+                    'status' => self::STATUS_APPROVED,
+                    'icon' => 'campaign',
+                    'participants' => 0,
+                    'pending_reviews' => 0,
+                    'sessions' => 5,
+                    'assessments' => 2,
+                    'progress' => 0,
+                    'avg_score' => 0,
+                    'updated_at' => 'Kemarin',
                 ],
             ];
             self::setStorage('courses', $defaultCourses);
@@ -127,7 +184,7 @@ class DX_LMS_M_Teacher_MockData
         }
 
         $notifications = self::getStorage('notifications', null);
-        if ($notifications === null) {
+        if ($notifications === null || count($notifications) < 4) {
             $defaultNotifications = [
                 [
                     'id' => 201,
@@ -146,6 +203,24 @@ class DX_LMS_M_Teacher_MockData
                     'icon' => 'assignment_return',
                     'is_read' => true,
                     'link' => '?route=/teacher/course/detail&course_id=3',
+                ],
+                [
+                    'id' => 3,
+                    'title' => 'Pertanyaan Forum Diskusi',
+                    'message' => 'Terdapat 3 balasan peserta yang butuh tanggapan Anda.',
+                    'time' => '3 Jam yang lalu',
+                    'icon' => 'forum',
+                    'is_read' => false,
+                    'link' => '?route=/teacher/forum',
+                ],
+                [
+                    'id' => 4,
+                    'title' => 'Course Kadaluarsa',
+                    'message' => 'Materi pada course Shopfloor Leadership butuh pembaruan berkala.',
+                    'time' => '1 Hari yang lalu',
+                    'icon' => 'warning',
+                    'is_read' => false,
+                    'link' => '?route=/teacher/course/detail&course_id=6',
                 ],
             ];
             self::setStorage('notifications', $defaultNotifications);

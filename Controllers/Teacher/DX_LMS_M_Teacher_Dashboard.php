@@ -36,9 +36,9 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
             'active_tab' => 'beranda',
             'base_path' => '',
             'stats' => $stats,
-            'courses' => array_slice($courses, 0, 3), // Show max 3 on dashboard
-            'activities' => array_slice($activities, 0, 4),
-            'pending_actions' => array_slice($pendingActions, 0, 2),
+            'courses' => array_slice($courses, 0, 6), // Show 6 on dashboard
+            'activities' => array_slice($activities, 0, 3), // Balance with 3 pending actions
+            'pending_actions' => array_slice($pendingActions, 0, 3),
         ];
 
         $this->view('DX_LMS_M_Teacher_Dashboard', $data);
