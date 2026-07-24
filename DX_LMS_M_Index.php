@@ -67,6 +67,9 @@ $router->add('/teacher/grade', 'DX_LMS_T_Teacher_Grade@index');
 $router->add('/teacher/forum', 'DX_LMS_T_Teacher_Forum@index');
 $router->add('/teacher/notifikasi', 'DX_LMS_T_Teacher_Notification@index');
 $router->add('/teacher/profil', 'DX_LMS_T_Teacher_Profile@index');
+$router->add('/teacher/profil/detail', 'DX_LMS_T_Teacher_Profile@detail');
+$router->add('/teacher/profil/pengaturan', 'DX_LMS_T_Teacher_Profile@pengaturan');
+$router->add('/teacher/profil/bantuan', 'DX_LMS_T_Teacher_Profile@bantuan');
 
 /** Mendefinisikan rute khusus untuk pengguna Admin (MVP Tahap 1 & 2). */
 $router->add('/admin', 'DX_LMS_M_Admin_Dashboard@index');
