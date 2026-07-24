@@ -20,24 +20,25 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
             exit();
         }
 
-        /** Mengambil data dari basis data terpusat (Single Source of Truth). */
-        // Untuk MVP kita ambil seluruh data course sementara
-        $allCourses = DX_LMS_M_Student_Data::getCourses();
-        
-        // Asumsi Teacher mengampu 3 course pertama (sebagai data dummy)
-        $managedCourses = array_slice($allCourses, 0, 3);
+        require_once 'includes/DX_LMS_M_Teacher_MockData.php';
 
-        $stats = [
-            'total_course' => count($managedCourses),
-            'total_student' => 125, // Dummy
-            'need_grading' => 5 // Dummy
-        ];
+        $stats = DX_LMS_M_Teacher_MockData::getTeacherStats();
+        $courses = DX_LMS_M_Teacher_MockData::getManagedCourses();
+        $activities = DX_LMS_M_Teacher_MockData::getActivities();
+        $notifications = DX_LMS_M_Teacher_MockData::getNotifications();
+
+        // Get recent actions (e.g., pending reviews, rejected recommendations)
+        $pendingActions = array_filter($notifications, function ($n) {
+            return !$n['is_read'];
+        });
 
         $data = [
             'active_tab' => 'beranda',
             'base_path' => '',
             'stats' => $stats,
-            'courses' => $managedCourses,
+            'courses' => array_slice($courses, 0, 3), // Show max 3 on dashboard
+            'activities' => array_slice($activities, 0, 4),
+            'pending_actions' => array_slice($pendingActions, 0, 2),
         ];
 
         $this->view('DX_LMS_M_Teacher_Dashboard', $data);

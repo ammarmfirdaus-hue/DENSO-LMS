@@ -1,110 +1,154 @@
 <?php
 /**
- * Kelas Pengontrol Course Pengajar (Teacher Course Controller).
+ * Kelas Pengontrol Manajemen Course Pengajar (Teacher Course Controller).
  *
- * Mengelola fungsionalitas bagi pengajar untuk melihat daftar course, 
- * mengelola sesi, dan mengelola materi di dalam course tersebut.
+ * Mengelola course list, detail course, dan flow penambahan (create wizard).
  */
 class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
 {
-    private function checkAuth()
+    /**
+     * Menampilkan daftar course yang diampu.
+     */
+    public function index()
     {
         session_start();
         if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
             header('Location: ?route=/login');
             exit();
         }
-    }
 
-    /**
-     * Menampilkan daftar semua course yang diampu.
-     */
-    public function index()
-    {
-        $this->checkAuth();
-        
-        // MVP: Ambil semua course dummy 
-        $courses = DX_LMS_M_Student_Data::getCourses();
-        $managedCourses = array_slice($courses, 0, 3); // Dummy filter
+        require_once 'includes/DX_LMS_M_Teacher_MockData.php';
+
+        $courses = DX_LMS_M_Teacher_MockData::getManagedCourses();
+        // Optional filter based on GET param handling
+        $filterStatus = $_GET['status'] ?? 'all';
+        if ($filterStatus !== 'all') {
+            $courses = array_filter($courses, function ($c) use ($filterStatus) {
+                return strtolower($c['status']) === strtolower($filterStatus);
+            });
+        }
 
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
-            'courses' => $managedCourses,
+            'courses' => $courses,
+            'current_filter' => $filterStatus,
         ];
 
         $this->view('DX_LMS_M_Teacher_Course', $data);
     }
 
     /**
-     * Menampilkan halaman kelola sesi dari sebuah course.
+     * Menampilkan Detail Course (Pusat Kendali Pengajaran)
+     */
+    public function detail()
+    {
+        session_start();
+        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+            header('Location: ?route=/login');
+            exit();
+        }
+
+        require_once 'includes/DX_LMS_M_Teacher_MockData.php';
+
+        $courseId = $_GET['course_id'] ?? 1;
+        $course = DX_LMS_M_Teacher_MockData::getCourseDetail($courseId);
+
+        if (!$course) {
+            header('Location: ?route=/teacher/courses');
+            exit();
+        }
+
+        // Dummy data for detail syllabus and participants
+        $syllabus = [
+            ['id' => 1, 'title' => 'Sesi 1: Pengenalan 5S', 'materials' => 2, 'assesments' => 1],
+            ['id' => 2, 'title' => 'Sesi 2: Sort (Seiri)', 'materials' => 1, 'assesments' => 0],
+        ];
+
+        $participants = [
+            ['nama' => 'Budi Santoso', 'progress' => 100, 'score' => 90, 'status' => 'Lulus'],
+            ['nama' => 'Ahmad Rizal', 'progress' => 50, 'score' => 0, 'status' => 'In Progress'],
+        ];
+
+        $activities = DX_LMS_M_Teacher_MockData::getActivities();
+        $courseActivities = array_filter($activities, function ($a) use ($course) {
+            return strpos(strtolower($a['target']), strtolower($course['title'])) !== false;
+        });
+
+        $data = [
+            'active_tab' => 'course',
+            'base_path' => '',
+            'course' => $course,
+            'syllabus' => $syllabus,
+            'participants' => $participants,
+            'activities' => $courseActivities,
+        ];
+
+        $this->view('DX_LMS_T_Teacher_Course_Detail', $data);
+    }
+
+    /**
+     * Menampilkan Form Create Course / Edit (Wizard)
+     */
+    public function create()
+    {
+        session_start();
+        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+            header('Location: ?route=/login');
+            exit();
+        }
+
+        require_once 'includes/DX_LMS_M_Teacher_MockData.php';
+
+        $courseId = $_GET['course_id'] ?? null;
+        $course = null;
+        if ($courseId) {
+            $course = DX_LMS_M_Teacher_MockData::getCourseDetail($courseId);
+        }
+
+        $filters = DX_LMS_M_Teacher_MockData::getTargetFilterOptions();
+
+        $data = [
+            'active_tab' => 'course',
+            'base_path' => '',
+            'course' => $course, // null if new course
+            'filters' => $filters,
+        ];
+
+        $this->view('DX_LMS_T_Teacher_Course_Create', $data);
+    }
+
+    /**
+     * Sisa method lama yang belum dipolish phase ini
+     *
      */
     public function session()
     {
-        $this->checkAuth();
-        $courseId = $_GET['id'] ?? '';
-        
-        $data = [
-            'active_tab' => 'course',
-            'base_path' => '',
-            'courseId' => $courseId,
-            // Dummy sessions
-            'sessions' => [
-                [
-                    'id' => 1,
-                    'title' => 'Sesi 1: Pengenalan TPM',
-                    'date' => '20 Okt 2023',
-                    'materials_count' => 3,
-                    'quiz_count' => 1
-                ],
-                [
-                    'id' => 2,
-                    'title' => 'Sesi 2: OEE Calculation',
-                    'date' => '25 Okt 2023',
-                    'materials_count' => 2,
-                    'quiz_count' => 0
-                ]
-            ]
-        ];
-
+        $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => ''];
         $this->view('DX_LMS_M_Teacher_Course_Session', $data);
     }
 
-    /**
-     * Menampilkan halaman detail/edit materi.
-     */
     public function material()
     {
-        $this->checkAuth();
-        
-        $data = [
-            'active_tab' => 'course',
-            'base_path' => '',
-            'material' => [
-                'id' => 101,
-                'title' => 'Slide Presentasi TPM Basics',
-                'type' => 'pdf',
-                'file_name' => 'TPM_Basics_Modul1.pdf',
-                'size' => '2.4 MB'
-            ]
-        ];
-
+        $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => ''];
         $this->view('DX_LMS_M_Teacher_Course_Material', $data);
     }
 
-    /**
-     * Menampilkan form tambah materi baru.
-     */
     public function addMaterial()
     {
-        $this->checkAuth();
-        
-        $data = [
-            'active_tab' => 'course',
-            'base_path' => '',
-            'sessionId' => $_GET['session_id'] ?? ''
-        ];
-
+        $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => ''];
         $this->view('DX_LMS_M_Teacher_Course_Add_Material', $data);
+    }
+
+    private function redirectIfNotTeacher()
+    {
+        session_start();
+        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+            header('Location: ?route=/login');
+            exit();
+        }
     }
 }
