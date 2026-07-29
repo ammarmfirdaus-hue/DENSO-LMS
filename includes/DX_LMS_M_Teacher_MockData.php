@@ -11,6 +11,7 @@ class DX_LMS_M_Teacher_MockData
     /** Peta Status Lifecycle Course */
     public const STATUS_DRAFT = 'Draft';
     public const STATUS_SUBMITTED = 'Submitted';
+    public const STATUS_REJECTED = 'Rejected';
     public const STATUS_APPROVED = 'Approved';
     public const STATUS_RUNNING = 'Running';
     public const STATUS_COMPLETED = 'Completed';
@@ -46,6 +47,15 @@ class DX_LMS_M_Teacher_MockData
      */
     public static function initData()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['teacher_mock_version']) || $_SESSION['teacher_mock_version'] < 2) {
+            unset($_SESSION['teacher_mock_data']);
+            $_SESSION['teacher_mock_version'] = 2;
+        }
+
         $courses = self::getStorage('courses', null);
         if ($courses === null || count($courses) < 6) {
             $defaultCourses = [
@@ -61,30 +71,6 @@ class DX_LMS_M_Teacher_MockData
                     'pending_reviews' => 2,
                     'sessions' => 6,
                     'assessments' => 1,
-                    'progress' => 60,
-                    'avg_score' => 88,
-                    'updated_at' => '2 Jam yang lalu',
-                ],
-                [
-                    'id' => 2,
-                    'code' => 'PROD-201',
-                    'title' => 'Pengenalan TPM (Total Productive Maintenance)',
-                    'description' => 'Pelatihan pemeliharaan mesin produksi tahap awal.',
-                    'category' => 'Maintenance',
-                    'status' => self::STATUS_SUBMITTED,
-                    'icon' => 'manufacturing',
-                    'participants' => 30, // Recommended count
-                    'pending_reviews' => 0,
-                    'sessions' => 4,
-                    'assessments' => 0,
-                    'progress' => 10,
-                    'avg_score' => 0,
-                    'updated_at' => 'Kemarin',
-                ],
-                [
-                    'id' => 3,
-                    'code' => 'QC-301',
-                    'title' => 'Quality Control Basic',
                     'description' => 'Materi standar QC untuk inspektur baru.',
                     'category' => 'Quality',
                     'status' => self::STATUS_DRAFT,
@@ -151,15 +137,47 @@ class DX_LMS_M_Teacher_MockData
                     'title' => 'Dasar Keselamatan Listrik',
                     'description' => 'Mengenal risiko kelistrikan dan penggunaan APD listrik.',
                     'category' => 'HSE',
-                    'status' => self::STATUS_COMPLETED,
+                    'status' => self::STATUS_RUNNING,
                     'icon' => 'electric_bolt',
                     'participants' => 35,
                     'pending_reviews' => 0,
                     'sessions' => 3,
                     'assessments' => 1,
-                    'progress' => 100,
-                    'avg_score' => 92,
+                    'progress' => 15,
+                    'avg_score' => 0,
                     'updated_at' => 'Bulan lalu',
+                ],
+                [
+                    'id' => 8,
+                    'code' => 'ISO-001',
+                    'title' => 'Implementasi ISO 9001:2015',
+                    'description' => 'Revisi silabus ISO untuk departemen QA bersertifikat baru.',
+                    'category' => 'Quality',
+                    'status' => self::STATUS_REJECTED,
+                    'icon' => 'gpp_bad',
+                    'participants' => 0,
+                    'pending_reviews' => 0,
+                    'sessions' => 3,
+                    'assessments' => 0,
+                    'progress' => 0,
+                    'avg_score' => 0,
+                    'updated_at' => '2 Hari yang lalu',
+                ],
+                [
+                    'id' => 9,
+                    'code' => 'LGC-2023',
+                    'title' => 'Legacy Training SOP Produksi 2023',
+                    'description' => 'SOP Lama, tidak berlaku sejak Januari 2024.',
+                    'category' => 'Production',
+                    'status' => self::STATUS_ARCHIVED,
+                    'icon' => 'inventory_2',
+                    'participants' => 420,
+                    'pending_reviews' => 0,
+                    'sessions' => 12,
+                    'assessments' => 4,
+                    'progress' => 100,
+                    'avg_score' => 88,
+                    'updated_at' => 'Tahun lalu',
                 ],
             ];
             self::setStorage('courses', $defaultCourses);
