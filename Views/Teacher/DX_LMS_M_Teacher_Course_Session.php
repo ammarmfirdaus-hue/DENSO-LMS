@@ -127,5 +127,6 @@
     </main>
 
     <?php include 'includes/components/DX_LMS_M_Teacher_Bottom_Nav.php'; ?>
+
 </body>
 </html>

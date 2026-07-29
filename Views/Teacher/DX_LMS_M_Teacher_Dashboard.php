@@ -217,109 +217,101 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
                     <?php foreach ($courses as $course): ?>
                     <?php
-                    // Lifecycle badge styling — subtle accent colors only
-                    $stat = $course['status'] ?? 'Draft';
-                    $badgeCls = match ($stat) {
-                        'Running' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                        'Submitted' => 'text-blue-700 bg-blue-50 border-blue-200',
-                        'Completed' => 'text-slate-600 bg-slate-50 border-slate-200',
-                        'Approved' => 'text-violet-700 bg-violet-50 border-violet-200',
-                        'Archived' => 'text-stone-500 bg-stone-50 border-stone-200',
-                        default => 'text-amber-700 bg-amber-50 border-amber-200', // Draft
+                    // Map backend status → 3 simplified UI labels
+                    $rawStat = $course['status'] ?? 'Draft';
+                    $displayStat = match ($rawStat) {
+                        'Running', 'Submitted', 'Approved' => 'In Progress',
+                        'Completed', 'Archived' => 'Completed',
+                        default => 'Draft',
                     };
 
-                    // Progress bar color — calm accents
-                    $progressBarColor = match ($stat) {
-                        'Running' => 'bg-emerald-500',
-                        'Completed' => 'bg-slate-400',
-                        'Approved' => 'bg-violet-400',
-                        default => 'bg-amber-400',
+                    // Badge styling — 3 clean token sets
+                    $badgeCls = match ($displayStat) {
+                        'In Progress' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
+                        'Completed' => 'text-blue-700 bg-blue-50 border-blue-200', // blue tone for Completed
+                        default => 'text-gray-700 bg-gray-50 border-gray-300 shadow-sm', // embossed gray for Draft
                     };
-                    $progressTextColor = match ($stat) {
-                        'Running' => 'text-emerald-600',
-                        'Completed' => 'text-slate-500',
+
+                    // Progress bar & text colors — match badge accent
+                    $progressBarHex = match ($displayStat) {
+                        'In Progress' => '#10B981', // emerald-500
+                        'Completed' => '#3B82F6', // blue-500
+                        default => '#9CA3AF', // gray-400 (though draft hides progress)
+                    };
+                    $progressTextColor = match ($displayStat) {
+                        'In Progress' => 'text-emerald-600',
+                        'Completed' => 'text-blue-600',
                         default => 'text-on-surface-variant',
                     };
 
                     $progress = (int) ($course['progress'] ?? 0);
 
                     // Context line — status-aware
-                    $contextLine = match ($stat) {
+                    $contextLine = match ($rawStat) {
                         'Draft' => 'Draft belum dikirim',
                         'Submitted' => 'Menunggu persetujuan admin',
                         'Approved' => 'Siap dijalankan',
-                        'Running' => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
-                        'Completed' => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
+                        'Completed' => 'Course telah selesai',
                         'Archived' => 'Course telah diarsipkan',
                         default => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
                     };
 
-                    // CTA text & style — based on lifecycle
-                    $ctaText = match ($stat) {
-                        'Running' => 'Kelola Penilaian',
-                        'Draft' => 'Edit Draft',
-                        'Submitted' => 'Lihat Detail',
+                    // CTA — simplified to match 3 statuses
+                    $ctaText = match ($displayStat) {
+                        'In Progress' => 'Kelola Penilaian',
                         'Completed' => 'Lihat Detail',
-                        'Approved' => 'Buka Course',
-                        'Archived' => 'Lihat Arsip',
-                        default => 'Buka Detail Course',
+                        default => 'Edit Draft',
                     };
-                    $ctaHref = match ($stat) {
+                    $ctaHref = match ($rawStat) {
                         'Running' => '?route=/teacher/grade&course_id=' . e((string) $course['id']),
                         'Draft' => '?route=/teacher/course/create&course_id=' . e((string) $course['id']),
                         default => '?route=/teacher/course/detail&course_id=' . e((string) $course['id']),
                     };
-                    // Running → solid accent, others → outline/ghost
-                    $ctaCls = match ($stat) {
-                        'Running' => 'text-emerald-700 border-emerald-300 bg-emerald-50 hover:bg-emerald-100',
-                        'Draft' => 'text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100',
-                        default
-                            => 'text-on-surface-variant border-outline-variant/40 bg-surface hover:bg-surface-container-low',
+                    $ctaCls = match ($displayStat) {
+                        'In Progress' => 'text-emerald-700 border-emerald-200 hover:bg-emerald-50',
+                        'Completed' => 'text-blue-700 border-blue-200 hover:bg-blue-50', // blue tone
+                        default => 'text-gray-700 border-gray-300 hover:bg-gray-100 shadow-sm', // embossed gray
                     };
                     ?>
-                    <div class="course-card flex flex-col h-full bg-white rounded-xl border border-outline-variant/30 overflow-hidden group hover:border-outline-variant hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200">
+                    <div class="course-card flex flex-col h-full bg-white rounded-xl border border-outline-variant/30 overflow-hidden hover:border-outline-variant/60 hover:shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-200">
                         
-                        <!-- Card Body — Clean & Flat -->
+                        <!-- Card Body -->
                         <div class="p-5 flex flex-col flex-1 gap-3">
 
                             <!-- 1. Status Badge -->
-                            <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border <?= $badgeCls ?>">
-                                    <?= e($stat) ?>
+                            <div>
+                                <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-[3px] rounded-full border <?= $badgeCls ?>">
+                                    <?= e($displayStat) ?>
                                 </span>
-                                <!-- Kebab menu placeholder -->
-                                <button class="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Opsi lainnya">
-                                    <span class="material-symbols-outlined text-[18px]">more_vert</span>
-                                </button>
                             </div>
 
-                            <!-- 2. Course Title (Hero Element) -->
-                            <h3 class="font-bold text-on-surface text-[15px] leading-snug line-clamp-2 group-hover:text-primary transition-colors" title="<?= e(
+                            <!-- 2. Course Title -->
+                            <h3 class="font-bold text-on-surface text-[15px] leading-snug line-clamp-2 min-h-[2.5rem]" title="<?= e(
                                 $course['title'],
                             ) ?>">
                                 <?= e($course['title']) ?>
                             </h3>
 
                             <!-- 3. Category + Code -->
-                            <p class="text-[12px] text-on-surface-variant font-medium tracking-wide">
+                            <p class="text-[12px] text-on-surface-variant font-medium">
                                 <?= e($course['category'] ?? '') ?> • <?= e($course['code'] ?? '') ?>
                             </p>
 
-                            <!-- 4. Operational Metrics — Compact 3-col -->
-                            <div class="grid grid-cols-3 gap-0 border-t border-b border-outline-variant/20 py-3 -mx-0">
-                                <div class="flex flex-col items-center justify-center">
+                            <!-- 4. Operational Metrics -->
+                            <div class="grid grid-cols-3 border-t border-b border-outline-variant/20 py-2.5">
+                                <div class="flex flex-col items-center">
                                     <span class="text-[15px] font-black text-on-surface leading-none"><?= e(
                                         (string) ($course['participants'] ?? 0),
                                     ) ?></span>
                                     <span class="text-[10px] text-on-surface-variant font-medium mt-1 uppercase tracking-wide">Peserta</span>
                                 </div>
-                                <div class="flex flex-col items-center justify-center border-x border-outline-variant/20">
+                                <div class="flex flex-col items-center border-x border-outline-variant/20">
                                     <span class="text-[15px] font-black text-on-surface leading-none"><?= e(
                                         (string) ($course['sessions'] ?? 0),
                                     ) ?></span>
                                     <span class="text-[10px] text-on-surface-variant font-medium mt-1 uppercase tracking-wide">Sesi</span>
                                 </div>
-                                <div class="flex flex-col items-center justify-center">
+                                <div class="flex flex-col items-center">
                                     <span class="text-[15px] font-black text-on-surface leading-none"><?= e(
                                         (string) ($course['assessments'] ?? 0),
                                     ) ?></span>
@@ -327,28 +319,28 @@
                                 </div>
                             </div>
 
-                            <!-- 5. Progress (if applicable) -->
-                            <?php if (in_array($stat, ['Running', 'Completed', 'Approved'])): ?>
+                            <!-- 5. Progress Bar (In Progress & Completed only) -->
+                            <?php if ($displayStat !== 'Draft'): ?>
                             <div class="space-y-1.5">
                                 <div class="flex justify-between items-baseline">
                                     <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wide">Progress Kelas</span>
                                     <span class="text-[12px] font-bold <?= $progressTextColor ?>"><?= $progress ?>%</span>
                                 </div>
-                                <div class="w-full bg-surface-container-highest/60 rounded-full h-[5px] overflow-hidden">
-                                    <div class="<?= $progressBarColor ?> h-full rounded-full transition-all duration-500" style="width: <?= $progress ?>%"></div>
+                                <div class="w-full rounded-full h-1.5 overflow-hidden border border-outline-variant/10" style="background-color: #E2E8F0;">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width: <?= $progress ?>%; background-color: <?= $progressBarHex ?>;"></div>
                                 </div>
                             </div>
                             <?php endif; ?>
 
-                            <!-- 6. Context Info -->
-                            <p class="text-[11px] text-outline font-medium mt-auto leading-snug">
-                                <?= $contextLine ?>
-                            </p>
-
-                            <!-- 7. CTA Button -->
-                            <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center w-full text-[13px] font-bold py-2 rounded-lg border transition-colors <?= $ctaCls ?>">
-                                <?= $ctaText ?>
-                            </a>
+                            <!-- 6 + 7. Footer: Context (left) + Action (right) -->
+                            <div class="flex items-end justify-between gap-3 pt-3 mt-auto border-t border-outline-variant/20">
+                                <p class="text-[11px] text-outline font-medium leading-snug flex-1 min-w-0">
+                                    <?= $contextLine ?>
+                                </p>
+                                <a href="<?= $ctaHref ?>" class="inline-flex items-center shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-lg border bg-white transition-colors <?= $ctaCls ?>">
+                                    <?= $ctaText ?>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <?php endforeach; ?>
