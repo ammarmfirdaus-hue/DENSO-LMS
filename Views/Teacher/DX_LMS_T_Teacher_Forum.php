@@ -1,139 +1,124 @@
 <?php
 /**
- * Tampilan Forum Diskusi Pengajar (Teacher Forum).
- *
- * Mengacu pada forum_diskusi_teacher_aligned_with_student_view/code.html
+ * Tampilan Forum Pengajar (Teacher Forum).
  */
 ?>
 <!DOCTYPE html>
-<html class="light" lang="id" style="">
+<html class="light" lang="id">
 <head>
     <?php
-    $page_title = 'Forum Diskusi - LMS';
+    $page_title = 'Forum Diskusi - LMS Teacher';
     include 'includes/components/DX_LMS_M_Tailwind_Head.php';
     ?>
     <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-            min-height: max(884px, 100dvh);
-        }
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        body { min-height: max(600px, 100dvh); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col font-sans antialiased pb-24">
-    <!-- TopAppBar -->
-    <header class="bg-surface border-b border-surface-variant docked full-width top-0 sticky z-50 flex justify-between items-center px-container-margin h-14 w-full transition-colors duration-200">
-        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low active:scale-95 text-on-surface-variant transition-transform">
-            <span class="material-symbols-outlined text-primary text-[28px]" data-icon="arrow_back">arrow_back</span>
+<body class="dls-app-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans">
+    
+    <?php $active_tab = 'course'; ?>
+    <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden">
+        <?php
+        $header_title = 'Forum Diskusi';
+        $show_back_button = true;
+        include 'includes/components/DX_LMS_M_Teacher_Header.php';
+        ?>
+    </div>
+    
+    <!-- Desktop Header -->
+    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="p-2 -ml-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-95 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            </button>
+            <h1 class="font-headline-6 font-bold text-on-surface">Forum Diskusi</h1>
+        </div>
+        <button class="bg-primary hover:bg-primary-600 text-on-primary font-label-md font-bold px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">add_comment</span> Buat Pengumuman Biasa
         </button>
-        <div class="font-headline-md text-headline-md font-bold tracking-tight text-primary">LMS</div>
-        <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low active:scale-95 text-on-surface-variant transition-transform relative">
-            <span class="material-symbols-outlined text-primary text-[28px]" data-icon="notifications">notifications</span>
-            <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
-        </button>
-    </header>
+    </div>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto px-container-margin py-stack-md pb-24">
-        <div class="relative w-full h-[200px] bg-surface-container-highest overflow-hidden group mb-stack-lg rounded-xl">
-            <div class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 bg-secondary flex items-center justify-center">
-                 <!-- Placeholder for Hero Image -->
-                 <span class="material-symbols-outlined text-white text-6xl">forum</span>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 w-full p-container-margin">
-                <h1 class="font-headline-lg text-headline-lg text-white mb-1 drop-shadow-md">Course K3</h1>
-                <p class="font-body-md text-body-md text-white/90">Pelatihan Keselamatan Kerja Dasar</p>
-            </div>
-        </div>
-        
-        <div class="mb-stack-lg">
-            <h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-sm">Forum Diskusi</h2>
-            <p class="font-body-md text-body-md text-on-surface-variant">Bergabunglah dalam diskusi untuk memperdalam pemahaman materi.</p>
-        </div>
-
-        <!-- Section 1 -->
-        <div class="mb-stack-lg">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md border-l-4 border-primary pl-3 py-1">Sesi 1: Pengenalan 5S</h3>
-            <div class="space-y-stack-md">
-                <!-- Discussion Card 1 -->
-                <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
-                    <div class="flex justify-between items-start mb-base">
-                        <h4 class="font-label-md text-label-md font-bold text-on-surface">Tanya Jawab K3</h4>
-                        <span class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">chat</span> 12
-                        </span>
-                    </div>
-                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
-                        Apakah ada standar khusus untuk penempatan alat pelindung diri di area produksi perakitan?
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
-                            B
-                        </div>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant">Budi Santoso • 2 jam lalu</span>
-                    </div>
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4 lg:pt-6">
+        <div class="max-w-4xl mx-auto space-y-stack-xl">
+            
+            <div class="bg-surface-container-low p-4 rounded-xl border border-surface-variant flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="font-headline-sm font-bold text-on-surface">Q&A Peserta</h2>
+                    <p class="font-body-sm text-on-surface-variant">Jawab pertanyaan peserta atau buat thread diskusi baru.</p>
                 </div>
-
-                <!-- Discussion Card 2 -->
-                <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
-                    <div class="flex justify-between items-start mb-base">
-                        <h4 class="font-label-md text-label-md font-bold text-on-surface">Implementasi Seiri</h4>
-                        <span class="bg-surface-container-high text-on-surface font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">chat</span> 5
-                        </span>
-                    </div>
-                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
-                        Bagaimana cara memilah barang yang jarang digunakan namun bernilai tinggi di gudang?
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center font-label-sm text-label-sm">
-                            S
-                        </div>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant">Siti Aminah • 5 jam lalu</span>
-                    </div>
+                <div class="flex items-center gap-3">
+                    <span class="font-label-sm text-secondary bg-secondary-container/20 px-2.5 py-1 rounded-md font-bold">Terdapat 1 pertanyaan baru</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Section 2 -->
-        <div class="mb-stack-lg">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md border-l-4 border-secondary pl-3 py-1">Sesi 2: Prosedur Evakuasi</h3>
-            <div class="space-y-stack-md">
-                <!-- Discussion Card 3 -->
-                <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-stack-md border border-surface-variant active:scale-[0.98] transition-transform cursor-pointer">
-                    <div class="flex justify-between items-start mb-base">
-                        <h4 class="font-label-md text-label-md font-bold text-on-surface">Jalur Evakuasi Area B</h4>
-                        <span class="bg-surface-container-high text-on-surface font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">chat</span> 0
-                        </span>
-                    </div>
-                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-stack-sm">
-                        Mengingat ada perbaikan jalur di Area B, ke mana titik kumpul alternatif saat keadaan darurat?
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
-                            A
+            <!-- Thread List -->
+            <div class="space-y-4">
+                <?php foreach ($threads ?? [] as $thread): ?>
+                <div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-stack-sm hover:border-outline-variant transition-colors group flex flex-col md:flex-row gap-4">
+                    <div class="flex items-center gap-3 md:hidden border-b border-surface-variant/50 pb-3">
+                        <div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+                            <span class="font-title-sm font-bold"><?= substr(
+                                e($thread['author'] ?? 'U'),
+                                0,
+                                1,
+                            ) ?></span>
                         </div>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant">Agus Pratama • 1 hari lalu</span>
+                        <div class="flex-1">
+                            <p class="font-label-md font-bold text-on-surface"><?= e($thread['author']) ?></p>
+                            <p class="font-body-sm text-on-surface-variant text-[11px]"><?= e($thread['time']) ?></p>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden md:flex flex-col items-center gap-2 w-16 shrink-0 shrink">
+                        <div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
+                            <span class="font-title-sm font-bold text-[18px]"><?= substr(
+                                e($thread['author'] ?? 'U'),
+                                0,
+                                1,
+                            ) ?></span>
+                        </div>
+                        <p class="font-label-sm font-bold text-on-surface text-center line-clamp-1 w-full text-[11px]"><?= e(
+                            $thread['author'],
+                        ) ?></p>
+                        <p class="font-body-sm text-on-surface-variant text-[10px] text-center w-full"><?= e(
+                            $thread['time'],
+                        ) ?></p>
+                    </div>
+
+                    <div class="flex-1 flex flex-col gap-2">
+                        <h3 class="font-title-lg font-bold text-on-surface group-hover:text-primary transition-colors"><?= e(
+                            $thread['title'],
+                        ) ?></h3>
+                        <p class="font-body-md text-on-surface-variant line-clamp-2 md:line-clamp-none whitespace-pre-wrap"><?= e(
+                            $thread['content'],
+                        ) ?></p>
+                        
+                        <div class="mt-2 pt-3 flex justify-between items-center border-t border-surface-variant/50">
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-1.5 text-secondary">
+                                    <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">question_answer</span>
+                                    <span class="font-label-sm font-bold"><?= e(
+                                        (string) ($thread['replies'] ?? '0'),
+                                    ) ?> Balasan</span>
+                                </div>
+                            </div>
+                            <button class="bg-primary text-on-primary font-label-md font-bold py-1.5 px-4 rounded-lg shadow-sm hover:bg-primary-600 transition-colors text-[13px]">
+                                Balas Topik
+                            </button>
+                        </div>
                     </div>
                 </div>
+                <?php endforeach; ?>
             </div>
-        </div>
 
-        <!-- Floating Action Button for New Topic -->
-        <div class="pt-4 flex justify-center pb-8">
-            <button class="flex items-center gap-2 bg-white border border-secondary text-secondary px-6 py-3 rounded-full font-label-md text-label-md hover:bg-secondary-fixed/30 active:scale-95 transition-all shadow-sm">
-                <span class="material-symbols-outlined text-[20px]" data-icon="add_comment">add_comment</span> Mulai Topik Baru
-            </button>
         </div>
     </main>
 
-    <?php 
-    $active_tab = 'course';
-    include 'includes/components/DX_LMS_M_Teacher_Bottom_Nav.php'; 
-    ?>
+    <?php include 'includes/components/DX_LMS_M_Teacher_Bottom_Nav.php'; ?>
 </body>
 </html>
