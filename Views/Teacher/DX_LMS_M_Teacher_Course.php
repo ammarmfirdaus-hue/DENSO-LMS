@@ -103,6 +103,52 @@
             <?php
                 // Lifecycle styling logic
                 // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Extract exactly mapped UI labels
+                // We assume it's one of the 6 exact status mappings
+
+                // Badge styling
+                // Private
+
+                // Progress bar & text colors
+
+                // Context line — status-aware
+
+                // CTA — Status-aware actions
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Extract exactly mapped UI labels
+                // We assume it's one of the 6 exact status mappings
+                // Badge styling
+                // Private
+                // Progress bar & text colors
+                // Context line — status-aware
+                // CTA — Status-aware actions
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Extract exactly mapped UI labels
+                // We assume it's one of the 6 exact status mappings
+
+                // Badge styling
+                // Private
+
+                // Progress bar & text colors
+
+                // Context line — status-aware
+
+                // CTA — Status-aware actions
+                // Lifecycle styling logic
+                // Lifecycle styling logic
+                // Extract exactly mapped UI labels
+                // We assume it's one of the 6 exact status mappings
+                // Badge styling
+                // Private
+                // Progress bar & text colors
+                // Context line — status-aware
+                // CTA — Status-aware actions
                 else: ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-gutter lg:gap-stack-lg pb-4">
                     <?php foreach ($courses as $course): ?>

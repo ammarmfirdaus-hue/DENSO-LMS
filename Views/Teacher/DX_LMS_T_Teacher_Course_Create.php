@@ -248,6 +248,10 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         // Dummy results
                         // Dummy results
                         // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
                         else: ?>
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-4">
