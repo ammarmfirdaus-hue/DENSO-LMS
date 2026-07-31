@@ -67,7 +67,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     $steps = [
                         1 => ['title' => 'Informasi', 'icon' => 'info'],
                         2 => ['title' => 'Materi', 'icon' => 'library_books'],
-                        3 => ['title' => 'Target Audience', 'icon' => 'groups'],
+                        3 => ['title' => 'Peserta Course', 'icon' => 'groups'],
                         4 => ['title' => 'Review', 'icon' => 'done_all'],
                     ];
 
@@ -155,35 +155,6 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md" placeholder="Jelaskan tujuan dan isi course ini..."><?= e(
                                 $course['description'] ?? '',
                             ) ?></textarea>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <label class="font-label-md font-bold text-on-surface mb-2 block">Pilih Icon/Visual</label>
-                            <div class="flex gap-3 flex-wrap">
-                                <?php
-                                $icons = [
-                                    'menu_book',
-                                    'health_and_safety',
-                                    'manufacturing',
-                                    'fact_check',
-                                    'engineering',
-                                    'computer',
-                                ];
-                                $selected = $course['icon'] ?? 'menu_book';
-                                foreach ($icons as $icon):
-                                    $isSel = $icon === $selected; ?>
-                                <button type="button" class="w-12 h-12 rounded-xl flex items-center justify-center border <?= $isSel
-                                    ? 'bg-primary-container border-primary text-primary'
-                                    : 'bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-variant' ?> transition-colors relative">
-                                    <span class="material-symbols-outlined"><?= $icon ?></span>
-                                    <?php if (
-                                        $isSel
-                                    ): ?><span class="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></span><?php endif; ?>
-                                </button>
-                                <?php
-                                endforeach;
-                                ?>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -394,7 +365,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     Kembali
                                 </button>
                             <?php else: ?>
-                                <button type="button" onclick="window.history.back()" class="px-5 py-2.5 rounded-lg text-error hover:bg-error-container hover:text-on-error-container font-label-md font-bold transition-colors">
+                                <button type="button" onclick="window.history.back()" class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface font-label-md font-bold hover:bg-surface-container transition-colors">
                                     Batal
                                 </button>
                             <?php endif; ?>
@@ -409,11 +380,11 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <button type="button" onclick="alert('Recommendation Submitted!'); window.location.href='?route=/teacher/course/detail&course_id=<?= e(
                                     $course['id'] ?? 1,
                                 ) ?>';" class="px-5 py-2.5 rounded-lg bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-sm transition-colors flex items-center gap-2">
-                                    Submit Recommendation <span class="material-symbols-outlined text-[18px]">send</span>
+                                    Submit<span class="material-symbols-outlined text-[18px]">send</span>
                                 </button>
                             <?php else: ?>
                                 <button type="submit" name="step" value="<?= $step +
-                                    1 ?>" class="px-7 py-2.5 rounded-lg bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-sm transition-colors flex items-center gap-1">
+                                    1 ?>" class="px-5 py-2.5 rounded-lg bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-sm transition-colors flex items-center gap-1">
                                     Selanjutnya <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                                 </button>
                             <?php endif; ?>

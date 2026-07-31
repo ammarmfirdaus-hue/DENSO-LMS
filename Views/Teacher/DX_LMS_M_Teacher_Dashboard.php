@@ -48,7 +48,7 @@
                 }
                 ?>
                 <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight text-on-surface">
-                    Selamat <?= e($sapaan) ?>, <?= e($_SESSION['user']['fullname'] ?? 'Hermawan') ?> 👋
+                    Selamat <?= e($sapaan) ?>, <?= e($_SESSION['user']['fullname'] ?? 'Budi Santoso') ?> 
                 </h1>
                 <p class="font-body-md text-on-surface-variant font-medium">
                     Hari ini Anda mengelola <span class="text-primary font-bold"><?= count(
