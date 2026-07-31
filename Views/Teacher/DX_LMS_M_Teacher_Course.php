@@ -77,7 +77,7 @@ if ($current_filter === 'all') {
     
     <!-- Desktop Header Extension (Only visible on lg) -->
     <div class="hidden lg:block lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md relative">
-        <div class="flex justify-between items-center max-w-5xl mx-auto">
+        <div class="flex justify-between items-center w-full">
             <h1 class="font-headline-6 font-bold text-on-surface">Kelola Course</h1>
             <a href="?route=/teacher/course/create" class="inline-flex items-center gap-1.5 bg-white text-error border border-error font-label-md font-bold px-4 py-2 rounded-lg hover:bg-error/5 hover:border-error transition-colors shadow-sm">
                 <span class="material-symbols-outlined text-[18px]">add</span>
@@ -89,7 +89,7 @@ if ($current_filter === 'all') {
     <!-- Main Content Canvas -->
     <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4">
         
-        <section class="max-w-5xl mx-auto space-y-stack-md">
+        <section class="w-full space-y-stack-md">
             
             <!-- Mobile View Intro / Create Button -->
             <div class="lg:hidden flex flex-col gap-4 mb-4">
@@ -259,7 +259,7 @@ if ($current_filter === 'all') {
                                         <span class="text-[16px] font-black text-on-surface leading-none"><?= e(
                                             (string) ($course['assessments'] ?? 0),
                                         ) ?></span>
-                                        <span class="text-[9px] text-on-surface-variant font-bold mt-1 uppercase tracking-widest">Asesmen</span>
+                                        <span class="text-[9px] text-on-surface-variant font-bold mt-1 uppercase tracking-widest">Assesment</span>
                                     </div>
                                 </div>
 

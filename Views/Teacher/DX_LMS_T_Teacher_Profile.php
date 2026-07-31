@@ -91,8 +91,8 @@
                     ['label' => 'Gol 1', 'name' => 'Operator'],
                     ['label' => 'Gol 2', 'name' => 'Senior Op'],
                     ['label' => 'Gol 3', 'name' => 'Leader'],
-                    ['label' => 'Gol 4', 'name' => 'Supervisor'],
-                    ['label' => 'Gol 5', 'name' => 'Manager'],
+                    // ['label' => 'Gol 4', 'name' => 'Supervisor'],
+                    // ['label' => 'Gol 5', 'name' => 'Manager'],
                 ];
                 ?>
                 <div class="bg-surface-container-lowest/50 p-5 lg:px-8 lg:py-6 flex flex-col sm:flex-row gap-6">

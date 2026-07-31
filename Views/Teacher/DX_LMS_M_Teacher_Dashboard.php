@@ -32,7 +32,7 @@
     <!-- Main Content Canvas -->
     <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px] bg-[#FAFAFA]">
 
-        <section class="max-w-[1400px] mx-auto space-y-stack-lg">
+        <section class="w-full space-y-stack-lg">
             
             <!-- Greeting Section -->
             <section class="flex flex-col gap-1">

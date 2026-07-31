@@ -107,12 +107,4 @@ $nav_groups = [
             </div>
         <?php endforeach; ?>
     </nav>
-    
-    <!-- Footer Links / Auth -->
-    <div class="p-4 border-t border-outline-variant space-y-1">
-        <a href="?route=/auth/logout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-colors mt-2">
-            <span class="material-symbols-outlined text-[20px]">logout</span>
-            <span class="font-label-md">Keluar</span>
-        </a>
-    </div>
 </aside>
