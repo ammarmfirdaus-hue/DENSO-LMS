@@ -61,7 +61,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             <?php endif; ?>
 
             <!-- Wizard Stepper (Horizontal) -->
-            <div class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm w-full overflow-x-auto hide-scrollbar sticky top-[68px] lg:top-[74px] z-20">
+            <div class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm w-full overflow-x-auto hide-scrollbar relative z-20 mb-8">
                 <div class="flex items-center min-w-[500px]">
                     <?php
                     $steps = [
@@ -88,14 +88,14 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         ?>
                         <!-- Step Bubble -->
                         <div class="flex flex-col items-center gap-1.5 relative z-10 w-24">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[12px] <?= $bgClass ?> transition-colors">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px] <?= $bgClass ?> transition-colors shadow-sm">
                                 <?php if ($isCompleted): ?>
-                                    <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+                                    <span class="material-symbols-outlined text-[18px] font-bold">check</span>
                                 <?php else: ?>
                                     <?= $i ?>
                                 <?php endif; ?>
                             </div>
-                            <span class="font-label-sm text-[10px] sm:text-[11px] font-semibold text-center leading-tight <?= $colorClass ?>">
+                            <span class="font-label-sm text-[11px] sm:text-[12px] font-bold text-center leading-tight <?= $colorClass ?> mt-1">
                                 <?= $steps[$i]['title'] ?>
                             </span>
                         </div>
@@ -133,28 +133,67 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             ) ?>">
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-1.5">
-                                <label class="font-label-md font-bold text-on-surface">Kode Course</label>
-                                <input type="text" class="w-full bg-surface border border-outline-variant rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md" placeholder="Contoh: K3-101" value="<?= e(
-                                    $course['code'] ?? '',
-                                ) ?>">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="font-label-md font-bold text-on-surface">Kategori</label>
-                                <select class="w-full bg-surface border border-outline-variant rounded-xl p-3 focus:outline-none focus:border-primary transition-all font-body-md">
-                                    <option>HSE</option>
-                                    <option>Quality</option>
-                                    <option>Maintenance</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div class="space-y-1.5">
                             <label class="font-label-md font-bold text-on-surface">Deskripsi Course</label>
                             <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md" placeholder="Jelaskan tujuan dan isi course ini..."><?= e(
                                 $course['description'] ?? '',
                             ) ?></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1.5 md:col-span-2">
+                                <label class="font-label-md font-bold text-on-surface">Tags <span class="text-on-surface-variant font-normal text-xs">(Pilih kategori relevan)</span></label>
+                                
+                                <!-- Custom Searchable Dropdown Multi-Select -->
+                                <div class="relative" id="tags-dropdown-container">
+                                    <!-- Selected Tags Display & Trigger -->
+                                    <div id="tags-trigger" class="min-h-[48px] bg-surface-container-lowest border border-outline-variant rounded-xl p-2 flex flex-wrap gap-2 items-center cursor-pointer hover:border-primary transition-all">
+                                        <!-- Selected tags will be injected here by JS -->
+                                        <div id="tags-placeholder" class="text-on-surface-variant font-body-md px-2 py-1">Pilih tags...</div>
+                                        <div class="ml-auto flex items-center pr-2">
+                                            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div id="tags-menu" class="absolute left-0 w-full mt-2 bg-surface-container border border-outline-variant rounded-xl shadow-lg z-50 hidden flex flex-col max-h-[300px] overflow-hidden">
+                                        <div class="p-3 border-b border-outline-variant sticky top-0 bg-surface-container rounded-t-xl z-20">
+                                            <div class="relative">
+                                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+                                                <input type="text" id="tags-search" class="w-full bg-surface border border-outline-variant rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary transition-all" placeholder="Cari tag, misal: Quality, Safety...">
+                                            </div>
+                                        </div>
+                                        <div class="overflow-y-auto p-2 flex flex-col gap-1 flex-1 overscroll-contain" id="tags-options">
+                                            <?php
+                                            $availableTags = [
+                                                'Automation',
+                                                'Compliance',
+                                                'Core',
+                                                'Culture',
+                                                'Engineering',
+                                                'HR',
+                                                'Leadership',
+                                                'Maintenance',
+                                                'Management',
+                                                'Problem Solving',
+                                                'Productivity',
+                                                'Quality',
+                                                'Safety',
+                                                'Soft Skill',
+                                            ];
+                                            foreach ($availableTags as $tag): ?>
+                                            <label class="tag-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors" data-value="<?= strtolower(
+                                                $tag,
+                                            ) ?>">
+                                                <input type="checkbox" class="tag-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" value="<?= $tag ?>">
+                                                <span class="font-body-md text-on-surface flex-1"><?= $tag ?></span>
+                                            </label>
+                                            <?php endforeach;
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -195,6 +234,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                             </div>
                         </div>
+                        <button type="button" onclick="window.location.href='?route=/teacher/courses'" class="px-5 py-2.5 rounded-lg text-error border border-outline-variant bg-white font-label-md font-bold hover:bg-error hover:text-white hover:border-error hover:shadow-md transition-all duration-300 hidden sm:block">
+                                    Simpan sebagai Private
+                                </button>
                     </div>
                 </section>
                 <?php endif; ?>
@@ -203,7 +245,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <?php if ($step === 3): ?>
                 <section class="bg-surface-container-lowest border border-surface-variant rounded-2xl p-stack-lg shadow-sm">
                     <div class="mb-5">
-                        <h3 class="font-headline-sm font-bold text-on-surface mb-1">Usulkan Target Audience</h3>
+                        <h3 class="font-headline-sm font-bold text-on-surface mb-1">Usulkan Peserta Course</h3>
                         <p class="font-body-md text-on-surface-variant">Gunakan filter untuk merekomendasikan karyawan ke course ini kepada Admin sesuai scope permission Anda.</p>
                     </div>
 
@@ -223,6 +265,126 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         // Dummy results
                         // Dummy results
                         // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
+                        // Dummy results
                         else: ?>
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-4">
@@ -230,7 +392,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <?php foreach ($filters as $type => $options): ?>
                                     <div class="flex flex-col gap-1">
-                                        <label class="font-label-sm font-bold text-on-surface capitalize"><?= $type ?></label>
+                                        <label class="font-label-sm font-bold text-on-surface capitalize"><?= ucfirst(
+                                            $type,
+                                        ) ?></label>
                                         <select class="w-full bg-surface border border-outline-variant rounded-lg p-2 focus:outline-none focus:border-primary text-body-sm font-body-sm text-on-surface-variant">
                                             <option value="">-- Semua <?= ucfirst($type) ?> --</option>
                                             <?php foreach ($options as $opt): ?>
@@ -347,7 +511,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <!-- Action Info Box -->
                             <div class="bg-info-container/20 border border-info/30 rounded-xl p-4 flex gap-2 items-start mt-2">
                                 <span class="material-symbols-outlined text-info text-[20px]">info</span>
-                                <p class="font-label-sm text-on-surface-variant leading-snug">Menekan "Submit Recommendation" berarti mengirim draft ini ke Admin. Draft tidak bisa diubah hingga ada keputusan Admin.</p>
+                                <p class="font-label-sm text-on-surface-variant leading-snug">Menekan "Submit" berarti mengirim course ini ke Admin. Course tidak bisa diubah hingga ada keputusan dari Admin.</p>
                             </div>
                         </div>
                     </div>
@@ -374,9 +538,6 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <!-- Right Action -->
                         <div class="flex gap-2">
                             <?php if ($step === 4): ?>
-                                <button type="button" onclick="window.location.href='?route=/teacher/courses'" class="px-5 py-2.5 rounded-lg text-primary font-label-md font-bold hover:bg-primary-container transition-colors hidden sm:block">
-                                    Simpan Draft
-                                </button>
                                 <button type="button" onclick="alert('Recommendation Submitted!'); window.location.href='?route=/teacher/course/detail&course_id=<?= e(
                                     $course['id'] ?? 1,
                                 ) ?>';" class="px-5 py-2.5 rounded-lg bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-sm transition-colors flex items-center gap-2">
@@ -396,10 +557,101 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         </div>
     </main>
 
-    <!-- JS untuk handle form interaktif simulasi -->
     <script>
-        // Form wizard normally doesn't submit standard POST inside GET mock, 
-        // using browser GET params is fine for mockup stepping.
+    // Custom Tags Dropdown Logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('tags-dropdown-container');
+        if(!container) return;
+        
+        const trigger = document.getElementById('tags-trigger');
+        const menu = document.getElementById('tags-menu');
+        const searchInput = document.getElementById('tags-search');
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        const optionsContainer = document.getElementById('tags-options');
+        
+        // Toggle Dropdown
+        trigger.addEventListener('click', (e) => {
+            // Prevent toggling if clicked on a "close" icon inside the trigger
+            if(e.target.textContent === 'close') return;
+            menu.classList.toggle('hidden');
+            if(!menu.classList.contains('hidden')) {
+                searchInput.focus();
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Search Filter
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const options = optionsContainer.querySelectorAll('.tag-option');
+            
+            options.forEach(opt => {
+                const val = opt.getAttribute('data-value');
+                if (val.includes(term)) {
+                    opt.style.display = 'flex';
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+        });
+
+        // Update selected tags display
+        function updateDisplay() {
+            const selected = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            // Clear old tags except for the chevron icon logic
+            const tagsAndPlaceholder = Array.from(trigger.children).filter(el => !el.classList.contains('ml-auto'));
+            tagsAndPlaceholder.forEach(el => el.remove());
+
+            if (selected.length === 0) {
+                const p = document.createElement('div');
+                p.id = 'tags-placeholder';
+                p.className = 'text-on-surface-variant font-body-md px-2 py-1';
+                p.textContent = 'Pilih tags...';
+                trigger.insertBefore(p, trigger.lastElementChild);
+            } else {
+                selected.forEach(tagText => {
+                    const badge = document.createElement('span');
+                    badge.className = 'inline-flex items-center gap-1 pl-3 pr-2 py-1 bg-primary-container text-on-primary-container border border-primary rounded-full text-xs font-semibold shadow-sm';
+                    
+                    const text = document.createElement('span');
+                    text.textContent = tagText;
+                    
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'material-symbols-outlined text-[14px] cursor-pointer hover:bg-black/10 rounded-full w-4 h-4 flex items-center justify-center transition-colors font-bold z-10 relative';
+                    removeBtn.textContent = 'close';
+                    removeBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation(); // Stop event so dropdown toggle doesn't trigger
+                        const cb = Array.from(checkboxes).find(c => c.value === tagText);
+                        if(cb) {
+                            cb.checked = false;
+                            updateDisplay();
+                        }
+                    };
+                    
+                    badge.appendChild(text);
+                    badge.appendChild(removeBtn);
+                    trigger.insertBefore(badge, trigger.lastElementChild);
+                });
+            }
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateDisplay);
+        });
+        
+        // Initial state
+        updateDisplay();
+    });
     </script>
 </body>
 </html>

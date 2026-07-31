@@ -336,7 +336,7 @@
                                     <span class="text-[16px] font-black text-on-surface leading-none"><?= e(
                                         (string) ($course['assessments'] ?? 0),
                                     ) ?></span>
-                                    <span class="text-[9px] text-on-surface-variant font-bold mt-1 uppercase tracking-widest">Asesmen</span>
+                                    <span class="text-[9px] text-on-surface-variant font-bold mt-1 uppercase tracking-widest">Assesment</span>
                                 </div>
                             </div>
 
