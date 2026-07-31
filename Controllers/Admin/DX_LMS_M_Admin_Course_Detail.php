@@ -23,6 +23,18 @@ class DX_LMS_M_Admin_Course_Detail extends DX_LMS_M_Controller
             return;
         }
 
+        // Map status to match Manajemen Course display status
+        $raw = $course['status'] ?? 'Draft';
+        $course['status'] = match ($raw) {
+            'Draft' => 'Private',
+            'Submitted', 'Approved' => 'Pending Review',
+            'Running' => 'In Progress',
+            'Completed' => 'Completed',
+            'Archived' => 'Archived',
+            'Rejected' => 'Rejected',
+            default => $raw,
+        };
+
         // Dummy data for detail syllabus and participants to mirror Teacher view exactly
         $syllabus = [
             [
