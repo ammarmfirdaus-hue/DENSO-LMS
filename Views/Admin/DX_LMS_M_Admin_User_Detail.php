@@ -113,24 +113,24 @@ $active_tab = 'user';
             </div>
 
             <!-- Activity Context -->
-            <div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-sm border border-surface-variant">
-                <h2 class="font-headline-sm font-bold text-on-surface mb-stack-sm flex justify-between items-center">
-                    Aktivitas Terbaru
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">history</span>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="font-headline-sm font-bold text-gray-900 mb-4 flex justify-between items-center">
+                    <span>Aktivitas Terbaru</span>
+                    <span class="material-symbols-outlined text-gray-400 text-[20px]">history</span>
                 </h2>
                 
-                <ul class="space-y-4">
+                <ul class="space-y-3.5 divide-y divide-gray-100">
                     <?php foreach ($user['recent_activities'] ?? [] as $act): ?>
-                        <li class="flex gap-3 items-start">
-                            <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">check_circle</span>
-                            <div>
-                                <p class="font-body-sm text-on-surface"><span class="font-bold"><?= e(
-                                    $act['action'],
-                                ) ?></span> pada <?= e($act['target']) ?></p>
-                                <span class="font-label-sm text-[10px] text-on-surface-variant"><?= e(
-                                    $act['time'],
-                                ) ?></span>
+                        <li class="flex justify-between items-start gap-4 pt-3.5 first:pt-0">
+                            <div class="flex gap-3 items-start">
+                                <span class="w-7 h-7 rounded-full bg-gray-50 border border-gray-200 text-gray-500 flex items-center justify-center shrink-0 mt-0.5">
+                                    <span class="material-symbols-outlined text-[16px]">task_alt</span>
+                                </span>
+                                <div class="text-sm text-gray-600 leading-relaxed">
+                                    <span><?= e($act['action']) ?></span> <strong class="font-semibold text-gray-900"><?= e($act['target']) ?></strong>
+                                </div>
                             </div>
+                            <span class="font-mono text-xs text-gray-400 whitespace-nowrap pt-1"><?= e($act['time']) ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>

@@ -199,51 +199,141 @@ $active_tab = 'beranda';
         </section>
         <?php endif; ?>
 
-        <!-- Activity Timeline Snippet (Stage 2 Integration) -->
+        <!-- Activity Timeline Snippet (Operational Control Log) -->
         <section class="mt-stack-xl space-y-stack-md">
-            <div class="flex justify-between items-center">
-                <h2 class="font-headline-sm font-bold text-on-surface">Timeline Sistem Terkini</h2>
-                <a href="?route=/admin/activity" class="font-label-md text-secondary border border-outline-variant px-3 py-1.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-1">Log Penuh <span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+            <!-- Section Header -->
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="font-headline-sm font-bold text-gray-900">Timeline Sistem Terkini</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Aktivitas dan log perubahan real-time di platform</p>
+                </div>
+                <a href="?route=/admin/activity" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition-colors group">
+                    <span>Lihat Semua Log</span>
+                    <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5">arrow_forward</span>
+                </a>
             </div>
 
-            <div class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-sm overflow-hidden">
-                <div class="relative before:content-[''] before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-outline-variant before:z-0 ml-1">
-                    <?php foreach ($recent_activities as $act): ?>
-                        <div class="relative pl-10 py-3 group -ml-1 z-10 border-b border-surface-variant last:border-0 last:pb-0">
-                            <div class="absolute w-10 h-10 rounded-full left-0 bg-surface border-2 border-<?= $act[
-                                'color'
-                            ] ?> text-<?= $act['color'] ?> flex items-center justify-center top-2 shadow-sm">
-                                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;"><?= e(
-                                    $act['icon'],
-                                ) ?></span>
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <!-- Filter Role Tabs -->
+                <div class="px-5 pt-4 pb-3 border-b border-gray-100 flex flex-wrap gap-2" id="dashTimelineTabs">
+                    <?php
+                    $dash_tabs = [
+                        'all'     => 'Semua',
+                        'admin'   => 'Admin',
+                        'teacher' => 'Teacher',
+                        'student' => 'Student',
+                    ];
+                    $dash_role_icons = [
+                        'all'     => 'group',
+                        'admin'   => 'admin_panel_settings',
+                        'teacher' => 'school',
+                        'student' => 'person',
+                    ];
+                    // Warna aksen awal: all/admin=merah, teacher=biru, student=hijau
+                    $dash_active_init = [
+                        'all'     => 'bg-red-600   text-white border-red-600',
+                        'admin'   => 'bg-red-600   text-white border-red-600',
+                        'teacher' => 'bg-blue-600  text-white border-blue-600',
+                        'student' => 'bg-green-600 text-white border-green-600',
+                    ];
+                    $dash_badge_init = [
+                        'all'     => 'bg-red-500   text-white',
+                        'admin'   => 'bg-red-500   text-white',
+                        'teacher' => 'bg-blue-500  text-white',
+                        'student' => 'bg-green-500 text-white',
+                    ];
+                    foreach ($dash_tabs as $tab_key => $tab_label):
+                        if ($tab_key === 'all') {
+                            $cnt = count($recent_activities);
+                        } else {
+                            $cnt = count(array_filter($recent_activities, fn($a) => strtolower($a['role']) === $tab_key));
+                        }
+                        $is_init_active = ($tab_key === 'all');
+                    ?>
+                        <button 
+                            onclick="filterDashTimeline('<?= $tab_key ?>')" 
+                            id="dash-tab-<?= $tab_key ?>"
+                            data-role-key="<?= $tab_key ?>"
+                            class="dash-timeline-tab inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all
+                                <?= $is_init_active ? ($dash_active_init[$tab_key] ?? 'bg-red-600 text-white border-red-600') : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50' ?>">
+                            <span class="material-symbols-outlined text-[14px]"><?= $dash_role_icons[$tab_key] ?></span>
+                            <?= $tab_label ?>
+                            <span class="<?= $is_init_active ? ($dash_badge_init[$tab_key] ?? 'bg-red-500 text-white') : 'bg-gray-100 text-gray-500' ?> text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                <?= $cnt ?>
+                            </span>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Timeline Items -->
+                <div class="px-5 py-2 space-y-0" id="dashTimelineList">
+                    <?php 
+                    $total_acts = count($recent_activities);
+                    foreach ($recent_activities as $idx => $act):
+                        $role_lower = strtolower($act['role']);
+                        $role_badge_map = [
+                            'admin'   => 'bg-red-50 text-red-700 border-red-200',
+                            'teacher' => 'bg-blue-50 text-blue-700 border-blue-200',
+                            'student' => 'bg-green-50 text-green-700 border-green-200',
+                        ];
+                        $role_dot_map = [
+                            'admin'   => 'bg-red-400',
+                            'teacher' => 'bg-blue-400',
+                            'student' => 'bg-green-400',
+                        ];
+                        $badge_class = $role_badge_map[$role_lower] ?? 'bg-gray-100 text-gray-600 border-gray-200';
+                        $dot_class   = $role_dot_map[$role_lower]   ?? 'bg-gray-400';
+                    ?>
+                        <div class="dash-log-item flex gap-3 py-3.5 border-b border-gray-100 last:border-0 relative group hover:bg-gray-50 -mx-5 px-5 transition-colors" data-role="<?= $role_lower ?>">
+                            <?php if ($idx < $total_acts - 1): ?>
+                                <span class="absolute left-[33px] top-14 -bottom-0 w-[2px] bg-gray-200 z-0 dash-line" aria-hidden="true"></span>
+                            <?php endif; ?>
+                            
+                            <!-- Icon node (flex item, tidak absolute) -->
+                            <div class="w-9 h-9 rounded-full shrink-0 bg-white border border-gray-200 text-gray-400 flex items-center justify-center shadow-sm z-10 group-hover:border-gray-300 group-hover:text-gray-600 transition-colors mt-0.5">
+                                <span class="material-symbols-outlined text-[17px]" style="font-variation-settings: 'FILL' 0;"><?= e($act['icon']) ?></span>
                             </div>
-                            <div class="flex justify-between items-start gap-4">
-                                <div class="font-body-sm text-on-surface max-w-[85%]">
-                                    <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ??
-                                        1 ?>" class="font-label-md font-bold text-on-surface hover:text-primary hover:underline"><?= e(
-    $act['user'],
-) ?></a> 
-                                    <span class="bg-<?= $act['color'] ?>/10 text-<?= $act[
-    'color'
-] ?> px-1.5 py-0.5 rounded text-[10px] uppercase font-bold mx-1 border border-<?= $act['color'] ?>/20"><?= e(
-    $act['role'],
-) ?></span> 
-                                    <?= e($act['action']) ?> 
-                                    <?php if (isset($act['target_type']) && $act['target_type'] === 'course'): ?>
-                                        <a href="?route=/admin/course/detail&id=<?= $act['target_id'] ??
-                                            101 ?>" class="font-bold hover:text-primary hover:underline">"<?= e(
-    $act['target'],
-) ?>"</a>
+
+                            <!-- Content (flex-1, tidak tertimpa icon) -->
+                            <div class="flex-1 min-w-0 flex justify-between items-start gap-4">
+                                <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 leading-relaxed">
+                                    <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ?? 1 ?>" class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors whitespace-nowrap"><?= e($act['user']) ?></a>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border <?= $badge_class ?> whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full <?= $dot_class ?>"></span>
+                                        <?= e($act['role']) ?>
+                                    </span>
+                                    <span><?= e($act['action']) ?></span>
+                                    <?php if (isset($act['target_type']) && in_array($act['target_type'], ['course','quiz','material'])): ?>
+                                        <a href="?route=/admin/course/detail&id=<?= $act['target_id'] ?? 101 ?>" class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors"><?= e($act['target']) ?></a>
                                     <?php else: ?>
-                                        "<?= e($act['target']) ?>"
+                                        <strong class="font-semibold text-gray-900"><?= e($act['target']) ?></strong>
+                                    <?php endif; ?>
+                                    <?php if (!empty($act['score'])): ?>
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                            <span class="material-symbols-outlined text-[11px]">grade</span>
+                                            <?= e($act['score']) ?>
+                                        </span>
                                     <?php endif; ?>
                                 </div>
-                                <span class="font-label-sm text-[10px] text-on-surface-variant whitespace-nowrap"><?= e(
-                                    $act['time'],
-                                ) ?></span>
+                                <span class="font-mono text-xs text-gray-400 whitespace-nowrap pt-0.5 shrink-0"><?= e($act['time']) ?></span>
                             </div>
                         </div>
                     <?php endforeach; ?>
+                </div>
+
+                <!-- Empty state (hidden by default, shown by JS) -->
+                <div id="dashEmptyState" class="hidden py-10 text-center">
+                    <span class="material-symbols-outlined text-gray-300 text-[48px]">inbox</span>
+                    <p class="mt-2 text-sm text-gray-400">Tidak ada aktivitas untuk filter ini</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-5 py-3 border-t border-gray-100 flex justify-between items-center">
+                    <span class="text-xs text-gray-400" id="dashFilterCount">Menampilkan <?= count($recent_activities) ?> aktivitas terbaru</span>
+                    <a href="?route=/admin/activity" class="text-xs font-semibold text-gray-500 hover:text-red-600 transition-colors inline-flex items-center gap-1">
+                        Lihat log lengkap
+                        <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
                 </div>
             </div>
         </section>
@@ -254,5 +344,84 @@ $active_tab = 'beranda';
     <?php include 'includes/components/DX_LMS_M_Admin_Bottom_Nav.php'; ?>
 
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script>
+    // ============================================================
+    // Dashboard Timeline Role Filter (Client-side)
+    // ============================================================
+    function filterDashTimeline(role) {
+        const items   = document.querySelectorAll('.dash-log-item');
+        const tabs    = document.querySelectorAll('.dash-timeline-tab');
+        const empty   = document.getElementById('dashEmptyState');
+        const counter = document.getElementById('dashFilterCount');
+        const lines   = document.querySelectorAll('.dash-line');
+
+        // Peta warna aksen per role
+        const roleColors = {
+            all:     { bg: 'bg-red-600',   border: 'border-red-600',   badge: 'bg-red-500   text-white' },
+            admin:   { bg: 'bg-red-600',   border: 'border-red-600',   badge: 'bg-red-500   text-white' },
+            teacher: { bg: 'bg-blue-600',  border: 'border-blue-600',  badge: 'bg-blue-500  text-white' },
+            student: { bg: 'bg-green-600', border: 'border-green-600', badge: 'bg-green-500 text-white' },
+        };
+        const inactiveClass = 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50';
+
+        // Update active tab styles per-role color
+        tabs.forEach(tab => {
+            const tabRole = tab.getAttribute('data-role-key');
+            const isActive = tabRole === role;
+            const colors = roleColors[tabRole] || roleColors.all;
+
+            // Reset semua class warna
+            tab.classList.remove(
+                'bg-red-600','bg-blue-600','bg-green-600',
+                'border-red-600','border-blue-600','border-green-600',
+                'text-white',
+                'bg-white','text-gray-500','border-gray-200',
+                'hover:border-gray-300','hover:bg-gray-50'
+            );
+
+            if (isActive) {
+                colors.bg.split(' ').forEach(c => tab.classList.add(c));
+                colors.border.split(' ').forEach(c => tab.classList.add(c));
+                tab.classList.add('text-white');
+                const badge = tab.querySelector('span:last-child');
+                if (badge) { badge.className = colors.badge + ' text-[10px] font-bold px-1.5 py-0.5 rounded-full'; }
+            } else {
+                inactiveClass.split(' ').forEach(c => tab.classList.add(c));
+                const badge = tab.querySelector('span:last-child');
+                if (badge) { badge.className = 'bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded-full'; }
+            }
+        });
+
+        // Hide/show connector lines
+        lines.forEach(l => l.style.opacity = '0');
+
+        // Show/hide items
+        let visibleCount = 0;
+        let visibleItems = [];
+        items.forEach(item => {
+            const itemRole = item.getAttribute('data-role');
+            const show = (role === 'all' || itemRole === role);
+            item.style.display = show ? '' : 'none';
+            if (show) {
+                visibleItems.push(item);
+                visibleCount++;
+            }
+        });
+
+        // Re-draw connector lines for visible items
+        visibleItems.forEach((item, i) => {
+            const line = item.querySelector('.dash-line');
+            if (line && i < visibleItems.length - 1) {
+                line.style.opacity = '1';
+            }
+        });
+
+        // Empty state
+        empty.classList.toggle('hidden', visibleCount > 0);
+
+        // Update counter
+        counter.textContent = 'Menampilkan ' + visibleCount + ' aktivitas' + (role !== 'all' ? ' · Filter: ' + role.charAt(0).toUpperCase() + role.slice(1) : ' terbaru');
+    }
+    </script>
 </body>
 </html>
