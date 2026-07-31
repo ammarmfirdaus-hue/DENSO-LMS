@@ -222,16 +222,16 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     <button type="button" onclick="deleteSessionBlock(this)" class="material-symbols-outlined text-[20px] text-on-surface-variant hover:text-error transition-colors" title="Hapus Sesi">delete</button>
                                 </div>
                             </div>
-                            <div class="bg-surface border-b border-surface-variant flex w-full overflow-hidden">
-                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center">Materi</button>
-                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Quiz</button>
+                            <div class="bg-surface border-b border-surface-variant flex w-full overflow-hidden session-tabs">
+                                <button type="button" onclick="switchSessionTab(this, 'materi')" class="session-tab-btn flex-1 py-3 px-2 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center transition-colors" data-tab="materi">Materi</button>
+                                <button type="button" onclick="switchSessionTab(this, 'quiz')" class="session-tab-btn flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap text-center" data-tab="quiz">Quiz</button>
                                 <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Forum</button>
                                 <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Riwayat</button>
                                 <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Capaian</button>
                             </div>
                             
                             <!-- Tab Content: Materi Workspace -->
-                            <div class="bg-surface-container-lowest p-5 flex flex-col session-workspace">
+                            <div class="bg-surface-container-lowest p-5 flex flex-col session-workspace" data-workspace="materi">
                                 <!-- Dynamic List -->
                                 <div class="materi-builder-list space-y-3 mb-5 empty:hidden">
                                     <!-- Pre-filled Sample -->
@@ -282,6 +282,47 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- Tab Content: Quiz Workspace -->
+                            <div class="bg-surface-container-lowest p-5 flex-col hidden" data-workspace="quiz">
+                                <!-- Quiz Items List -->
+                                <div class="quiz-items-list space-y-3 mb-5">
+                                    <!-- Quiz Course -->
+                                    <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
+                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-primary flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined">assignment</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Quiz Course</p>
+                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface">0</span> Pertanyaan</p>
+                                        </div>
+                                        <button type="button" onclick="openQuizBuilder(this, 'quiz')" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors shadow-sm lg:opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                            <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                        </button>
+                                    </div>
+                                    <!-- Final Assessment -->
+                                    <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
+                                        <div class="w-10 h-10 rounded-lg bg-error-container text-error flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined">verified</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                            <p class="font-label-sm text-error mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Final Assessment</p>
+                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface">0</span> Pertanyaan</p>
+                                        </div>
+                                        <button type="button" onclick="openQuizBuilder(this, 'final')" class="flex items-center gap-1.5 px-3 py-1.5 bg-error text-on-error rounded-lg font-label-sm font-bold hover:bg-error/80 transition-colors shadow-sm lg:opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                            <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Info Note -->
+                                <!-- <div class="flex items-start gap-3 p-4 bg-surface-container-low border border-outline-variant/60 rounded-xl">
+                                    <span class="material-symbols-outlined text-primary text-[20px] mt-0.5 shrink-0">info</span>
+                                    <div>
+                                        <p class="font-body-sm text-on-surface"><span class="font-bold">Quiz Course</span> dapat diakses peserta kapan saja sebagai latihan, sedangkan <span class="font-bold">Final Assessment</span> hanya dibuka satu kali pada akhir sesi.</p>
+                                    </div>
+                                </div>
+                            </div> -->
                         </div>
                         <button type="button" onclick="window.location.href='?route=/teacher/courses'" class="px-5 py-2.5 rounded-lg text-error border border-outline-variant bg-white font-label-md font-bold hover:bg-error hover:text-white hover:border-error hover:shadow-md transition-all duration-300 hidden sm:block">
                                     Simpan sebagai Private
@@ -614,6 +655,58 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             </footer>
         </div>
 
+        <!-- ============================================== -->
+        <!-- OVERLAY: QUIZ BUILDER (Quiz Course / Final Assessment) -->
+        <!-- ============================================== -->
+        <div id="quiz-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+                <div class="flex-1 flex justify-start">
+                    <button type="button" onclick="closeQuizBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+                </div>
+                <div class="flex-none flex justify-center">
+                    <h2 id="qb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Quiz Builder</h2>
+                </div>
+                <div class="flex-1 flex justify-end">
+                    <button type="button" onclick="saveQuizBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Quiz</span></button>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+                <!-- Summary & Config -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
+                        <div id="qb-icon-wrap" class="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">assignment</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-title-lg font-bold text-on-surface">Pengaturan & Instruksi Quiz</h3>
+                            <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="qb-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="qb-max-score" class="text-primary">0</span></span></p>
+                        </div>
+                    </div>
+                    <textarea id="qb-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[80px]" placeholder="Masukkan instruksi pengerjaan quiz (Contoh: Jawab semua pertanyaan berikut. Quiz ini tidak dibatasi waktu.)"></textarea>
+                </div>
+
+                <!-- Question List -->
+                <div id="qb-questions-list" class="space-y-6">
+                    <!-- Questions injected here via JS -->
+                </div>
+
+                <!-- Add Question Toolbar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" onclick="qbAddQuestion('mc')" class="py-5 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">checklist</span>
+                        <span class="font-label-md font-bold">Tambah Pilihan Ganda</span>
+                    </button>
+                    <button type="button" onclick="qbAddQuestion('essay')" class="py-5 border-2 border-dashed border-outline-variant hover:border-secondary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-secondary transition-all group bg-transparent hover:bg-secondary/5">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">edit_note</span>
+                        <span class="font-label-md font-bold">Tambah Isian / Essay</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -664,6 +757,17 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         
         // Re-evaluate empty state for the new clone
         checkEmptyHintList(list);
+
+        // Clear quiz tab content in cloned session
+        const quizList = newSession.querySelector('.quiz-items-list');
+        if (quizList) {
+            quizList.querySelectorAll('.qb-saved-state').forEach(el => el.remove());
+            quizList.querySelectorAll('.qz-question-count').forEach(el => el.textContent = '0');
+        }
+
+        // Reset tab state to Materi
+        const firstTab = newSession.querySelector('.session-tab-btn[data-tab="materi"]');
+        if (firstTab) switchSessionTab(firstTab, 'materi');
     }
     
     function deleteSessionBlock(btn) {
@@ -1026,6 +1130,34 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     }
 
     // ==============================================
+    // Session Tab Switching
+    // ==============================================
+
+    function switchSessionTab(btn, tabName) {
+        const sessionBlock = btn.closest('.session-block');
+        if (!sessionBlock) return;
+        
+        // Update tab button styles
+        sessionBlock.querySelectorAll('.session-tab-btn').forEach(t => {
+            t.classList.remove('border-primary', 'text-primary');
+            t.classList.add('border-transparent', 'text-on-surface-variant');
+        });
+        btn.classList.add('border-primary', 'text-primary');
+        btn.classList.remove('border-transparent', 'text-on-surface-variant');
+        
+        // Toggle workspace panels
+        sessionBlock.querySelectorAll('[data-workspace]').forEach(ws => {
+            if (ws.getAttribute('data-workspace') === tabName) {
+                ws.classList.remove('hidden');
+                ws.classList.add('flex');
+            } else {
+                ws.classList.add('hidden');
+                ws.classList.remove('flex');
+            }
+        });
+    }
+
+    // ==============================================
     // Session Title Inline Editor
     // ==============================================
 
@@ -1381,6 +1513,309 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         }
         
         previewDiv.innerHTML = `<iframe class="w-full h-full rounded-xl" src="https://www.youtube.com/embed/${videoId}" title="YouTube Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
+
+    // ==============================================
+    // Quiz Builder Engine (Pilihan Ganda + Essay)
+    // ==============================================
+
+    let currentEditingQuizModule = null;
+    let qbQuestionCounter = 0;
+
+    function openQuizBuilder(btnEl, quizType) {
+        currentEditingQuizModule = btnEl.closest('.quiz-module-block');
+        const modal = document.getElementById('quiz-builder-overlay');
+        const sessionTitleEl = btnEl.closest('.session-block').querySelector('h4');
+        const iconWrap = document.getElementById('qb-icon-wrap');
+        
+        let typeName = quizType === 'final' ? 'Final Assessment' : 'Quiz Course';
+        let sessionPrefix = sessionTitleEl ? sessionTitleEl.textContent.trim() : 'Sesi';
+        document.getElementById('qb-title').textContent = typeName + ': ' + sessionPrefix;
+        
+        // Style based on type
+        if (quizType === 'final') {
+            iconWrap.className = 'w-12 h-12 bg-error-container text-error rounded-full flex items-center justify-center shrink-0';
+            iconWrap.querySelector('.material-symbols-outlined').textContent = 'verified';
+        } else {
+            iconWrap.className = 'w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0';
+            iconWrap.querySelector('.material-symbols-outlined').textContent = 'assignment';
+        }
+        
+        // Restore state or init
+        const list = document.getElementById('qb-questions-list');
+        const instructionTa = document.getElementById('qb-instruction');
+        const stateDiv = currentEditingQuizModule.querySelector('.qb-saved-state');
+        
+        if (stateDiv) {
+            list.innerHTML = stateDiv.innerHTML;
+            instructionTa.value = stateDiv.getAttribute('data-instruction') || '';
+        } else {
+            list.innerHTML = '';
+            instructionTa.value = '';
+            qbAddQuestion('mc');
+        }
+        qbQuestionCounter = list.querySelectorAll('.qb-question-block').length;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); }, 10);
+        document.body.style.overflow = 'hidden';
+        qbCalculateTotal();
+    }
+
+    function closeQuizBuilder() {
+        const modal = document.getElementById('quiz-builder-overlay');
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function saveQuizBuilder() {
+        const list = document.getElementById('qb-questions-list');
+        const instructionTa = document.getElementById('qb-instruction');
+        
+        // Sync DOM states
+        list.querySelectorAll('input[type="text"], input[type="number"], input[type="url"]').forEach(i => i.setAttribute('value', i.value));
+        list.querySelectorAll('textarea').forEach(t => t.textContent = t.value);
+        list.querySelectorAll('input[type="radio"]').forEach(r => {
+            if (r.checked) r.setAttribute('checked', 'checked');
+            else r.removeAttribute('checked');
+        });
+        list.querySelectorAll('select').forEach(s => {
+            s.querySelectorAll('option').forEach(o => {
+                if (o.value === s.value) o.setAttribute('selected', 'selected');
+                else o.removeAttribute('selected');
+            });
+        });
+        
+        if (currentEditingQuizModule) {
+            let stateDiv = currentEditingQuizModule.querySelector('.qb-saved-state');
+            if (!stateDiv) {
+                stateDiv = document.createElement('div');
+                stateDiv.className = 'qb-saved-state hidden';
+                currentEditingQuizModule.appendChild(stateDiv);
+            }
+            stateDiv.innerHTML = list.innerHTML;
+            stateDiv.setAttribute('data-instruction', instructionTa.value);
+            
+            // Update count badge
+            const countEl = currentEditingQuizModule.querySelector('.qz-question-count');
+            if (countEl) countEl.textContent = list.querySelectorAll('.qb-question-block').length;
+        }
+        
+        const saveBtn = document.querySelector('#quiz-builder-overlay header button.bg-primary');
+        const ogText = saveBtn.innerHTML;
+        saveBtn.classList.replace('bg-primary', 'bg-success');
+        saveBtn.classList.replace('hover:bg-primary-600', 'hover:bg-success');
+        saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span> Tersimpan';
+        setTimeout(() => {
+            saveBtn.classList.replace('bg-success', 'bg-primary');
+            saveBtn.classList.replace('hover:bg-success', 'hover:bg-primary-600');
+            saveBtn.innerHTML = ogText;
+            closeQuizBuilder();
+        }, 600);
+    }
+
+    function qbCalculateTotal() {
+        const list = document.getElementById('qb-questions-list');
+        const blocks = list.querySelectorAll('.qb-question-block');
+        let total = 0;
+        blocks.forEach(b => {
+            const w = b.querySelector('.qb-weight-input');
+            if (w) total += parseInt(w.value) || 0;
+        });
+        document.getElementById('qb-counter').textContent = 'Total ' + blocks.length + ' Pertanyaan';
+        document.getElementById('qb-max-score').textContent = total;
+    }
+
+    function qbDeleteQuestion(btn) {
+        const block = btn.closest('.qb-question-block');
+        block.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-200');
+        setTimeout(() => {
+            block.remove();
+            qbRenumberQuestions();
+            qbCalculateTotal();
+        }, 200);
+    }
+
+    function qbRenumberQuestions() {
+        const list = document.getElementById('qb-questions-list');
+        list.querySelectorAll('.qb-question-block').forEach((block, i) => {
+            block.setAttribute('data-index', i + 1);
+            const label = block.querySelector('.qb-index-label');
+            if (label) label.textContent = 'Soal ' + (i + 1);
+        });
+    }
+
+    function qbAddQuestion(type) {
+        const list = document.getElementById('qb-questions-list');
+        qbQuestionCounter = list.querySelectorAll('.qb-question-block').length + 1;
+        const qIndex = qbQuestionCounter;
+        let markup = '';
+        
+        if (type === 'mc') {
+            const optHtml = ['A','B','C','D'].map((opt, i) => `
+                <label class="qb-option-row group/opt flex items-center gap-3 p-3 border border-outline-variant/60 rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-colors shadow-sm relative overflow-hidden">
+                    <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-has-[:checked]/opt:bg-success transition-colors"></div>
+                    <input type="radio" onchange="qbOptionSelected(this)" name="qb_q${qIndex}_correct" value="${opt}" ${i===0?'checked':''} class="ml-2 w-5 h-5 text-success border-outline-variant focus:ring-success cursor-pointer">
+                    <span class="qb-opt-letter font-title-sm font-bold w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant border border-outline-variant/40 group-has-[:checked]/opt:bg-success group-has-[:checked]/opt:text-on-success group-has-[:checked]/opt:border-success transition-all">${opt}</span>
+                    <input type="text" class="flex-1 bg-transparent py-1 border-b border-transparent outline-none font-body-md text-on-surface focus:border-primary pointer-events-auto transition-colors" placeholder="Ketik pilihan jawaban ${opt}...">
+                    ${i >= 2 ? '<button type="button" onclick="const container = this.closest(\'.qb-options-container\'); this.closest(\'.qb-option-row\').remove(); qbRenumberOptions(container)" class="material-symbols-outlined text-on-surface-variant hover:text-error opacity-0 lg:group-hover/opt:opacity-100 transition-opacity p-1 relative z-10" title="Hapus Opsi">close</button>' : ''}
+                </label>
+            `).join('');
+            
+            markup = `
+            <div class="qb-question-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-0 shadow-sm overflow-hidden animate-fade-in-down transition-colors hover:border-outline-variant" data-index="${qIndex}" data-type="mc">
+                <div class="bg-surface-container-lowest border-b border-outline-variant/40 px-5 py-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="qb-index-label font-label-md font-bold text-on-surface bg-surface-container-low border border-outline-variant/60 px-3 py-1 rounded-lg">Soal ${qIndex}</span>
+                        <span class="font-label-sm font-bold text-primary bg-primary/5 border border-primary/20 px-2 py-0.5 rounded-lg flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">checklist</span>Pilihan Ganda</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-lg border border-outline/50 shadow-sm hover:border-primary transition-colors focus-within:border-primary">
+                            <span class="font-label-sm text-on-surface-variant">Bobot</span>
+                            <input type="number" class="qb-weight-input w-12 text-center font-title-sm font-bold text-on-surface bg-transparent outline-none" value="5" min="1" max="100" oninput="qbCalculateTotal()">
+                        </div>
+                        <button type="button" onclick="qbDeleteQuestion(this)" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1.5 rounded-lg hover:bg-error/10 transition-all" title="Hapus Soal">delete</button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-4">
+                    <textarea class="qb-question-body w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-md text-on-surface outline-none resize-y min-h-[80px] p-4 transition-all" placeholder="Tuliskan pertanyaan Anda secara spesifik di sini..."></textarea>
+                    
+                    <!-- Image Support for MC -->
+                    <div class="qb-image-attach">
+                        <div class="border border-dashed border-outline-variant rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
+                            <span class="material-symbols-outlined text-[20px] group-hover:text-primary">add_photo_alternate</span>
+                            <span class="font-label-sm font-bold group-hover:text-primary">Lampirkan Gambar Pendukung (Opsional)</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+                        </div>
+                    </div>
+                    
+                    <div class="qb-options-container space-y-2">
+                        ${optHtml}
+                    </div>
+                    
+                    <div class="pl-0 sm:pl-4 mt-2">
+                        <button type="button" onclick="qbAddOption(this)" class="flex items-center gap-2 text-primary font-label-sm font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-primary/20 w-fit">
+                            <span class="material-symbols-outlined text-[18px]">add</span> Tambah Pilihan Baru
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        } else if (type === 'essay') {
+            markup = `
+            <div class="qb-question-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-0 shadow-sm overflow-hidden animate-fade-in-down transition-colors hover:border-outline-variant" data-index="${qIndex}" data-type="essay">
+                <div class="bg-surface-container-lowest border-b border-outline-variant/40 px-5 py-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="qb-index-label font-label-md font-bold text-on-surface bg-surface-container-low border border-outline-variant/60 px-3 py-1 rounded-lg">Soal ${qIndex}</span>
+                        <span class="font-label-sm font-bold text-secondary bg-secondary/5 border border-secondary/20 px-2 py-0.5 rounded-lg flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit_note</span>Isian / Essay</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-lg border border-outline/50 shadow-sm hover:border-primary transition-colors focus-within:border-primary">
+                            <span class="font-label-sm text-on-surface-variant">Bobot</span>
+                            <input type="number" class="qb-weight-input w-12 text-center font-title-sm font-bold text-on-surface bg-transparent outline-none" value="10" min="1" max="100" oninput="qbCalculateTotal()">
+                        </div>
+                        <button type="button" onclick="qbDeleteQuestion(this)" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1.5 rounded-lg hover:bg-error/10 transition-all" title="Hapus Soal">delete</button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-4">
+                    <textarea class="qb-question-body w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-md text-on-surface outline-none resize-y min-h-[80px] p-4 transition-all" placeholder="Tuliskan pertanyaan essay / isian Anda di sini..."></textarea>
+                    
+                    <!-- Answer Guidance -->
+                    <div class="bg-surface-container-low border border-outline-variant/40 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-secondary">lightbulb</span>
+                            <span class="font-label-sm font-bold text-on-surface uppercase tracking-wider">Panduan Jawaban (Untuk Penilaian)</span>
+                        </div>
+                        <textarea class="qb-answer-key w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-sm text-on-surface outline-none resize-y min-h-[60px] p-3 transition-all" placeholder="Tuliskan kunci jawaban atau poin-poin penting yang harus ada dalam jawaban siswa (untuk panduan saat penilaian manual)..."></textarea>
+                        <div class="flex items-center gap-3">
+                            <span class="font-label-sm text-on-surface-variant">Panjang jawaban:</span>
+                            <select class="bg-surface border border-outline-variant/60 rounded-lg px-3 py-1.5 font-body-sm text-on-surface outline-none focus:border-primary transition-colors cursor-pointer">
+                                <option value="short">Pendek (1-2 kalimat)</option>
+                                <option value="medium" selected>Sedang (1 paragraf)</option>
+                                <option value="long">Panjang (Multi-paragraf)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+        
+        list.insertAdjacentHTML('beforeend', markup);
+        qbCalculateTotal();
+        
+        // Scroll into view
+        setTimeout(() => { list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+    }
+
+    function qbOptionSelected(radio) {
+        // Visual feedback handled by CSS group-has-[:checked]
+    }
+
+    function qbAddOption(btn) {
+        const block = btn.closest('.qb-question-block');
+        const qIndex = block.getAttribute('data-index');
+        const container = block.querySelector('.qb-options-container');
+        const count = container.children.length;
+        if (count >= 10) { alert('Maksimal 10 pilihan (A-J).'); return; }
+        
+        const letter = String.fromCharCode(65 + count);
+        const markup = `
+            <label class="qb-option-row group/opt flex items-center gap-3 p-3 border border-outline-variant/60 rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-colors shadow-sm relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-has-[:checked]/opt:bg-success transition-colors"></div>
+                <input type="radio" onchange="qbOptionSelected(this)" name="qb_q${qIndex}_correct" value="${letter}" class="ml-2 w-5 h-5 text-success border-outline-variant focus:ring-success cursor-pointer">
+                <span class="qb-opt-letter font-title-sm font-bold w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant border border-outline-variant/40 group-has-[:checked]/opt:bg-success group-has-[:checked]/opt:text-on-success group-has-[:checked]/opt:border-success transition-all">${letter}</span>
+                <input type="text" class="flex-1 bg-transparent py-1 border-b border-transparent outline-none font-body-md text-on-surface focus:border-primary pointer-events-auto transition-colors" placeholder="Ketik pilihan jawaban ${letter}...">
+                <button type="button" onclick="const c = this.closest('.qb-options-container'); this.closest('.qb-option-row').remove(); qbRenumberOptions(c)" class="material-symbols-outlined text-on-surface-variant hover:text-error opacity-0 lg:group-hover/opt:opacity-100 transition-opacity p-1 relative z-10" title="Hapus Opsi">close</button>
+            </label>
+        `;
+        container.insertAdjacentHTML('beforeend', markup);
+    }
+
+    function qbRenumberOptions(container) {
+        if (!container) return;
+        container.querySelectorAll('.qb-option-row').forEach((row, i) => {
+            const letter = String.fromCharCode(65 + i);
+            const badge = row.querySelector('.qb-opt-letter');
+            if (badge) badge.textContent = letter;
+            const radio = row.querySelector('input[type="radio"]');
+            if (radio) radio.value = letter;
+            const textInput = row.querySelector('input[type="text"]');
+            if (textInput) textInput.placeholder = 'Ketik pilihan jawaban ' + letter + '...';
+        });
+    }
+
+    function qbPreviewQuestionImage(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const attachDiv = input.closest('.qb-image-attach');
+            attachDiv.innerHTML = `
+                <div class="relative rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container-low">
+                    <img src="${e.target.result}" class="w-full max-h-[300px] object-contain" alt="Question Image">
+                    <div class="absolute top-2 right-2">
+                        <button type="button" onclick="qbRemoveQuestionImage(this)" class="bg-surface/80 backdrop-blur-sm border border-outline-variant rounded-lg p-1.5 material-symbols-outlined text-on-surface-variant hover:text-error transition-colors text-[18px]" title="Hapus Gambar">close</button>
+                    </div>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function qbRemoveQuestionImage(btn) {
+        const attachDiv = btn.closest('.qb-image-attach');
+        attachDiv.innerHTML = `
+            <div class="border border-dashed border-outline-variant rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
+                <span class="material-symbols-outlined text-[20px] group-hover:text-primary">add_photo_alternate</span>
+                <span class="font-label-sm font-bold group-hover:text-primary">Lampirkan Gambar Pendukung (Opsional)</span>
+                <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+            </div>
+        `;
     }
 
     // ==============================================
