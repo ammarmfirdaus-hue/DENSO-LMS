@@ -17,6 +17,16 @@ $show_back = $show_back ?? false;
 $header_title = $header_title ?? 'LMS';
 $notif_count = $notif_count ?? 0;
 $base_path = $base_path ?? '';
+
+$current_route = $_GET['route'] ?? '';
+if (str_starts_with($current_route, '/admin')) {
+    $default_notif_url = $base_path . '?route=/admin/notification';
+} elseif (str_starts_with($current_route, '/teacher')) {
+    $default_notif_url = $base_path . '?route=/teacher/notifikasi';
+} else {
+    $default_notif_url = $base_path . '?route=/student/notifikasi';
+}
+$notif_url = $notif_url ?? $default_notif_url;
 ?>
 <header class="bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe lg:w-[calc(100%-240px)] lg:ml-[240px] transition-all duration-300" id="topAppBar">
     <div class="flex justify-between items-center w-full px-container-margin h-14">
@@ -38,7 +48,7 @@ $base_path = $base_path ?? '';
         ) ?></div>
 
         <!-- Right Action: Notification Bell -->
-        <a href="<?= $base_path ?>?route=/student/notifikasi" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative" aria-label="Notifikasi">
+        <a href="<?= htmlspecialchars($notif_url) ?>" class="text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative" aria-label="Notifikasi">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
             <?php if ($notif_count > 0): ?>
             <span class="notification-dot absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 min-w-[18px] h-[18px] bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-surface dark:border-on-background">

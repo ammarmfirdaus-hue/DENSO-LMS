@@ -170,3 +170,85 @@ function getNotifIcon(string $type): array
         default => ['notifications', 'bg-surface-container', 'text-on-surface-variant'],
     };
 }
+
+/**
+ * Memeriksa Hak Akses (RBAC Permission Checker).
+ *
+ * Memeriksa apakah suatu role atau user saat ini memiliki kapabilitas/otoritas
+ * tertentu dalam sistem DENSO-LMS berdasarkan matriks otorisasi.
+ *
+ * @param string $capability Nama kapabilitas atau kode otorisasi (misalnya: 'Full System Control', 'Kelola User & Akun').
+ * @param string|null $roleName Nama role (opsional, secara default membaca dari session user).
+ * @return bool True apabila diizinkan, False jika ditolak.
+ */
+function hasPermission(string $capability, ?string $roleName = null): bool
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+
+    if ($roleName === null) {
+        $user = $_SESSION['user'] ?? null;
+        $roleName = $user['role'] ?? 'Student';
+    }
+
+    if (strcasecmp($roleName, 'Super Admin') === 0 || strcasecmp($roleName, 'System Root') === 0) {
+        return true;
+    }
+
+    $permissionsMap = [
+        'Admin' => [
+            'Kelola User & Akun',
+            'Manajemen Course & Materi',
+            'Assignment & Target KPI',
+            'Laporan & Activity Log',
+            'Buat & Edit Course',
+            'Upload Materi Video/PDF',
+            'Buat Quiz & Final Test',
+            'Pantau Progres Siswa',
+            'Periksa & Grading Quiz',
+            'Bantu Evaluasi Tugas',
+            'Review Materi Course',
+            'Rekap Nilai Kelas',
+            'Akses Materi & Sesi Belajar',
+            'Ikuti Kuis & Evaluasi',
+            'Unduh Sertifikat K3/ISO',
+            'Akses Forum Diskusi'
+        ],
+        'Teacher' => [
+            'Buat & Edit Course',
+            'Upload Materi Video/PDF',
+            'Buat Quiz & Final Test',
+            'Pantau Progres Siswa',
+            'Periksa & Grading Quiz',
+            'Bantu Evaluasi Tugas',
+            'Review Materi Course',
+            'Rekap Nilai Kelas',
+            'Akses Materi & Sesi Belajar',
+            'Ikuti Kuis & Evaluasi',
+            'Unduh Sertifikat K3/ISO',
+            'Akses Forum Diskusi'
+        ],
+        'Teacher Associate' => [
+            'Periksa & Grading Quiz',
+            'Bantu Evaluasi Tugas',
+            'Review Materi Course',
+            'Rekap Nilai Kelas',
+            'Akses Materi & Sesi Belajar',
+            'Ikuti Kuis & Evaluasi',
+            'Unduh Sertifikat K3/ISO',
+            'Akses Forum Diskusi'
+        ],
+        'Student' => [
+            'Akses Materi & Sesi Belajar',
+            'Ikuti Kuis & Evaluasi',
+            'Unduh Sertifikat K3/ISO',
+            'Akses Forum Diskusi'
+        ],
+    ];
+
+    $allowedCapabilities = $permissionsMap[$roleName] ?? [];
+
+    return in_array($capability, $allowedCapabilities, true);
+}
+

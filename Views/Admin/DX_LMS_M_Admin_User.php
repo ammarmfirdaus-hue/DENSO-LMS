@@ -131,7 +131,7 @@ $active_tab = 'user';
                             <th class="px-4 py-3.5 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">Jabatan & Dept</th>
                             <th class="px-4 py-3.5 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role Status</th>
                             <th class="px-4 py-3.5 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">Akses Tambahan</th>
-                            <th class="px-4 py-3.5 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
+                            <th class="px-4 py-3.5 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -198,13 +198,15 @@ $active_tab = 'user';
                                             <span class="text-gray-400 text-xs italic">Tidak ada</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="px-4 py-3.5 text-right whitespace-nowrap">
-                                        <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-red-600 transition-colors shadow-sm" aria-label="Edit Profile">
-                                            <span class="material-symbols-outlined text-[16px]">edit</span> Edit
-                                        </button>
-                                        <button class="inline-flex items-center justify-center w-7 h-7 text-gray-400 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm ml-1" aria-label="More Options">
-                                            <span class="material-symbols-outlined text-[18px]">more_vert</span>
-                                        </button>
+                                    <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-red-600 transition-colors shadow-sm" aria-label="Edit Profile">
+                                                <span class="material-symbols-outlined text-[16px]">edit</span> Edit
+                                            </button>
+                                            <button class="inline-flex items-center justify-center w-7 h-7 text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm" aria-label="More Options">
+                                                <span class="material-symbols-outlined text-[18px]">more_vert</span>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

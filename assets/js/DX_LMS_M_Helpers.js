@@ -37,51 +37,86 @@
              * @param {string} options.cancelText - Teks tombol batal
              * @returns {Promise} Promise yang resolve dengan hasil dialog
              */
-            confirm: function(options) {
-                return Swal.fire({
-                    icon: options.icon || 'question',
-                    title: options.title || 'Konfirmasi',
-                    text: options.text || '',
+            confirm: function(optionsOrTitle, textOrHtml, confirmText, cancelText, icon) {
+                let opts = {};
+                if (typeof optionsOrTitle === 'object' && optionsOrTitle !== null) {
+                    opts = optionsOrTitle;
+                } else {
+                    opts = {
+                        title: optionsOrTitle || 'Konfirmasi',
+                        text: textOrHtml || '',
+                        confirmText: confirmText || 'Ya, Lanjutkan',
+                        cancelText: cancelText || 'Batal',
+                        icon: icon || 'question'
+                    };
+                }
+
+                const content = opts.text || opts.html || '';
+                const isHtml = /<[a-z][\s\S]*>/i.test(content);
+
+                const swalConfig = {
+                    icon: opts.icon || 'question',
+                    title: opts.title || 'Konfirmasi',
                     showCancelButton: true,
-                    confirmButtonText: options.confirmText || 'Ya, Lanjutkan',
-                    cancelButtonText: options.cancelText || 'Batal',
+                    confirmButtonText: opts.confirmText || 'Ya, Lanjutkan',
+                    cancelButtonText: opts.cancelText || 'Batal',
                     reverseButtons: true,
                     customClass: {
                         popup: 'dls-swal-popup'
                     }
-                });
+                };
+
+                if (isHtml || opts.html) {
+                    swalConfig.html = content;
+                } else {
+                    swalConfig.text = content;
+                }
+
+                return Swal.fire(swalConfig);
             },
 
             /**
              * Menampilkan dialog sukses.
              *
              * @param {string} title - Judul dialog
-             * @param {string} text - Teks isi dialog (opsional)
+             * @param {string} text - Teks isi dialog (opsional, mendukung HTML)
              * @returns {Promise} Promise yang resolve setelah user menutup dialog
              */
             success: function(title, text) {
-                return Swal.fire({
+                const isHtml = text && /<[a-z][\s\S]*>/i.test(text);
+                const config = {
                     icon: 'success',
                     title: title || 'Berhasil!',
-                    text: text || '',
                     confirmButtonText: 'OK'
-                });
+                };
+                if (isHtml) {
+                    config.html = text;
+                } else {
+                    config.text = text || '';
+                }
+                return Swal.fire(config);
             },
 
             /**
              * Menampilkan dialog error.
              *
              * @param {string} title - Judul dialog
-             * @param {string} text - Teks isi dialog (opsional)
+             * @param {string} text - Teks isi dialog (opsional, mendukung HTML)
              * @returns {Promise} Promise yang resolve setelah user menutup dialog
              */
             error: function(title, text) {
-                return Swal.fire({
+                const isHtml = text && /<[a-z][\s\S]*>/i.test(text);
+                const config = {
                     icon: 'error',
                     title: title || 'Gagal!',
-                    text: text || '',
                     confirmButtonText: 'OK'
-                });
+                };
+                if (isHtml) {
+                    config.html = text;
+                } else {
+                    config.text = text || '';
+                }
+                return Swal.fire(config);
             },
 
             /**

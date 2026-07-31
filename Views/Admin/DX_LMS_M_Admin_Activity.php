@@ -48,7 +48,7 @@ $active_tab = 'activity';
         <!-- ================================================
              PAGE HEADER
              ================================================ -->
-        <div class="max-w-5xl mx-auto mb-6">
+        <div class="mb-6">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
                     <h1 class="font-headline-lg font-bold text-gray-900">Activity Hub LMS</h1>
@@ -65,7 +65,7 @@ $active_tab = 'activity';
         <!-- ================================================
              STATISTIK SUMMARY (4 KPI Card)
              ================================================ -->
-        <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <a href="?route=/admin/activity&role=all<?= !empty($filter_date) ? '&date=' . e($filter_date) : '' ?>" 
                class="bg-white border <?= $filter_role === 'all' ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200 hover:border-gray-300' ?> rounded-xl p-4 text-center transition-all group shadow-sm">
                 <div class="text-2xl font-bold text-gray-900"><?= $stats['total'] ?></div>
@@ -107,7 +107,7 @@ $active_tab = 'activity';
         <!-- ================================================
              TOOLBAR: SEARCH + FILTER ROLE TABS + DATE
              ================================================ -->
-        <div class="max-w-5xl mx-auto mb-5">
+        <div class="mb-5">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                 <!-- Baris 1: Search + Date -->
                 <div class="flex flex-col sm:flex-row gap-3 mb-4">
@@ -230,7 +230,7 @@ $active_tab = 'activity';
         <!-- ================================================
              ACTIVITY TIMELINE LIST
              ================================================ -->
-        <div class="max-w-5xl mx-auto">
+        <div class="w-full">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <!-- Header List -->
                 <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -257,7 +257,7 @@ $active_tab = 'activity';
                         <span class="material-symbols-outlined text-gray-300 text-[64px]">inbox</span>
                         <p class="mt-3 text-sm font-semibold text-gray-500">Tidak ada aktivitas ditemukan</p>
                         <p class="mt-1 text-xs text-gray-400">Coba ubah filter atau kata kunci pencarian Anda.</p>
-                        <a href="?route=/admin/activity" class="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-red-600 hover:underline">
+                        <a href="?route=/admin/activity" class="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-red-600">
                             <span class="material-symbols-outlined text-[16px]">refresh</span> Reset semua filter
                         </a>
                     </div>
@@ -308,9 +308,6 @@ $active_tab = 'activity';
                         ?>
                             <!-- Log item: flex layout agar icon tidak menimpa teks -->
                             <div class="log-item flex gap-3 py-3.5 border-b border-gray-100 last:border-0 relative group hover:bg-gray-50 -mx-6 px-6 transition-colors" data-role="<?= strtolower($act['role']) ?>">
-                                <?php if ($show_line): ?>
-                                    <span class="absolute left-[35px] top-14 bottom-0 w-[2px] bg-gray-200 z-0" aria-hidden="true"></span>
-                                <?php endif; ?>
 
                                 <!-- Icon Node (flex item, bukan absolute) -->
                                 <div class="w-9 h-9 rounded-full shrink-0 bg-white border border-gray-200 text-gray-400 flex items-center justify-center shadow-sm z-10 group-hover:border-gray-300 group-hover:text-gray-600 transition-colors mt-0.5">
@@ -322,7 +319,7 @@ $active_tab = 'activity';
                                     <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 leading-relaxed">
                                         <!-- User Name -->
                                         <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ?? 1 ?>" 
-                                           class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors whitespace-nowrap"><?= e($act['user']) ?></a>
+                                           class="font-semibold text-gray-900 hover:text-red-600 transition-colors whitespace-nowrap"><?= e($act['user']) ?></a>
                                         <!-- Role Badge (warna per role) -->
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border <?= $role_badge_class ?> whitespace-nowrap">
                                             <span class="w-1.5 h-1.5 rounded-full <?= $role_dot_class ?>"></span>
@@ -333,7 +330,7 @@ $active_tab = 'activity';
                                         <!-- Target Entity -->
                                         <?php if (isset($act['target_type']) && in_array($act['target_type'], ['course','quiz','material'])): ?>
                                             <a href="?route=/admin/<?= $act['target_type'] ?>/detail&id=<?= $act['target_id'] ?? 1 ?>" 
-                                               class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors"><?= e($act['target']) ?></a>
+                                               class="font-semibold text-gray-900 hover:text-red-600 transition-colors"><?= e($act['target']) ?></a>
                                         <?php else: ?>
                                             <strong class="font-semibold text-gray-900"><?= e($act['target']) ?></strong>
                                         <?php endif; ?>

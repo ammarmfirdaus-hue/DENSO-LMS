@@ -76,6 +76,7 @@ $router->add('/admin', 'DX_LMS_M_Admin_Dashboard@index');
 $router->add('/admin/user', 'DX_LMS_M_Admin_User@index');
 $router->add('/admin/course', 'DX_LMS_M_Admin_Course@index');
 $router->add('/admin/role', 'DX_LMS_M_Admin_Role@index');
+$router->add('/admin/role/update', 'DX_LMS_M_Admin_Role@update');
 $router->add('/admin/assignment', 'DX_LMS_M_Admin_Assignment@index');
 $router->add('/admin/monitoring', 'DX_LMS_M_Admin_Monitoring@index');
 $router->add('/admin/score', 'DX_LMS_M_Admin_Score@index');

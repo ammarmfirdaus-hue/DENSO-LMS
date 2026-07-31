@@ -168,41 +168,100 @@ class DX_LMS_M_Admin_MockData
                 'id' => 'role_1',
                 'name' => 'Super Admin',
                 'level' => 1,
-                'description' => 'Akses penuh seluruh sistem. Otoritas tertinggi.',
+                'badge_label' => 'System Root',
+                'description' => 'Akses penuh seluruh sistem, otorisasi tertinggi, dan konfigurasi database LMS.',
                 'users_count' => 1,
                 'status' => 'Active',
+                'capabilities' => ['Full System Control', 'Role & Security Mgmt', 'Database & Audit Logs', 'All Department Access'],
+                'allowed' => [
+                    'Mengelola seluruh data akun pengguna & hak akses level sistem',
+                    'Mengkonfigurasi parameter server, koneksi database, dan audit logs',
+                    'Akses penuh tanpa batas ke seluruh course, materi, dan penugasan',
+                    'Menyetujui atau menolak perubahan regulasi K3 & ISO tingkat perusahaan'
+                ],
+                'restricted' => [
+                    'Tidak ada pembatasan pada sistem (Otoritas Apex)'
+                ]
             ],
             [
                 'id' => 'role_2',
                 'name' => 'Admin',
                 'level' => 2,
-                'description' => 'Akses kelola user, course, dan operasional utama.',
+                'badge_label' => 'LMS Controller',
+                'description' => 'Akses kelola user, manajemen course, penugasan karyawan, dan operasional utama.',
                 'users_count' => 5,
                 'status' => 'Active',
+                'capabilities' => ['Kelola User & Akun', 'Manajemen Course & Materi', 'Assignment & Target KPI', 'Laporan & Activity Log'],
+                'allowed' => [
+                    'Mendaftarkan, mengedit, menonaktifkan, dan mereset password akun pengguna',
+                    'Membuat, meninjau, dan mempublikasikan seluruh modul Course & Materi',
+                    'Menyalurkan penugasan (Assignment) berdasarkan Jabatan, Golongan, & Departemen',
+                    'Melihat statistik pemantauan progres dan Activity Log operasional'
+                ],
+                'restricted' => [
+                    'Tidak dapat mengubah konfigurasi database & parameter server core',
+                    'Tidak dapat mengangkat user lain menjadi Super Admin'
+                ]
             ],
             [
                 'id' => 'role_3',
                 'name' => 'Teacher',
                 'level' => 3,
-                'description' => 'Akses pembuat materi, kuis, dan pemantau nilai.',
+                'badge_label' => 'Instructor',
+                'description' => 'Akses pembuat materi, perancang kuis, dan pemantau nilai evaluasi peserta.',
                 'users_count' => 12,
                 'status' => 'Active',
+                'capabilities' => ['Buat & Edit Course', 'Upload Materi Video/PDF', 'Buat Quiz & Final Test', 'Pantau Progres Siswa'],
+                'allowed' => [
+                    'Merancang silabus course, sesi pembelajaran, dan mengunggah materi (PDF/Video)',
+                    'Membuat kuis pilihan ganda, essay, dan Final Assessment bersertifikat',
+                    'Memantau skor, tingkat kelulusan, dan riwayat belajar peserta di kelasnya',
+                    'Memberikan feedback atau nilai pada ujian praktik/essay'
+                ],
+                'restricted' => [
+                    'Tidak dapat mendaftarkan atau menghapus akun pengguna (Admin only)',
+                    'Tidak dapat mengubah penugasan lintas departemen tanpa persetujuan Admin'
+                ]
             ],
             [
                 'id' => 'role_4',
                 'name' => 'Teacher Associate',
                 'level' => 4,
-                'description' => 'Asisten Teacher untuk memeriksa quiz.',
+                'badge_label' => 'Assistant',
+                'description' => 'Asisten pengajar untuk memeriksa kuis, rekap nilai, dan meninjau materi.',
                 'users_count' => 2,
                 'status' => 'Active',
+                'capabilities' => ['Periksa & Grading Quiz', 'Bantu Evaluasi Tugas', 'Review Materi Course', 'Rekap Nilai Kelas'],
+                'allowed' => [
+                    'Memeriksa hasil pengerjaan kuis peserta dan melakukan grading manual',
+                    'Membantu Teacher meninjau dan memperbaiki dokumen materi pembelajaran',
+                    'Mengunduh rekapitulasi nilai dan daftar hadir sesi pelatihan',
+                    'Berinteraksi dengan peserta untuk tanya jawab seputar materi'
+                ],
+                'restricted' => [
+                    'Tidak dapat menghapus course atau materi yang sudah dipublikasikan',
+                    'Tidak memiliki hak akses manajemen user dan pengaturan sistem'
+                ]
             ],
             [
                 'id' => 'role_5',
                 'name' => 'Student',
                 'level' => 5,
-                'description' => 'Akses default untuk pembelajaran LMS.',
+                'badge_label' => 'Audience',
+                'description' => 'Akses default untuk pembelajaran LMS, mengikuti kuis, dan mengunduh sertifikat.',
                 'users_count' => 104,
                 'status' => 'Active',
+                'capabilities' => ['Akses Course Ditugaskan', 'Belajar Materi & Video', 'Kerjakan Quiz & Ujian', 'Lihat Sertifikat & Progres'],
+                'allowed' => [
+                    'Mengakses seluruh course yang ditugaskan (Assignment) atau terdaftar',
+                    'Mempelajari materi video, dokumen SOP, dan instruksi kerja',
+                    'Mengerjakan latihan kuis dan evaluasi Final Assessment',
+                    'Melihat rapor hasil belajar sendiri dan mengunduh sertifikat kelulusan'
+                ],
+                'restricted' => [
+                    'Tidak dapat membuat, mengubah, atau menghapus course & materi',
+                    'Tidak dapat melihat data nilai atau aktivitas dari pengguna lain'
+                ]
             ],
         ];
     }
@@ -218,6 +277,7 @@ class DX_LMS_M_Admin_MockData
                 'assigned_by' => 'Tono Wijaya',
                 'date' => '12 Jul 2026',
                 'status' => 'Active',
+                'est_participants' => 124,
             ],
             [
                 'id' => 'asg_2',
@@ -227,6 +287,7 @@ class DX_LMS_M_Admin_MockData
                 'assigned_by' => 'Tono Wijaya',
                 'date' => '05 Jul 2026',
                 'status' => 'Active',
+                'est_participants' => 45,
             ],
             [
                 'id' => 'asg_3',
@@ -236,6 +297,37 @@ class DX_LMS_M_Admin_MockData
                 'assigned_by' => 'Pending',
                 'date' => '-',
                 'status' => 'Pending',
+                'est_participants' => 24,
+            ],
+            [
+                'id' => 'asg_4',
+                'course_title' => '5S & Kaizen Fundamentals',
+                'target_type' => 'Jabatan & Golongan',
+                'target_value' => 'Leader & SPV (Gol 3-4)',
+                'assigned_by' => 'Rina Kartika',
+                'date' => '15 Jul 2026',
+                'status' => 'Active',
+                'est_participants' => 86,
+            ],
+            [
+                'id' => 'asg_5',
+                'course_title' => 'Standard Operating Procedure (SOP) Line A',
+                'target_type' => 'Departemen',
+                'target_value' => 'Manufacturing Line A',
+                'assigned_by' => 'Tono Wijaya',
+                'date' => '18 Jul 2026',
+                'status' => 'Active',
+                'est_participants' => 63,
+            ],
+            [
+                'id' => 'asg_6',
+                'course_title' => 'Total Productive Maintenance (TPM) Basic',
+                'target_type' => 'Spesifik User',
+                'target_value' => '48 Peserta Terpilih',
+                'assigned_by' => 'Pending',
+                'date' => '-',
+                'status' => 'Pending',
+                'est_participants' => 48,
             ],
         ];
     }
@@ -548,27 +640,168 @@ class DX_LMS_M_Admin_MockData
 
     public static function getNotifications()
     {
+        $today     = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $d2        = date('Y-m-d', strtotime('-2 days'));
+        $d3        = date('Y-m-d', strtotime('-3 days'));
+        $d8        = date('Y-m-d', strtotime('-8 days'));
+        $d10       = date('Y-m-d', strtotime('-10 days'));
+        $d14       = date('Y-m-d', strtotime('-14 days'));
+        $d30       = date('Y-m-d', strtotime('-30 days'));
+
         return [
+            // ── HARI INI ────────────────────────────────────────
             [
-                'id' => 'not_1',
-                'type' => 'Warning',
-                'title' => 'Pending Assignment',
-                'message' => 'Course "Pengenalan ISO 9001:2015" menunggu persetujuan delegasi audiens.',
-                'time' => '5 Jam lalu',
+                'id'           => 'not_1',
+                'group'        => 'hari_ini',
+                'type'         => 'Warning',
+                'category'     => 'assignment',
+                'is_penting'   => true,
+                'icon'         => 'assignment_late',
+                'title'        => 'Pending Assignment',
+                'message'      => 'Course "Pengenalan ISO 9001:2015" menunggu persetujuan delegasi audiens.',
+                'tag'          => 'ISO 9001:2015',
+                'date'         => $today,
+                'time'         => '5 jam yang lalu',
+                'action_label' => 'Tindak Lanjuti',
+                'action_href'  => '?route=/admin/assignment',
             ],
             [
-                'id' => 'not_2',
-                'type' => 'Info',
-                'title' => 'Course Selesai',
-                'message' => 'Course "5S & Kaizen" telah diarsipkan otomatis setelah seluruh peserta tuntas 100%.',
-                'time' => '1 Hari lalu',
+                'id'           => 'not_2',
+                'group'        => 'hari_ini',
+                'type'         => 'Warning',
+                'category'     => 'assignment',
+                'is_penting'   => true,
+                'icon'         => 'pending_actions',
+                'title'        => 'Assignment Belum Disetujui',
+                'message'      => 'Assignment course "Total Productive Maintenance" untuk 48 peserta masih berstatus Pending.',
+                'tag'          => 'TPM Basic',
+                'date'         => $today,
+                'time'         => '3 jam yang lalu',
+                'action_label' => 'Tindak Lanjuti',
+                'action_href'  => '?route=/admin/assignment',
             ],
             [
-                'id' => 'not_3',
-                'type' => 'Success',
-                'title' => 'Assessment Direview',
-                'message' => 'Teacher Rina Kartika telah menyelesaikan scoring untuk 24 siswa PLC.',
-                'time' => '2 Hari lalu',
+                'id'           => 'not_3',
+                'group'        => 'hari_ini',
+                'type'         => 'Info',
+                'category'     => 'system',
+                'is_penting'   => false,
+                'icon'         => 'manage_accounts',
+                'title'        => 'Pengguna Baru Terdaftar',
+                'message'      => '3 akun karyawan baru dari departemen Engineering telah berhasil didaftarkan ke sistem LMS.',
+                'tag'          => 'Dept. Engineering',
+                'date'         => $today,
+                'time'         => '1 jam yang lalu',
+                'action_label' => 'Lihat Pengguna',
+                'action_href'  => '?route=/admin/user',
+            ],
+            // ── MINGGU LALU ─────────────────────────────────────
+            [
+                'id'           => 'not_4',
+                'group'        => 'minggu_lalu',
+                'type'         => 'Info',
+                'category'     => 'course',
+                'is_penting'   => false,
+                'icon'         => 'inventory_2',
+                'title'        => 'Course Selesai Diarsipkan',
+                'message'      => 'Course "5S & Kaizen" telah diarsipkan otomatis setelah seluruh peserta tuntas 100%.',
+                'tag'          => '5S & Kaizen Fundamentals',
+                'date'         => $yesterday,
+                'time'         => '1 hari yang lalu',
+                'action_label' => 'Lihat Course',
+                'action_href'  => '?route=/admin/course',
+            ],
+            [
+                'id'           => 'not_5',
+                'group'        => 'minggu_lalu',
+                'type'         => 'Info',
+                'category'     => 'course',
+                'is_penting'   => false,
+                'icon'         => 'upload_file',
+                'title'        => 'Materi Baru Diunggah',
+                'message'      => 'Teacher Ahmad Rizal mengunggah materi "Video Safety Prosedur K3" pada course Dasar Keselamatan Kerja.',
+                'tag'          => 'Dasar Keselamatan Kerja',
+                'date'         => $d2,
+                'time'         => '2 hari yang lalu',
+                'action_label' => 'Lihat Course',
+                'action_href'  => '?route=/admin/course',
+            ],
+            [
+                'id'           => 'not_6',
+                'group'        => 'minggu_lalu',
+                'type'         => 'Success',
+                'category'     => 'assessment',
+                'is_penting'   => false,
+                'icon'         => 'grading',
+                'title'        => 'Assessment Telah Direview',
+                'message'      => 'Teacher Rina Kartika telah menyelesaikan scoring untuk 24 siswa PLC.',
+                'tag'          => 'Basic PLC',
+                'date'         => $d3,
+                'time'         => '3 hari yang lalu',
+                'action_label' => 'Lihat Nilai',
+                'action_href'  => '?route=/admin/score',
+            ],
+            [
+                'id'           => 'not_7',
+                'group'        => 'minggu_lalu',
+                'type'         => 'Success',
+                'category'     => 'course',
+                'is_penting'   => false,
+                'icon'         => 'workspace_premium',
+                'title'        => 'Course Lulus 100%',
+                'message'      => 'Seluruh 120 peserta course "Dasar Keselamatan Kerja (K3)" telah dinyatakan lulus dengan rata-rata nilai 88.',
+                'tag'          => 'Dasar Keselamatan Kerja',
+                'date'         => $d8,
+                'time'         => date('d M Y', strtotime('-8 days')),
+                'action_label' => 'Lihat Laporan',
+                'action_href'  => '?route=/admin/score',
+            ],
+            [
+                'id'           => 'not_8',
+                'group'        => 'minggu_lalu',
+                'type'         => 'Warning',
+                'category'     => 'assignment',
+                'is_penting'   => true,
+                'icon'         => 'group_remove',
+                'title'        => 'Peserta Tidak Aktif Terdeteksi',
+                'message'      => '12 peserta belum login dan mengakses materi selama lebih dari 7 hari.',
+                'tag'          => 'Monitoring Aktifitas',
+                'date'         => $d10,
+                'time'         => date('d M Y', strtotime('-10 days')),
+                'action_label' => 'Lihat Monitoring',
+                'action_href'  => '?route=/admin/monitoring',
+            ],
+            // ── BULAN LALU ──────────────────────────────────────
+            [
+                'id'           => 'not_9',
+                'group'        => 'bulan_lalu',
+                'type'         => 'Info',
+                'category'     => 'course',
+                'is_penting'   => false,
+                'icon'         => 'library_add',
+                'title'        => 'Course Baru Dipublikasikan',
+                'message'      => 'Course "Standard Operating Procedure (SOP) Line A" telah resmi dipublikasikan ke 63 peserta.',
+                'tag'          => 'SOP Line A',
+                'date'         => $d14,
+                'time'         => date('d M Y', strtotime('-14 days')),
+                'action_label' => 'Lihat Course',
+                'action_href'  => '?route=/admin/course',
+            ],
+            [
+                'id'           => 'not_10',
+                'group'        => 'bulan_lalu',
+                'type'         => 'Success',
+                'category'     => 'system',
+                'is_penting'   => false,
+                'icon'         => 'download_done',
+                'title'        => 'Ekspor Laporan Berhasil',
+                'message'      => 'Laporan rekap nilai batch Juli 2026 telah berhasil diproses dan siap diunduh.',
+                'tag'          => 'Rekap Nilai Juli 2026',
+                'date'         => $d30,
+                'time'         => date('d M Y', strtotime('-30 days')),
+                'action_label' => 'Lihat Laporan',
+                'action_href'  => '?route=/admin/score',
             ],
         ];
     }

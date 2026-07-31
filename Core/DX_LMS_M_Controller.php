@@ -43,7 +43,7 @@ class DX_LMS_M_Controller
 
         $viewFile = $this->findViewFile($view);
         if ($viewFile) {
-            require_once $viewFile;
+            require $viewFile;
         } else {
             die("File View '$view.php' tidak ditemukan di seluruh direktori Views.");
         }

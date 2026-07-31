@@ -207,7 +207,7 @@ $active_tab = 'beranda';
                     <h2 class="font-headline-sm font-bold text-gray-900">Timeline Sistem Terkini</h2>
                     <p class="text-xs text-gray-500 mt-0.5">Aktivitas dan log perubahan real-time di platform</p>
                 </div>
-                <a href="?route=/admin/activity" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition-colors group">
+                <a href="?route=/admin/activity" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors group">
                     <span>Lihat Semua Log</span>
                     <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5">arrow_forward</span>
                 </a>
@@ -294,14 +294,14 @@ $active_tab = 'beranda';
                             <!-- Content (flex-1, tidak tertimpa icon) -->
                             <div class="flex-1 min-w-0 flex justify-between items-start gap-4">
                                 <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 leading-relaxed">
-                                    <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ?? 1 ?>" class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors whitespace-nowrap"><?= e($act['user']) ?></a>
+                                    <a href="?route=/admin/user/detail&id=<?= $act['user_id'] ?? 1 ?>" class="font-semibold text-gray-900 hover:text-red-600 transition-colors whitespace-nowrap"><?= e($act['user']) ?></a>
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border <?= $badge_class ?> whitespace-nowrap">
                                         <span class="w-1.5 h-1.5 rounded-full <?= $dot_class ?>"></span>
                                         <?= e($act['role']) ?>
                                     </span>
                                     <span><?= e($act['action']) ?></span>
                                     <?php if (isset($act['target_type']) && in_array($act['target_type'], ['course','quiz','material'])): ?>
-                                        <a href="?route=/admin/course/detail&id=<?= $act['target_id'] ?? 101 ?>" class="font-semibold text-gray-900 hover:text-red-600 hover:underline transition-colors"><?= e($act['target']) ?></a>
+                                        <a href="?route=/admin/course/detail&id=<?= $act['target_id'] ?? 101 ?>" class="font-semibold text-gray-900 hover:text-red-600 transition-colors"><?= e($act['target']) ?></a>
                                     <?php else: ?>
                                         <strong class="font-semibold text-gray-900"><?= e($act['target']) ?></strong>
                                     <?php endif; ?>
