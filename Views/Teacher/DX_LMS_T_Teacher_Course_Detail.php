@@ -58,13 +58,8 @@ switch ($courseStatus) {
     ?>
 
     <!-- Main Content Canvas -->
-<<<<<<< HEAD
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-24 pt-4 lg:pt-8 bg-[#FAFAFA]">
-        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-2xl lg:gap-8 items-start">
-=======
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
-        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-xl lg:gap-gutter items-start">
->>>>>>> d16e058b989517586eb0cc4e605242d2d3baff45
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px] bg-[#FAFAFA]">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-xl lg:gap-8 items-start">
             
             <!-- Left Column: Primary Content -->
             <div class="lg:col-span-2 space-y-stack-xl lg:space-y-8">

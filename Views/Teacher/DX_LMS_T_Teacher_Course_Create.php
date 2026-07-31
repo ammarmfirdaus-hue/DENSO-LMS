@@ -52,7 +52,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             <?php endif; ?>
 
             <!-- Wizard Stepper (Horizontal - Enterprise Grade) -->
-            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-5 shadow-sm w-full overflow-x-auto hide-scrollbar relative z-20 mb-8">
+            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-5 shadow-sm w-full overflow-x-auto hide-scrollbar relative z-20 mb-8 mt-8">
                 <div class="flex items-center justify-between min-w-[640px] px-2">
                     <?php
                     $steps = [
@@ -63,6 +63,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     ];
 
                     for ($i = 1; $i <= 4; $i++):
+
                         $isActive = $step === $i;
                         $isCompleted = $step > $i;
                         $colorClass = $isActive
@@ -129,18 +130,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <p class="font-body-sm text-on-surface-variant mt-0.5">Lengkapi identitas utama, deskripsi kompetensi, serta klasifikasi kategori untuk mempermudah identifikasi materi.</p>
                         </div>
                     </div>
-
-                    <!-- Instructor Best Practice Tip -->
-                    <div class="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3 mb-6">
-                        <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">tips_and_updates</span>
-                        <div class="font-body-sm text-on-surface-variant leading-relaxed">
-                            <span class="font-bold text-on-surface">Tips Denso Learning:</span> Gunakan judul yang ringkas dan spesifik (misal: <span class="italic text-primary font-medium">"Fundamental 5S & K3 - Level Dasar"</span>) agar peserta dan Admin mudah mengenali tujuan pembelajaran.
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        <!-- Left 2 Columns: Form Fields -->
-                        <div class="xl:col-span-2 space-y-6">
+                    <div class="w-full">
+                        <div class="space-y-6">
                             <!-- Nama Course Field -->
                             <div class="space-y-1.5">
                                 <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
@@ -229,48 +220,6 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Right Column: Cover Preview & Corporate Guidelines -->
-                        <div class="xl:col-span-1 space-y-6">
-                            <!-- Cover Preview Box -->
-                            <div class="bg-surface-container-low/50 border border-outline-variant rounded-2xl p-5 shadow-xs space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-primary text-[20px]">image</span>
-                                        Cover Course
-                                    </h4>
-                                    <span class="font-label-xs text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">Default Denso</span>
-                                </div>
-                                <div class="w-full h-40 rounded-xl bg-gradient-to-br from-primary-container/80 to-secondary-container/80 border border-outline-variant/60 flex flex-col items-center justify-center p-4 text-center relative overflow-hidden group">
-                                    <div class="absolute inset-0 bg-primary/5 opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                                    <span class="material-symbols-outlined text-primary text-[40px] mb-2 relative z-10">school</span>
-                                    <p class="font-label-sm font-bold text-primary relative z-10">Denso Corporate Pattern</p>
-                                    <p class="font-label-xs text-on-surface-variant/80 text-[11px] mt-1 relative z-10">Cover otomatis dibuat secara adaptif sesuai kategori course</p>
-                                </div>
-                                <p class="font-body-xs text-[12px] text-on-surface-variant/80 leading-relaxed">
-                                    Sampul ini memastikan seluruh katalog pembelajaran PT Denso Indonesia memiliki tampilan standar yang rapi dan seragam di semua perangkat.
-                                </p>
-                            </div>
-
-                            <!-- Enterprise Competency Card -->
-                            <div class="bg-surface-container-low/50 border border-outline-variant rounded-2xl p-5 shadow-xs space-y-3">
-                                <h4 class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-secondary text-[20px]">verified</span>
-                                    Standar PT Denso Indonesia
-                                </h4>
-                                <ul class="space-y-2.5 font-body-xs text-[13px] text-on-surface-variant/90">
-                                    <li class="flex items-start gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check_circle</span>
-                                        <span>Pastikan materi merujuk pada standar SOP produksi atau tata kelola perusahaan terbaru.</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check_circle</span>
-                                        <span>Susun evaluasi kuis untuk mengukur pemahaman peserta pada setiap sesi pembelajaran.</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
                 </section>
                 <?php endif; ?>
 
@@ -427,12 +376,12 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     </div>
 
                     <!-- Approval Workflow Guidance Notice -->
-                    <div class="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3 mb-6">
+                    <!-- <div class="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3 mb-6">
                         <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
                         <div class="font-body-sm text-on-surface-variant leading-relaxed">
                             <span class="font-bold text-on-surface">Alur Persetujuan (Approval Workflow):</span> Rekomendasi peserta dari Pengajar (Teacher) akan diteruskan ke Admin untuk verifikasi akhir dan pendaftaran otomatis ke kelas (Enrollment).
                         </div>
-                    </div>
+                    </div> -->
 
                     <?php if (($course['status'] ?? '') === 'Submitted' || ($course['status'] ?? '') === 'Approved'): ?>
                         <!-- Readonly mode -->
@@ -447,23 +396,27 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-6">
                             <!-- Filter Builder -->
-                            <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <?php foreach ($filters as $type => $options): ?>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label class="font-label-sm font-bold text-on-surface capitalize flex items-center gap-1.5">
-                                            <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
-                                            <?= ucfirst($type) ?>
-                                        </label>
-                                        <select class="w-full bg-surface border border-outline-variant rounded-xl p-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-sm font-body-sm text-on-surface shadow-sm transition-all">
-                                            <option value="">-- Semua <?= ucfirst($type) ?> --</option>
-                                            <?php foreach ($options as $opt): ?>
-                                                <option value="<?= $opt ?>"><?= $opt ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                <?php endforeach; ?>
-                                <div class="md:col-span-2 lg:col-span-4 flex justify-end mt-2 pt-2 border-t border-outline-variant/40">
-                                    <button type="button" class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md font-bold shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2">
+                            <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 flex flex-col gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                    <?php foreach ($filters as $type => $options): ?>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="font-label-sm font-bold text-on-surface capitalize flex items-center gap-1.5">
+                                                <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
+                                                <?= ucfirst($type) ?>
+                                            </label>
+                                            <select id="filter-<?= strtolower(
+                                                $type,
+                                            ) ?>" class="w-full bg-surface border border-outline-variant rounded-xl p-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-sm font-body-sm text-on-surface shadow-sm transition-all">
+                                                <option value="">-- Semua <?= ucfirst($type) ?> --</option>
+                                                <?php foreach ($options as $opt): ?>
+                                                    <option value="<?= $opt ?>"><?= $opt ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="border-outline-variant/40 mt-1">
+                                    <button type="button" onclick="applyCandidateFilter()" class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md font-bold shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2">
                                         <span class="material-symbols-outlined text-[18px]">search</span> Tampilkan Kandidat
                                     </button>
                                 </div>
@@ -474,62 +427,152 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <div class="bg-primary-container/30 px-5 py-3 border-b border-outline-variant flex flex-wrap items-center justify-between gap-2">
                                     <label class="flex items-center gap-2.5 font-label-sm font-bold text-on-surface cursor-pointer select-none">
                                         <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
-                                        Pilih Semua (3 Kandidat Relevan Ditemukan)
+                                        <span id="emp-count-display">Pilih Semua (7 Kandidat Relevan Ditemukan)</span>
                                     </label>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
                                         <span class="material-symbols-outlined text-[14px]">check_circle</span> Target Aktif
                                     </span>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-body-sm max-h-[460px] overflow-y-auto">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-body-sm max-h-[460px] overflow-y-auto" id="candidate-list-container">
                                     <?php
                                     $emps = [
                                         [
                                             'name' => 'Budi Santoso',
                                             'npk' => '12345',
                                             'jabatan' => 'Operator',
-                                            'dept' => 'Manufacturing',
+                                            'golongan' => 'Gol 1',
+                                            'departemen' => 'Manufacturing',
+                                            'divisi' => 'Produksi',
+                                            'seksi' => 'Assembling',
                                         ],
                                         [
                                             'name' => 'Citra Lestari',
                                             'npk' => '11223',
                                             'jabatan' => 'Supervisor',
-                                            'dept' => 'Quality',
+                                            'golongan' => 'Gol 3',
+                                            'departemen' => 'Quality',
+                                            'divisi' => 'QA',
+                                            'seksi' => 'Pemeriksaan',
                                         ],
                                         [
                                             'name' => 'Ahmad Rizal',
                                             'npk' => '67890',
                                             'jabatan' => 'Leader',
-                                            'dept' => 'Manufacturing',
+                                            'golongan' => 'Gol 2',
+                                            'departemen' => 'Manufacturing',
+                                            'divisi' => 'Produksi',
+                                            'seksi' => 'Assembling',
+                                        ],
+                                        [
+                                            'name' => 'Dian Sastro',
+                                            'npk' => '23456',
+                                            'jabatan' => 'Manager',
+                                            'golongan' => 'Gol 4',
+                                            'departemen' => 'Engineering',
+                                            'divisi' => 'PE',
+                                            'seksi' => 'Desain',
+                                        ],
+                                        [
+                                            'name' => 'Eko Prasetyo',
+                                            'npk' => '34567',
+                                            'jabatan' => 'Operator',
+                                            'golongan' => 'Gol 1',
+                                            'departemen' => 'Manufacturing',
+                                            'divisi' => 'Produksi',
+                                            'seksi' => 'Machining',
+                                        ],
+                                        [
+                                            'name' => 'Fani Amelia',
+                                            'npk' => '45678',
+                                            'jabatan' => 'Staff',
+                                            'golongan' => 'Gol 2',
+                                            'departemen' => 'HR',
+                                            'divisi' => 'Personalia',
+                                            'seksi' => 'Rekrutmen',
+                                        ],
+                                        [
+                                            'name' => 'Gilang Ramadhan',
+                                            'npk' => '56789',
+                                            'jabatan' => 'Staff',
+                                            'golongan' => 'Gol 2',
+                                            'departemen' => 'Finance',
+                                            'divisi' => 'Akuntansi',
+                                            'seksi' => 'Pajak',
                                         ],
                                     ];
                                     foreach ($emps as $emp):
-                                        $initials = strtoupper(substr($emp['name'], 0, 1));
-                                    ?>
-                                    <label class="flex items-center gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group">
+                                        $initials = strtoupper(substr($emp['name'], 0, 1)); ?>
+                                    <label class="emp-card flex items-center gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group"
+                                           data-jabatan="<?= e(strtolower($emp['jabatan'])) ?>" 
+                                           data-golongan="<?= e(strtolower($emp['golongan'])) ?>" 
+                                           data-departemen="<?= e(strtolower($emp['departemen'])) ?>" 
+                                           data-divisi="<?= e(strtolower($emp['divisi'])) ?>" 
+                                           data-seksi="<?= e(strtolower($emp['seksi'])) ?>">
                                         <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" checked>
                                         <div class="w-10 h-10 rounded-xl bg-primary-container/60 text-primary font-bold flex items-center justify-center shrink-0">
                                             <?= e($initials) ?>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e($emp['name']) ?></p>
-                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e($emp['npk']) ?></span>
+                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e(
+                                                    $emp['name'],
+                                                ) ?></p>
+                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e(
+                                                    $emp['npk'],
+                                                ) ?></span>
                                             </div>
                                             <p class="font-label-sm text-on-surface-variant text-[12px] mt-0.5 flex items-center gap-1.5 truncate">
-                                                <span class="material-symbols-outlined text-[14px]">work</span> <?= e($emp['jabatan']) ?> • <?= e($emp['dept']) ?>
+                                                <span class="material-symbols-outlined text-[14px]">work</span> <?= e(
+                                                    $emp['jabatan'],
+                                                ) ?> • <?= e($emp['dept'] ?? $emp['departemen']) ?>
                                             </p>
                                         </div>
                                     </label>
-                                    <?php endforeach;
+                                    <?php
+                                    endforeach;
                                     ?>
                                 </div>
                                 <div class="bg-surface-container-low px-5 py-3 border-t border-outline-variant/60 flex items-center justify-between font-label-sm">
                                     <span class="text-on-surface-variant text-[12px]">Kandidat akan diusulkan pada saat pengiriman course ke Admin</span>
-                                    <span class="font-bold text-primary flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> 3 Karyawan Terpilih
+                                    <span id="emp-count-bottom" class="font-bold text-primary flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> 7 Karyawan Terpilih
                                     </span>
                                 </div>
                             </div>
+                            
+                            <script>
+                            function applyCandidateFilter() {
+                                const filters = {
+                                    jabatan: document.getElementById('filter-jabatan')?.value.toLowerCase() || '',
+                                    golongan: document.getElementById('filter-golongan')?.value.toLowerCase() || '',
+                                    departemen: document.getElementById('filter-departemen')?.value.toLowerCase() || '',
+                                    divisi: document.getElementById('filter-divisi')?.value.toLowerCase() || '',
+                                    seksi: document.getElementById('filter-seksi')?.value.toLowerCase() || ''
+                                };
+                                
+                                let visibleCount = 0;
+                                const cards = document.querySelectorAll('.emp-card');
+                                
+                                cards.forEach(card => {
+                                    let isMatch = true;
+                                    for (const [key, val] of Object.entries(filters)) {
+                                        if (val && card.dataset[key] !== val) {
+                                            isMatch = false;
+                                            break;
+                                        }
+                                    }
+                                    if (isMatch) {
+                                        card.style.display = 'flex';
+                                        visibleCount++;
+                                    } else {
+                                        card.style.display = 'none';
+                                    }
+                                });
+
+                                document.getElementById('emp-count-display').innerText = `Pilih Semua (${visibleCount} Kandidat Relevan Ditemukan)`;
+                                document.getElementById('emp-count-bottom').innerHTML = `<span class="material-symbols-outlined text-[16px]">how_to_reg</span> ${visibleCount} Karyawan Terpilih`;
+                            }
+                            </script>
                         </div>
                     <?php endif; ?>
                 </section>
@@ -562,15 +605,14 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     $course['title'] ?? 'Nama Course',
                                 ) ?></h4>
                                 <p class="font-body-sm text-on-surface-variant/80 line-clamp-2"><?= e(
-                                    $course['description'] ??
-                                        'Deskripsi course belum diisi.',
+                                    $course['description'] ?? 'Deskripsi course belum diisi.',
                                 ) ?></p>
                             </div>
                             <div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between font-label-sm">
-                                <span class="text-on-surface-variant">Kode / Kategori</span>
-                                <span class="font-bold text-on-surface"><?= e(
-                                    $course['category'] ?? 'Umum',
-                                ) ?> • <?= e($course['code'] ?? '-') ?></span>
+                                <span class="text-on-surface-variant">Kategori</span>
+                                <span class="font-bold text-on-surface"><?= e($course['category'] ?? 'Umum') ?> • <?= e(
+     $course['code'] ?? '-',
+ ) ?></span>
                             </div>
                         </div>
 
@@ -627,7 +669,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <?php endif; ?>
 
                 <!-- Wizard Navigation Actions (Sticky Bottom on Desktop, Fixed Below on Mobile) -->
-                <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 p-4 bg-surface/90 backdrop-blur-md border-t border-outline-variant/80 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] flex justify-between gap-3 z-40 pb-safe lg:pb-4 transition-all">
+                <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 h-20 lg:h-24 bg-surface shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.1)] border-t border-outline-variant/60 flex items-center z-40 transition-all">
                     <div class="w-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
                         <!-- Left Action -->
                         <div>
@@ -646,7 +688,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <!-- Right Action -->
                         <div class="flex gap-2">
                             <?php if ($step === 4): ?>
-                                <button type="button" onclick="alert('Recommendation Submitted!'); window.location.href='?route=/teacher/course/detail&course_id=<?= e(
+                                <button type="button" onclick="alert('Course Submitted!'); window.location.href='?route=/teacher/course/detail&course_id=<?= e(
                                     $course['id'] ?? 1,
                                 ) ?>';" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
                                     Submit ke Admin <span class="material-symbols-outlined text-[18px]">send</span>
@@ -753,25 +795,37 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     </div>
 
                     <!-- Add Content Block Toolbar -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm">
-                        <p class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">Sisipkan Blok Konten</p>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <button type="button" onclick="mbAddBlock('text')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
-                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">article</span>
-                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Teks</span>
-                            </button>
-                            <button type="button" onclick="mbAddBlock('image')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
-                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">image</span>
-                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Gambar</span>
-                            </button>
-                            <button type="button" onclick="mbAddBlock('youtube')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
-                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
-                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">YouTube</span>
-                            </button>
-                            <button type="button" onclick="mbAddBlock('document')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
-                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">picture_as_pdf</span>
-                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Dokumen</span>
-                            </button>
+                    <div class="max-w-4xl mx-auto mt-8">
+                        <div class="bg-surface-container-low/40 border-2 border-dashed border-outline-variant/60 rounded-2xl p-6 flex flex-col items-center">
+                            <p class="font-label-md font-bold text-on-surface-variant flex items-center gap-2 mb-5">
+                                <span class="material-symbols-outlined text-[20px]">add_circle</span> Tambah Blok Konten
+                            </p>
+                            <div class="flex flex-wrap justify-center gap-4 w-full">
+                                <button type="button" onclick="mbAddBlock('text')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">article</span>
+                                    </div>
+                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Teks Judul & Paragraf</span>
+                                </button>
+                                <button type="button" onclick="mbAddBlock('image')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">image</span>
+                                    </div>
+                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Gambar / Ilustrasi</span>
+                                </button>
+                                <button type="button" onclick="mbAddBlock('youtube')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
+                                    </div>
+                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Video YouTube</span>
+                                </button>
+                                <button type="button" onclick="mbAddBlock('document')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">picture_as_pdf</span>
+                                    </div>
+                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Dokumen PDF</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1991,6 +2045,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             menu.classList.toggle('hidden');
             if(!menu.classList.contains('hidden')) {
                 searchInput.focus();
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
             }
         });
 
@@ -1998,6 +2055,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         document.addEventListener('click', (e) => {
             if (!container.contains(e.target)) {
                 menu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
             }
         });
 
