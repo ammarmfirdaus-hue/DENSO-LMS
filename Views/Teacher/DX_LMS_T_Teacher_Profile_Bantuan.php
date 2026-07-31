@@ -57,21 +57,16 @@ $active_tab = 'profil'; ?>
 <body class="dls-app-shell bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased pt-safe">
     <!-- TopAppBar -->
     <?php
-    $header_title = 'Pusat Bantuan Guru';
-    $show_back = true;
-    $back_url = '?route=/teacher/profil';
-    $notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
-    include 'includes/components/DX_LMS_M_Header.php';
+    $header_title = 'Pusat Bantuan Pengajar';
+    $show_back_button = true;
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
     ?>
 
     <!-- Sidebar Component (Desktop) -->
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Bottom Nav -->
-    <?php include 'includes/components/DX_LMS_M_Teacher_Bottom_Nav.php'; ?>
-
     <!-- Main Content -->
-    <main class="dls-main flex-1 px-container-margin py-5 flex flex-col gap-5 pb-32 mt-14 lg:ml-[240px] lg:w-[calc(100%-240px)]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-32 pt-[72px] flex flex-col gap-5">
         <div class="max-w-[800px] w-full mx-auto flex flex-col gap-5">
 
             <!-- ===== HEADER ===== -->

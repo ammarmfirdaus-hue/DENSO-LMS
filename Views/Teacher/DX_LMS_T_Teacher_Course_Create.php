@@ -29,26 +29,17 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     <?php $active_tab = 'course'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = $isEdit ? 'Edit Course' : 'Buat Course';
-        $show_back_button = true;
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header -->
-    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md items-center gap-3">
-        <button onclick="window.location.href='?route=/teacher/courses'" class="p-2 -ml-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-95 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-        <h1 class="font-headline-6 font-bold text-on-surface"><?= $isEdit ? 'Edit Course' : 'Buat Course Baru' ?></h1>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = $isEdit ? 'Edit Course' : 'Buat Course Baru';
+    $show_back_button = true;
+    $back_url = '?route=/teacher/courses';
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
-    <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[120px] pt-4 lg:pt-6">
-        <div class="max-w-4xl mx-auto space-y-stack-xl relative">
+    <!-- Main Content Canvas (Full-Width Fluid Layout without Empty Margins) -->
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[120px] pt-[72px]">
+        <div class="w-full space-y-stack-xl relative">
             
             <?php if (($course['status'] ?? '') === 'Submitted' || ($course['status'] ?? '') === 'Approved'): ?>
                 <div class="bg-warning-container/20 border border-warning/30 p-4 rounded-xl flex items-start gap-3">
@@ -147,92 +138,136 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <!-- Nama Course Field -->
-                        <div class="space-y-1.5">
-                            <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
-                                Nama Course <span class="text-error">*</span>
-                            </label>
-                            <input type="text" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm" placeholder="Contoh: Fundamental 5S & K3" value="<?= e(
-                                $course['title'] ?? '',
-                            ) ?>">
-                            <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px] text-primary">info</span> Disertai dengan standar kompetensi operasional PT Denso Indonesia.
-                            </p>
-                        </div>
-                        
-                        <!-- Deskripsi Course Field -->
-                        <div class="space-y-1.5">
-                            <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
-                                Deskripsi Course
-                            </label>
-                            <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm leading-relaxed" placeholder="Jelaskan tujuan kompetensi, sasaran pembelajaran, dan manfaat setelah menyelesaikan course ini..."><?= e(
-                                $course['description'] ?? '',
-                            ) ?></textarea>
-                            <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">description</span> Ringkasan akan dipratinjau pada katalog dan halaman detail peserta.
-                            </p>
-                        </div>
-                        
-                        <!-- Tags Multi-Select Field -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-1.5 md:col-span-2">
-                                <label class="font-label-md font-bold text-on-surface flex items-center gap-2">
-                                    Tags <span class="text-on-surface-variant font-normal text-xs">(Pilih kategori relevan)</span>
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        <!-- Left 2 Columns: Form Fields -->
+                        <div class="xl:col-span-2 space-y-6">
+                            <!-- Nama Course Field -->
+                            <div class="space-y-1.5">
+                                <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
+                                    Nama Course <span class="text-error">*</span>
                                 </label>
-                                
-                                <!-- Custom Searchable Dropdown Multi-Select -->
-                                <div class="relative" id="tags-dropdown-container">
-                                    <!-- Selected Tags Display & Trigger -->
-                                    <div id="tags-trigger" class="min-h-[48px] bg-surface-container-lowest border border-outline-variant rounded-xl p-2.5 flex flex-wrap gap-2 items-center cursor-pointer hover:border-primary transition-all shadow-sm">
-                                        <!-- Selected tags will be injected here by JS -->
-                                        <div id="tags-placeholder" class="text-on-surface-variant font-body-md px-2 py-1">Pilih tags...</div>
-                                        <div class="ml-auto flex items-center pr-2">
-                                            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
-                                        </div>
-                                    </div>
+                                <input type="text" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm" placeholder="Contoh: Fundamental 5S & K3" value="<?= e(
+                                    $course['title'] ?? '',
+                                ) ?>">
+                                <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">info</span> Disertai dengan standar kompetensi operasional PT Denso Indonesia.
+                                </p>
+                            </div>
+                            
+                            <!-- Deskripsi Course Field -->
+                            <div class="space-y-1.5">
+                                <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
+                                    Deskripsi Course
+                                </label>
+                                <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm leading-relaxed" placeholder="Jelaskan tujuan kompetensi, sasaran pembelajaran, dan manfaat setelah menyelesaikan course ini..."><?= e(
+                                    $course['description'] ?? '',
+                                ) ?></textarea>
+                                <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">description</span> Ringkasan akan dipratinjau pada katalog dan halaman detail peserta.
+                                </p>
+                            </div>
+                            
+                            <!-- Tags Multi-Select Field -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="font-label-md font-bold text-on-surface flex items-center gap-2">
+                                        Tags <span class="text-on-surface-variant font-normal text-xs">(Pilih kategori relevan)</span>
+                                    </label>
                                     
-                                    <!-- Dropdown Menu -->
-                                    <div id="tags-menu" class="absolute left-0 w-full mt-2 bg-surface-container border border-outline-variant rounded-xl shadow-lg z-50 hidden flex flex-col max-h-[300px] overflow-hidden">
-                                        <div class="p-3 border-b border-outline-variant sticky top-0 bg-surface-container rounded-t-xl z-20">
-                                            <div class="relative">
-                                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-                                                <input type="text" id="tags-search" class="w-full bg-surface border border-outline-variant rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary transition-all" placeholder="Cari tag, misal: Quality, Safety...">
+                                    <!-- Custom Searchable Dropdown Multi-Select -->
+                                    <div class="relative" id="tags-dropdown-container">
+                                        <!-- Selected Tags Display & Trigger -->
+                                        <div id="tags-trigger" class="min-h-[48px] bg-surface-container-lowest border border-outline-variant rounded-xl p-2.5 flex flex-wrap gap-2 items-center cursor-pointer hover:border-primary transition-all shadow-sm">
+                                            <!-- Selected tags will be injected here by JS -->
+                                            <div id="tags-placeholder" class="text-on-surface-variant font-body-md px-2 py-1">Pilih tags...</div>
+                                            <div class="ml-auto flex items-center pr-2">
+                                                <span class="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
                                             </div>
                                         </div>
-                                        <div class="overflow-y-auto p-2 flex flex-col gap-1 flex-1 overscroll-contain" id="tags-options">
-                                            <?php
-                                            $availableTags = [
-                                                'Automation',
-                                                'Compliance',
-                                                'Core',
-                                                'Culture',
-                                                'Engineering',
-                                                'HR',
-                                                'Leadership',
-                                                'Maintenance',
-                                                'Management',
-                                                'Problem Solving',
-                                                'Productivity',
-                                                'Quality',
-                                                'Safety',
-                                                'Soft Skill',
-                                            ];
-                                            foreach ($availableTags as $tag): ?>
-                                            <label class="tag-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors" data-value="<?= strtolower(
-                                                $tag,
-                                            ) ?>">
-                                                <input type="checkbox" class="tag-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" value="<?= $tag ?>">
-                                                <span class="font-body-md text-on-surface flex-1"><?= $tag ?></span>
-                                            </label>
-                                            <?php endforeach;
-                                            ?>
+                                        
+                                        <!-- Dropdown Menu -->
+                                        <div id="tags-menu" class="absolute left-0 w-full mt-2 bg-surface-container border border-outline-variant rounded-xl shadow-lg z-50 hidden flex flex-col max-h-[300px] overflow-hidden">
+                                            <div class="p-3 border-b border-outline-variant sticky top-0 bg-surface-container rounded-t-xl z-20">
+                                                <div class="relative">
+                                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+                                                    <input type="text" id="tags-search" class="w-full bg-surface border border-outline-variant rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary transition-all" placeholder="Cari tag, misal: Quality, Safety...">
+                                                </div>
+                                            </div>
+                                            <div class="overflow-y-auto p-2 flex flex-col gap-1 flex-1 overscroll-contain" id="tags-options">
+                                                <?php
+                                                $availableTags = [
+                                                    'Automation',
+                                                    'Compliance',
+                                                    'Core',
+                                                    'Culture',
+                                                    'Engineering',
+                                                    'HR',
+                                                    'Leadership',
+                                                    'Maintenance',
+                                                    'Management',
+                                                    'Problem Solving',
+                                                    'Productivity',
+                                                    'Quality',
+                                                    'Safety',
+                                                    'Soft Skill',
+                                                ];
+                                                foreach ($availableTags as $tag): ?>
+                                                <label class="tag-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors" data-value="<?= strtolower(
+                                                    $tag,
+                                                ) ?>">
+                                                    <input type="checkbox" class="tag-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" value="<?= $tag ?>">
+                                                    <span class="font-body-md text-on-surface flex-1"><?= $tag ?></span>
+                                                </label>
+                                                <?php endforeach;
+                                                ?>
+                                            </div>
                                         </div>
                                     </div>
+                                    <p class="text-[12px] text-on-surface-variant/80 mt-1">
+                                        Pilih satu atau lebih kategori yang relevan agar mempermudah kurasi dan filter course.
+                                    </p>
                                 </div>
-                                <p class="text-[12px] text-on-surface-variant/80 mt-1">
-                                    Pilih satu atau lebih kategori yang relevan agar mempermudah kurasi dan filter course.
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Cover Preview & Corporate Guidelines -->
+                        <div class="xl:col-span-1 space-y-6">
+                            <!-- Cover Preview Box -->
+                            <div class="bg-surface-container-low/50 border border-outline-variant rounded-2xl p-5 shadow-xs space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-primary text-[20px]">image</span>
+                                        Cover Course
+                                    </h4>
+                                    <span class="font-label-xs text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">Default Denso</span>
+                                </div>
+                                <div class="w-full h-40 rounded-xl bg-gradient-to-br from-primary-container/80 to-secondary-container/80 border border-outline-variant/60 flex flex-col items-center justify-center p-4 text-center relative overflow-hidden group">
+                                    <div class="absolute inset-0 bg-primary/5 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                                    <span class="material-symbols-outlined text-primary text-[40px] mb-2 relative z-10">school</span>
+                                    <p class="font-label-sm font-bold text-primary relative z-10">Denso Corporate Pattern</p>
+                                    <p class="font-label-xs text-on-surface-variant/80 text-[11px] mt-1 relative z-10">Cover otomatis dibuat secara adaptif sesuai kategori course</p>
+                                </div>
+                                <p class="font-body-xs text-[12px] text-on-surface-variant/80 leading-relaxed">
+                                    Sampul ini memastikan seluruh katalog pembelajaran PT Denso Indonesia memiliki tampilan standar yang rapi dan seragam di semua perangkat.
                                 </p>
+                            </div>
+
+                            <!-- Enterprise Competency Card -->
+                            <div class="bg-surface-container-low/50 border border-outline-variant rounded-2xl p-5 shadow-xs space-y-3">
+                                <h4 class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-secondary text-[20px]">verified</span>
+                                    Standar PT Denso Indonesia
+                                </h4>
+                                <ul class="space-y-2.5 font-body-xs text-[13px] text-on-surface-variant/90">
+                                    <li class="flex items-start gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check_circle</span>
+                                        <span>Pastikan materi merujuk pada standar SOP produksi atau tata kelola perusahaan terbaru.</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check_circle</span>
+                                        <span>Susun evaluasi kuis untuk mengukur pemahaman peserta pada setiap sesi pembelajaran.</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -412,7 +447,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-6">
                             <!-- Filter Builder -->
-                            <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <?php foreach ($filters as $type => $options): ?>
                                     <div class="flex flex-col gap-1.5">
                                         <label class="font-label-sm font-bold text-on-surface capitalize flex items-center gap-1.5">
@@ -427,16 +462,16 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                         </select>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="md:col-span-2 lg:col-span-3 flex justify-end mt-2 pt-2 border-t border-outline-variant/40">
+                                <div class="md:col-span-2 lg:col-span-4 flex justify-end mt-2 pt-2 border-t border-outline-variant/40">
                                     <button type="button" class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md font-bold shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2">
                                         <span class="material-symbols-outlined text-[18px]">search</span> Tampilkan Kandidat
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Dummy Result List -->
+                            <!-- Candidate Grid View -->
                             <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
-                                <div class="bg-primary-container/30 px-5 py-3 border-b border-outline-variant flex items-center justify-between">
+                                <div class="bg-primary-container/30 px-5 py-3 border-b border-outline-variant flex flex-wrap items-center justify-between gap-2">
                                     <label class="flex items-center gap-2.5 font-label-sm font-bold text-on-surface cursor-pointer select-none">
                                         <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
                                         Pilih Semua (3 Kandidat Relevan Ditemukan)
@@ -445,7 +480,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                         <span class="material-symbols-outlined text-[14px]">check_circle</span> Target Aktif
                                     </span>
                                 </div>
-                                <div class="divide-y divide-outline-variant/40 font-body-sm max-h-[340px] overflow-y-auto">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-body-sm max-h-[460px] overflow-y-auto">
                                     <?php
                                     $emps = [
                                         [
@@ -470,17 +505,17 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     foreach ($emps as $emp):
                                         $initials = strtoupper(substr($emp['name'], 0, 1));
                                     ?>
-                                    <label class="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-container-lowest cursor-pointer transition-colors group">
-                                        <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
+                                    <label class="flex items-center gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group">
+                                        <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" checked>
                                         <div class="w-10 h-10 rounded-xl bg-primary-container/60 text-primary font-bold flex items-center justify-center shrink-0">
                                             <?= e($initials) ?>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2">
-                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors"><?= e($emp['name']) ?></p>
-                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium">NPK: <?= e($emp['npk']) ?></span>
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e($emp['name']) ?></p>
+                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e($emp['npk']) ?></span>
                                             </div>
-                                            <p class="font-label-sm text-on-surface-variant text-[12px] mt-0.5 flex items-center gap-1.5">
+                                            <p class="font-label-sm text-on-surface-variant text-[12px] mt-0.5 flex items-center gap-1.5 truncate">
                                                 <span class="material-symbols-outlined text-[14px]">work</span> <?= e($emp['jabatan']) ?> • <?= e($emp['dept']) ?>
                                             </p>
                                         </div>
@@ -593,7 +628,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
                 <!-- Wizard Navigation Actions (Sticky Bottom on Desktop, Fixed Below on Mobile) -->
                 <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 p-4 bg-surface/90 backdrop-blur-md border-t border-outline-variant/80 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] flex justify-between gap-3 z-40 pb-safe lg:pb-4 transition-all">
-                    <div class="max-w-5xl mx-auto flex w-full justify-between items-center px-2">
+                    <div class="w-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
                         <!-- Left Action -->
                         <div>
                             <?php if ($step > 1): ?>
@@ -647,7 +682,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             </header>
             
             <!-- Content container -->
-            <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+            <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
                 <!-- Summary Box -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
@@ -694,7 +729,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             
             <!-- Scrollable Content Area -->
             <div class="flex-1 overflow-y-auto" id="mb-scroll-area">
-                <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-5 pb-32">
+                <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-5 pb-32">
                     <!-- Page Info Card -->
                     <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm">
                         <div class="flex items-center gap-4">
@@ -785,7 +820,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             </header>
             
             <!-- Content -->
-            <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+            <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
                 <!-- Summary & Config -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">

@@ -20,21 +20,14 @@
     <?php $active_tab = 'profil'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = 'Menu Lainnya';
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header -->
-    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md items-center gap-3">
-        <h1 class="font-headline-6 font-bold text-on-surface">Data Diri & Pengaturan</h1>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = 'Data Diri & Pengaturan';
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
     <!-- Main Content Canvas (Match Student Structure) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin py-4 lg:py-8 flex flex-col pb-32">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin py-4 lg:py-8 flex flex-col pb-32 pt-[72px]">
         <div class="w-full max-w-3xl mx-auto flex flex-col gap-5">
             
             <!-- Top Profile Card -->
