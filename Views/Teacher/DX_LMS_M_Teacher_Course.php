@@ -67,36 +67,28 @@ if ($current_filter === 'all') {
     <?php $active_tab = 'course'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = 'Kelola Course';
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header Extension (Only visible on lg) -->
-    <div class="hidden lg:block lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md relative">
-        <div class="flex justify-between items-center w-full">
-            <h1 class="font-headline-6 font-bold text-on-surface">Kelola Course</h1>
-            <a href="?route=/teacher/course/create" class="inline-flex items-center gap-1.5 bg-white text-error border border-error font-label-md font-bold px-4 py-2 rounded-lg hover:bg-error/5 hover:border-error transition-colors shadow-sm">
-                <span class="material-symbols-outlined text-[18px]">add</span>
-                Buat Course Baru
-            </a>
-        </div>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = 'Kelola Course';
+    $show_create_button = true;
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
         
         <section class="w-full space-y-stack-md">
             
-            <!-- Mobile View Intro / Create Button -->
-            <div class="lg:hidden flex flex-col gap-4 mb-4">
-                <div class="flex flex-col gap-1">
-                    <h2 class="font-headline-sm font-bold text-on-surface">Course Saya</h2>
-                    <p class="font-body-sm text-on-surface-variant">Kelola seluruh status materi pembelajaran Anda.</p>
+            <!-- Page Header with Create Course Button -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <div>
+                    <h1 class="font-headline-md font-bold text-on-surface tracking-tight">Daftar Course Saya</h1>
+                    <p class="font-body-md text-on-surface-variant mt-0.5">Kelola kurikulum, pengajuan materi, dan pantau status publikasi course Anda.</p>
                 </div>
+                <a href="?route=/teacher/course/create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-sm hover:shadow transition-all active:scale-95 shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                    <span>Buat Course</span>
+                </a>
             </div>
 
             <!-- Filter Tabs -->

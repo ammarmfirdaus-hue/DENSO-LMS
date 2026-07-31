@@ -50,46 +50,21 @@ switch ($courseStatus) {
     <?php $active_tab = 'course'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = 'Detail Course';
-        $show_back_button = true;
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header -->
-    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md justify-between items-center">
-        <div class="flex items-center gap-3">
-            <button onclick="history.back()" class="p-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-95 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-            </button>
-            <h1 class="font-headline-6 font-bold text-on-surface line-clamp-1">Detail Course</h1>
-        </div>
-        
-        <div class="flex gap-2">
-            <?php if ($canEditRecommendation): ?>
-            <a href="?route=/teacher/course/create&course_id=<?= e(
-                (string) $course['id'],
-            ) ?>" class="bg-primary text-on-primary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-primary-600 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">edit</span>
-                Edit Course
-            </a>
-            <?php elseif ($courseStatus === 'Running'): ?>
-            <a href="?route=/teacher/grade&course_id=<?= e(
-                (string) $course['id'],
-            ) ?>" class="bg-secondary text-on-secondary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-secondary-600 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">grading</span>
-                Kelola Nilai
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = 'Detail Course';
+    $show_back_button = true;
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
     <!-- Main Content Canvas -->
+<<<<<<< HEAD
     <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-24 pt-4 lg:pt-8 bg-[#FAFAFA]">
         <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-2xl lg:gap-8 items-start">
+=======
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-xl lg:gap-gutter items-start">
+>>>>>>> d16e058b989517586eb0cc4e605242d2d3baff45
             
             <!-- Left Column: Primary Content -->
             <div class="lg:col-span-2 space-y-stack-xl lg:space-y-8">
@@ -152,6 +127,24 @@ switch ($courseStatus) {
                                         ) ?> Peserta Aktif</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-outline-variant/30">
+                                <?php if ($canEditRecommendation): ?>
+                                <a href="?route=/teacher/course/create&course_id=<?= e(
+                                    (string) $course['id'],
+                                ) ?>" class="bg-primary text-on-primary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-primary-600 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                    Edit Course
+                                </a>
+                                <?php elseif ($courseStatus === 'Running'): ?>
+                                <a href="?route=/teacher/grade&course_id=<?= e(
+                                    (string) $course['id'],
+                                ) ?>" class="bg-secondary text-on-secondary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-secondary-600 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">grading</span>
+                                    Kelola Nilai
+                                </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

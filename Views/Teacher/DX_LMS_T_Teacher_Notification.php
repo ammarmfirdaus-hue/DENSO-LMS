@@ -20,29 +20,21 @@
     <?php $active_tab = 'notifikasi'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = 'Notifikasi';
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header -->
-    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md items-center justify-between">
-        <h1 class="font-headline-6 font-bold text-on-surface">Notifikasi</h1>
-        <button class="text-primary font-label-md hover:underline font-bold transition-all px-2">Tandai semua dibaca</button>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = 'Notifikasi';
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4 lg:pt-6">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
         <div class="max-w-3xl mx-auto space-y-stack-xl">
             
-            <section class="flex justify-between items-end mb-2 lg:hidden">
+            <section class="flex justify-between items-center mb-4">
                 <div>
                     <h2 class="font-headline-sm font-bold text-on-surface">Pemberitahuan</h2>
                 </div>
-                <button class="text-primary font-label-sm font-bold">Baca Semua</button>
+                <button class="text-primary font-label-md font-bold hover:underline transition-all">Tandai semua dibaca</button>
             </section>
 
             <div class="bg-surface-container-lowest border border-surface-variant rounded-2xl overflow-hidden shadow-sm">

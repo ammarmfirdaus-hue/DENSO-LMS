@@ -20,25 +20,15 @@
     <?php $active_tab = 'course'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden">
-        <?php
-        $header_title = 'Pengelolaan Nilai';
-        $show_back_button = true;
-        include 'includes/components/DX_LMS_M_Teacher_Header.php';
-        ?>
-    </div>
-    
-    <!-- Desktop Header -->
-    <div class="hidden lg:flex lg:ml-[240px] px-container-margin py-4 border-b border-outline-variant/30 sticky top-0 z-30 bg-surface/90 backdrop-blur-md items-center gap-3">
-        <button onclick="history.back()" class="p-2 -ml-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-95 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-        </button>
-        <h1 class="font-headline-6 font-bold text-on-surface">Kelola Kelulusan Peserta</h1>
-    </div>
+    <!-- Universal Enterprise Teacher Top Bar -->
+    <?php
+    $header_title = 'Pengelolaan Nilai';
+    $show_back_button = true;
+    include 'includes/components/DX_LMS_M_Teacher_Header.php';
+    ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4 lg:pt-6">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
         <div class="max-w-5xl mx-auto space-y-stack-xl">
             
             <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-end bg-surface-container-lowest p-stack-md rounded-2xl border border-surface-variant">
