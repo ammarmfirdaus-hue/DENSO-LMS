@@ -284,14 +284,14 @@ if ($current_filter === 'all') {
                             </div>
 
                             <!-- 6 & 7. Footer: Context (left) + Action (right) -->
-                            <div class="px-5 py-4 bg-[#FAFAFA] flex items-center justify-between gap-3 mt-auto border-t border-outline-variant/40">
+                            <div class="px-5 py-4 flex items-center justify-between mt-auto border-t border-outline-variant/30">
                                 <!-- Left: Context Info -->
-                                <p class="text-[11px] text-on-surface-variant font-medium leading-snug flex-1 min-w-0 line-clamp-1 italic">
-                                    <?= $contextLine ?>
-                                </p>
+                                <span class="font-body-sm text-[11px] text-on-surface-variant italic leading-snug flex-1">
+                                    <?= e($contextLine) ?>
+                                </span>
                                 <!-- Right: Action Button -->
-                                <a href="<?= $ctaHref ?>" class="inline-flex items-center shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-md border bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors <?= $ctaCls ?>">
-                                    <?= $ctaText ?>
+                                <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-4 py-2 rounded-lg transition-colors <?= $ctaCls ?>">
+                                    <?= e($ctaText) ?>
                                 </a>
                             </div>
                         </div>

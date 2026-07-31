@@ -5,7 +5,7 @@
  */
 
 // Menyiapkan variabel header
-$header_title = 'Admin Dashboard';
+$header_title = 'Dashboard';
 $notif_count = $stats['unread_notifs'] ?? 0;
 $active_tab = 'beranda';
 ?>

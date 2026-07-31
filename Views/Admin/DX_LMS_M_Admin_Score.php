@@ -4,7 +4,7 @@
  * Pusat pengelolaan operasional hasil belajar.
  */
 
-$header_title = 'Data Kehadiran & Nilai';
+$header_title = 'Attendance & Score';
 $active_tab = 'score';
 ?>
 <!DOCTYPE html>

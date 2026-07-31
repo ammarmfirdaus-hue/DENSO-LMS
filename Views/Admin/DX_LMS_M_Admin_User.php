@@ -3,7 +3,7 @@
  * Tampilan Manajemen User Admin DLS (DLS Admin User View).
  */
 
-$header_title = 'Kelola User';
+$header_title = 'Manajemen User';
 $active_tab = 'user';
 ?>
 <!DOCTYPE html>

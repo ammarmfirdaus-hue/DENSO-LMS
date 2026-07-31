@@ -95,7 +95,7 @@ $active_tab = $active_tab ?? 'beranda'; ?>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab === 'score'
                 ? '1'
                 : '0' ?>;">fact_check</span>
-            <span class="font-label-md">Attedance & Score</span>
+            <span class="font-label-md">Attendance & Score</span>
         </a>
         <a href="?route=/admin/activity" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
         'activity'

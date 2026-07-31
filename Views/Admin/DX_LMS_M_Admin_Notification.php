@@ -3,7 +3,7 @@
  * Tampilan Sentra Notifikasi (Notification Center) DLS Admin.
  */
 
-$header_title = 'Notifikasi Operasional';
+$header_title = 'Pusat Notifikasi';
 $active_tab   = 'notification';
 ?>
 <!DOCTYPE html>

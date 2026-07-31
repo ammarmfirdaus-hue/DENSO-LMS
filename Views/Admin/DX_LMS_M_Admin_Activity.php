@@ -4,7 +4,7 @@
  * Dilengkapi: filter role, filter tanggal, pencarian keyword, statistik agregat, export CSV.
  */
 
-$header_title = 'Activity Center';
+$header_title = 'Activity Log';
 $active_tab = 'activity';
 ?>
 <!DOCTYPE html>

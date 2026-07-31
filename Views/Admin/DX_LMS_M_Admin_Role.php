@@ -4,7 +4,7 @@
  * Ultra-Professional, Highly Detailed & Enterprise-Grade RBAC Management.
  */
 
-$header_title = 'Kelola Role & Akses';
+$header_title = 'Control Role & Akses';
 $active_tab = 'role';
 ?>
 <!DOCTYPE html>

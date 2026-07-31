@@ -685,7 +685,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="qb-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="qb-max-score" class="text-primary">0</span></span></p>
                         </div>
                     </div>
-                    <textarea id="qb-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[80px]" placeholder="Masukkan instruksi pengerjaan quiz (Contoh: Jawab semua pertanyaan berikut. Quiz ini tidak dibatasi waktu.)"></textarea>
+                    <textarea id="qb-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[80px]" placeholder="Masukkan instruksi pengerjaan quiz (Contoh: Jawab semua pertanyaan berikut.)"></textarea>
                 </div>
 
                 <!-- Question List -->
@@ -1010,7 +1010,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     }
 
     function abDeleteQuestion(btn) {
-        if(confirm('Hapus soal uji ini?')) {
+        if(confirm('Hapus soal ini?')) {
             const block = btn.closest('.ab-question-block');
             block.classList.add('opacity-0', 'transition-opacity');
             setTimeout(() => {

@@ -3,7 +3,7 @@
  * Tampilan Pengaturan Penugasan (Assignment Flow) Admin DLS - E.
  */
 
-$header_title = 'Kelola Penugasan';
+$header_title = 'Penugasan & Assignment';
 $active_tab = 'assignment';
 ?>
 <!DOCTYPE html>
