@@ -66,7 +66,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     <?php
                     $steps = [
                         1 => ['title' => 'Informasi', 'icon' => 'info'],
-                        2 => ['title' => 'Materi', 'icon' => 'library_books'],
+                        2 => ['title' => 'Course', 'icon' => 'library_books'],
                         3 => ['title' => 'Peserta Course', 'icon' => 'groups'],
                         4 => ['title' => 'Review', 'icon' => 'done_all'],
                     ];
@@ -199,37 +199,86 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 </section>
                 <?php endif; ?>
 
-                <!-- ====== STEP 2: STRUKTUR MATERI ====== -->
+                <!-- ====== STEP 2: STRUKTUR COURSE ====== -->
                 <?php if ($step === 2): ?>
                 <section class="bg-surface-container-lowest border border-surface-variant rounded-2xl p-stack-lg shadow-sm">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-headline-sm font-bold text-on-surface">Struktur Materi</h3>
-                        <button type="button" class="text-primary font-label-md font-bold flex items-center gap-1 hover:underline">
+                        <h3 class="font-headline-sm font-bold text-on-surface">Struktur Course</h3>
+                        <button type="button" onclick="addSessionBlock()" class="text-primary font-label-md font-bold flex items-center gap-1 hover:underline">
                             <span class="material-symbols-outlined text-[18px]">add</span> Tambah Sesi
                         </button>
                     </div>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-4" id="sessions-container">
                         <!-- Sesi 1 Dummy -->
-                        <div class="border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm">
+                        <div class="session-block border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm">
                             <div class="bg-surface-container-low px-4 py-3 border-b border-outline-variant/60 flex justify-between items-center cursor-move">
                                 <div class="flex items-center gap-3">
                                     <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface cursor-grab">drag_indicator</span>
                                     <h4 class="font-title-sm font-bold text-on-surface">Sesi 1: Dasar Materi</h4>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button type="button" class="material-symbols-outlined text-[20px] text-on-surface-variant hover:text-primary">edit</button>
+                                    <button type="button" onclick="editSessionTitle(this)" class="material-symbols-outlined text-[20px] text-on-surface-variant hover:text-primary transition-colors" title="Edit Judul Sesi">edit</button>
+                                    <button type="button" onclick="deleteSessionBlock(this)" class="material-symbols-outlined text-[20px] text-on-surface-variant hover:text-error transition-colors" title="Hapus Sesi">delete</button>
                                 </div>
                             </div>
-                            <div class="bg-surface p-0 flex flex-col divide-y divide-surface-variant/50">
-                                <div class="px-5 py-3 flex items-center gap-3 hover:bg-surface-container-lowest transition-colors">
-                                    <span class="material-symbols-outlined text-primary text-[20px]">description</span>
-                                    <span class="font-body-sm text-on-surface flex-1">Materi PDF Basic</span>
-                                    <button type="button" class="material-symbols-outlined text-[18px] text-error hover:text-error-600 opacity-50 hover:opacity-100">delete</button>
+                            <div class="bg-surface border-b border-surface-variant flex w-full overflow-hidden">
+                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center">Materi</button>
+                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Quiz</button>
+                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Forum</button>
+                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Riwayat</button>
+                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Capaian</button>
+                            </div>
+                            
+                            <!-- Tab Content: Materi Workspace -->
+                            <div class="bg-surface-container-lowest p-5 flex flex-col session-workspace">
+                                <!-- Dynamic List -->
+                                <div class="materi-builder-list space-y-3 mb-5 empty:hidden">
+                                    <!-- Pre-filled Sample -->
+                                    <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
+                                        <div class="w-10 h-10 rounded-lg bg-secondary-container text-secondary flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined">quiz</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                            <p class="font-label-sm text-secondary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Pre-Test</p>
+                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="Pre-Test Dasar Evaluasi" placeholder="Judul Modul...">
+                                        </div>
+                                        <button type="button" onclick="openAssessmentBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Soal">settings</button>
+                                        <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
+                                    </div>
+                                    <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
+                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-primary flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined">description</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Materi</p>
+                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="Materi PDF SOP Standar" placeholder="Judul Modul...">
+                                        </div>
+                                        <button type="button" onclick="openMaterialBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Materi">settings</button>
+                                        <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
+                                    </div>
                                 </div>
-                                <div class="px-5 py-3 flex items-center gap-3 bg-surface-container-lowest/50 text-center justify-center border-t-0">
-                                    <button type="button" class="font-label-sm font-semibold text-secondary flex items-center gap-1 hover:underline">
-                                        <span class="material-symbols-outlined text-[16px]">add</span> Tambah Modul/Quiz
+                                
+                                <!-- Empty State Hint -->
+                                <div class="materi-empty-hint hidden flex-col items-center justify-center py-6 text-center text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-[48px] text-surface-variant mb-2">auto_awesome_mosaic</span>
+                                    <p class="font-bold font-title-md text-on-surface">Belum ada modul</p>
+                                    <p class="font-body-sm max-w-sm mt-1">Tambahkan pre-test, materi, atau post-test di bawah ini untuk menyusun sesi pembelajaran.</p>
+                                </div>
+
+                                <!-- Action Toolbar -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-dashed border-outline-variant">
+                                    <button type="button" onclick="appendModuleBlock(this, 'Pre-Test', 'quiz', 'secondary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-secondary/5 hover:border-secondary transition-all group">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary group-hover:scale-110 transition-transform">add_circle</span>
+                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-secondary">Pre-Test</span>
+                                    </button>
+                                    <button type="button" onclick="appendModuleBlock(this, 'Materi', 'description', 'primary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-primary/5 hover:border-primary transition-all group">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:scale-110 transition-transform">add_circle</span>
+                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-primary">Materi</span>
+                                    </button>
+                                    <button type="button" onclick="appendModuleBlock(this, 'Post-Test', 'task', 'warning')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-warning/5 hover:border-warning transition-all group">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-warning group-hover:scale-110 transition-transform">add_circle</span>
+                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-warning">Post-Test</span>
                                     </button>
                                 </div>
                             </div>
@@ -256,136 +305,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <p class="font-bold text-on-surface">Mode Hanya-Baca</p>
                             <p class="font-body-sm text-on-surface-variant">Anda telah submit 12 karyawan. Menunggu assign by Admin.</p>
                         </div>
-                    <?php
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        // Dummy results
-                        else: ?>
+                    <?php else: ?>
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-4">
                             <!-- Filter Builder -->
@@ -555,11 +475,924 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 
             </form>
         </div>
+
+        <!-- ============================================== -->
+        <!-- OVERLAY: ASSESSMENT BUILDER (Pre-Test / Post-Test) -->
+        <!-- ============================================== -->
+        <div id="assessment-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+                <div class="flex-1 flex justify-start">
+                    <button type="button" onclick="closeAssessmentBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+                </div>
+                <div class="flex-none flex justify-center">
+                    <h2 id="ab-title" class="font-title-lg font-bold text-on-surface truncate px-4">Pre-Test: Modul Soal</h2>
+                </div>
+                <div class="flex-1 flex justify-end">
+                    <button type="button" onclick="saveAssessmentBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Soal</span></button>
+                </div>
+            </header>
+            
+            <!-- Content container -->
+            <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+                <!-- Summary Box -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
+                        <div class="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">assignment</span>
+                        </div>
+                        <div>
+                            <h3 class="font-title-lg font-bold text-on-surface">Instruksi & Pengaturan Soal</h3>
+                            <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="ab-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="ab-max-score" class="text-primary">0</span></span></p>
+                        </div>
+                    </div>
+                    <textarea id="ab-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[90px]" placeholder="Masukkan instruksi pengerjaan soal untuk  (Contoh: Pilih satu jawaban yang paling tepat."></textarea>
+                </div>
+
+                <!-- Question List -->
+                <div id="ab-questions-list" class="space-y-6">
+                    <!-- Questions injected here via JS -->
+                </div>
+
+                <!-- Add Question Button -->
+                <button type="button" onclick="abAddQuestion()" class="w-full py-6 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_circle</span>
+                    <span class="font-label-md font-bold">Tambah Pertanyaan Baru</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- OVERLAY: MATERIAL BUILDER (Materi Content Pages) -->
+        <!-- ============================================== -->
+        <div id="material-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0">
+            <!-- Header -->
+            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+                <div class="flex-1 flex justify-start">
+                    <button type="button" onclick="closeMaterialBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+                </div>
+                <div class="flex-none flex justify-center">
+                    <h2 id="mb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Materi: Modul Konten</h2>
+                </div>
+                <div class="flex-1 flex justify-end">
+                    <button type="button" onclick="saveMaterialBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Materi</span></button>
+                </div>
+            </header>
+            
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto" id="mb-scroll-area">
+                <div class="max-w-3xl mx-auto w-full p-4 sm:p-6 space-y-5 pb-32">
+                    <!-- Page Info Card -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-11 h-11 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[22px]">auto_stories</span>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-title-md font-bold text-on-surface">Editor Halaman Materi</h3>
+                                <p class="font-body-sm text-on-surface-variant">Susun konten pembelajaran dengan teks, gambar, video, dan dokumen.</p>
+                            </div>
+                            <div class="bg-surface-container-low border border-outline-variant/60 rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">layers</span>
+                                <span class="font-label-md font-bold text-on-surface">Hal. <span id="mb-current-page" class="text-primary">1</span> / <span id="mb-total-pages">1</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page Canvas (content blocks go here) -->
+                    <div id="mb-page-canvas" class="space-y-4 min-h-[200px]">
+                        <!-- Content blocks injected here -->
+                    </div>
+
+                    <!-- Add Content Block Toolbar -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm">
+                        <p class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">Sisipkan Blok Konten</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button type="button" onclick="mbAddBlock('text')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
+                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">article</span>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Teks</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('image')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
+                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">image</span>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Gambar</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('youtube')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
+                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">YouTube</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('document')" class="flex flex-col items-center gap-2 p-4 border border-outline-variant/60 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all group">
+                                <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">picture_as_pdf</span>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary">Dokumen</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Pagination Footer -->
+            <footer class="bg-surface border-t border-outline-variant sticky bottom-0 z-20 shadow-[0_-2px_8px_rgba(0,0,0,0.06)] px-4 sm:px-6 h-16 flex items-center shrink-0">
+                <div class="flex-1 flex justify-start">
+                    <button type="button" onclick="mbPrevPage()" id="mb-btn-prev" class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-label-md font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed px-3 py-2 rounded-lg hover:bg-surface-container" disabled>
+                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        <span class="hidden sm:inline">Materi Sebelumnya</span>
+                    </button>
+                </div>
+                <div class="flex-none flex justify-center">
+                    <div class="bg-surface-container-low border border-outline-variant/60 rounded-full px-5 py-1.5 flex items-center gap-1 shadow-sm">
+                        <span class="font-label-md font-bold text-on-surface">Materi</span>
+                        <span id="mb-footer-current" class="font-title-sm font-bold text-primary">1</span>
+                        <span class="font-label-md text-on-surface-variant">/</span>
+                        <span id="mb-footer-total" class="font-title-sm font-bold text-on-surface">1</span>
+                    </div>
+                </div>
+                <div class="flex-1 flex justify-end">
+                    <button type="button" onclick="mbNextPage()" id="mb-btn-next" class="flex items-center gap-1 bg-primary text-on-primary font-label-md font-bold transition-colors px-4 py-2 rounded-lg hover:bg-primary-600 shadow-sm">
+                        <span class="hidden sm:inline">Materi Selanjutnya</span>
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                    </button>
+                </div>
+            </footer>
+        </div>
+
     </main>
 
     <script>
-    // Custom Tags Dropdown Logic
+    function updateSessionNumbers() {
+        const container = document.getElementById('sessions-container');
+        if(!container) return;
+        const sessions = container.querySelectorAll('.session-block');
+        sessions.forEach((sess, index) => {
+            const titleEl = sess.querySelector('h4');
+            if(titleEl) {
+                const parts = titleEl.textContent.split(':');
+                if(parts.length > 1) {
+                    titleEl.textContent = 'Sesi ' + (index + 1) + ':' + parts.slice(1).join(':');
+                } else {
+                    titleEl.textContent = 'Sesi ' + (index + 1);
+                }
+            }
+        });
+    }
+
+    function addSessionBlock() {
+        const container = document.getElementById('sessions-container');
+        if(!container) return;
+        
+        const sessions = container.querySelectorAll('.session-block');
+        const nextIndex = sessions.length + 1;
+        
+        // Find the first session block as a template to clone
+        const firstSession = sessions[0];
+        if(!firstSession) return;
+        
+        const newSession = firstSession.cloneNode(true);
+        
+        // Update Title
+        const titleEl = newSession.querySelector('h4');
+        if(titleEl) {
+            titleEl.textContent = 'Sesi ' + nextIndex + ': Modul Baru';
+        }
+        
+        // Clear out builder list content
+        const list = newSession.querySelector('.materi-builder-list');
+        if(list) {
+            list.innerHTML = '';
+        }
+        
+        // Append to container 
+        container.appendChild(newSession);
+        
+        // Re-evaluate empty state for the new clone
+        checkEmptyHintList(list);
+    }
+    
+    function deleteSessionBlock(btn) {
+        const container = document.getElementById('sessions-container');
+        const sessions = container.querySelectorAll('.session-block');
+        
+        if (sessions.length <= 1) {
+            alert('Minimal harus ada 1 sesi dalam course.');
+            return;
+        }
+        
+        if (confirm('Apakah Anda yakin ingin menghapus sesi ini beserta semua materinya?')) {
+            const session = btn.closest('.session-block');
+            
+            // Add a small fade out animation
+            session.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+            setTimeout(() => {
+                session.remove();
+                updateSessionNumbers();
+            }, 300);
+        }
+    }
+
+    function handleModuleTitleEnter(e, el, forceSave = false) {
+        if(forceSave || (e && e.key === 'Enter')) {
+            if(e) e.preventDefault();
+            el.blur();
+            // Flash green border to simulate saving
+            el.classList.remove('border-transparent');
+            el.classList.add('border-success', 'text-success');
+            setTimeout(() => {
+                el.classList.remove('border-success', 'text-success');
+                el.classList.add('border-transparent');
+            }, 600);
+        }
+    }
+
+    // Module Builder logic
+    function appendModuleBlock(btnEl, title, icon, colorContext) {
+        const workspace = btnEl.closest('.session-workspace');
+        if(!workspace) return;
+        
+        const list = workspace.querySelector('.materi-builder-list');
+        
+        // Define color classes based on context
+        let bagdeBgClass = '', bagdeTextClass = '';
+        if(colorContext === 'secondary') {
+            bagdeBgClass = 'bg-secondary-container';
+            bagdeTextClass = 'text-secondary';
+        } else if (colorContext === 'warning') {
+            bagdeBgClass = 'bg-warning-container/30';
+            bagdeTextClass = 'text-warning';
+        } else {
+            bagdeBgClass = 'bg-primary-container';
+            bagdeTextClass = 'text-primary';
+        }
+
+        // Construct template with gear based on type
+        let actionButtons = `<button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>`;
+        
+        if (colorContext === 'secondary' || colorContext === 'warning') { // pre-test or post-test
+            actionButtons = `
+                <button type="button" onclick="openAssessmentBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Soal">settings</button>
+                ${actionButtons}
+            `;
+        } else { // materi type
+            actionButtons = `
+                <button type="button" onclick="openMaterialBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Materi">settings</button>
+                ${actionButtons}
+            `;
+        }
+
+        const template = `
+            <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group animate-fade-in-down">
+                <div class="w-10 h-10 rounded-lg ${bagdeBgClass} ${bagdeTextClass} flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined">${icon}</span>
+                </div>
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <p class="font-label-sm ${bagdeTextClass} mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">${title}</p>
+                    <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="" placeholder="Isi judul modifikasi baru...">
+                </div>
+                ${actionButtons}
+            </div>
+        `;
+        
+        list.insertAdjacentHTML('beforeend', template);
+        checkEmptyHintList(list);
+        
+        // Auto focus new input
+        const inputs = list.querySelectorAll('input[type="text"]');
+        if(inputs.length > 0) {
+            inputs[inputs.length - 1].focus();
+        }
+    }
+
+    function checkEmptyHintList(list) {
+        if(!list) return;
+        const workspace = list.closest('.session-workspace');
+        if(!workspace) return;
+        
+        const emptyHint = workspace.querySelector('.materi-empty-hint');
+        if(list && emptyHint) {
+            if(list.children.length === 0) {
+                emptyHint.classList.remove('hidden');
+                emptyHint.classList.add('flex');
+            } else {
+                emptyHint.classList.add('hidden');
+                emptyHint.classList.remove('flex');
+            }
+        }
+    }
+
+    // ==============================================
+    // Assessment Builder Engine Logics
+    // ==============================================
+
+    let currentEditingModule = null;
+
+    function openAssessmentBuilder(btnEl) {
+        currentEditingModule = btnEl.closest('.module-block');
+        const modal = document.getElementById('assessment-builder-overlay');
+        const sessionTitleEl = btnEl.closest('.session-block').querySelector('h4');
+        const moduleInputEl = currentEditingModule.querySelector('input[type="text"]');
+        
+        // Assemble Title
+        let moduleType = currentEditingModule.querySelector('.font-label-sm').textContent.trim();
+        let sessionPrefix = sessionTitleEl ? sessionTitleEl.textContent.trim().split(':')[0] : 'Sesi X';
+        let displayTitle = moduleType + ': ' + sessionPrefix;
+        if(moduleInputEl && moduleInputEl.value.trim() !== '') {
+            displayTitle = displayTitle + ' - ' + moduleInputEl.value.trim();
+        }
+        document.getElementById('ab-title').textContent = displayTitle;
+
+        // Restore State or Initialize Empty
+        const list = document.getElementById('ab-questions-list');
+        const instructionTa = document.getElementById('ab-instruction');
+        const stateDiv = currentEditingModule.querySelector('.ab-saved-state');
+        
+        if (stateDiv) {
+            list.innerHTML = stateDiv.innerHTML;
+            instructionTa.value = stateDiv.getAttribute('data-instruction') || '';
+        } else {
+            list.innerHTML = '';
+            instructionTa.value = '';
+            abAddQuestion();
+        }
+
+        // Display Modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Trigger opacity for animation
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+        }, 10);
+        
+        abCalculateTotal();
+        document.body.style.overflow = 'hidden'; // prevent background scrolling
+    }
+
+    function closeAssessmentBuilder() {
+        const modal = document.getElementById('assessment-builder-overlay');
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function saveAssessmentBuilder() {
+        const list = document.getElementById('ab-questions-list');
+        const instructionTa = document.getElementById('ab-instruction');
+        
+        // Sync JS property states to HTML attributes so innerHTML captures them
+        list.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+            input.setAttribute('value', input.value);
+        });
+        list.querySelectorAll('textarea').forEach(ta => {
+            ta.textContent = ta.value;
+        });
+        list.querySelectorAll('input[type="radio"]').forEach(radio => {
+            if (radio.checked) radio.setAttribute('checked', 'checked');
+            else radio.removeAttribute('checked');
+        });
+
+        // Save serialized state into current editing module
+        if (currentEditingModule) {
+            let stateDiv = currentEditingModule.querySelector('.ab-saved-state');
+            if (!stateDiv) {
+                stateDiv = document.createElement('div');
+                stateDiv.className = 'ab-saved-state hidden';
+                currentEditingModule.appendChild(stateDiv);
+            }
+            stateDiv.innerHTML = list.innerHTML;
+            stateDiv.setAttribute('data-instruction', instructionTa.value);
+        }
+        
+        // Flash success logic
+        const saveBtn = document.querySelector('#assessment-builder-overlay header button.bg-primary');
+        const ogText = saveBtn.innerHTML;
+        saveBtn.classList.replace('bg-primary', 'bg-success');
+        saveBtn.classList.replace('hover:bg-primary-600', 'hover:bg-success');
+        saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span> Tersimpan';
+        
+        setTimeout(() => {
+            saveBtn.classList.replace('bg-success', 'bg-primary');
+            saveBtn.classList.replace('hover:bg-success', 'hover:bg-primary-600');
+            saveBtn.innerHTML = ogText;
+            closeAssessmentBuilder();
+        }, 600);
+    }
+
+    function abOptionSelected(radioBtn) {
+        // Clear all sibling label classes in this group
+        const container = radioBtn.closest('.space-y-3');
+        container.querySelectorAll('label').forEach(lbl => {
+            lbl.classList.remove('border-success', 'bg-success-container/10');
+            lbl.classList.add('border-outline-variant');
+        });
+        
+        // Highlight active
+        const activeLabel = radioBtn.closest('label');
+        activeLabel.classList.remove('border-outline-variant');
+        activeLabel.classList.add('border-success', 'bg-success-container/10');
+    }
+
+    function abCalculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.ab-weight').forEach(input => {
+            let val = parseInt(input.value) || 0;
+            total += val;
+        });
+        document.getElementById('ab-max-score').textContent = total;
+        
+        const count = document.querySelectorAll('.ab-question-block').length;
+        document.getElementById('ab-counter').textContent = 'Total ' + count + ' Pertanyaan';
+    }
+
+    function abDeleteQuestion(btn) {
+        if(confirm('Hapus soal uji ini?')) {
+            const block = btn.closest('.ab-question-block');
+            block.classList.add('opacity-0', 'transition-opacity');
+            setTimeout(() => {
+                block.remove();
+                abRenumberQuestions();
+                abCalculateTotal();
+            }, 300);
+        }
+    }
+
+    function abRenumberQuestions() {
+        const questions = document.querySelectorAll('.ab-question-block');
+        questions.forEach((block, idx) => {
+            let qIndex = idx + 1;
+            block.setAttribute('data-index', qIndex);
+            // Label
+            const headerBadge = block.querySelector('.font-label-md');
+            if(headerBadge) headerBadge.textContent = 'Soal ' + qIndex;
+            
+            // Re-bind radio names so they don't break grouping
+            const radios = block.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.setAttribute('name', 'ab_q' + qIndex + '_correct');
+            });
+        });
+    }
+
+    function abAddQuestion() {
+        const list = document.getElementById('ab-questions-list');
+        const qIndex = list.children.length + 1;
+        
+        const markup = `
+            <div class="ab-question-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-0 shadow-sm overflow-hidden animate-fade-in-down transition-colors hover:border-outline-variant" data-index="${qIndex}">
+                <div class="bg-surface-container-lowest border-b border-outline-variant/40 px-5 py-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="font-label-md font-bold text-on-surface bg-surface-container-low border border-outline-variant/60 px-3 py-1 rounded-lg">Soal ${qIndex}</span>
+                        <span class="font-label-sm font-bold text-primary bg-primary/5 border border-primary/20 px-2 py-0.5 rounded-lg flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">checklist</span>Pilihan Ganda</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-lg border border-outline/50 shadow-sm hover:border-primary transition-colors focus-within:border-primary">
+                            <label class="font-label-sm font-bold text-on-surface-variant">Bobot</label>
+                            <div class="w-px h-4 bg-outline-variant/60"></div>
+                            <input type="number" onchange="abCalculateTotal()" class="ab-weight font-title-sm font-bold text-primary w-12 text-center outline-none bg-transparent" value="5" min="1">
+                        </div>
+                        <div class="w-px h-6 bg-outline-variant/50 mx-1"></div>
+                        <button type="button" onclick="abDeleteQuestion(this)" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container hover:text-error transition-colors p-1.5 rounded-lg" title="Hapus Soal">delete</button>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="group relative">
+                        <textarea class="w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary focus:bg-surface-container-lowest rounded-xl font-body-md text-on-surface outline-none transition-all resize-y min-h-[80px] p-4 shadow-sm" placeholder="Tuliskan pertanyaan Anda secara spesifik di sini..."></textarea>
+                    </div>
+                    
+                    <div class="ab-options-container grid gap-3 pl-0 sm:pl-4 transition-all">
+                        ${['A', 'B', 'C', 'D'].map((opt, i) => `
+                        <label class="ab-option-row group/opt flex items-center gap-3 p-3 border border-outline-variant/60 rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-colors shadow-sm relative overflow-hidden">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-has-[:checked]/opt:bg-success transition-colors"></div>
+                            <input type="radio" onchange="abOptionSelected(this)" name="ab_q${qIndex}_correct" value="${opt}" class="ml-2 w-5 h-5 text-success border-outline-variant focus:ring-success cursor-pointer" ${i===0?'checked':''}>
+                            <span class="ab-opt-letter font-title-sm font-bold w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant border border-outline-variant/40 group-has-[:checked]/opt:bg-success group-has-[:checked]/opt:text-on-success group-has-[:checked]/opt:border-success transition-all">${opt}</span>
+                            <input type="text" class="flex-1 bg-transparent py-1 border-b border-transparent outline-none font-body-md text-on-surface focus:border-primary pointer-events-auto transition-colors" placeholder="Ketik pilihan jawaban ${opt}...">
+                            ${i >= 2 ? `<button type="button" onclick="const container = this.closest('.ab-options-container'); this.closest('.ab-option-row').remove(); abRenumberOptions(container)" class="material-symbols-outlined text-on-surface-variant hover:text-error opacity-0 lg:group-hover/opt:opacity-100 transition-opacity p-1 relative z-10" title="Hapus Opsi">close</button>` : ''}
+                        </label>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="pl-0 sm:pl-4 mt-2">
+                        <button type="button" onclick="abAddOption(this)" class="flex items-center gap-2 text-primary font-label-sm font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-primary/20 w-fit">
+                            <span class="material-symbols-outlined text-[18px]">add</span> Tambah Pilihan Baru
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        list.insertAdjacentHTML('beforeend', markup);
+        abCalculateTotal();
+    }
+
+    function abAddOption(btn) {
+        const block = btn.closest('.ab-question-block');
+        const qIndex = block.getAttribute('data-index');
+        const container = block.querySelector('.ab-options-container');
+        
+        const count = container.children.length;
+        if (count >= 10) {
+            alert('Maksimal 10 pilihan (A-J).');
+            return;
+        }
+        
+        const letter = String.fromCharCode(65 + count); // A=65
+        
+        const markup = `
+            <label class="ab-option-row group/opt flex items-center gap-3 p-3 border border-outline-variant/60 rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-colors shadow-sm relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-has-[:checked]/opt:bg-success transition-colors"></div>
+                <input type="radio" onchange="abOptionSelected(this)" name="ab_q${qIndex}_correct" value="${letter}" class="ml-2 w-5 h-5 text-success border-outline-variant focus:ring-success cursor-pointer">
+                <span class="ab-opt-letter font-title-sm font-bold w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant border border-outline-variant/40 group-has-[:checked]/opt:bg-success group-has-[:checked]/opt:text-on-success group-has-[:checked]/opt:border-success transition-all">${letter}</span>
+                <input type="text" class="flex-1 bg-transparent py-1 border-b border-transparent outline-none font-body-md text-on-surface focus:border-primary pointer-events-auto transition-colors" placeholder="Ketik pilihan jawaban ${letter}...">
+                <button type="button" onclick="const c = this.closest('.ab-options-container'); this.closest('.ab-option-row').remove(); abRenumberOptions(c)" class="material-symbols-outlined text-on-surface-variant hover:text-error opacity-0 lg:group-hover/opt:opacity-100 transition-opacity p-1 relative z-10" title="Hapus Opsi">close</button>
+            </label>
+        `;
+        container.insertAdjacentHTML('beforeend', markup);
+    }
+
+    function abRenumberOptions(container) {
+        if (!container) return;
+        const rows = container.querySelectorAll('.ab-option-row');
+        rows.forEach((row, i) => {
+            const letter = String.fromCharCode(65 + i);
+            const optLetterBadge = row.querySelector('.ab-opt-letter');
+            if(optLetterBadge) optLetterBadge.textContent = letter;
+            
+            const radio = row.querySelector('input[type="radio"]');
+            if(radio) radio.value = letter;
+            
+            const textInput = row.querySelector('input[type="text"]');
+            if(textInput) textInput.placeholder = 'Ketik pilihan jawaban ' + letter + '...';
+        });
+    }
+
+    // ==============================================
+    // Session Title Inline Editor
+    // ==============================================
+
+    function editSessionTitle(btn) {
+        const header = btn.closest('.flex.justify-between');
+        const h4 = header.querySelector('h4');
+        if (!h4) return;
+        
+        const currentText = h4.textContent.trim();
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentText;
+        input.className = 'font-title-sm font-bold text-on-surface bg-transparent border-b-2 border-primary outline-none w-full max-w-[280px] pb-0.5 transition-all';
+        
+        h4.replaceWith(input);
+        input.focus();
+        input.select();
+        
+        const save = () => {
+            const newH4 = document.createElement('h4');
+            newH4.className = 'font-title-sm font-bold text-on-surface';
+            newH4.textContent = input.value.trim() || currentText;
+            input.replaceWith(newH4);
+            
+            // Flash confirm
+            newH4.classList.add('text-success');
+            setTimeout(() => newH4.classList.remove('text-success'), 600);
+        };
+        
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+            if (e.key === 'Escape') { input.value = currentText; input.blur(); }
+        });
+    }
+
+    // ==============================================
+    // Material Builder Engine
+    // ==============================================
+
+    let currentEditingMateriModule = null;
+    let mbPages = []; // array of HTML strings, one per page
+    let mbCurrentPage = 0;
+
+    function openMaterialBuilder(btnEl) {
+        currentEditingMateriModule = btnEl.closest('.module-block');
+        const modal = document.getElementById('material-builder-overlay');
+        const sessionTitleEl = btnEl.closest('.session-block').querySelector('h4');
+        const moduleInputEl = currentEditingMateriModule.querySelector('input[type="text"]');
+        
+        let moduleType = currentEditingMateriModule.querySelector('.font-label-sm').textContent.trim();
+        let sessionPrefix = sessionTitleEl ? sessionTitleEl.textContent.trim().split(':')[0] : 'Sesi X';
+        let displayTitle = moduleType + ': ' + sessionPrefix;
+        if (moduleInputEl && moduleInputEl.value.trim() !== '') {
+            displayTitle = displayTitle + ' - ' + moduleInputEl.value.trim();
+        }
+        document.getElementById('mb-title').textContent = displayTitle;
+        
+        // Restore or Init
+        const stateDiv = currentEditingMateriModule.querySelector('.mb-saved-state');
+        if (stateDiv) {
+            try { mbPages = JSON.parse(stateDiv.getAttribute('data-pages')); } catch(e) { mbPages = ['']; }
+        } else {
+            mbPages = [''];
+        }
+        mbCurrentPage = 0;
+        mbLoadPage(0);
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMaterialBuilder() {
+        const modal = document.getElementById('material-builder-overlay');
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function mbSaveCurrentPageState() {
+        const canvas = document.getElementById('mb-page-canvas');
+        // Sync input values to attributes
+        canvas.querySelectorAll('input[type="text"], input[type="url"]').forEach(i => i.setAttribute('value', i.value));
+        canvas.querySelectorAll('textarea').forEach(t => t.textContent = t.value);
+        mbPages[mbCurrentPage] = canvas.innerHTML;
+    }
+
+    function mbLoadPage(pageIdx) {
+        const canvas = document.getElementById('mb-page-canvas');
+        if (pageIdx < 0 || pageIdx >= mbPages.length) return;
+        mbCurrentPage = pageIdx;
+        canvas.innerHTML = mbPages[pageIdx] || '';
+        mbUpdatePaginationUI();
+        
+        // Scroll to top
+        const scrollArea = document.getElementById('mb-scroll-area');
+        if (scrollArea) scrollArea.scrollTop = 0;
+    }
+
+    function mbUpdatePaginationUI() {
+        const total = mbPages.length;
+        const current = mbCurrentPage + 1;
+        document.getElementById('mb-current-page').textContent = current;
+        document.getElementById('mb-total-pages').textContent = total;
+        document.getElementById('mb-footer-current').textContent = current;
+        document.getElementById('mb-footer-total').textContent = total;
+        
+        const prevBtn = document.getElementById('mb-btn-prev');
+        const nextBtn = document.getElementById('mb-btn-next');
+        prevBtn.disabled = mbCurrentPage === 0;
+        
+        // Change next button text if last page
+        if (mbCurrentPage >= mbPages.length - 1) {
+            nextBtn.innerHTML = '<span class="hidden sm:inline">Tambah Halaman</span><span class="material-symbols-outlined text-[18px]">add</span>';
+        } else {
+            nextBtn.innerHTML = '<span class="hidden sm:inline">Materi Selanjutnya</span><span class="material-symbols-outlined text-[18px]">chevron_right</span>';
+        }
+    }
+
+    function mbPrevPage() {
+        if (mbCurrentPage <= 0) return;
+        mbSaveCurrentPageState();
+        mbLoadPage(mbCurrentPage - 1);
+    }
+
+    function mbNextPage() {
+        mbSaveCurrentPageState();
+        if (mbCurrentPage >= mbPages.length - 1) {
+            // Create new page
+            mbPages.push('');
+            mbLoadPage(mbPages.length - 1);
+        } else {
+            mbLoadPage(mbCurrentPage + 1);
+        }
+    }
+
+    function mbDeletePage() {
+        if (mbPages.length <= 1) {
+            alert('Minimal harus ada 1 halaman materi.');
+            return;
+        }
+        if (!confirm('Hapus halaman ' + (mbCurrentPage + 1) + '?')) return;
+        mbPages.splice(mbCurrentPage, 1);
+        if (mbCurrentPage >= mbPages.length) mbCurrentPage = mbPages.length - 1;
+        mbLoadPage(mbCurrentPage);
+    }
+
+    function saveMaterialBuilder() {
+        mbSaveCurrentPageState();
+        
+        if (currentEditingMateriModule) {
+            let stateDiv = currentEditingMateriModule.querySelector('.mb-saved-state');
+            if (!stateDiv) {
+                stateDiv = document.createElement('div');
+                stateDiv.className = 'mb-saved-state hidden';
+                currentEditingMateriModule.appendChild(stateDiv);
+            }
+            stateDiv.setAttribute('data-pages', JSON.stringify(mbPages));
+        }
+        
+        const saveBtn = document.querySelector('#material-builder-overlay header button.bg-primary');
+        const ogText = saveBtn.innerHTML;
+        saveBtn.classList.replace('bg-primary', 'bg-success');
+        saveBtn.classList.replace('hover:bg-primary-600', 'hover:bg-success');
+        saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span> Tersimpan';
+        setTimeout(() => {
+            saveBtn.classList.replace('bg-success', 'bg-primary');
+            saveBtn.classList.replace('hover:bg-success', 'hover:bg-primary-600');
+            saveBtn.innerHTML = ogText;
+            closeMaterialBuilder();
+        }, 600);
+    }
+
+    function mbAddBlock(type) {
+        const canvas = document.getElementById('mb-page-canvas');
+        let markup = '';
+        const blockId = 'mb-blk-' + Date.now();
+        
+        if (type === 'text') {
+            markup = `
+            <div class="mb-content-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl overflow-hidden shadow-sm hover:border-outline-variant transition-colors animate-fade-in-down" id="${blockId}">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">article</span>
+                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Blok Teks</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="mbMoveBlock(this, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Atas">arrow_upward</button>
+                        <button type="button" onclick="mbMoveBlock(this, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Bawah">arrow_downward</button>
+                        <div class="w-px h-5 bg-outline-variant/50 mx-1"></div>
+                        <button type="button" onclick="this.closest('.mb-content-block').remove()" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1 rounded transition-colors" title="Hapus">delete</button>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <textarea class="w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-md text-on-surface outline-none transition-all resize-y min-h-[140px] p-4" placeholder="Tulis konten materi pembelajaran Anda di sini. Anda bisa menjelaskan teori, memberikan contoh, atau menyertakan instruksi langkah demi langkah..."></textarea>
+                </div>
+            </div>`;
+        } else if (type === 'image') {
+            markup = `
+            <div class="mb-content-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl overflow-hidden shadow-sm hover:border-outline-variant transition-colors animate-fade-in-down" id="${blockId}">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">image</span>
+                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Blok Gambar</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="mbMoveBlock(this, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Atas">arrow_upward</button>
+                        <button type="button" onclick="mbMoveBlock(this, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Bawah">arrow_downward</button>
+                        <div class="w-px h-5 bg-outline-variant/50 mx-1"></div>
+                        <button type="button" onclick="this.closest('.mb-content-block').remove()" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1 rounded transition-colors" title="Hapus">delete</button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
+                        <span class="material-symbols-outlined text-[40px] group-hover:text-primary transition-colors">cloud_upload</span>
+                        <p class="font-label-md font-bold group-hover:text-primary">Klik untuk unggah gambar</p>
+                        <p class="font-body-sm text-on-surface-variant/70">Mendukung JPG, PNG, WebP (Maks 5MB)</p>
+                        <input type="file" accept="image/*" class="hidden" onchange="mbPreviewImage(this)">
+                    </div>
+                    <input type="text" class="w-full bg-transparent border-b border-outline-variant/40 focus:border-primary outline-none font-body-sm text-on-surface-variant py-2 transition-colors" placeholder="Keterangan gambar (opsional)...">
+                </div>
+            </div>`;
+        } else if (type === 'youtube') {
+            markup = `
+            <div class="mb-content-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl overflow-hidden shadow-sm hover:border-outline-variant transition-colors animate-fade-in-down" id="${blockId}">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">play_circle</span>
+                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Video YouTube</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="mbMoveBlock(this, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Atas">arrow_upward</button>
+                        <button type="button" onclick="mbMoveBlock(this, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Bawah">arrow_downward</button>
+                        <div class="w-px h-5 bg-outline-variant/50 mx-1"></div>
+                        <button type="button" onclick="this.closest('.mb-content-block').remove()" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1 rounded transition-colors" title="Hapus">delete</button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div class="flex gap-3">
+                        <div class="flex-1 relative">
+                            <input type="url" class="mb-yt-url w-full bg-transparent border border-outline-variant/60 focus:border-primary rounded-xl font-body-md text-on-surface outline-none transition-all px-4 py-3 pr-24" placeholder="Tempel URL YouTube di sini (contoh: https://youtube.com/watch?v=...)">
+                            <button type="button" onclick="mbEmbedYoutube(this)" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors">Muat</button>
+                        </div>
+                    </div>
+                    <div class="mb-yt-preview rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/40 aspect-video flex items-center justify-center">
+                        <div class="text-center text-on-surface-variant p-6">
+                            <span class="material-symbols-outlined text-[48px] mb-2 opacity-40">smart_display</span>
+                            <p class="font-body-sm">Pratinjau video akan muncul di sini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        } else if (type === 'document') {
+            markup = `
+            <div class="mb-content-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl overflow-hidden shadow-sm hover:border-outline-variant transition-colors animate-fade-in-down" id="${blockId}">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">picture_as_pdf</span>
+                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Dokumen</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="mbMoveBlock(this, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Atas">arrow_upward</button>
+                        <button type="button" onclick="mbMoveBlock(this, 1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Bawah">arrow_downward</button>
+                        <div class="w-px h-5 bg-outline-variant/50 mx-1"></div>
+                        <button type="button" onclick="this.closest('.mb-content-block').remove()" class="material-symbols-outlined text-on-surface-variant hover:text-error p-1 rounded transition-colors" title="Hapus">delete</button>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
+                        <span class="material-symbols-outlined text-[40px] group-hover:text-primary transition-colors">upload_file</span>
+                        <p class="font-label-md font-bold group-hover:text-primary">Klik untuk unggah dokumen</p>
+                        <p class="font-body-sm text-on-surface-variant/70">Mendukung PDF, DOCX, PPTX (Maks 25MB)</p>
+                        <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="hidden" onchange="mbPreviewDocument(this)">
+                    </div>
+                </div>
+            </div>`;
+        }
+        
+        canvas.insertAdjacentHTML('beforeend', markup);
+        
+        // Smooth scroll to new block
+        const scrollArea = document.getElementById('mb-scroll-area');
+        setTimeout(() => { scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' }); }, 100);
+    }
+
+    function mbMoveBlock(btn, direction) {
+        const block = btn.closest('.mb-content-block');
+        const canvas = document.getElementById('mb-page-canvas');
+        if (!block) return;
+        
+        if (direction === -1 && block.previousElementSibling) {
+            canvas.insertBefore(block, block.previousElementSibling);
+        } else if (direction === 1 && block.nextElementSibling) {
+            canvas.insertBefore(block.nextElementSibling, block);
+        }
+    }
+
+    function mbPreviewImage(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dropZone = input.closest('.border-dashed');
+            dropZone.outerHTML = `
+                <div class="relative rounded-xl overflow-hidden border border-outline-variant/40">
+                    <img src="${e.target.result}" class="w-full max-h-[400px] object-contain bg-surface-container-low" alt="Uploaded">
+                    <div class="absolute top-3 right-3 flex gap-2">
+                        <button type="button" onclick="this.closest('.mb-content-block').querySelector('.border-dashed') || this.closest('div.relative').outerHTML = '<div class=\'border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group\' onclick=\'this.querySelector(input[type=file]).click()\'><span class=\'material-symbols-outlined text-[40px] group-hover:text-primary transition-colors\'>cloud_upload</span><p class=\'font-label-md font-bold group-hover:text-primary\'>Klik untuk unggah gambar</p><p class=\'font-body-sm text-on-surface-variant/70\'>Mendukung JPG, PNG, WebP (Maks 5MB)</p><input type=\'file\' accept=\'image/*\' class=\'hidden\' onchange=\'mbPreviewImage(this)\'></div>'" class="bg-surface/80 backdrop-blur-sm border border-outline-variant rounded-lg p-1.5 material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Hapus Gambar">close</button>
+                    </div>
+                </div>`;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function mbPreviewDocument(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const dropZone = input.closest('.border-dashed');
+        const ext = file.name.split('.').pop().toUpperCase();
+        dropZone.outerHTML = `
+            <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
+                <div class="w-12 h-12 bg-primary-container text-primary rounded-xl flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined">description</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-title-sm font-bold text-on-surface truncate">${file.name}</p>
+                    <p class="font-body-sm text-on-surface-variant">${ext} • ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <span class="material-symbols-outlined text-success text-[28px]">check_circle</span>
+            </div>`;
+    }
+
+    function mbEmbedYoutube(btn) {
+        const block = btn.closest('.mb-content-block');
+        const urlInput = block.querySelector('.mb-yt-url');
+        const previewDiv = block.querySelector('.mb-yt-preview');
+        let url = urlInput.value.trim();
+        
+        // Extract video ID
+        let videoId = '';
+        const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+        if (match) videoId = match[1];
+        
+        if (!videoId) {
+            previewDiv.innerHTML = '<div class="text-center text-error p-6"><span class="material-symbols-outlined text-[32px]">error</span><p class="font-body-sm mt-2">URL YouTube tidak valid. Pastikan formatnya benar.</p></div>';
+            return;
+        }
+        
+        previewDiv.innerHTML = `<iframe class="w-full h-full rounded-xl" src="https://www.youtube.com/embed/${videoId}" title="YouTube Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
+
+    // ==============================================
+    // Initialize Logic
+    // ==============================================
     document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.materi-builder-list').forEach(list => {
+            checkEmptyHintList(list);
+        });
+
+        // Existing tags dropdown logic below...
+
         const container = document.getElementById('tags-dropdown-container');
         if(!container) return;
         

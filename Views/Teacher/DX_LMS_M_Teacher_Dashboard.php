@@ -97,7 +97,7 @@
                         <p class="font-headline-sm font-black text-on-surface leading-tight"><?= e(
                             (string) ($stats['pending_review'] ?? 0),
                         ) ?></p>
-                        <p class="font-label-sm text-on-surface-variant mt-0.5 max-w-[80px] leading-tight mx-auto truncate text-clip">Pending Review</p>
+                        <p class="font-label-sm text-on-surface-variant mt-0.5">Pending Review</p>
                     </div>
                 </div>
             </section>
