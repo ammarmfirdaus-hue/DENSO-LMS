@@ -317,7 +317,7 @@ $active_tab = 'profil'; ?>
                         <h2 class="font-headline-sm text-on-surface font-bold text-[14px]">Laporkan Masalah</h2>
                     </div>
                     <div class="p-4">
-                        <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); alert('Laporan Anda telah dikirim. Tim IT akan merespon dalam 1�-24 jam kerja.');">
+                        <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); Swal.fire({title: 'Laporan Terkirim', text: 'Laporan Anda telah dikirim. Tim IT akan merespon dalam 1-24 jam kerja.', icon: 'success', confirmButtonColor: '#E20613'});">
                             <div>
                                 <label class="text-[14px] text-on-surface-variant font-medium block mb-1">Judul Masalah</label>
                                 <input type="text" placeholder="Contoh: Tidak bisa membuka quiz sesi 2" class="w-full bg-surface-container border border-outline-variant/40 rounded-xl px-3.5 py-2.5 text-[14px] text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50">

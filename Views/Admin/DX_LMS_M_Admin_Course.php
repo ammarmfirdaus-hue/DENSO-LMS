@@ -73,7 +73,7 @@ $active_tab = 'course';
                     <p class="font-body-md text-on-surface-variant">Manajemen materi, pelacakan sesi, dan pengaturan publikasi.</p>
                 </div>
                 
-                <button onclick="alert('Fitur tambah course muncul!')" class="inline-flex items-center gap-1.5 bg-white text-error border border-error font-label-md font-bold px-4 py-2 rounded-lg hover:bg-error/5 hover:border-error transition-colors shadow-sm">
+                <button onclick="Swal.fire({title: 'Segera Hadir!', text: 'Fitur tambah course muncul!', icon: 'info', confirmButtonColor: '#b4000b'})" class="inline-flex items-center gap-1.5 bg-white text-error border border-error font-label-md font-bold px-4 py-2 rounded-lg hover:bg-error/5 hover:border-error transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     Buat Course Baru
                 </button>

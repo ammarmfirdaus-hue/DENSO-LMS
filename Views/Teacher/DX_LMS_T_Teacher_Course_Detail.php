@@ -9,33 +9,62 @@
 // Lifecycle UI Logic
 $courseStatus = $course['status'] ?? 'Draft';
 $badgeColor = 'bg-surface-container-high text-on-surface-variant';
+$badgeBorder = 'border-outline-variant/40';
+$badgeDot = 'bg-on-surface-variant';
 $canEditRecommendation = false;
 
 switch ($courseStatus) {
     case 'Draft':
+    case 'Private':
         $badgeColor = 'bg-surface-container-high text-on-surface-variant';
-        $canEditRecommendation = true;
+        $badgeBorder = 'border-outline-variant/50';
+        $badgeDot = 'bg-on-surface-variant';
+        $canEditRecommendation = $courseStatus === 'Draft';
         break;
+    case 'Pending Review':
     case 'Submitted':
-        $badgeColor = 'bg-info-container text-on-info-container';
+        $badgeColor = 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
+        $badgeBorder = 'border-amber-300 dark:border-amber-700';
+        $badgeDot = 'bg-amber-500 animate-pulse';
         break;
     case 'Approved':
-        $badgeColor = 'bg-success-container text-on-success-container';
+        $badgeColor = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
+        $badgeBorder = 'border-emerald-300 dark:border-emerald-700';
+        $badgeDot = 'bg-emerald-500';
         break;
+    case 'In Progress':
     case 'Running':
         $badgeColor = 'bg-primary-container text-on-primary-container';
+        $badgeBorder = 'border-primary/30';
+        $badgeDot = 'bg-primary animate-pulse';
         break;
     case 'Completed':
     case 'Archived':
         $badgeColor = 'bg-surface-container text-outline';
+        $badgeBorder = 'border-outline-variant/40';
+        $badgeDot = 'bg-outline';
         break;
+}
+
+// Executive Analytics Calculation
+$avgProgress = 0;
+$avgScore = 0;
+if (!empty($participants)) {
+    $totalProg = 0;
+    $totalScore = 0;
+    foreach ($participants as $p) {
+        $totalProg += (int) ($p['progress'] ?? 0);
+        $totalScore += (int) ($p['score'] ?? 0);
+    }
+    $avgProgress = round($totalProg / count($participants));
+    $avgScore = round($totalScore / count($participants), 1);
 }
 ?>
 <!DOCTYPE html>
 <html class="light" lang="id">
 <head>
     <?php
-    $page_title = 'Detail Course - ' . htmlspecialchars($course['title'] ?? 'Course');
+    $page_title = 'Detail Course - ' . e($course['title'] ?? 'Course');
     include 'includes/components/DX_LMS_M_Tailwind_Head.php';
     ?>
     <style>
@@ -57,105 +86,113 @@ switch ($courseStatus) {
     include 'includes/components/DX_LMS_M_Teacher_Header.php';
     ?>
 
-    <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px] bg-[#FAFAFA]">
-        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-stack-xl lg:gap-8 items-start">
+    <!-- Main Content Canvas (Full-Width Fluid Layout Tanpa Ruang Kosong Berlebih) -->
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[72px] bg-[#FAFAFA]">
+        
+        <!-- Full-Width Fluid Grid (2 Kolom Kiri, 1 Kolom Kanan) -->
+        <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
             
-            <!-- Left Column: Primary Content -->
-            <div class="lg:col-span-2 space-y-stack-xl lg:space-y-8">
+            <!-- Left Column: Primary Course Content -->
+            <div class="lg:col-span-2 space-y-8">
                 
-                <!-- Course Hero Banner -->
-                <div class="bg-white rounded-3xl border border-outline-variant/50 shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden relative">
-                    <!-- Gradient Banner Header -->
-                    <div class="h-32 bg-gradient-to-r from-primary-container/80 via-surface-variant/30 to-surface-container-highest/20 relative border-b border-outline-variant/30">
-                        <div class="absolute top-5 right-5 flex gap-2">
-                            <span class="bg-white/90 backdrop-blur-sm font-label-sm text-[10px] text-secondary px-3 py-1.5 rounded-full border border-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] tracking-wide">
-                                <?= e($course['code'] ?? '') ?>
-                            </span>
-                            <div class="<?= $badgeColor ?> px-3 py-1.5 rounded-full font-label-sm text-[11px] font-bold shadow-[0_2px_8px_rgba(0,0,0,0.04)] whitespace-nowrap border border-white/50 backdrop-blur-sm tracking-wide">
-                                <?= e($courseStatus) ?>
+                <!-- Integrated Enterprise Hero Profile Card -->
+                <div class="bg-white rounded-3xl border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden mb-8">
+                    <!-- Gradient Accent Top Strip -->
+                    <div class="h-2.5 w-full bg-gradient-to-r from-primary via-tertiary to-secondary"></div>
+                    
+                    <div class="p-6 sm:p-8">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
+                            <div class="flex items-start gap-5">
+                                <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-sm">
+                                    <span class="material-symbols-outlined text-[36px]" style="font-variation-settings: 'FILL' 1;">
+                                        <?= e($course['icon'] ?? 'menu_book') ?>
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        <span class="px-2.5 py-1 rounded-md bg-surface-container text-on-surface-variant font-mono text-[11px] font-bold border border-outline-variant/40">
+                                            <?= e($course['code'] ?? 'MGT-501') ?>
+                                        </span>
+                                        <span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-[11px] font-bold">
+                                            <?= e($course['category'] ?? 'Leadership') ?>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full <?= $badgeColor ?> border <?= $badgeBorder ?> font-label-sm text-[11px] font-bold">
+                                            <span class="w-2 h-2 rounded-full <?= $badgeDot ?>"></span>
+                                            <?= e($courseStatus) ?>
+                                        </span>
+                                    </div>
+                                    <h2 class="font-headline-md sm:font-headline-lg font-bold text-on-surface tracking-tight leading-tight">
+                                        <?= e($course['title'] ?? '') ?>
+                                    </h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Hero Content -->
-                    <div class="px-6 lg:px-8 pb-8 relative">
-                        <!-- Overlapping Icon -->
-                        <div class="absolute left-6 lg:left-8 w-24 h-24 bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] border border-outline-variant/40 flex items-center justify-center p-2 z-10 transition-transform hover:scale-105" style="top: -3rem;">
-                            <div class="w-full h-full bg-primary/5 rounded-xl flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[44px] text-primary" style="font-variation-settings: 'FILL' 1;">
-                                    <?= e($course['icon'] ?? 'menu_book') ?>
+
+                        <!-- Course Description -->
+                        <p class="font-body-lg text-on-surface-variant leading-relaxed mb-8 max-w-3xl">
+                            <?= e($course['description'] ?? 'Tidak ada deskripsi rinci untuk course ini.') ?>
+                        </p>
+                        
+                        <!-- Horizontal Meta Badges Strip -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
+                            <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1">Target Peserta</span>
+                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[18px] text-tertiary">engineering</span>
+                                    Leader & SPV
                                 </span>
                             </div>
-                        </div>
-                        
-                        <!-- Title & Description -->
-                        <div class="pl-2" style="padding-top: 80px;">
-                            <h2 class="font-headline-lg font-bold text-on-surface mb-3 leading-tight tracking-tight">
-                                <?= e($course['title'] ?? '') ?>
-                            </h2>
-                            <p class="font-body-lg text-on-surface-variant max-w-2xl mb-8 leading-relaxed opacity-90">
-                                <?= e($course['description'] ?? 'Tidak ada deskripsi rinci untuk course ini.') ?>
-                            </p>
-                            
-                            <!-- Key Metrics Horizontal -->
-                            <div class="flex flex-wrap items-center gap-x-8 gap-y-4 text-label-md text-on-surface-variant border-t border-outline-variant/30 pt-6">
-                                <div class="flex items-center gap-3 group">
-                                    <div class="w-10 h-10 rounded-full bg-surface-container-high group-hover:bg-primary/10 flex items-center justify-center text-on-surface group-hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-[20px]">category</span>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-60">Kategori</span>
-                                        <span class="font-bold text-on-surface"><?= e(
-                                            $course['category'] ?? 'Umum',
-                                        ) ?></span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 group">
-                                    <div class="w-10 h-10 rounded-full bg-surface-container-high group-hover:bg-tertiary/10 flex items-center justify-center text-on-surface group-hover:text-tertiary transition-colors">
-                                        <span class="material-symbols-outlined text-[20px]">groups</span>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-60">Pendaftaran</span>
-                                        <span class="font-bold text-on-surface"><?= e(
-                                            (string) ($course['participants'] ?? '0'),
-                                        ) ?> Peserta Aktif</span>
-                                    </div>
-                                </div>
+                            <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1">Total Modul Sesi</span>
+                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[18px] text-primary">view_timeline</span>
+                                    <?= e((string) count($syllabus)) ?> Sesi
+                                </span>
                             </div>
-
-                            <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-outline-variant/30">
-                                <?php if ($canEditRecommendation): ?>
-                                <a href="?route=/teacher/course/create&course_id=<?= e(
-                                    (string) $course['id'],
-                                ) ?>" class="bg-primary text-on-primary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-primary-600 transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                                    Edit Course
-                                </a>
-                                <?php elseif ($courseStatus === 'Running'): ?>
-                                <a href="?route=/teacher/grade&course_id=<?= e(
-                                    (string) $course['id'],
-                                ) ?>" class="bg-secondary text-on-secondary h-10 px-4 rounded-xl shadow-sm text-label-md font-bold flex items-center gap-2 hover:bg-secondary-600 transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">grading</span>
-                                    Kelola Nilai
-                                </a>
-                                <?php endif; ?>
+                            <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1">Total Materi</span>
+                                <?php
+                                $totalMat = 0;
+                                foreach ($syllabus as $s) {
+                                    $totalMat += (int) ($s['materials'] ?? 0);
+                                }
+                                ?>
+                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[18px] text-indigo-500">article</span>
+                                    <?= $totalMat ?> Materi
+                                </span>
+                            </div>
+                            <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1">Peserta Aktif</span>
+                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[18px] text-emerald-600">group</span>
+                                    <?= e((string) ($course['participants'] ?? '0')) ?> Peserta
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Syllabus / Sesi & Materi Panel -->
-                <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-headline-sm font-bold text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-[24px]">view_timeline</span> 
-                            Silabus & Materi
-                        </h3>
+                <!-- Structured Learning Tree (Silabus & Materi Panel) -->
+                <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-[22px]">auto_stories</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-sm font-bold text-on-surface">Silabus & Materi Kurikulum</h3>
+                                <p class="font-body-sm text-on-surface-variant">Struktur sesi pemotongan kompetensi dan dokumen pelatihan</p>
+                            </div>
+                        </div>
                         <?php if ($canEditRecommendation): ?>
                         <button class="bg-primary/10 text-primary px-4 py-2 rounded-xl font-label-md font-bold hover:bg-primary/20 transition-colors flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[20px]">add</span> Tambah Sesi
                         </button>
+                        <?php else: ?>
+                        <span class="px-3 py-1 bg-surface-container rounded-full font-label-sm font-semibold text-on-surface-variant">
+                            <?= e((string) count($syllabus)) ?> Modul
+                        </span>
                         <?php endif; ?>
                     </div>
                     
@@ -168,35 +205,40 @@ switch ($courseStatus) {
                         <?php else: ?>
                             <div class="flex flex-col gap-3">
                                 <?php foreach ($syllabus as $index => $sess): ?>
-                                    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 hover:border-primary/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all group">
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                                            <h4 class="font-title-md font-semibold text-on-surface"><?= e(
-                                                $sess['title'],
-                                            ) ?></h4>
+                                    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all group">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-10 h-10 rounded-xl bg-primary text-on-primary font-bold font-mono text-sm flex items-center justify-center shrink-0 shadow-sm">
+                                                    <?= sprintf('%02d', $index + 1) ?>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+                                                        <?= e($sess['title']) ?>
+                                                    </h4>
+                                                    <span class="font-label-sm text-on-surface-variant">Modul Komponen Terverifikasi</span>
+                                                </div>
+                                            </div>
                                             
                                             <!-- Pill Metrics for Session -->
-                                            <div class="flex items-center gap-2 shrink-0">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface text-on-surface-variant font-label-sm border border-outline-variant/40 tooltip">
-                                                    <span class="material-symbols-outlined text-[16px] text-primary">article</span>
-                                                    <?= e((string) ($sess['materials'] ?? 0)) ?> Materi
-                                                </span>
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface text-on-surface-variant font-label-sm border border-outline-variant/40">
-                                                    <span class="material-symbols-outlined text-[16px] text-orange-500">quiz</span>
-                                                    <?= e((string) ($sess['assesments'] ?? 0)) ?> Assessment
-                                                </span>
-                                                <button class="w-8 h-8 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors ml-1">
-                                                    <span class="material-symbols-outlined text-[20px]">expand_more</span>
+                                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 shrink-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-on-surface-variant font-label-sm border border-outline-variant/60 shadow-sm">
+                                                        <span class="material-symbols-outlined text-[16px] text-primary">article</span>
+                                                        <?= e((string) ($sess['materials'] ?? 0)) ?> Materi
+                                                    </span>
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-on-surface-variant font-label-sm border border-outline-variant/60 shadow-sm">
+                                                        <span class="material-symbols-outlined text-[16px] text-orange-500">quiz</span>
+                                                        <?= e((string) ($sess['assesments'] ?? 0)) ?> Assessment
+                                                    </span>
+                                                </div>
+                                                
+                                                <?php if ($canEditRecommendation): ?>
+                                                <button class="text-primary font-label-sm font-bold hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span> Edit Konten
                                                 </button>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-                                        
-                                        <?php if ($canEditRecommendation): ?>
-                                        <div class="pt-3 border-t border-outline-variant/30 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button class="text-primary font-label-sm font-bold hover:underline flex items-center gap-1">
-                                                <span class="material-symbols-outlined text-[16px]">edit</span> Edit Konten Sesi
-                                            </button>
-                                        </div>
-                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -204,23 +246,39 @@ switch ($courseStatus) {
                     </div>
                 </section>
 
-                <!-- Peserta & Target Audience -->
-                <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-headline-sm font-bold text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-tertiary text-[24px]">group</span> 
-                            Monitoring Peserta
-                        </h3>
-                        <?php if ($canEditRecommendation): ?>
-                        <a href="?route=/teacher/course/create&course_id=<?= e(
-                            (string) $course['id'],
-                        ) ?>#target" class="text-primary font-label-md font-bold hover:underline flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[18px]">edit</span> Revisi Target
-                        </a>
-                        <?php endif; ?>
+                <!-- Executive Analytics & Monitoring Peserta -->
+                <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-outline-variant/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+                                <span class="material-symbols-outlined text-[22px]">group</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-sm font-bold text-on-surface">Monitoring Peserta & Executive Progress</h3>
+                                <p class="font-body-sm text-on-surface-variant">Analisis partisipasi aktif karyawan terhadap modul course</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-3">
+                            <?php if ($canEditRecommendation): ?>
+                            <a href="?route=/teacher/course/create&course_id=<?= e(
+                                (string) $course['id'],
+                            ) ?>#target" class="text-primary font-label-md font-bold hover:bg-primary/10 transition-colors flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary/20 bg-surface">
+                                <span class="material-symbols-outlined text-[18px]">edit</span> Revisi Target
+                            </a>
+                            <?php else: ?>
+                            <!-- Executive Summary Pills -->
+                            <span class="px-3 py-1.5 bg-surface-container-lowest border border-outline-variant/50 rounded-xl font-label-sm text-on-surface">
+                                Rata-rata Selesai: <strong class="text-primary"><?= $avgProgress ?>%</strong>
+                            </span>
+                            <span class="px-3 py-1.5 bg-surface-container-lowest border border-outline-variant/50 rounded-xl font-label-sm text-on-surface">
+                                Rata-rata Skor: <strong class="text-emerald-600"><?= $avgScore ?></strong>
+                            </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <?php if ($courseStatus === 'Submitted'): ?>
+                    <?php if ($courseStatus === 'Pending Review' || $courseStatus === 'Submitted'): ?>
                         <div class="bg-info/10 border-l-4 border-info p-5 rounded-r-xl flex items-start gap-4 mb-6">
                             <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm text-info">
                                 <span class="material-symbols-outlined">info</span>
@@ -249,27 +307,32 @@ switch ($courseStatus) {
                         <!-- Modern Participant List -->
                         <div class="flex flex-col gap-3">
                             <?php foreach ($participants as $p): ?>
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-outline-variant/40 hover:border-primary/30 bg-surface-container-lowest transition-colors gap-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-outline-variant/40 hover:border-primary/40 bg-surface-container-lowest transition-all gap-4">
                                 <div class="flex items-center gap-4">
                                     <?php
                                     $bgColors = [
-                                        'bg-primary/20 text-primary',
-                                        'bg-tertiary/20 text-tertiary',
-                                        'bg-secondary/20 text-secondary',
-                                        'bg-error/20 text-error',
+                                        'bg-primary/10 text-primary border border-primary/20',
+                                        'bg-tertiary/10 text-tertiary border border-tertiary/20',
+                                        'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                                        'bg-indigo-100 text-indigo-700 border border-indigo-200',
                                     ];
                                     $randColor = $bgColors[crc32($p['nama']) % count($bgColors)];
                                     ?>
-                                    <div class="w-12 h-12 rounded-full <?= $randColor ?> flex items-center justify-center font-headline-sm font-bold shrink-0">
+                                    <div class="w-11 h-11 rounded-full <?= $randColor ?> flex items-center justify-center font-title-sm font-bold shrink-0 shadow-sm">
                                         <?= strtoupper(substr($p['nama'], 0, 1)) ?>
                                     </div>
                                     <div class="flex flex-col">
                                         <h4 class="font-title-sm font-bold text-on-surface"><?= e($p['nama']) ?></h4>
-                                        <p class="font-body-sm text-on-surface-variant flex items-center gap-1">
-                                            <?php if ($courseStatus === 'Submitted' || $courseStatus === 'Draft'): ?>
+                                        <p class="font-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+                                            <?php if (
+                                                $courseStatus === 'Pending Review' ||
+                                                $courseStatus === 'Submitted' ||
+                                                $courseStatus === 'Private' ||
+                                                $courseStatus === 'Draft'
+                                            ): ?>
                                                 <span class="italic opacity-80">Kandidat Rekomendasi</span>
                                             <?php else: ?>
-                                                <span class="material-symbols-outlined text-[14px]">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e(
+                                                <span class="material-symbols-outlined text-[14px] text-amber-500">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e(
                                                     (string) $p['score'],
                                                 ) ?></span>
                                             <?php endif; ?>
@@ -277,8 +340,13 @@ switch ($courseStatus) {
                                     </div>
                                 </div>
                                 
-                                <div class="flex flex-col sm:items-end gap-1.5" style="min-width: 150px;">
-                                    <?php if ($courseStatus === 'Submitted' || $courseStatus === 'Draft'): ?>
+                                <div class="flex flex-col sm:items-end gap-1.5" style="min-width: 180px;">
+                                    <?php if (
+                                        $courseStatus === 'Pending Review' ||
+                                        $courseStatus === 'Submitted' ||
+                                        $courseStatus === 'Private' ||
+                                        $courseStatus === 'Draft'
+                                    ): ?>
                                         <span class="px-3 py-1 bg-surface-container-high rounded-full font-label-sm text-[11px] text-on-surface-variant font-medium">Pending Approval</span>
                                     <?php else: ?>
                                         <?php
@@ -290,7 +358,7 @@ switch ($courseStatus) {
                                                 ? 'text-emerald-600'
                                                 : 'text-primary' ?>"><?= $pg ?>% Selesai</span>
                                         </div>
-                                        <div class="w-full h-2 bg-surface-variant/50 rounded-full overflow-hidden">
+                                        <div class="w-full h-2 bg-surface-variant/60 rounded-full overflow-hidden">
                                             <div class="h-full rounded-full transition-all duration-1000 <?= $isFull
                                                 ? 'bg-emerald-500'
                                                 : 'bg-primary' ?>" style="width: <?= $pg ?>%;"></div>
@@ -301,45 +369,90 @@ switch ($courseStatus) {
                             <?php endforeach; ?>
                             
                             <?php if (count($participants) > 2): ?>
-                                <button class="w-full py-3 mt-2 rounded-xl border border-dashed border-outline-variant text-primary font-label-md font-bold hover:bg-primary/5 transition-colors">
-                                    Lihat Semua <?= e((string) count($participants)) ?> Peserta
+                                <button onclick="handleTeacherAction('view_all_participants')" class="w-full py-3.5 mt-2 rounded-2xl border border-outline-variant/60 bg-white hover:bg-surface-variant/40 text-primary font-label-md font-bold transition-colors shadow-sm">
+                                    Lihat Semua <?= e((string) count($participants)) ?> Peserta Terdaftar →
                                 </button>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </section>
-
-                <div class="h-8"></div> <!-- spacer -->
             </div>
 
-            <!-- Right Column: Interactive Widgets & Context -->
+            <!-- Right Column: Teacher Control Center & Interactive Widgets -->
             <div class="space-y-6">
-                    <!-- Kelola Nilai Widget -->
-                    <?php if ($courseStatus === 'Running' || $courseStatus === 'Completed'): ?>
-                    <a href="?route=/teacher/grade&course_id=<?= e(
-                        (string) $course['id'],
-                    ) ?>" class="group block bg-white border border-outline-variant/60 rounded-2xl p-6 shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.08)] hover:border-emerald-200 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-emerald-50 rounded-full mix-blend-multiply opacity-50 group-hover:scale-110 transition-transform"></div>
-                        
-                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-5 shrink-0 relative z-10 group-hover:-translate-y-1 transition-transform">
-                            <span class="material-symbols-outlined text-[24px]">grading</span>
+                
+                <!-- Card 1: Pusat Kendali Instruktur -->
+                <div class="bg-white rounded-3xl border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6">
+                    <div class="flex items-center gap-3 mb-4 pb-4 border-b border-outline-variant/30">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
                         </div>
-                        <h4 class="font-title-md font-bold text-on-surface mb-1.5 relative z-10">Kelola Penilaian</h4>
-                        <p class="font-body-sm text-on-surface-variant relative z-10 leading-snug">Evaluasi submission essay dan periksa nilai akhir participant.</p>
-                    </a>
-                    <?php endif; ?>
+                        <div>
+                            <h4 class="font-title-md font-bold text-on-surface">Pusat Kendali Pengajar</h4>
+                            <p class="font-label-sm text-on-surface-variant">Operasional course & kelas</p>
+                        </div>
+                    </div>
+
+                    <!-- Lifecycle State Explainer -->
+                    <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40 mb-5">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1.5">Status Lifecycle Saat Ini</span>
+                        <div class="flex items-center">
+                            <span class="font-title-sm font-bold text-on-surface flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full <?= $badgeDot ?>"></span>
+                                <?= e($courseStatus) ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Teacher Action Buttons List -->
+                    <div class="space-y-2.5">
+                        <?php if ($canEditRecommendation): ?>
+                            <a href="?route=/teacher/course/create&course_id=<?= e(
+                                (string) $course['id'],
+                            ) ?>" class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-600 text-white font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-center">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                                Edit Detail Course
+                            </a>
+                        <?php elseif ($courseStatus === 'Running'): ?>
+                            <a href="?route=/teacher/grade&course_id=<?= e(
+                                (string) $course['id'],
+                            ) ?>" class="w-full py-3 px-4 rounded-xl border border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 font-label-md font-bold flex items-center justify-center gap-2 transition-all text-center">
+                                <span class="material-symbols-outlined text-[18px]">grading</span>
+                                Kelola Penilaian Peserta
+                            </a>
+                        <?php endif; ?>
+                            <button onclick="handleTeacherAction('preview')" class="w-full py-3 px-4 rounded-xl border border-outline-variant text-on-surface-variant hover:bg-surface-variant/40 font-label-md font-semibold flex items-center justify-center gap-2 transition-all <?= $canEditRecommendation ||
+                            $courseStatus === 'Running'
+                                ? 'mt-3'
+                                : '' ?>">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                Preview Mode Peserta
+                            </button>
+                    </div>
                 </div>
 
-                <!-- Timeline Activity Widget -->
-                <section class="bg-white border border-outline-variant/60 p-6 rounded-2xl shadow-sm">
+                <!-- Card 2: Buka Ruang Forum Widget -->
+                <button onclick="handleTeacherAction('forum')" class="group block text-left bg-white border border-outline-variant/60 rounded-3xl p-6 shadow-sm hover:shadow-[0_8px_24px_rgba(99,102,241,0.08)] hover:border-indigo-200 transition-all duration-300 relative overflow-hidden w-full">
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-50 rounded-full mix-blend-multiply opacity-50 group-hover:scale-110 transition-transform"></div>
+                    
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-5 shrink-0 relative z-10 group-hover:-translate-y-1 transition-transform">
+                        <span class="material-symbols-outlined text-[24px]">forum</span>
+                    </div>
+                    <h4 class="font-title-md font-bold text-on-surface mb-1.5 relative z-10">Buka Ruang Forum Course</h4>
+                    <p class="font-body-sm text-on-surface-variant relative z-10 leading-snug">Berinteraksi, pantau Q&A dan isu terkait course ini (2 diskusi baru).</p>
+                </button>
+
+                <!-- Card 3: Timeline Activity Widget -->
+                <section class="bg-white border border-outline-variant/60 p-6 rounded-3xl shadow-sm">
                     <div class="flex items-center gap-2 mb-6 border-b border-outline-variant/40 pb-4">
                         <span class="material-symbols-outlined text-secondary">history</span>
-                        <h3 class="font-title-md font-bold text-on-surface">Aktivitas Course</h3>
+                        <h3 class="font-title-md font-bold text-on-surface">Aktivitas & Audit Trail</h3>
                     </div>
                     
                     <?php if (empty($activities)): ?>
-                        <div class="py-4 text-center">
-                            <p class="font-body-sm text-on-surface-variant italic">Belum ada historical log.</p>
+                        <div class="py-6 text-center">
+                            <span class="material-symbols-outlined text-[32px] text-outline-variant block mb-2">history_toggle_off</span>
+                            <p class="font-body-sm text-on-surface-variant italic">Belum ada aktivitas atau audit log.</p>
                         </div>
                     <?php else: ?>
                         <div class="relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-surface-variant before:to-transparent">
@@ -375,5 +488,24 @@ switch ($courseStatus) {
     </main>
 
     <?php include 'includes/components/DX_LMS_M_Teacher_Bottom_Nav.php'; ?>
+
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+    <script>
+        function handleTeacherAction(actionType) {
+            if (typeof DLS === 'undefined') {
+                alert("Fitur sedang memuat, silakan coba beberapa saat lagi.");
+                return;
+            }
+
+            if (actionType === 'preview') {
+                DLS.toast('Membuka Preview Mode...', 'info');
+            } else if (actionType === 'forum') {
+                DLS.toast('Membuka Ruang Forum Course...', 'info');
+            } else if (actionType === 'view_all_participants') {
+                DLS.toast('Menampilkan seluruh daftar peserta terdaftar', 'info');
+            }
+        }
+    </script>
 </body>
 </html>

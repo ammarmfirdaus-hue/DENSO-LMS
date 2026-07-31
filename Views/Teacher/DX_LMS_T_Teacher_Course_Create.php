@@ -669,8 +669,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <?php endif; ?>
 
                 <!-- Wizard Navigation Actions (Sticky Bottom on Desktop, Fixed Below on Mobile) -->
-                <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 h-20 lg:h-24 bg-surface shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.1)] border-t border-outline-variant/60 flex items-center z-40 transition-all">
-                    <div class="w-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
+                <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 bg-surface shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.08)] border-t border-outline-variant/60 z-40 transition-all drop-shadow-sm pb-safe">
+                    <div class="w-full flex justify-between items-center px-4 sm:px-6 lg:px-8 h-20 lg:h-24">
                         <!-- Left Action -->
                         <div>
                             <?php if ($step > 1): ?>
@@ -688,9 +688,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <!-- Right Action -->
                         <div class="flex gap-2">
                             <?php if ($step === 4): ?>
-                                <button type="button" onclick="alert('Course Submitted!'); window.location.href='?route=/teacher/course/detail&course_id=<?= e(
+                                <button type="button" onclick="Swal.fire({title: 'Submit Berhasil!', text: 'Course berhasil disubmit ke Admin.', icon: 'success', confirmButtonColor: '#E20613'}).then(() => { window.location.href='?route=/teacher/course/detail&course_id=<?= e(
                                     $course['id'] ?? 1,
-                                ) ?>';" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
+                                ) ?>';});" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
                                     Submit ke Admin <span class="material-symbols-outlined text-[18px]">send</span>
                                 </button>
                             <?php else: ?>
@@ -976,7 +976,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const sessions = container.querySelectorAll('.session-block');
         
         if (sessions.length <= 1) {
-            alert('Minimal harus ada 1 sesi dalam course.');
+            Swal.fire({title: 'Perhatian', text: 'Minimal harus ada 1 sesi dalam course.', icon: 'warning', confirmButtonColor: '#E20613'});
             return;
         }
         
@@ -1296,7 +1296,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         
         const count = container.children.length;
         if (count >= 10) {
-            alert('Maksimal 10 pilihan (A-J).');
+            Swal.fire({title: 'Batas Maksimum', text: 'Maksimal 10 pilihan (A-J).', icon: 'info', confirmButtonColor: '#E20613'});
             return;
         }
         
@@ -1503,7 +1503,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
     function mbDeletePage() {
         if (mbPages.length <= 1) {
-            alert('Minimal harus ada 1 halaman materi.');
+            Swal.fire({title: 'Perhatian', text: 'Minimal harus ada 1 halaman materi.', icon: 'warning', confirmButtonColor: '#E20613'});
             return;
         }
         if (!confirm('Hapus halaman ' + (mbCurrentPage + 1) + '?')) return;
@@ -1962,7 +1962,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const qIndex = block.getAttribute('data-index');
         const container = block.querySelector('.qb-options-container');
         const count = container.children.length;
-        if (count >= 10) { alert('Maksimal 10 pilihan (A-J).'); return; }
+        if (count >= 10) { Swal.fire({title: 'Batas Maksimum', text: 'Maksimal 10 pilihan (A-J).', icon: 'info', confirmButtonColor: '#E20613'}); return; }
         
         const letter = String.fromCharCode(65 + count);
         const markup = `
@@ -2126,5 +2126,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         updateDisplay();
     });
     </script>
+
+    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
 </body>
 </html>

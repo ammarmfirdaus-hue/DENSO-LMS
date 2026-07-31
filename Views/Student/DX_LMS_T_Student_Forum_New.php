@@ -89,7 +89,7 @@
                         <a href="?route=/student/course/detail&tab=forum" class="px-6 py-3 border border-outline-variant rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors text-center flex-1 sm:flex-none">
                             Batal
                         </a>
-                        <button onclick="alert('Topik berhasil diposting!'); window.location.href='?route=/student/course/detail&tab=forum';" class="px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center hover:opacity-90 active:scale-95 transition-all shadow-[0_4px_12px_0_rgba(226,6,19,0.2)] flex-1 sm:flex-none" type="button">
+                        <button onclick="Swal.fire({title: 'Berhasil!', text: 'Topik berhasil diposting!', icon: 'success', confirmButtonColor: '#b4000b'}).then(() => { window.location.href='?route=/student/course/detail&tab=forum'; });" class="px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center hover:opacity-90 active:scale-95 transition-all shadow-[0_4px_12px_0_rgba(226,6,19,0.2)] flex-1 sm:flex-none" type="button">
                             Posting Topik
                             <span class="material-symbols-outlined ml-2 text-[18px]">send</span>
                         </button>

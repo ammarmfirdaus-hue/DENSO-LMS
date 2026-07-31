@@ -101,7 +101,7 @@ $lh = $loginHistory ?? [];
                             <span class="material-symbols-outlined text-[14px] text-secondary">key</span>
                             Ubah Password
                         </h3>
-                        <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); alert('Fitur ini akan aktif saat terhubung ke database.');">
+                        <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); Swal.fire({title: 'Segera Hadir!', text: 'Fitur ini akan aktif saat terhubung ke database.', icon: 'info', confirmButtonColor: '#b4000b'});">
                             <div>
                                 <label class="text-[14px] text-on-surface-variant font-medium block mb-1">Password Lama</label>
                                 <input type="password" placeholder="Masukkan password lama" class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-xl px-3.5 py-2.5 text-[14px] text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50">
@@ -129,7 +129,7 @@ $lh = $loginHistory ?? [];
                                 <p class="text-[14px] text-on-surface-variant">Keluar dari semua perangkat yang terhubung</p>
                             </div>
                         </div>
-                        <button onclick="alert('Semua sesi pada perangkat lain akan diakhiri.')" class="text-error font-label-sm font-bold bg-error/8 px-3 py-1.5 rounded-lg hover:bg-error/12 transition-colors active:scale-95">
+                        <button onclick="Swal.fire({title: 'Sesi Diakhiri', text: 'Semua sesi pada perangkat lain akan diakhiri.', icon: 'success', confirmButtonColor: '#b4000b'})" class="text-error font-label-sm font-bold bg-error/8 px-3 py-1.5 rounded-lg hover:bg-error/12 transition-colors active:scale-95">
                             Logout
                         </button>
                     </div>

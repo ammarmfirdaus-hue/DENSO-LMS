@@ -36,7 +36,7 @@ $active_tab = 'user';
                 <p class="text-sm text-gray-500 mt-1">Atur pendaftaran, deaktivasi, serta pemberian akses Role LMS.</p>
             </div>
             
-            <button class="bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg active:scale-95 transition-all hover:bg-red-700 hover:shadow-md flex items-center gap-2 shadow-sm shrink-0" onclick="alert('Fitur tambah form muncul!')">
+            <button class="bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg active:scale-95 transition-all hover:bg-red-700 hover:shadow-md flex items-center gap-2 shadow-sm shrink-0" onclick="Swal.fire({title: 'Segera Hadir!', text: 'Fitur tambah form muncul!', icon: 'info', confirmButtonColor: '#b4000b'})">
                 <span class="material-symbols-outlined text-[18px]">person_add</span> Tambah User Baru
             </button>
         </div>
@@ -57,9 +57,13 @@ $active_tab = 'user';
                     <span class="material-symbols-outlined text-[24px]">school</span>
                 </div>
                 <div>
-                    <?php 
+                    <?php
                     $teacher_count = 0;
-                    foreach($users as $u) if($u['role'] === 'Teacher') $teacher_count++;
+                    foreach ($users as $u) {
+                        if ($u['role'] === 'Teacher') {
+                            $teacher_count++;
+                        }
+                    }
                     ?>
                     <div class="text-2xl font-bold text-gray-900"><?= $teacher_count ?></div>
                     <div class="text-xs font-medium text-gray-500">Active Teachers</div>
@@ -70,9 +74,13 @@ $active_tab = 'user';
                     <span class="material-symbols-outlined text-[24px]">person</span>
                 </div>
                 <div>
-                    <?php 
+                    <?php
                     $student_count = 0;
-                    foreach($users as $u) if($u['role'] === 'Student') $student_count++;
+                    foreach ($users as $u) {
+                        if ($u['role'] === 'Student') {
+                            $student_count++;
+                        }
+                    }
                     ?>
                     <div class="text-2xl font-bold text-gray-900"><?= $student_count ?></div>
                     <div class="text-xs font-medium text-gray-500">Active Students</div>
@@ -136,17 +144,24 @@ $active_tab = 'user';
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <?php if (!empty($users)): ?>
-                            <?php 
+                            <?php
                             // Warna background acak untuk avatar
-                            $avatar_colors = ['bg-amber-100 text-amber-700', 'bg-emerald-100 text-emerald-700', 'bg-indigo-100 text-indigo-700', 'bg-pink-100 text-pink-700', 'bg-cyan-100 text-cyan-700'];
-                            foreach ($users as $index => $user): 
+                            $avatar_colors = [
+                                'bg-amber-100 text-amber-700',
+                                'bg-emerald-100 text-emerald-700',
+                                'bg-indigo-100 text-indigo-700',
+                                'bg-pink-100 text-pink-700',
+                                'bg-cyan-100 text-cyan-700',
+                            ];
+                            foreach ($users as $index => $user):
+
                                 $color = $avatar_colors[$index % count($avatar_colors)];
                                 $initials = substr($user['name'], 0, 1);
-                                if(strpos($user['name'], ' ') !== false) {
+                                if (strpos($user['name'], ' ') !== false) {
                                     $parts = explode(' ', $user['name']);
                                     $initials = substr($parts[0], 0, 1) . substr($parts[1], 0, 1);
                                 }
-                            ?>
+                                ?>
                                 <tr class="hover:bg-gray-50 transition-colors group relative">
                                     <td class="px-4 py-3.5 text-center">
                                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -158,23 +173,31 @@ $active_tab = 'user';
                                                 <?= strtoupper($initials) ?>
                                             </div>
                                             <div class="flex flex-col">
-                                                <span class="font-semibold text-gray-900 text-sm leading-tight"><?= e($user['name']) ?></span>
-                                                <span class="text-xs text-gray-500 mt-0.5">NPK: <?= e($user['npk']) ?></span>
+                                                <span class="font-semibold text-gray-900 text-sm leading-tight"><?= e(
+                                                    $user['name'],
+                                                ) ?></span>
+                                                <span class="text-xs text-gray-500 mt-0.5">NPK: <?= e(
+                                                    $user['npk'],
+                                                ) ?></span>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3.5">
-                                        <div class="text-sm font-medium text-gray-900"><?= e($user['jabatan']) ?> <span class="text-gray-400 font-normal ml-1">&bull; <?= e($user['golongan']) ?></span></div>
+                                        <div class="text-sm font-medium text-gray-900"><?= e(
+                                            $user['jabatan'],
+                                        ) ?> <span class="text-gray-400 font-normal ml-1">&bull; <?= e(
+     $user['golongan'],
+ ) ?></span></div>
                                         <div class="text-xs text-gray-500 mt-0.5"><?= e($user['departemen']) ?></div>
                                     </td>
                                     <td class="px-4 py-3.5">
-                                        <?php 
+                                        <?php
                                         $role_cls = '';
                                         $dot_cls = '';
-                                        if($user['role'] === 'Admin') {
+                                        if ($user['role'] === 'Admin') {
                                             $role_cls = 'bg-red-50 text-red-700 ring-red-200';
                                             $dot_cls = 'bg-red-500';
-                                        } elseif($user['role'] === 'Teacher') {
+                                        } elseif ($user['role'] === 'Teacher') {
                                             $role_cls = 'bg-blue-50 text-blue-700 ring-blue-200';
                                             $dot_cls = 'bg-blue-500';
                                         } else {
@@ -191,7 +214,9 @@ $active_tab = 'user';
                                         <?php if (count($user['access']) > 0): ?>
                                             <div class="flex flex-wrap gap-1.5">
                                                 <?php foreach ($user['access'] as $acc): ?>
-                                                    <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600 border border-gray-200"><?= e($acc) ?></span>
+                                                    <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600 border border-gray-200"><?= e(
+                                                        $acc,
+                                                    ) ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -209,7 +234,9 @@ $active_tab = 'user';
                                         </div>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php
+                            endforeach;
+                            ?>
                         <?php else: ?>
                             <tr>
                                 <td colspan="6" class="px-4 py-12 text-center">
