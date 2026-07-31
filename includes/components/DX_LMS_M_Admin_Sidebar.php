@@ -9,10 +9,6 @@
 $active_tab = $active_tab ?? 'beranda'; ?>
 <!-- Navigation Sidebar (Desktop/Tablet Only) -->
 <aside class="hidden lg:flex flex-col w-[240px] bg-surface-container fixed left-0 top-0 h-screen border-r border-outline-variant z-50">
-    <div class="h-14 flex items-center px-4 border-b border-outline-variant">
-        <span class="material-symbols-outlined text-primary mr-3" style="font-variation-settings: 'FILL' 1;">business</span>
-        <span class="font-headline-sm font-bold text-primary tracking-tight">Admin DLS</span>
-    </div>
 
     <!-- User Info Mini -->
     <div class="p-4 border-b border-outline-variant/50">

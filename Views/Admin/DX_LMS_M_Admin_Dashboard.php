@@ -36,7 +36,7 @@ $active_tab = 'beranda';
         <!-- Welcome Section -->
         <section class="space-y-stack-sm min-w-0 mb-stack-lg">
             <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight text-on-surface">
-                Control Center LMS ⚙️
+                Control Center LMS
             </h1>
             <p class="font-body-md text-on-surface-variant">Ringkasan aktivitas operasional dan pengelolaan platform Denso Learning System.</p>
         </section>
@@ -285,9 +285,6 @@ $active_tab = 'beranda';
                         $dot_class   = $role_dot_map[$role_lower]   ?? 'bg-gray-400';
                     ?>
                         <div class="dash-log-item flex gap-3 py-3.5 border-b border-gray-100 last:border-0 relative group hover:bg-gray-50 -mx-5 px-5 transition-colors" data-role="<?= $role_lower ?>">
-                            <?php if ($idx < $total_acts - 1): ?>
-                                <span class="absolute left-[33px] top-14 -bottom-0 w-[2px] bg-gray-200 z-0 dash-line" aria-hidden="true"></span>
-                            <?php endif; ?>
                             
                             <!-- Icon node (flex item, tidak absolute) -->
                             <div class="w-9 h-9 rounded-full shrink-0 bg-white border border-gray-200 text-gray-400 flex items-center justify-center shadow-sm z-10 group-hover:border-gray-300 group-hover:text-gray-600 transition-colors mt-0.5">
@@ -353,7 +350,6 @@ $active_tab = 'beranda';
         const tabs    = document.querySelectorAll('.dash-timeline-tab');
         const empty   = document.getElementById('dashEmptyState');
         const counter = document.getElementById('dashFilterCount');
-        const lines   = document.querySelectorAll('.dash-line');
 
         // Peta warna aksen per role
         const roleColors = {
@@ -392,8 +388,7 @@ $active_tab = 'beranda';
             }
         });
 
-        // Hide/show connector lines
-        lines.forEach(l => l.style.opacity = '0');
+
 
         // Show/hide items
         let visibleCount = 0;
@@ -408,13 +403,6 @@ $active_tab = 'beranda';
             }
         });
 
-        // Re-draw connector lines for visible items
-        visibleItems.forEach((item, i) => {
-            const line = item.querySelector('.dash-line');
-            if (line && i < visibleItems.length - 1) {
-                line.style.opacity = '1';
-            }
-        });
 
         // Empty state
         empty.classList.toggle('hidden', visibleCount > 0);
