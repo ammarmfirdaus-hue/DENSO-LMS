@@ -40,7 +40,7 @@ class DX_LMS_T_Student_Forum_New extends DX_LMS_M_Controller
             session_start();
         }
 
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('student') ?? [
             'npk' => '12345',
             'name' => 'Budi Santoso',
             'jabatan' => 'Operator Produksi',

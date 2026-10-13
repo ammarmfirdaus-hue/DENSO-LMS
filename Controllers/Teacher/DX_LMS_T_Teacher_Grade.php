@@ -17,7 +17,8 @@ class DX_LMS_T_Teacher_Grade extends DX_LMS_M_Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
@@ -76,6 +77,7 @@ class DX_LMS_T_Teacher_Grade extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'grade',
             'base_path' => '',
+            'user' => $teacherUser,
             'courses' => $managedCourses,
             'selectedCourseId' => $selectedCourseId,
             'activeCourse' => $activeCourse,

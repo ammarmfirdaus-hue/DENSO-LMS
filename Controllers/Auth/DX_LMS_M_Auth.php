@@ -19,9 +19,24 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
      */
     public function login()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        // Jika ada parameter ?switch=1, ?relogin=1, ?new=1, ?role=..., atau ?portal=..., 
+        // biarkan form login tampil agar pengguna bisa login akun/peran lain di tab terpisah pada browser yang sama
+        if (isset($_GET['switch']) || isset($_GET['relogin']) || isset($_GET['new']) || isset($_GET['role']) || isset($_GET['portal'])) {
+            $this->view('DX_LMS_M_Auth_Login');
+            return;
+        }
+
         if (isset($_SESSION['user'])) {
-            header('Location: ?route=/pilih-peran');
+            $baseRole = $_SESSION['user']['role'] ?? 'student';
+            if ($baseRole === 'student') {
+                $_SESSION['active_role'] = 'student';
+                header('Location: ?route=/student');
+            } else {
+                header('Location: ?route=/pilih-peran');
+            }
             exit();
         }
         $this->view('DX_LMS_M_Auth_Login');
@@ -31,17 +46,20 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
      * Memproses Data Login dari Formulir (Form Submit).
      *
      * Menerima kiriman data (POST) berisi NPK dan kata sandi (password).
-     * Akan memvalidasi keberadaan pengguna di basis data dan mencocokkan hash sandi.
-     * Jika validasi berhasil, data profil esensial akan disimpan ke dalam sesi ($_SESSION),
-     * lalu pengguna diarahkan ke antarmuka pemilihan peran.
+     * Memvalidasi akun dan mengarahkan pengguna secara cerdas:
+     * - Role 'student': langsung menuju halaman /student
+     * - Role 'teacher': menuju pemilihan peran (Student / Teacher)
+     * - Role 'admin': menuju pemilihan peran (Student / Teacher / Admin)
      *
-     * @return void Melakukan redirect berdasarkan status autentikasi (berhasil atau gagal).
+     * @return void Melakukan redirect berdasarkan status autentikasi.
      */
     public function processLogin()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $npk = $_POST['npk'] ?? '';
+            $npk = trim($_POST['npk'] ?? '');
             $password = $_POST['password'] ?? '';
 
             if (!empty($npk) && !empty($password)) {
@@ -52,18 +70,52 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
                 /** Melakukan verifikasi ketersediaan pengguna dan kecocokan kata sandi. */
                 if ($user && password_verify($password, $user['password'])) {
                     unset($_SESSION['course_filters']);
+                    $baseRole = strtolower($user['role'] ?? 'student');
+
+                    // Menentukan daftar peran yang diizinkan untuk akun ini
+                    $availableRoles = ['student'];
+                    if ($baseRole === 'teacher') {
+                        $availableRoles = ['student', 'teacher'];
+                    } elseif ($baseRole === 'admin') {
+                        $availableRoles = ['student', 'teacher', 'admin'];
+                    }
+
                     /** Menyimpan data penting (esensial) ke dalam sesi (session). */
-                    $_SESSION['user'] = [
+                    $userData = [
                         'npk' => $user['npk'],
                         'username' => $user['npk'],
                         'name' => $user['fullname'],
-                        'role' => $user['role'],
-                        'golongan' => $user['golongan_id'],
-                        'jabatan' => $user['position_id'],
+                        'fullname' => $user['fullname'],
+                        'role' => $baseRole, // Role dasar akun tetap dan permanen
+                        'golongan' => $user['golongan'] ?? $user['golongan_id'] ?? 'Gol 1',
+                        'jabatan' => $user['jabatan'] ?? $user['position_id'] ?? 'Staff',
+                        'position' => $user['jabatan'] ?? $user['position_id'] ?? 'Staff',
+                        'department' => $user['department'] ?? '',
+                        'division' => $user['division'] ?? '',
+                        'section' => $user['section'] ?? '',
+                        'email' => $user['email'] ?? '',
                     ];
 
-                    header('Location: ?route=/pilih-peran');
-                    exit();
+                    $_SESSION['user'] = $userData;
+                    $_SESSION['available_roles'] = $availableRoles;
+
+                    // Mengisolasi slot peran di $_SESSION['roles'] agar multi-tab tidak saling menimpa
+                    if (!isset($_SESSION['roles'])) {
+                        $_SESSION['roles'] = [];
+                    }
+                    $_SESSION['roles'][$baseRole] = $userData;
+
+                    // Alur pengalihan berdasarkan Role akun
+                    if ($baseRole === 'student') {
+                        // Role student langsung masuk ke halaman student
+                        $_SESSION['active_role'] = 'student';
+                        header('Location: ?route=/student');
+                        exit();
+                    } else {
+                        // Role teacher dan admin masuk ke pemilihan peran
+                        header('Location: ?route=/pilih-peran');
+                        exit();
+                    }
                 } else {
                     /** Menangani kondisi ketika kata sandi salah atau pengguna tidak ditemukan/tidak aktif. */
                     header('Location: ?route=/login&error=1');
@@ -74,63 +126,134 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
                 exit();
             }
         }
+        header('Location: ?route=/login');
+        exit();
     }
 
     /**
      * Menampilkan Halaman Pemilihan Peran (Role Selection).
      *
-     * Setelah pengguna berhasil login, antarmuka ini disajikan agar pengguna
-     * dapat memilih mode masuk (contoh: sebagai Student atau Admin/Teacher)
-     * sesuai dengan hak akses yang terdaftar pada akun mereka.
+     * Hanya dapat diakses oleh akun yang memiliki opsi multi-peran (Teacher atau Admin).
+     * Pengguna dengan peran 'student' murni akan otomatis diarahkan ke /student.
      *
-     * @return void Merender halaman pemilihan peran jika sesi tersedia, jika tidak kembali ke login.
+     * @return void Merender halaman pemilihan peran atau redirect.
      */
     public function roleSelection()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (!isset($_SESSION['user'])) {
             header('Location: ?route=/login');
             exit();
         }
+
+        $baseRole = $_SESSION['user']['role'] ?? 'student';
+
+        // Jika akun merupakan Student murni, langsung arahkan ke beranda student
+        if ($baseRole === 'student') {
+            $_SESSION['active_role'] = 'student';
+            header('Location: ?route=/student');
+            exit();
+        }
+
         $this->view('DX_LMS_M_Auth_Role');
     }
 
     /**
      * Memproses Penyimpanan Pilihan Peran ke dalam Sesi.
      *
-     * Menerima input peran yang dipilih pengguna (POST), menyimpannya sebagai
-     * 'active_role' di dalam memori sesi, lalu merutekan pengguna ke dasbor yang sesuai.
+     * Melakukan validasi ketat (whitelist) terhadap peran yang diminta:
+     * - Akun Teacher hanya boleh memilih 'student' atau 'teacher'
+     * - Akun Admin boleh memilih 'student', 'teacher', atau 'admin'
+     * - Role asli pada database ($_SESSION['user']['role']) tetap terjaga dan tidak berubah.
      *
      * @return void Redirect ke dasbor target (Student/Teacher/Admin).
      */
     public function setRole()
     {
-        session_start();
-        if (isset($_POST['role'])) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            header('Location: ?route=/login');
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role'])) {
+            $baseRole = $_SESSION['user']['role'] ?? 'student';
+            $selectedRole = strtolower(trim($_POST['role']));
+
+            // Daftar peran sah yang boleh diakses berdasarkan role akun
+            $allowedRoles = $_SESSION['available_roles'] ?? ['student'];
+            if (!in_array($selectedRole, $allowedRoles, true)) {
+                // Percobaan akses peran ilegal ditolak
+                header('Location: ?route=/pilih-peran&error=unauthorized');
+                exit();
+            }
+
             unset($_SESSION['course_filters']);
-            $_SESSION['active_role'] = $_POST['role'];
-            if ($_POST['role'] === 'student') {
+            // Ubah active_role dan simpan profil pada slot peran spesifik
+            $_SESSION['active_role'] = $selectedRole;
+            if (!isset($_SESSION['roles'])) {
+                $_SESSION['roles'] = [];
+            }
+            // Jangan menimpa akun asli jika peran yang dipilih sudah memiliki akun murni aktif
+            if (empty($_SESSION['roles'][$selectedRole]) || strtolower($_SESSION['roles'][$selectedRole]['role'] ?? '') !== $selectedRole) {
+                $_SESSION['roles'][$selectedRole] = $_SESSION['user'];
+            }
+
+            if ($selectedRole === 'student') {
                 header('Location: ?route=/student');
-            } elseif ($_POST['role'] === 'teacher') {
+            } elseif ($selectedRole === 'teacher') {
                 header('Location: ?route=/teacher');
+            } elseif ($selectedRole === 'admin') {
+                header('Location: ?route=/admin');
             } else {
                 header('Location: ?route=/pilih-peran');
             }
             exit();
         }
+
+        header('Location: ?route=/pilih-peran');
+        exit();
     }
 
     /**
      * Memproses Keluar Sistem (Logout).
      *
-     * Menghancurkan seluruh data sesi yang aktif pada server untuk memutuskan
-     * status login pengguna secara aman, kemudian mengembalikan pengguna ke halaman login.
+     * Menghancurkan sesi pengguna secara aman. Mendukung logout per peran
+     * (jika parameter ?role= dispesifikasikan) atau logout penuh dari seluruh sistem.
      *
      * @return void Redirect otomatis ke rute '/login'.
      */
     public function logout()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $portal = $_GET['role'] ?? $_GET['portal'] ?? null;
+        if ($portal && isset($_SESSION['roles'][$portal])) {
+            unset($_SESSION['roles'][$portal]);
+            if (($_SESSION['user']['role'] ?? '') === $portal) {
+                unset($_SESSION['user']);
+                foreach (['admin', 'teacher', 'student'] as $r) {
+                    if (!empty($_SESSION['roles'][$r])) {
+                        $_SESSION['user'] = $_SESSION['roles'][$r];
+                        break;
+                    }
+                }
+            }
+            if (empty($_SESSION['user']) && empty($_SESSION['roles'])) {
+                $_SESSION = [];
+                session_destroy();
+            }
+            header('Location: ?route=/login&relogin=1');
+            exit();
+        }
+
+        $_SESSION = [];
         session_destroy();
         header('Location: ?route=/login');
         exit();

@@ -6,7 +6,12 @@
  * - $active_tab: String (beranda|user|course|assignment|role|monitoring|score|activity|notification)
  */
 
-$active_tab = $active_tab ?? 'beranda'; ?>
+$active_tab = $active_tab ?? 'beranda';
+$adminSession = $user ?? getPortalUser('admin');
+$adminName = $adminSession['fullname'] ?? ($adminSession['name'] ?? 'Admin System');
+$adminRole = $adminSession['position'] ?? 'Super Admin';
+$adminInitial = mb_substr($adminName, 0, 1, 'UTF-8');
+?>
 <!-- Navigation Sidebar (Desktop/Tablet Only) -->
 <aside class="hidden lg:flex flex-col w-[240px] bg-surface-container fixed left-0 top-0 h-screen border-r border-outline-variant z-50">
 
@@ -14,11 +19,11 @@ $active_tab = $active_tab ?? 'beranda'; ?>
     <div class="p-4 border-b border-outline-variant/50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-body-lg">
-                A
+                <?= htmlspecialchars($adminInitial, ENT_QUOTES, 'UTF-8') ?>
             </div>
             <div class="flex flex-col min-w-0">
-                <span class="font-label-md font-bold text-on-surface truncate">Admin System</span>
-                <span class="font-body-sm text-on-surface-variant truncate">Super Admin</span>
+                <span class="font-label-md font-bold text-on-surface truncate"><?= htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="font-body-sm text-on-surface-variant truncate"><?= htmlspecialchars($adminRole, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
     </div>
@@ -128,8 +133,12 @@ $active_tab = $active_tab ?? 'beranda'; ?>
         </a>
     </nav>
     
-    <div class="p-3 border-t border-outline-variant">
-        <a href="?route=/auth/logout" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors text-error hover:bg-error/10 hover:text-error">
+    <div class="p-3 border-t border-outline-variant flex flex-col gap-1">
+        <a href="?route=/pilih-peran" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors text-on-surface-variant hover:bg-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined">swap_horiz</span>
+            <span class="font-label-md font-medium">Beralih Peran</span>
+        </a>
+        <a href="?route=/auth/logout&role=admin" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors text-error hover:bg-error/10 hover:text-error">
             <span class="material-symbols-outlined">logout</span>
             <span class="font-label-md font-bold">Keluar Sistem</span>
         </a>

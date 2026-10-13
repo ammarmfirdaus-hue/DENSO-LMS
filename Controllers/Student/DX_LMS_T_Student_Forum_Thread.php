@@ -37,7 +37,7 @@ class DX_LMS_T_Student_Forum_Thread extends DX_LMS_M_Controller
 
         $replies = $topic ? $forumModel->getReplies($topicId) : [];
 
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('student') ?? [
             'npk' => '12345',
             'name' => 'Budi Santoso',
             'role' => 'student',
@@ -68,7 +68,7 @@ class DX_LMS_T_Student_Forum_Thread extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $user = $_SESSION['user'] ?? null;
+        $user = getPortalUser('student');
         if (!$user) {
             echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
             exit();
@@ -123,7 +123,7 @@ class DX_LMS_T_Student_Forum_Thread extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $user = $_SESSION['user'] ?? null;
+        $user = getPortalUser('student');
         if (!$user) {
             echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
             exit();

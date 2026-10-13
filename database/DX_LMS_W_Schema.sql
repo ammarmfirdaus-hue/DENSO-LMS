@@ -67,4 +67,15 @@ BEGIN
         'Production A', 'Manufacturing', 'Operation', 'Plant 1', 'teacher', 'Active'
     );
 END
+
+IF NOT EXISTS (SELECT 1 FROM [dbo].[DX_LMS_M_Employees] WHERE [npk] = '99999')
+BEGIN
+    INSERT INTO [dbo].[DX_LMS_M_Employees] (
+        [npk], [fullname], [email], [password], [golongan], [jabatan], [bu_code], 
+        [section], [department], [division], [directorate], [role], [status]
+    ) VALUES (
+        '99999', 'Admin System', 'admin@perusahaan.co.id', '$2y$10$r21wQRARzlhPsx.reVEBYOrvvz.YpG9DmifFjIWrcI7AEl84GPBv.', 'Gol 4', 'SPV', 101, 
+        'People Development', 'HR & GA', 'Human Capital', 'Head Office', 'admin', 'Active'
+    );
+END
 GO

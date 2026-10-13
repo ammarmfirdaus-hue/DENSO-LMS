@@ -14,9 +14,16 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
      */
     public function index()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
-            header('Location: ?route=/login');
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
+            if (isset($_SESSION['user'])) {
+                header('Location: ?route=/student');
+            } else {
+                header('Location: ?route=/login');
+            }
             exit();
         }
 
@@ -35,6 +42,7 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'beranda',
             'base_path' => '',
+            'user' => $teacherUser,
             'stats' => $stats,
             'courses' => array_slice($courses, 0, 6), // Show 6 on dashboard
             'activities' => array_slice($activities, 0, 3), // Balance with 3 pending actions

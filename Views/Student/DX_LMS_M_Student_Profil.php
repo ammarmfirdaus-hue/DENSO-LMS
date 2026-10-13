@@ -277,6 +277,9 @@ $active_tab = 'profil'; ?>
                         <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-1 transition-all text-[20px]" style="font-variation-settings:'FILL' 0;">chevron_right</span>
                     </a>
 
+                    <?php
+                    $effectiveRole = $user['role'] ?? (getPortalUser('student')['role'] ?? 'student');
+                    if (in_array($effectiveRole, ['teacher', 'admin'], true)): ?>
                     <!-- Ubah Peran (neutral default → red on hover, SweetAlert confirm) -->
                     <button type="button" id="btn-ubah-peran" class="dls-menu-card group flex items-center justify-between w-full p-4 bg-surface rounded-xl border border-outline-variant/30 shadow-sm
                                hover:bg-error/5 hover:border-error/30 hover:shadow-md transition-all text-left">
@@ -286,11 +289,12 @@ $active_tab = 'profil'; ?>
                             </div>
                             <div class="flex flex-col text-left">
                                 <span class="font-label-lg text-on-surface group-hover:text-error font-bold transition-colors">Ubah Peran</span>
-                                <span class="font-body-sm text-on-surface-variant">Beralih ke tampilan Teacher (jika memiliki akses)</span>
+                                <span class="font-body-sm text-on-surface-variant">Beralih ke mode <?= $effectiveRole === 'admin' ? 'Teacher / Admin' : 'Teacher' ?></span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined text-on-surface-variant group-hover:text-error group-hover:translate-x-1 transition-all text-[20px]" style="font-variation-settings:'FILL' 0;">chevron_right</span>
                     </button>
+                    <?php endif; ?>
 
                     <!-- Pengaturan -->
                     <a href="?route=/student/profil/pengaturan" class="dls-menu-card group flex items-center justify-between w-full p-4 bg-surface rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md hover:border-primary/20 hover:bg-primary/5 transition-all">
@@ -352,29 +356,32 @@ $active_tab = 'profil'; ?>
             }
 
             /** ── Modul Konfirmasi: Pembaruan Otoritas Peran ──────────────────────────────────────────── */
-            document.getElementById('btn-ubah-peran').addEventListener('click', function() {
-                Swal.fire({
-                    title: 'Ubah Peran?',
-                    text: 'Anda akan beralih dari tampilan Student ke Teacher. Pastikan Anda memiliki akses sebagai Teacher.',
-                    icon: 'warning',
-                    iconColor: '#ef4444',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Ubah Peran',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    reverseButtons: true,
-                    customClass: {
-                        popup: 'rounded-2xl shadow-xl',
-                        confirmButton: 'rounded-lg font-semibold px-5 py-2.5',
-                        cancelButton: 'rounded-lg font-semibold px-5 py-2.5',
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '?route=/pilih-peran';
-                    }
+            const btnUbahPeran = document.getElementById('btn-ubah-peran');
+            if (btnUbahPeran) {
+                btnUbahPeran.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Ubah Peran?',
+                        text: 'Anda akan dialihkan ke antarmuka pemilihan peran untuk mengganti workspace aktif.',
+                        icon: 'question',
+                        iconColor: '#e20613',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Ubah Peran',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#e20613',
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-xl',
+                            confirmButton: 'rounded-lg font-semibold px-5 py-2.5',
+                            cancelButton: 'rounded-lg font-semibold px-5 py-2.5',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '?route=/pilih-peran';
+                        }
+                    });
                 });
-            });
+            }
 
             /** ── Modul Konfirmasi: Mengakhiri Sesi (Logout) ──────────────────────────────────────────── */
             document.getElementById('btn-keluar').addEventListener('click', function() {
@@ -396,7 +403,7 @@ $active_tab = 'profil'; ?>
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '?route=/auth/logout';
+                        window.location.href = '?route=/auth/logout&role=student';
                     }
                 });
             });

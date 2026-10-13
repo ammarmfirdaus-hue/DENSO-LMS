@@ -6,8 +6,11 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
 {
     public function index()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
@@ -16,14 +19,14 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         $stats = DX_LMS_M_Teacher_MockData::getTeacherStats();
 
         $profile = [
-            'name' => $_SESSION['user']['fullname'] ?? 'Budi Santoso',
-            'npk' => $_SESSION['user']['npk'] ?? '987654321',
+            'name' => $teacherUser['fullname'] ?? ($teacherUser['name'] ?? 'Ahmad Rizal'),
+            'npk' => $teacherUser['npk'] ?? '67890',
             'role' => 'Teacher',
-            'department' => 'Manufacturing Training',
-            'division' => 'Operation',
-            'section' => 'Production A',
-            'position' => $_SESSION['user']['jabatan'] ?? 'Leader',
-            'golongan' => 'Gol 3',
+            'department' => !empty($teacherUser['department']) ? $teacherUser['department'] : 'Manufacturing',
+            'division' => !empty($teacherUser['division']) ? $teacherUser['division'] : 'Operation',
+            'section' => !empty($teacherUser['section']) ? $teacherUser['section'] : 'Production A',
+            'position' => $teacherUser['jabatan'] ?? ($teacherUser['position'] ?? 'Leader'),
+            'golongan' => $teacherUser['golongan'] ?? 'Gol 3',
             'photo_url' =>
                 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9cdk8ogJL3w5_NK_GyqBiVTRDCvukSi1wBuUwvyCk4aYPtCY0cq1TqwcHgbQL_oM8zIGtY6Qc9HxNMF6ntprsZAOrebYyekTQ08a6liWME8Mbb84YFlne--pGRw1PuxTtapDDG5vwnrRa4WjzAkxEeFhSj0RlYKQUO04cC-0mb29AzlccPjtNlf0v6vY07qlVED0ce0prmKp_lgKoHDzZjYAQHAOLj8-8tsUeW6lwWTIKJ8KztRWlr5aUBvQcaQkNW-1XTqgHgUA',
         ];
@@ -31,6 +34,7 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'profil',
             'base_path' => '',
+            'user' => $teacherUser,
             'profile' => $profile,
             'stats' => $stats,
         ];
@@ -43,18 +47,23 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
+            header('Location: ?route=/login');
+            exit();
+        }
         require_once 'includes/DX_LMS_M_Teacher_MockData.php';
         $stats = DX_LMS_M_Teacher_MockData::getTeacherStats();
 
         $profile = [
-            'name' => $_SESSION['user']['fullname'] ?? 'Budi Santoso',
-            'npk' => $_SESSION['user']['npk'] ?? '987654321',
+            'name' => $teacherUser['fullname'] ?? ($teacherUser['name'] ?? 'Ahmad Rizal'),
+            'npk' => $teacherUser['npk'] ?? '67890',
             'role' => 'Teacher',
-            'department' => 'Manufacturing Training',
-            'division' => 'Operation',
-            'section' => 'Production A',
-            'position' => $_SESSION['user']['jabatan'] ?? 'Leader',
-            'golongan' => 'Gol 3',
+            'department' => !empty($teacherUser['department']) ? $teacherUser['department'] : 'Manufacturing',
+            'division' => !empty($teacherUser['division']) ? $teacherUser['division'] : 'Operation',
+            'section' => !empty($teacherUser['section']) ? $teacherUser['section'] : 'Production A',
+            'position' => $teacherUser['jabatan'] ?? ($teacherUser['position'] ?? 'Leader'),
+            'golongan' => $teacherUser['golongan'] ?? 'Gol 3',
             'photo_url' =>
                 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9cdk8ogJL3w5_NK_GyqBiVTRDCvukSi1wBuUwvyCk4aYPtCY0cq1TqwcHgbQL_oM8zIGtY6Qc9HxNMF6ntprsZAOrebYyekTQ08a6liWME8Mbb84YFlne--pGRw1PuxTtapDDG5vwnrRa4WjzAkxEeFhSj0RlYKQUO04cC-0mb29AzlccPjtNlf0v6vY07qlVED0ce0prmKp_lgKoHDzZjYAQHAOLj8-8tsUeW6lwWTIKJ8KztRWlr5aUBvQcaQkNW-1XTqgHgUA',
         ];
@@ -62,6 +71,7 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         return [
             'profile' => $profile,
             'stats' => $stats,
+            'user' => $teacherUser,
         ];
     }
 
@@ -72,6 +82,7 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
             // Add mock elements specific to detail
             'active_tab' => 'profil',
             'base_path' => '',
+            'user' => $common['user'],
             'profile' => $common['profile'],
             'stats' => $common['stats'],
             'careerHistory' => [
@@ -137,6 +148,7 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'profil',
             'base_path' => '',
+            'user' => $common['user'],
             'profile' => $common['profile'],
             'stats' => $common['stats'],
             'loginHistory' => [
@@ -165,6 +177,7 @@ class DX_LMS_T_Teacher_Profile extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'profil',
             'base_path' => '',
+            'user' => $common['user'],
             'profile' => $common['profile'],
             'stats' => $common['stats'],
         ];

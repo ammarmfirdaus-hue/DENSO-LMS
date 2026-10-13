@@ -6,9 +6,9 @@
 
 $active_tab = $active_tab ?? 'beranda';
 $base_path = $base_path ?? '';
-$userSession = $_SESSION['user'] ?? [];
-$userName = $userSession['fullname'] ?? ($userSession['name'] ?? 'Teacher Dummy');
-$userJabatan = $userSession['jabatan'] ?? 'Leader';
+$userSession = $user ?? getPortalUser('teacher');
+$userName = $userSession['fullname'] ?? ($userSession['name'] ?? 'Teacher');
+$userJabatan = $userSession['jabatan'] ?? ($userSession['position'] ?? 'Leader');
 
 // Cek tipe teacher (jika ada flag)
 $teacherType = $_SESSION['teacher_type'] ?? 'Teacher Associate';

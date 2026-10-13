@@ -46,9 +46,11 @@
                 } elseif ($hour >= 15 && $hour < 18) {
                     $sapaan = 'sore';
                 }
+                $teacherUser = $user ?? getPortalUser('teacher');
+                $teacherName = $teacherUser['fullname'] ?? ($teacherUser['name'] ?? 'Teacher');
                 ?>
                 <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight text-on-surface">
-                    Selamat <?= e($sapaan) ?>, <?= e($_SESSION['user']['fullname'] ?? 'Budi Santoso') ?> 
+                    Selamat <?= e($sapaan) ?>, <?= e($teacherName) ?> 
                 </h1>
                 <p class="font-body-md text-on-surface-variant font-medium">
                     Hari ini Anda mengelola <span class="text-primary font-bold"><?= count(

@@ -365,7 +365,7 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '?route=/auth/logout';
+                        window.location.href = '?route=/auth/logout&role=teacher';
                     }
                 });
             });

@@ -18,8 +18,10 @@ class DX_LMS_M_Student_Course extends DX_LMS_M_Controller
      */
     public function index()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'student') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!getPortalUser('student')) {
             header('Location: ?route=/login');
             exit();
         }

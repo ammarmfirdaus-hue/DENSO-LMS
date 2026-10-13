@@ -25,7 +25,8 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
             session_start();
         }
 
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
@@ -72,6 +73,7 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'forum',
             'base_path' => '',
+            'user' => $teacherUser,
             'courses' => $managedCourses,
             'selectedCourseId' => $selectedCourseId,
             'activeCourse' => $activeCourse,
@@ -96,7 +98,8 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
             session_start();
         }
 
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
@@ -111,7 +114,7 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
         }
 
         $replies = $forumModel->getReplies($topicId);
-        $user = $_SESSION['user'];
+        $user = $teacherUser;
 
         $backUrl = '?route=/teacher/course/detail&course_id=' . urlencode($topic['course_id'] ?? '1') . '&tab=forum';
 
@@ -136,12 +139,13 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             echo json_encode(['success' => false, 'message' => 'Otoritas tidak sah.']);
             exit();
         }
 
-        $user = $_SESSION['user'];
+        $user = $teacherUser;
         $topicId = isset($_POST['topic_id']) ? (int) $_POST['topic_id'] : 0;
         $content = isset($_POST['content']) ? trim($_POST['content']) : '';
 
@@ -181,7 +185,7 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        if (!getPortalUser('teacher')) {
             echo json_encode(['success' => false, 'message' => 'Otoritas pengajar diperlukan.']);
             exit();
         }
@@ -212,7 +216,7 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $user = $_SESSION['user'] ?? null;
+        $user = getPortalUser('teacher');
         if (!$user) {
             echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
             exit();
@@ -242,12 +246,13 @@ class DX_LMS_T_Teacher_Forum extends DX_LMS_M_Controller
             session_start();
         }
 
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
 
-        $user = $_SESSION['user'];
+        $user = $teacherUser;
         $courseId = $_POST['course_id'] ?? '1';
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');

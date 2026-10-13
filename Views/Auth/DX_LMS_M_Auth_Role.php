@@ -7,9 +7,20 @@
  *
  * Ref: pilih_peran
  */
-
 $page_title = 'Pilih Peran - LMS';
 $base_path = '';
+
+$currentUser = $_SESSION['user'] ?? [];
+$userName = $currentUser['fullname'] ?? ($currentUser['name'] ?? 'Pengguna');
+$userNpk = $currentUser['npk'] ?? '';
+$baseRole = $currentUser['role'] ?? 'teacher';
+$availableRoles = $_SESSION['available_roles'] ?? (
+    $baseRole === 'admin' ? ['student', 'teacher', 'admin'] : ['student', 'teacher']
+);
+$activeRole = $_SESSION['active_role'] ?? ($baseRole === 'admin' ? 'admin' : ($baseRole === 'teacher' ? 'teacher' : 'student'));
+if (!in_array($activeRole, $availableRoles, true)) {
+    $activeRole = in_array('teacher', $availableRoles, true) ? 'teacher' : 'student';
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -35,7 +46,7 @@ $base_path = '';
 
         .pilih-peran-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .pilih-peran-header .logo-text {
@@ -45,7 +56,7 @@ $base_path = '';
             color: #e20613;
             letter-spacing: -0.03em;
             line-height: 1;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .pilih-peran-header h1 {
@@ -84,21 +95,20 @@ $base_path = '';
         .pilih-peran-img-container {
             position: relative;
             width: 100%;
+            height: 96px;
             background-color: #eae7e7;
             overflow: hidden;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
         }
 
         .pilih-peran-img-container img {
             width: 100%;
-            height: auto;
+            height: 100%;
             object-fit: cover;
-            object-position: top;
+            object-position: center 25%;
             display: block;
-            margin-bottom: -25%;
-            /* Memotong 25% dari bawah gambar */
         }
 
         .pilih-peran-img-gradient {
@@ -107,19 +117,19 @@ $base_path = '';
             left: 0;
             right: 0;
             height: 50%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
         }
 
         .pilih-peran-card-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
+            padding: 12px 16px;
         }
 
         .pilih-peran-card-title {
             font-family: 'Inter', sans-serif;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: #1b1c1c;
         }
@@ -133,8 +143,8 @@ $base_path = '';
         }
 
         .pilih-peran-indicator {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             border: 2px solid #e9bcb6;
             display: flex;
@@ -167,29 +177,26 @@ $base_path = '';
         <!-- Desktop Left Image Panel / Branding Area -->
         <div class="hidden lg:flex flex-col w-full lg:flex-1 bg-[#0b0e14] relative overflow-hidden min-h-[600px] lg:min-h-[100dvh]">
             <!-- Background Image -->
-            <!-- bg-left ensures the worker's body is fully visible -->
             <div class="absolute inset-0 bg-cover bg-left bg-no-repeat z-0 opacity-100" style="background-image: url('<?= $base_path ?>assets/img/pilih-peran/DX_LMS_M_Pilih_Peran_Left.png');"></div>
 
-            <!-- Premium Dark Overlay (More transparent at bottom) -->
+            <!-- Premium Dark Overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-[#0b0e14]/95 from-[20%] via-[#0b0e14]/70 to-[#0b0e14]/10 z-10"></div>
 
             <!-- Content -->
             <div class="relative z-20 flex-1 flex flex-col justify-end p-8 md:p-12 lg:p-16 lg:px-20 w-full max-w-2xl mx-auto lg:mx-0 lg:ml-auto xl:ml-0 pb-10 lg:pb-12">
 
                 <div class="mt-auto mb-6">
-                    <!-- Title & Logo (Side by side) -->
+                    <!-- Title & Logo -->
                     <div class="flex items-center gap-4 mb-6">
-                        <!-- Logo -->
                         <div class="w-[56px] h-[56px] bg-gradient-to-br from-[#d42a2a] to-[#a01a1a] rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(212,42,42,0.5)] shrink-0">
                             <span class="material-symbols-outlined text-[28px] text-white">groups</span>
                         </div>
-                        <!-- Title -->
                         <h2 class="text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight">
                             Peran Pembelajaran
                         </h2>
                     </div>
 
-                    <!-- Description (Justified) -->
+                    <!-- Description -->
                     <p class="text-[14px] lg:text-[15px] text-gray-200 leading-relaxed max-w-[460px] text-justify mb-4">
                         Sistem akan menyesuaikan modul dan analitik sesuai dengan tanggung jawab dan tingkat akses yang Anda miliki.
                     </p>
@@ -197,7 +204,7 @@ $base_path = '';
                 </div>
 
                 <!-- Footer -->
-                <div class="">
+                <div>
                     <div class="w-12 h-[1px] bg-white/30 mb-4"></div>
                     <p class="text-[11px] lg:text-xs text-gray-300 font-medium">© Learning Management System</p>
                 </div>
@@ -205,8 +212,8 @@ $base_path = '';
         </div>
 
         <!-- Right Content Panel -->
-        <div class="flex-1 w-full flex flex-col justify-center items-center p-8 bg-surface">
-            <div class="w-full max-w-[400px] flex flex-col justify-center">
+        <div class="flex-1 w-full flex flex-col justify-center items-center p-6 lg:p-8 bg-surface overflow-y-auto">
+            <div class="w-full max-w-[420px] flex flex-col justify-center my-auto py-2">
                 <!-- Header -->
                 <div class="pilih-peran-header">
                     <div class="logo-text">LMS</div>
@@ -214,53 +221,108 @@ $base_path = '';
                     <p>Pilih peran yang akan Anda gunakan saat ini</p>
                 </div>
 
+                <!-- Current User Identity Banner -->
+                <div class="mb-5 p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/40 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                            <?= strtoupper(substr($userName, 0, 1)) ?>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-on-surface truncate"><?= htmlspecialchars($userName) ?></p>
+                            <p class="text-[11px] text-on-surface-variant truncate">NPK: <?= htmlspecialchars($userNpk) ?> · Akun <?= ucfirst($baseRole) ?></p>
+                        </div>
+                    </div>
+                    <a href="?route=/login&switch=1" class="text-xs text-primary font-semibold hover:underline shrink-0 ml-3 flex items-center gap-1" title="Login Akun Lain">
+                        <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+                        <span>Login Akun Lain</span>
+                    </a>
+                </div>
+
                 <!-- Role Selection Form -->
                 <form method="POST" action="?route=/auth/set-role" id="formPilihPeran" class="w-full">
-                    <div class="space-y-4">
-                        <!-- Karyawan/Student Card -->
-                        <div class="pilih-peran-card selected" data-role="student" id="roleStudent">
+                    <div class="space-y-3">
+                        <!-- Student Card -->
+                        <?php if (in_array('student', $availableRoles, true)): ?>
+                        <div class="pilih-peran-card <?= $activeRole === 'student' ? 'selected' : '' ?>" data-role="student" id="roleStudent">
                             <div class="pilih-peran-img-container">
                                 <img src="assets/img/pilih-peran/DX_LMS_M_Student.png" alt="Student" onerror="this.style.display='none'">
                                 <div class="pilih-peran-img-gradient"></div>
                             </div>
-                            <div class="pilih-peran-card-content py-3 lg:py-4 px-4">
+                            <div class="pilih-peran-card-content">
                                 <div class="pilih-peran-card-text">
-                                    <div class="pilih-peran-card-title text-base lg:text-lg">Student</div>
-                                    <div class="pilih-peran-card-desc text-[11px] lg:text-[12px]">Belajar materi, kerjakan quiz, isi absensi, dan lihat capaian.</div>
+                                    <div class="pilih-peran-card-title">Student</div>
+                                    <div class="pilih-peran-card-desc">Belajar materi, kerjakan quiz, isi absensi, dan lihat capaian.</div>
                                 </div>
-                                <div class="pilih-peran-indicator w-6 h-6 lg:w-7 lg:h-7">
-                                    <span class="material-symbols-outlined text-[14px] lg:text-[16px]">check</span>
+                                <div class="pilih-peran-indicator">
+                                    <span class="material-symbols-outlined">check</span>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- Teacher Card -->
-                        <div class="pilih-peran-card" data-role="teacher" id="roleTeacher">
+                        <?php if (in_array('teacher', $availableRoles, true)): ?>
+                        <div class="pilih-peran-card <?= $activeRole === 'teacher' ? 'selected' : '' ?>" data-role="teacher" id="roleTeacher">
                             <div class="pilih-peran-img-container">
                                 <img src="assets/img/pilih-peran/DX_LMS_M_Teacher.png" alt="Teacher" onerror="this.style.display='none'">
                                 <div class="pilih-peran-img-gradient"></div>
                             </div>
-                            <div class="pilih-peran-card-content py-3 lg:py-4 px-4">
+                            <div class="pilih-peran-card-content">
                                 <div class="pilih-peran-card-text">
-                                    <div class="pilih-peran-card-title text-base lg:text-lg">Teacher</div>
-                                    <div class="pilih-peran-card-desc text-[11px] lg:text-[12px]">Kelola materi, buat quiz, dan pantau progress peserta.</div>
+                                    <div class="pilih-peran-card-title">Teacher</div>
+                                    <div class="pilih-peran-card-desc">Kelola materi, buat quiz, dan pantau progress peserta.</div>
                                 </div>
-                                <div class="pilih-peran-indicator w-6 h-6 lg:w-7 lg:h-7">
-                                    <span class="material-symbols-outlined text-[14px] lg:text-[16px]">check</span>
+                                <div class="pilih-peran-indicator">
+                                    <span class="material-symbols-outlined">check</span>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
+
+                        <!-- Admin Card -->
+                        <?php if (in_array('admin', $availableRoles, true)): ?>
+                        <div class="pilih-peran-card <?= $activeRole === 'admin' ? 'selected' : '' ?>" data-role="admin" id="roleAdmin">
+                            <div class="pilih-peran-img-container">
+                                <img src="assets/img/pilih-peran/DX_LMS_M_Admin.png" alt="Admin" onerror="this.style.display='none'">
+                                <div class="pilih-peran-img-gradient"></div>
+                            </div>
+                            <div class="pilih-peran-card-content">
+                                <div class="pilih-peran-card-text">
+                                    <div class="pilih-peran-card-title">Admin</div>
+                                    <div class="pilih-peran-card-desc">Kelola pengguna, master data, hak akses sistem, dan analitik.</div>
+                                </div>
+                                <div class="pilih-peran-indicator">
+                                    <span class="material-symbols-outlined">check</span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Hidden input for role value -->
-                    <input type="hidden" name="role" id="selectedRole" value="student">
+                    <input type="hidden" name="role" id="selectedRole" value="<?= htmlspecialchars($activeRole, ENT_QUOTES, 'UTF-8') ?>">
 
                     <!-- Submit Button -->
-                    <div class="mt-8">
+                    <div class="mt-6">
                         <button type="submit" class="w-full h-11 bg-primary-container text-on-primary font-label-md rounded-full shadow-[0_4px_12px_rgba(226,6,19,0.25)] hover:bg-primary active:scale-95 transition-all flex items-center justify-center gap-2" id="btnMasuk">
                             Masuk
                             <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
                         </button>
+                    </div>
+
+                    <!-- Switch Account Link -->
+                    <div class="mt-4 text-center space-y-1">
+                        <div>
+                            <a href="?route=/login&switch=1" class="text-xs text-on-surface-variant hover:text-primary transition-colors font-medium inline-flex items-center gap-1">
+                                <span>Ingin buka akun pengajar/admin lain?</span>
+                                <span class="font-bold underline text-primary">Login Akun Lain</span>
+                            </a>
+                        </div>
+                        <div>
+                            <a href="?route=/auth/logout" class="text-[11px] text-on-surface-variant/70 hover:text-error transition-colors">
+                                Keluar dari semua sesi
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

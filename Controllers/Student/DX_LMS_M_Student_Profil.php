@@ -20,12 +20,20 @@ class DX_LMS_M_Student_Profil extends DX_LMS_M_Controller
      */
     public function index()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $studentUser = getPortalUser('student');
+        if (!$studentUser) {
+            header('Location: ?route=/login');
+            exit();
+        }
         $stats = DX_LMS_M_Student_Data::getStats();
         $profile = DX_LMS_M_Student_Data::getEmployeeProfile();
         $learningStats = DX_LMS_M_Student_Data::getLearningStats();
         $golonganMap = DX_LMS_M_Student_Data::getGolonganMap();
         $data = [
+            'user' => $studentUser,
             'stats' => $stats,
             'profile' => $profile,
             'learningStats' => $learningStats,
@@ -45,13 +53,21 @@ class DX_LMS_M_Student_Profil extends DX_LMS_M_Controller
      */
     public function detail()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $studentUser = getPortalUser('student');
+        if (!$studentUser) {
+            header('Location: ?route=/login');
+            exit();
+        }
         $stats = DX_LMS_M_Student_Data::getStats();
         $profile = DX_LMS_M_Student_Data::getEmployeeProfile();
         $careerHistory = DX_LMS_M_Student_Data::getCareerHistory();
         $golonganMap = DX_LMS_M_Student_Data::getGolonganMap();
         $learningStats = DX_LMS_M_Student_Data::getLearningStats();
         $data = [
+            'user' => $studentUser,
             'stats' => $stats,
             'profile' => $profile,
             'careerHistory' => $careerHistory,
@@ -71,11 +87,19 @@ class DX_LMS_M_Student_Profil extends DX_LMS_M_Controller
      */
     public function pengaturan()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $studentUser = getPortalUser('student');
+        if (!$studentUser) {
+            header('Location: ?route=/login');
+            exit();
+        }
         $stats = DX_LMS_M_Student_Data::getStats();
         $profile = DX_LMS_M_Student_Data::getEmployeeProfile();
         $loginHistory = DX_LMS_M_Student_Data::getLoginHistory();
         $data = [
+            'user' => $studentUser,
             'stats' => $stats,
             'profile' => $profile,
             'loginHistory' => $loginHistory,
@@ -93,9 +117,17 @@ class DX_LMS_M_Student_Profil extends DX_LMS_M_Controller
      */
     public function bantuan()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $studentUser = getPortalUser('student');
+        if (!$studentUser) {
+            header('Location: ?route=/login');
+            exit();
+        }
         $stats = DX_LMS_M_Student_Data::getStats();
         $data = [
+            'user' => $studentUser,
             'stats' => $stats,
         ];
         $this->view('DX_LMS_M_Student_Profil_Bantuan', $data);

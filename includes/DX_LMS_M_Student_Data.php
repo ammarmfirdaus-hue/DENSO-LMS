@@ -1195,20 +1195,30 @@ class DX_LMS_M_Student_Data
      */
     public static function getEmployeeProfile(): array
     {
+        $sessionUser = getPortalUser('student') ?? [];
+        $fullname = $sessionUser['fullname'] ?? ($sessionUser['name'] ?? 'Budi Santoso');
+        $npk = $sessionUser['npk'] ?? '12345';
+        $role = ucfirst($sessionUser['role'] ?? 'Student');
+        $position = $sessionUser['jabatan'] ?? ($sessionUser['position'] ?? 'Operator');
+        $golongan = $sessionUser['golongan'] ?? 'Gol 1';
+        $department = !empty($sessionUser['department']) ? $sessionUser['department'] : 'Manufacturing';
+        $division = !empty($sessionUser['division']) ? $sessionUser['division'] : 'Operation';
+        $section = !empty($sessionUser['section']) ? $sessionUser['section'] : 'Production A';
+
         return [
-            'npk' => '123456',
-            'fullname' => 'Budi Santoso',
-            'email' => 'budi.santoso@perusahaan.co.id',
+            'npk' => $npk,
+            'fullname' => $fullname,
+            'name' => $fullname,
+            'email' => $sessionUser['email'] ?? 'user@perusahaan.co.id',
             'phone' => '0812-3456-7890',
-            'photo_url' =>
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuC9cdk8ogJL3w5_NK_GyqBiVTRDCvukSi1wBuUwvyCk4aYPtCY0cq1TqwcHgbQL_oM8zIGtY6Qc9HxNMF6ntprsZAOrebYyekTQ08a6liWME8Mbb84YFlne--pGRw1PuxTtapDDG5vwnrRa4WjzAkxEeFhSj0RlYKQUO04cC-0mb29AzlccPjtNlf0v6vY07qlVED0ce0prmKp_lgKoHDzZjYAQHAOLj8-8tsUeW6lwWTIKJ8KztRWlr5aUBvQcaQkNW-1XTqgHgUA',
-            'role' => 'Student',
-            'position' => 'Leader',
-            'golongan' => 'Gol 2',
-            'golongan_label' => 'Leader Middle',
-            'department' => 'Produksi',
-            'division' => 'Manufacturing',
-            'section' => 'Assembly Line A',
+            'photo_url' => '',
+            'role' => $role,
+            'position' => $position,
+            'golongan' => $golongan,
+            'golongan_label' => $position . ' ' . $golongan,
+            'department' => $department,
+            'division' => $division,
+            'section' => $section,
             'status' => 'Aktif',
             'join_date' => '2019-03-15',
             'direct_supervisor' => 'Ahmad Hidayat, SPV',

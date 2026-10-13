@@ -18,8 +18,11 @@ class DX_LMS_T_Student_Dashboard extends DX_LMS_M_Controller
      */
     public function index()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'student') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $studentUser = getPortalUser('student');
+        if (!$studentUser) {
             header('Location: ?route=/login');
             exit();
         }
@@ -48,11 +51,19 @@ class DX_LMS_T_Student_Dashboard extends DX_LMS_M_Controller
             return $timeB <=> $timeA;
         });
 
+        $userName = $studentUser['fullname'] ?? ($studentUser['name'] ?? 'Budi Santoso');
+        $userJabatan = $studentUser['jabatan'] ?? ($studentUser['position'] ?? 'Operator');
+        $userDepartment = !empty($studentUser['department']) ? $studentUser['department'] : 'Departemen Produksi';
+
         $data = [
             'active_tab' => 'beranda',
             'base_path' => '',
+            'user' => $studentUser,
             'stats' => $stats,
             'courses' => $progressCourses,
+            'userName' => $userName,
+            'userJabatan' => $userJabatan,
+            'userDepartment' => $userDepartment,
         ];
 
         $this->view('DX_LMS_T_Student_Dashboard', $data);

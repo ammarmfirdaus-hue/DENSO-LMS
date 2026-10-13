@@ -25,7 +25,7 @@ class DX_LMS_M_Admin_Forum extends DX_LMS_M_Controller
         }
 
         // Pastikan sesi admin aktif atau sediakan fallback admin
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('admin') ?? [
             'npk' => '99999',
             'name' => 'Admin System',
             'fullname' => 'Admin System',
@@ -111,7 +111,7 @@ class DX_LMS_M_Admin_Forum extends DX_LMS_M_Controller
         }
 
         $replies = $forumModel->getReplies($topicId);
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('admin') ?? [
             'npk' => '99999',
             'name' => 'Admin System',
             'fullname' => 'Admin System',
@@ -143,7 +143,7 @@ class DX_LMS_M_Admin_Forum extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('admin') ?? [
             'npk' => '99999',
             'name' => 'Admin System',
             'fullname' => 'Admin System',
@@ -217,7 +217,7 @@ class DX_LMS_M_Admin_Forum extends DX_LMS_M_Controller
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('admin') ?? [
             'npk' => '99999',
             'name' => 'Admin System'
         ];
@@ -246,7 +246,7 @@ class DX_LMS_M_Admin_Forum extends DX_LMS_M_Controller
             session_start();
         }
 
-        $user = $_SESSION['user'] ?? [
+        $user = getPortalUser('admin') ?? [
             'npk' => '99999',
             'name' => 'Admin System',
             'fullname' => 'Admin System'

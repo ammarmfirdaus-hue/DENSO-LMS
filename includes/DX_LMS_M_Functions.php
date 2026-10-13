@@ -252,3 +252,78 @@ function hasPermission(string $capability, ?string $roleName = null): bool
     return in_array($capability, $allowedCapabilities, true);
 }
 
+/**
+ * Mendapatkan data pengguna yang berwenang untuk portal/workspace tertentu ('student', 'teacher', 'admin').
+ *
+ * Mendukung pembukaan beberapa tab dengan peran berbeda (misal: Teacher di Tab 1, Admin di Tab 2)
+ * pada peramban (browser) yang sama tanpa benturan (session collision) atau saling menimpa.
+ *
+ * @param string $portal Portal yang diakses ('student', 'teacher', atau 'admin').
+ * @return array|null Mengembalikan data profil pengguna jika berhak, atau null jika tidak sah.
+ */
+function getPortalUser(string $portal = 'student'): ?array
+{
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+
+    $portal = strtolower(trim($portal));
+
+    // 1. Prioritaskan data sesi akun asli yang tepat dengan portalnya
+    if (!empty($_SESSION['roles'][$portal])) {
+        $savedRole = strtolower($_SESSION['roles'][$portal]['role'] ?? '');
+        if ($savedRole === $portal) {
+            return $_SESSION['roles'][$portal];
+        }
+    }
+
+    // 2. Jika di portal 'teacher', cari apakah ada akun ber-role 'teacher' asli di $_SESSION['roles']
+    if ($portal === 'teacher') {
+        if (!empty($_SESSION['roles']['teacher']) && strtolower($_SESSION['roles']['teacher']['role'] ?? '') === 'teacher') {
+            return $_SESSION['roles']['teacher'];
+        }
+    }
+
+    // 3. Jika di portal 'admin', cari apakah ada akun ber-role 'admin' asli di $_SESSION['roles']
+    if ($portal === 'admin') {
+        if (!empty($_SESSION['roles']['admin']) && strtolower($_SESSION['roles']['admin']['role'] ?? '') === 'admin') {
+            return $_SESSION['roles']['admin'];
+        }
+    }
+
+    // 4. Jika di portal 'student', cari apakah ada akun ber-role 'student' asli di $_SESSION['roles']
+    if ($portal === 'student') {
+        if (!empty($_SESSION['roles']['student']) && strtolower($_SESSION['roles']['student']['role'] ?? '') === 'student') {
+            return $_SESSION['roles']['student'];
+        }
+    }
+
+    // 5. Cek slot tersimpan pada portal tersebut (misal akun admin yang sedang berada di mode teacher/student)
+    if (!empty($_SESSION['roles'][$portal])) {
+        return $_SESSION['roles'][$portal];
+    }
+
+    // 6. Terakhir, evaluasi akun aktif ($_SESSION['user']) jika memiliki izin peran tersebut
+    if (!empty($_SESSION['user'])) {
+        $baseRole = strtolower($_SESSION['user']['role'] ?? 'student');
+
+        if ($portal === 'student') {
+            return $_SESSION['user'];
+        }
+
+        if ($portal === 'teacher') {
+            if (in_array($baseRole, ['teacher', 'admin'], true)) {
+                return $_SESSION['user'];
+            }
+        }
+
+        if ($portal === 'admin') {
+            if ($baseRole === 'admin') {
+                return $_SESSION['user'];
+            }
+        }
+    }
+
+    return null;
+}
+

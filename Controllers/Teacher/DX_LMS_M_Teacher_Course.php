@@ -11,11 +11,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
      */
     public function index()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
-            header('Location: ?route=/login');
-            exit();
-        }
+        $teacherUser = $this->redirectIfNotTeacher();
 
         require_once 'includes/DX_LMS_M_Teacher_MockData.php';
 
@@ -31,6 +27,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
+            'user' => $teacherUser,
             'courses' => $courses,
             'current_filter' => $filterStatus,
         ];
@@ -43,11 +40,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
      */
     public function detail()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
-            header('Location: ?route=/login');
-            exit();
-        }
+        $teacherUser = $this->redirectIfNotTeacher();
 
         require_once 'includes/DX_LMS_M_Teacher_MockData.php';
 
@@ -81,6 +74,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
+            'user' => $teacherUser,
             'course' => $course,
             'syllabus' => $syllabus,
             'participants' => $participants,
@@ -97,11 +91,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
      */
     public function create()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
-            header('Location: ?route=/login');
-            exit();
-        }
+        $teacherUser = $this->redirectIfNotTeacher();
 
         require_once 'includes/DX_LMS_M_Teacher_MockData.php';
 
@@ -116,6 +106,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
+            'user' => $teacherUser,
             'course' => $course, // null if new course
             'filters' => $filters,
         ];
@@ -129,31 +120,35 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
      */
     public function session()
     {
-        $this->redirectIfNotTeacher();
-        $data = ['active_tab' => 'course', 'base_path' => ''];
+        $teacherUser = $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => '', 'user' => $teacherUser];
         $this->view('DX_LMS_M_Teacher_Course_Session', $data);
     }
 
     public function material()
     {
-        $this->redirectIfNotTeacher();
-        $data = ['active_tab' => 'course', 'base_path' => ''];
+        $teacherUser = $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => '', 'user' => $teacherUser];
         $this->view('DX_LMS_M_Teacher_Course_Material', $data);
     }
 
     public function addMaterial()
     {
-        $this->redirectIfNotTeacher();
-        $data = ['active_tab' => 'course', 'base_path' => ''];
+        $teacherUser = $this->redirectIfNotTeacher();
+        $data = ['active_tab' => 'course', 'base_path' => '', 'user' => $teacherUser];
         $this->view('DX_LMS_M_Teacher_Course_Add_Material', $data);
     }
 
     private function redirectIfNotTeacher()
     {
-        session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['active_role'] !== 'teacher') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $teacherUser = getPortalUser('teacher');
+        if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
         }
+        return $teacherUser;
     }
 }

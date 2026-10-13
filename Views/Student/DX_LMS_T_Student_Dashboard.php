@@ -7,7 +7,8 @@
  */
 
 /** Menyiapkan status dan nilai awal variabel sistem yang dibutuhkan. */
-$userName = $_SESSION['user']['name'] ?? 'Budi Santoso';
+$studentSession = $user ?? getPortalUser('student');
+$userName = $studentSession['fullname'] ?? ($studentSession['name'] ?? 'Budi Santoso');
 $userRole = 'Student';
 
 /** Hak akses atau peranan bawaan yang berlaku untuk antarmuka terkait. */
@@ -50,7 +51,7 @@ $userRole = 'Student';
             <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface whitespace-nowrap overflow-hidden">
                 Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?> 
             </h1>
-            <p class="font-body-md text-body-md text-on-surface-variant">Leader • Departemen Produksi</p>
+            <p class="font-body-md text-body-md text-on-surface-variant"><?= e($userJabatan ?? 'Operator') ?> • <?= e($userDepartment ?? 'Departemen Produksi') ?></p>
         </section>
 
         <script>

@@ -10,6 +10,19 @@ class DX_LMS_M_Admin_Dashboard extends DX_LMS_M_Controller
 {
     public function index()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $adminUser = getPortalUser('admin');
+        if (!$adminUser) {
+            if (isset($_SESSION['user'])) {
+                header('Location: ?route=/pilih-peran');
+            } else {
+                header('Location: ?route=/login');
+            }
+            exit();
+        }
+
         // Ambil mock data untuk visualisasi
         $stats = DX_LMS_M_Admin_MockData::getDashboardStats();
         $recent_users = array_slice(DX_LMS_M_Admin_MockData::getUsers(), 0, 3);
@@ -20,6 +33,7 @@ class DX_LMS_M_Admin_Dashboard extends DX_LMS_M_Controller
         $notifications = array_slice(DX_LMS_M_Admin_MockData::getNotifications(), 0, 2);
 
         $this->view('Admin/DX_LMS_M_Admin_Dashboard', [
+            'user' => $adminUser,
             'stats' => $stats,
             'recent_users' => $recent_users,
             'recent_courses' => $recent_courses,

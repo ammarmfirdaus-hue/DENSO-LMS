@@ -208,7 +208,7 @@ if (!function_exists('formatMonthYear')) {
                         <span class="material-symbols-outlined text-[18px] text-on-surface-variant/60 mt-0.5 shrink-0">info</span>
                         <p class="text-[12px] text-on-surface-variant leading-relaxed">
                             Data bertanda <span class="material-symbols-outlined text-[12px] align-middle">lock</span> dikelola oleh Admin HR.
-                            Untuk perubahan data, silakan <a href="?route=/student/profil/bantuan" class="text-primary font-semibold hover:underline">hubungi Admin</a>
+                            Untuk perubahan data, silakan <a href="?route=/teacher/profil/bantuan" class="text-primary font-semibold hover:underline">hubungi Admin</a>
                             atau ajukan permintaan koreksi melalui menu Bantuan.
                         </p>
                     </div>
@@ -466,7 +466,7 @@ if (!function_exists('formatMonthYear')) {
                     <h2 class="font-headline-sm text-on-surface font-bold text-[15px]">Keamanan Akun</h2>
                 </div>
                 <div class="p-4 flex flex-col gap-3">
-                    <a href="?route=/student/profil/pengaturan" class="flex items-center justify-between p-3 bg-surface-container/30 rounded-xl hover:bg-surface-container/50 transition-colors group">
+                    <a href="?route=/teacher/profil/pengaturan" class="flex items-center justify-between p-3 bg-surface-container/30 rounded-xl hover:bg-surface-container/50 transition-colors group">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined text-[20px] text-secondary" style="font-variation-settings:'FILL' 0;">key</span>
                             <div>

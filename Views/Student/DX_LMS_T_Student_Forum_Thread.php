@@ -17,8 +17,8 @@ if (!isset($topic) || empty($topic)) {
     $replies = $topic ? $fm->getReplies($tid) : [];
 }
 
-$userSession = $_SESSION['user'] ?? [];
-$activeRole = $_SESSION['active_role'] ?? ($userSession['role'] ?? 'student');
+$userSession = $user ?? getPortalUser($userRole ?? 'student');
+$activeRole = $userRole ?? ($userSession['role'] ?? 'student');
 $userName = $userSession['fullname'] ?? ($userSession['name'] ?? 'Pengguna');
 $userNpk = $userSession['npk'] ?? '00000';
 $userJabatan = $userSession['jabatan'] ?? 'Peserta';
