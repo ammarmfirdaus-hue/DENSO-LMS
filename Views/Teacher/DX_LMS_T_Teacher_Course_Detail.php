@@ -173,6 +173,103 @@ if (!empty($participants)) {
                     </div>
                 </div>
 
+                <!-- Navigation Tabs (Silabus, Forum Diskusi, Monitoring Peserta) -->
+                <?php $tab = $tab ?? 'silabus'; ?>
+                <div class="bg-white rounded-2xl border border-outline-variant/50 p-1.5 flex gap-2 mb-8 shadow-sm">
+                    <a href="?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=silabus" class="flex-1 py-3 px-4 rounded-xl text-center font-label-md font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 <?= $tab === 'silabus' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container' ?>">
+                        <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+                        <span>Silabus & Materi</span>
+                    </a>
+                    <a href="?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=forum" class="flex-1 py-3 px-4 rounded-xl text-center font-label-md font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 <?= $tab === 'forum' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container' ?>">
+                        <span class="material-symbols-outlined text-[18px]">forum</span>
+                        <span>Forum Diskusi</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $tab === 'forum' ? 'bg-white text-primary' : 'bg-primary/10 text-primary' ?>">
+                            <?= count($forumTopics ?? []) ?>
+                        </span>
+                    </a>
+                    <a href="?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=peserta" class="flex-1 py-3 px-4 rounded-xl text-center font-label-md font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 <?= $tab === 'peserta' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container' ?>">
+                        <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                        <span>Capaian & Peserta</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $tab === 'peserta' ? 'bg-white text-primary' : 'bg-primary/10 text-primary' ?>">
+                            <?= count($participants ?? []) ?>
+                        </span>
+                    </a>
+                </div>
+
+                <?php if ($tab === 'forum'): ?>
+                <!-- Forum Diskusi Panel (Aligned with Student Forum View) -->
+                <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-[22px]">forum</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-sm font-bold text-on-surface">Forum Diskusi Course</h3>
+                                <p class="font-body-sm text-on-surface-variant">Tanya jawab dan diskusi materi pelatihan bersama peserta</p>
+                            </div>
+                        </div>
+                        <a href="?route=/teacher/forum&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>" class="bg-primary hover:bg-primary-600 text-white px-4 py-2 rounded-xl font-label-md font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shrink-0">
+                            <span class="material-symbols-outlined text-[16px]">open_in_new</span> Buka Ruang Forum Penuh
+                        </a>
+                    </div>
+
+                    <!-- Forum Threads List -->
+                    <div class="space-y-3">
+                        <?php if (empty($forumTopics)): ?>
+                            <div class="py-12 text-center text-on-surface-variant bg-surface-container-low/50 rounded-2xl border border-dashed border-outline-variant/60">
+                                <span class="material-symbols-outlined text-[40px] mb-2 opacity-40">chat</span>
+                                <p class="font-body-md font-bold">Belum ada topik diskusi pada course ini.</p>
+                                <p class="font-body-sm text-xs opacity-75 mt-0.5">Peserta dapat mengajukan pertanyaan melalui tab forum course.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($forumTopics as $ft): ?>
+                                <?php
+                                $isResolved = ($ft['status'] ?? 'open') === 'resolved';
+                                $authorInitial = strtoupper(substr($ft['author_name'] ?? 'U', 0, 1));
+                                ?>
+                                <div class="p-4 sm:p-5 rounded-2xl border border-outline-variant/40 bg-surface hover:border-primary/40 hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex items-start gap-3.5 flex-1 min-w-0">
+                                        <div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface border border-outline-variant/40 font-bold text-sm flex items-center justify-center shrink-0">
+                                            <?= $authorInitial ?>
+                                        </div>
+                                        <div class="space-y-1 min-w-0 flex-1">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="font-bold text-on-surface text-xs sm:text-sm"><?= htmlspecialchars($ft['author_name']) ?></span>
+                                                <span class="text-[11px] text-on-surface-variant">· <?= htmlspecialchars($ft['time_formatted'] ?? 'Baru saja') ?></span>
+                                                <?php if ($isResolved): ?>
+                                                    <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1">
+                                                        <span class="material-symbols-outlined text-[12px]">check_circle</span> Solusi Disetujui
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <a href="?route=/teacher/forum/thread&id=<?= (int)$ft['topic_id'] ?>" class="block font-title-sm font-bold text-on-surface hover:text-primary transition-colors text-sm line-clamp-1">
+                                                <?= htmlspecialchars($ft['title']) ?>
+                                            </a>
+                                            <p class="text-xs text-on-surface-variant line-clamp-1">
+                                                <?= htmlspecialchars(mb_substr($ft['content'], 0, 110)) ?>...
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-outline-variant/30">
+                                        <span class="text-xs font-semibold text-secondary flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[16px]">chat</span>
+                                            <?= (int)$ft['total_replies'] ?> Balasan
+                                        </span>
+                                        <a href="?route=/teacher/forum/thread&id=<?= (int)$ft['topic_id'] ?>" class="px-3.5 py-1.5 rounded-xl bg-primary/10 hover:bg-primary hover:text-white text-primary font-label-sm font-bold text-xs transition-colors flex items-center gap-1">
+                                            <span>Buka</span>
+                                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <?php if ($tab === 'silabus'): ?>
                 <!-- Structured Learning Tree (Silabus & Materi Panel) -->
                 <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8">
                     <div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/30">
@@ -245,7 +342,9 @@ if (!empty($participants)) {
                         <?php endif; ?>
                     </div>
                 </section>
+                <?php endif; ?>
 
+                <?php if ($tab === 'peserta'): ?>
                 <!-- Executive Analytics & Monitoring Peserta -->
                 <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-outline-variant/30">
@@ -368,14 +467,16 @@ if (!empty($participants)) {
                             </div>
                             <?php endforeach; ?>
                             
-                            <?php if (count($participants) > 2): ?>
-                                <button onclick="handleTeacherAction('view_all_participants')" class="w-full py-3.5 mt-2 rounded-2xl border border-outline-variant/60 bg-white hover:bg-surface-variant/40 text-primary font-label-md font-bold transition-colors shadow-sm">
-                                    Lihat Semua <?= e((string) count($participants)) ?> Peserta Terdaftar →
-                                </button>
-                            <?php endif; ?>
+                            <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                                <a href="?route=/teacher/grade&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>" class="flex-1 py-3 px-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-label-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-center text-xs sm:text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                                    <span>Kelola Nilai & Capaian Lengkap (<?= e((string) count($participants)) ?> Peserta) →</span>
+                                </a>
+                            </div>
                         </div>
                     <?php endif; ?>
                 </section>
+                <?php endif; ?>
             </div>
 
             <!-- Right Column: Teacher Control Center & Interactive Widgets -->
@@ -413,12 +514,12 @@ if (!empty($participants)) {
                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                 Edit Detail Course
                             </a>
-                        <?php elseif ($courseStatus === 'Running'): ?>
+                        <?php elseif ($courseStatus === 'Running' || $courseStatus === 'Completed'): ?>
                             <a href="?route=/teacher/grade&course_id=<?= e(
                                 (string) $course['id'],
                             ) ?>" class="w-full py-3 px-4 rounded-xl border border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 font-label-md font-bold flex items-center justify-center gap-2 transition-all text-center">
-                                <span class="material-symbols-outlined text-[18px]">grading</span>
-                                Kelola Penilaian Peserta
+                                <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                                Kelola Penilaian & Capaian
                             </a>
                         <?php endif; ?>
                             <button onclick="handleTeacherAction('preview')" class="w-full py-3 px-4 rounded-xl border border-outline-variant text-on-surface-variant hover:bg-surface-variant/40 font-label-md font-semibold flex items-center justify-center gap-2 transition-all <?= $canEditRecommendation ||
@@ -432,15 +533,15 @@ if (!empty($participants)) {
                 </div>
 
                 <!-- Card 2: Buka Ruang Forum Widget -->
-                <button onclick="handleTeacherAction('forum')" class="group block text-left bg-white border border-outline-variant/60 rounded-3xl p-6 shadow-sm hover:shadow-[0_8px_24px_rgba(99,102,241,0.08)] hover:border-indigo-200 transition-all duration-300 relative overflow-hidden w-full">
+                <a href="?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=forum" class="group block text-left bg-white border border-outline-variant/60 rounded-3xl p-6 shadow-sm hover:shadow-[0_8px_24px_rgba(99,102,241,0.08)] hover:border-indigo-200 transition-all duration-300 relative overflow-hidden w-full">
                     <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-50 rounded-full mix-blend-multiply opacity-50 group-hover:scale-110 transition-transform"></div>
                     
                     <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-5 shrink-0 relative z-10 group-hover:-translate-y-1 transition-transform">
                         <span class="material-symbols-outlined text-[24px]">forum</span>
                     </div>
                     <h4 class="font-title-md font-bold text-on-surface mb-1.5 relative z-10">Buka Ruang Forum Course</h4>
-                    <p class="font-body-sm text-on-surface-variant relative z-10 leading-snug">Berinteraksi, pantau Q&A dan isu terkait course ini (2 diskusi baru).</p>
-                </button>
+                    <p class="font-body-sm text-on-surface-variant relative z-10 leading-snug">Berinteraksi, pantau Q&A dan isu terkait course ini (<?= count($forumTopics ?? []) ?> diskusi aktif).</p>
+                </a>
 
                 <!-- Card 3: Timeline Activity Widget -->
                 <section class="bg-white border border-outline-variant/60 p-6 rounded-3xl shadow-sm">
@@ -501,7 +602,7 @@ if (!empty($participants)) {
             if (actionType === 'preview') {
                 DLS.toast('Membuka Preview Mode...', 'info');
             } else if (actionType === 'forum') {
-                DLS.toast('Membuka Ruang Forum Course...', 'info');
+                window.location.href = '?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=forum';
             } else if (actionType === 'view_all_participants') {
                 DLS.toast('Menampilkan seluruh daftar peserta terdaftar', 'info');
             }

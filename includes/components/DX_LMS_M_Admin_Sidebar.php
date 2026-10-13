@@ -14,7 +14,7 @@ $active_tab = $active_tab ?? 'beranda'; ?>
     <div class="p-4 border-b border-outline-variant/50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-body-lg">
-                AD
+                A
             </div>
             <div class="flex flex-col min-w-0">
                 <span class="font-label-md font-bold text-on-surface truncate">Admin System</span>
@@ -74,6 +74,15 @@ $active_tab = $active_tab ?? 'beranda'; ?>
                 ? '1'
                 : '0' ?>;">admin_panel_settings</span>
             <span class="font-label-md">Control Role & Akses</span>
+        </a>
+        <a href="?route=/admin/forum" class="flex items-center gap-4 px-3 py-2.5 rounded-lg transition-colors <?= $active_tab ===
+        'forum'
+            ? 'bg-primary-container text-on-primary-container font-bold'
+            : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface' ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $active_tab === 'forum'
+                ? '1'
+                : '0' ?>;">forum</span>
+            <span class="font-label-md">Forum Diskusi</span>
         </a>
 
         <div class="px-3 pb-2 pt-4 text-[11px] font-bold tracking-wider uppercase text-on-surface-variant/70">Operasional & Laporan</div>

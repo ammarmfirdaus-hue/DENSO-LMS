@@ -22,6 +22,8 @@ $nav_groups = [
         'title' => 'Pengajaran',
         'items' => [
             ['id' => 'course', 'label' => 'Kelola Course', 'icon' => 'school', 'href' => '?route=/teacher/courses'],
+            ['id' => 'grade', 'label' => 'Penilaian & Capaian', 'icon' => 'fact_check', 'href' => '?route=/teacher/grade'],
+            ['id' => 'forum', 'label' => 'Forum Diskusi', 'icon' => 'forum', 'href' => '?route=/teacher/forum'],
         ],
     ],
     [

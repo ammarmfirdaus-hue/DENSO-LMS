@@ -56,8 +56,11 @@
                             <!-- Content -->
                             <div class="bg-transparent hover:bg-surface-container rounded-xl md:-mt-1 md:p-3 -m-2 p-2 transition-colors flex justify-between items-start">
                                 <div>
-                                    <p class="font-body-sm md:font-body-md text-on-surface-variant mt-0.5 max-w-sm">
-                                        <b class="text-on-surface font-semibold"><?= e($act['action']) ?></b>
+                                    <p class="font-body-sm md:font-body-md text-on-surface mt-0.5 max-w-sm">
+                                        <?php if (!empty($act['student_name'])): ?>
+                                            <strong class="text-primary font-bold"><?= e($act['student_name']) ?></strong>
+                                        <?php endif; ?>
+                                        <span class="text-on-surface-variant font-medium"><?= e($act['action']) ?></span>
                                     </p>
                                     <p class="font-body-md text-on-surface font-medium hidden">...</p>
                                     <div class="bg-surface-container-low border border-surface-variant px-3 py-1.5 rounded-lg inline-block mt-2 font-label-sm text-[12px] text-on-surface">

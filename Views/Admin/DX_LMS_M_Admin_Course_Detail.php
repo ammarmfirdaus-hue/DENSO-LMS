@@ -556,7 +556,7 @@ $active_tab = 'course';
                     }
                 });
             } else if (actionType === 'forum') {
-                DLS.toast('Membuka Ruang Forum Course...', 'info');
+                window.location.href = '?route=/admin/forum&course_id=<?= urlencode((string)($course['id'] ?? '1')) ?>';
             } else if (actionType === 'view_all_participants') {
                 DLS.toast('Menampilkan seluruh daftar peserta terdaftar', 'info');
             }

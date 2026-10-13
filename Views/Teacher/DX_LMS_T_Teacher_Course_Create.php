@@ -122,7 +122,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
-                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-primary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
+                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
                             <span class="material-symbols-outlined text-[26px]">auto_stories</span>
                         </div>
                         <div>
@@ -229,7 +229,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     <!-- Section Header -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-outline-variant/60">
                         <div class="flex items-start gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-primary-container text-primary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
+                            <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
                                 <span class="material-symbols-outlined text-[26px]">account_tree</span>
                             </div>
                             <div>
@@ -256,11 +256,14 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                             </div>
                             <div class="bg-surface border-b border-surface-variant flex w-full overflow-hidden session-tabs">
-                                <button type="button" onclick="switchSessionTab(this, 'materi')" class="session-tab-btn flex-1 py-3 px-2 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center transition-colors" data-tab="materi">Materi</button>
-                                <button type="button" onclick="switchSessionTab(this, 'quiz')" class="session-tab-btn flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap text-center" data-tab="quiz">Quiz</button>
-                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Forum</button>
-                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Riwayat</button>
-                                <button type="button" class="flex-1 py-3 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-bg-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap cursor-not-allowed opacity-60 text-center">Capaian</button>
+                                <button type="button" onclick="switchSessionTab(this, 'materi')" class="session-tab-btn flex-1 py-3 px-4 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center transition-colors flex items-center justify-center gap-2" data-tab="materi">
+                                    <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                                    <span>Materi Pembelajaran</span>
+                                </button>
+                                <button type="button" onclick="switchSessionTab(this, 'quiz')" class="session-tab-btn flex-1 py-3 px-4 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap text-center flex items-center justify-center gap-2" data-tab="quiz">
+                                    <span class="material-symbols-outlined text-[18px]">quiz</span>
+                                    <span>Quiz & Evaluasi</span>
+                                </button>
                             </div>
                             
                             <!-- Tab Content: Materi Workspace -->
@@ -280,7 +283,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                         <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
                                     </div>
                                     <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-primary flex items-center justify-center shrink-0">
+                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
                                             <span class="material-symbols-outlined">description</span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -322,7 +325,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <div class="quiz-items-list space-y-3 mb-5">
                                     <!-- Quiz Course -->
                                     <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-primary flex items-center justify-center shrink-0">
+                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
                                             <span class="material-symbols-outlined">assignment</span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -366,7 +369,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
-                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-primary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
+                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
                             <span class="material-symbols-outlined text-[26px]">groups</span>
                         </div>
                         <div>
@@ -583,7 +586,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
-                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-primary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
+                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
                             <span class="material-symbols-outlined text-[26px]">done_all</span>
                         </div>
                         <div>
@@ -705,210 +708,209 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 
             </form>
         </div>
+    </main>
 
-        <!-- ============================================== -->
-        <!-- OVERLAY: ASSESSMENT BUILDER (Pre-Test / Post-Test) -->
-        <!-- ============================================== -->
-        <div id="assessment-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto">
-            <!-- Header -->
-            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
-                <div class="flex-1 flex justify-start">
-                    <button type="button" onclick="closeAssessmentBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+    <!-- ============================================== -->
+    <!-- OVERLAY: ASSESSMENT BUILDER (Pre-Test / Post-Test) -->
+    <!-- ============================================== -->
+    <div id="assessment-builder-overlay" class="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full z-[100] bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto" style="top: 0; left: 0; right: 0; bottom: 0; z-index: 100;">
+        <!-- Header -->
+        <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+            <div class="flex-1 flex justify-start">
+                <button type="button" onclick="closeAssessmentBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+            </div>
+            <div class="flex-none flex justify-center">
+                <h2 id="ab-title" class="font-title-lg font-bold text-on-surface truncate px-4">Pre-Test: Modul Soal</h2>
+            </div>
+            <div class="flex-1 flex justify-end">
+                <button type="button" onclick="saveAssessmentBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Soal</span></button>
+            </div>
+        </header>
+        
+        <!-- Content container -->
+        <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+            <!-- Summary Box -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
+                    <div class="w-12 h-12 bg-primary-container text-white rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[24px]">assignment</span>
+                    </div>
+                    <div>
+                        <h3 class="font-title-lg font-bold text-on-surface">Instruksi & Pengaturan Soal</h3>
+                        <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="ab-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="ab-max-score" class="text-primary">0</span></span></p>
+                    </div>
                 </div>
-                <div class="flex-none flex justify-center">
-                    <h2 id="ab-title" class="font-title-lg font-bold text-on-surface truncate px-4">Pre-Test: Modul Soal</h2>
-                </div>
-                <div class="flex-1 flex justify-end">
-                    <button type="button" onclick="saveAssessmentBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Soal</span></button>
-                </div>
-            </header>
-            
-            <!-- Content container -->
-            <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
-                <!-- Summary Box -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
-                        <div class="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-[24px]">assignment</span>
+                <textarea id="ab-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[90px]" placeholder="Masukkan instruksi pengerjaan soal untuk  (Contoh: Pilih satu jawaban yang paling tepat."></textarea>
+            </div>
+
+            <!-- Question List -->
+            <div id="ab-questions-list" class="space-y-6">
+                <!-- Questions injected here via JS -->
+            </div>
+
+            <!-- Add Question Button -->
+            <button type="button" onclick="abAddQuestion()" class="w-full py-6 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_circle</span>
+                <span class="font-label-md font-bold">Tambah Pertanyaan Baru</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- OVERLAY: MATERIAL BUILDER (Materi Content Pages) -->
+    <!-- ============================================== -->
+    <div id="material-builder-overlay" class="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full z-[100] bg-surface hidden flex-col transition-opacity duration-300 opacity-0" style="top: 0; left: 0; right: 0; bottom: 0; z-index: 100;">
+        <!-- Header -->
+        <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+            <div class="flex-1 flex justify-start">
+                <button type="button" onclick="closeMaterialBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+            </div>
+            <div class="flex-none flex justify-center">
+                <h2 id="mb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Materi: Modul Konten</h2>
+            </div>
+            <div class="flex-1 flex justify-end">
+                <button type="button" onclick="saveMaterialBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Materi</span></button>
+            </div>
+        </header>
+        
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto" id="mb-scroll-area">
+            <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-5 pb-32">
+                <!-- Page Info Card -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 bg-primary-container text-white rounded-full flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">auto_stories</span>
                         </div>
-                        <div>
-                            <h3 class="font-title-lg font-bold text-on-surface">Instruksi & Pengaturan Soal</h3>
-                            <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="ab-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="ab-max-score" class="text-primary">0</span></span></p>
+                        <div class="flex-1">
+                            <h3 class="font-title-md font-bold text-on-surface">Editor Halaman Materi</h3>
+                            <p class="font-body-sm text-on-surface-variant">Susun konten pembelajaran dengan teks, gambar, video, dan dokumen.</p>
+                        </div>
+                        <div class="bg-surface-container-low border border-outline-variant/60 rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">layers</span>
+                            <span class="font-label-md font-bold text-on-surface">Hal. <span id="mb-current-page" class="text-primary">1</span> / <span id="mb-total-pages">1</span></span>
                         </div>
                     </div>
-                    <textarea id="ab-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[90px]" placeholder="Masukkan instruksi pengerjaan soal untuk  (Contoh: Pilih satu jawaban yang paling tepat."></textarea>
                 </div>
 
-                <!-- Question List -->
-                <div id="ab-questions-list" class="space-y-6">
-                    <!-- Questions injected here via JS -->
+                <!-- Page Canvas (content blocks go here) -->
+                <div id="mb-page-canvas" class="space-y-4 min-h-[200px]">
+                    <!-- Content blocks injected here -->
                 </div>
 
-                <!-- Add Question Button -->
-                <button type="button" onclick="abAddQuestion()" class="w-full py-6 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_circle</span>
-                    <span class="font-label-md font-bold">Tambah Pertanyaan Baru</span>
+                <!-- Add Content Block Toolbar -->
+                <div class="max-w-4xl mx-auto mt-8">
+                    <div class="bg-surface-container-low/40 border-2 border-dashed border-outline-variant/60 rounded-2xl p-6 flex flex-col items-center">
+                        <p class="font-label-md font-bold text-on-surface-variant flex items-center gap-2 mb-5">
+                            <span class="material-symbols-outlined text-[20px]">add_circle</span> Tambah Blok Konten
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4 w-full">
+                            <button type="button" onclick="mbAddBlock('text')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">article</span>
+                                </div>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Teks Judul & Paragraf</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('image')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">image</span>
+                                </div>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Gambar / Ilustrasi</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('youtube')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
+                                </div>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Video YouTube</span>
+                            </button>
+                            <button type="button" onclick="mbAddBlock('document')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                                <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">picture_as_pdf</span>
+                                </div>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Dokumen PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Pagination Footer -->
+        <footer class="bg-surface border-t border-outline-variant sticky bottom-0 z-20 shadow-[0_-2px_8px_rgba(0,0,0,0.06)] px-4 sm:px-6 h-16 flex items-center shrink-0">
+            <div class="flex-1 flex justify-start">
+                <button type="button" onclick="mbPrevPage()" id="mb-btn-prev" class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-label-md font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed px-3 py-2 rounded-lg hover:bg-surface-container" disabled>
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                    <span class="hidden sm:inline">Materi Sebelumnya</span>
+                </button>
+            </div>
+            <div class="flex-none flex justify-center">
+                <div class="bg-surface-container-low border border-outline-variant/60 rounded-full px-5 py-1.5 flex items-center gap-1 shadow-sm">
+                    <span class="font-label-md font-bold text-on-surface">Materi</span>
+                    <span id="mb-footer-current" class="font-title-sm font-bold text-primary">1</span>
+                    <span class="font-label-md text-on-surface-variant">/</span>
+                    <span id="mb-footer-total" class="font-title-sm font-bold text-on-surface">1</span>
+                </div>
+            </div>
+            <div class="flex-1 flex justify-end">
+                <button type="button" onclick="mbNextPage()" id="mb-btn-next" class="flex items-center gap-1 bg-primary text-on-primary font-label-md font-bold transition-colors px-4 py-2 rounded-lg hover:bg-primary-600 shadow-sm">
+                    <span class="hidden sm:inline">Materi Selanjutnya</span>
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- OVERLAY: QUIZ BUILDER (Quiz Course / Final Assessment) -->
+    <!-- ============================================== -->
+    <div id="quiz-builder-overlay" class="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full z-[100] bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto" style="top: 0; left: 0; right: 0; bottom: 0; z-index: 100;">
+        <!-- Header -->
+        <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
+            <div class="flex-1 flex justify-start">
+                <button type="button" onclick="closeQuizBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
+            </div>
+            <div class="flex-none flex justify-center">
+                <h2 id="qb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Quiz Builder</h2>
+            </div>
+            <div class="flex-1 flex justify-end">
+                <button type="button" onclick="saveQuizBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Quiz</span></button>
+            </div>
+        </header>
+        
+        <!-- Content -->
+        <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
+            <!-- Summary & Config -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
+                    <div id="qb-icon-wrap" class="w-12 h-12 bg-primary-container text-white rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[24px]">assignment</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-title-lg font-bold text-on-surface">Pengaturan & Instruksi Quiz</h3>
+                        <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="qb-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="qb-max-score" class="text-primary">0</span></span></p>
+                    </div>
+                </div>
+                <textarea id="qb-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[80px]" placeholder="Masukkan instruksi pengerjaan quiz (Contoh: Jawab semua pertanyaan berikut.)"></textarea>
+            </div>
+
+            <!-- Question List -->
+            <div id="qb-questions-list" class="space-y-6">
+                <!-- Questions injected here via JS -->
+            </div>
+
+            <!-- Add Question Toolbar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button type="button" onclick="qbAddQuestion('mc')" class="py-5 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">checklist</span>
+                    <span class="font-label-md font-bold">Tambah Pilihan Ganda</span>
+                </button>
+                <button type="button" onclick="qbAddQuestion('essay')" class="py-5 border-2 border-dashed border-outline-variant hover:border-secondary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-secondary transition-all group bg-transparent hover:bg-secondary/5">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">edit_note</span>
+                    <span class="font-label-md font-bold">Tambah Isian / Essay</span>
                 </button>
             </div>
         </div>
-
-        <!-- ============================================== -->
-        <!-- OVERLAY: MATERIAL BUILDER (Materi Content Pages) -->
-        <!-- ============================================== -->
-        <div id="material-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0">
-            <!-- Header -->
-            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
-                <div class="flex-1 flex justify-start">
-                    <button type="button" onclick="closeMaterialBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
-                </div>
-                <div class="flex-none flex justify-center">
-                    <h2 id="mb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Materi: Modul Konten</h2>
-                </div>
-                <div class="flex-1 flex justify-end">
-                    <button type="button" onclick="saveMaterialBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Materi</span></button>
-                </div>
-            </header>
-            
-            <!-- Scrollable Content Area -->
-            <div class="flex-1 overflow-y-auto" id="mb-scroll-area">
-                <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-5 pb-32">
-                    <!-- Page Info Card -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm">
-                        <div class="flex items-center gap-4">
-                            <div class="w-11 h-11 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[22px]">auto_stories</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-title-md font-bold text-on-surface">Editor Halaman Materi</h3>
-                                <p class="font-body-sm text-on-surface-variant">Susun konten pembelajaran dengan teks, gambar, video, dan dokumen.</p>
-                            </div>
-                            <div class="bg-surface-container-low border border-outline-variant/60 rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm">
-                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">layers</span>
-                                <span class="font-label-md font-bold text-on-surface">Hal. <span id="mb-current-page" class="text-primary">1</span> / <span id="mb-total-pages">1</span></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Page Canvas (content blocks go here) -->
-                    <div id="mb-page-canvas" class="space-y-4 min-h-[200px]">
-                        <!-- Content blocks injected here -->
-                    </div>
-
-                    <!-- Add Content Block Toolbar -->
-                    <div class="max-w-4xl mx-auto mt-8">
-                        <div class="bg-surface-container-low/40 border-2 border-dashed border-outline-variant/60 rounded-2xl p-6 flex flex-col items-center">
-                            <p class="font-label-md font-bold text-on-surface-variant flex items-center gap-2 mb-5">
-                                <span class="material-symbols-outlined text-[20px]">add_circle</span> Tambah Blok Konten
-                            </p>
-                            <div class="flex flex-wrap justify-center gap-4 w-full">
-                                <button type="button" onclick="mbAddBlock('text')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
-                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">article</span>
-                                    </div>
-                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Teks Judul & Paragraf</span>
-                                </button>
-                                <button type="button" onclick="mbAddBlock('image')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
-                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">image</span>
-                                    </div>
-                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Gambar / Ilustrasi</span>
-                                </button>
-                                <button type="button" onclick="mbAddBlock('youtube')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
-                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
-                                    </div>
-                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Video YouTube</span>
-                                </button>
-                                <button type="button" onclick="mbAddBlock('document')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
-                                    <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">picture_as_pdf</span>
-                                    </div>
-                                    <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Dokumen PDF</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sticky Pagination Footer -->
-            <footer class="bg-surface border-t border-outline-variant sticky bottom-0 z-20 shadow-[0_-2px_8px_rgba(0,0,0,0.06)] px-4 sm:px-6 h-16 flex items-center shrink-0">
-                <div class="flex-1 flex justify-start">
-                    <button type="button" onclick="mbPrevPage()" id="mb-btn-prev" class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-label-md font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed px-3 py-2 rounded-lg hover:bg-surface-container" disabled>
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                        <span class="hidden sm:inline">Materi Sebelumnya</span>
-                    </button>
-                </div>
-                <div class="flex-none flex justify-center">
-                    <div class="bg-surface-container-low border border-outline-variant/60 rounded-full px-5 py-1.5 flex items-center gap-1 shadow-sm">
-                        <span class="font-label-md font-bold text-on-surface">Materi</span>
-                        <span id="mb-footer-current" class="font-title-sm font-bold text-primary">1</span>
-                        <span class="font-label-md text-on-surface-variant">/</span>
-                        <span id="mb-footer-total" class="font-title-sm font-bold text-on-surface">1</span>
-                    </div>
-                </div>
-                <div class="flex-1 flex justify-end">
-                    <button type="button" onclick="mbNextPage()" id="mb-btn-next" class="flex items-center gap-1 bg-primary text-on-primary font-label-md font-bold transition-colors px-4 py-2 rounded-lg hover:bg-primary-600 shadow-sm">
-                        <span class="hidden sm:inline">Materi Selanjutnya</span>
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
-                </div>
-            </footer>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- OVERLAY: QUIZ BUILDER (Quiz Course / Final Assessment) -->
-        <!-- ============================================== -->
-        <div id="quiz-builder-overlay" class="fixed inset-0 z-50 bg-surface hidden flex-col transition-opacity duration-300 opacity-0 overflow-y-auto">
-            <!-- Header -->
-            <header class="bg-surface border-b border-outline-variant sticky top-0 z-20 shadow-sm px-4 sm:px-6 h-16 flex items-center shrink-0">
-                <div class="flex-1 flex justify-start">
-                    <button type="button" onclick="closeQuizBuilder()" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 transition-colors rounded-full hover:bg-surface-container" title="Kembali">arrow_back</button>
-                </div>
-                <div class="flex-none flex justify-center">
-                    <h2 id="qb-title" class="font-title-lg font-bold text-on-surface truncate px-4">Quiz Builder</h2>
-                </div>
-                <div class="flex-1 flex justify-end">
-                    <button type="button" onclick="saveQuizBuilder()" class="px-3 sm:px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md font-bold hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap">Simpan <span class="hidden sm:inline">Quiz</span></button>
-                </div>
-            </header>
-            
-            <!-- Content -->
-            <div class="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6 pb-32">
-                <!-- Summary & Config -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-6 shadow-sm">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-outline-variant/60">
-                        <div id="qb-icon-wrap" class="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-[24px]">assignment</span>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-title-lg font-bold text-on-surface">Pengaturan & Instruksi Quiz</h3>
-                            <p class="font-body-sm text-on-surface-variant flex gap-2"><span id="qb-counter">Total 0 Pertanyaan</span> • <span class="font-bold">Bobot Maks: <span id="qb-max-score" class="text-primary">0</span></span></p>
-                        </div>
-                    </div>
-                    <textarea id="qb-instruction" class="w-full bg-surface-container-lowest border border-outline hover:border-primary focus:border-primary rounded-xl p-4 font-body-sm text-on-surface outline-none transition-all resize-y min-h-[80px]" placeholder="Masukkan instruksi pengerjaan quiz (Contoh: Jawab semua pertanyaan berikut.)"></textarea>
-                </div>
-
-                <!-- Question List -->
-                <div id="qb-questions-list" class="space-y-6">
-                    <!-- Questions injected here via JS -->
-                </div>
-
-                <!-- Add Question Toolbar -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button type="button" onclick="qbAddQuestion('mc')" class="py-5 border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-all group bg-transparent hover:bg-primary/5">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">checklist</span>
-                        <span class="font-label-md font-bold">Tambah Pilihan Ganda</span>
-                    </button>
-                    <button type="button" onclick="qbAddQuestion('essay')" class="py-5 border-2 border-dashed border-outline-variant hover:border-secondary rounded-2xl flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-secondary transition-all group bg-transparent hover:bg-secondary/5">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">edit_note</span>
-                        <span class="font-label-md font-bold">Tambah Isian / Essay</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </main>
+    </div>
 
     <script>
     function updateSessionNumbers() {
@@ -1041,9 +1043,10 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             `;
         }
 
+        const iconColorClass = (colorContext === 'primary') ? 'text-white' : bagdeTextClass;
         const template = `
             <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group animate-fade-in-down">
-                <div class="w-10 h-10 rounded-lg ${bagdeBgClass} ${bagdeTextClass} flex items-center justify-center shrink-0">
+                <div class="w-10 h-10 rounded-lg ${bagdeBgClass} ${iconColorClass} flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined">${icon}</span>
                 </div>
                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -1686,7 +1689,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const ext = file.name.split('.').pop().toUpperCase();
         dropZone.outerHTML = `
             <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
-                <div class="w-12 h-12 bg-primary-container text-primary rounded-xl flex items-center justify-center shrink-0">
+                <div class="w-12 h-12 bg-primary-container text-white rounded-xl flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined">description</span>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -1738,7 +1741,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             iconWrap.className = 'w-12 h-12 bg-error-container text-error rounded-full flex items-center justify-center shrink-0';
             iconWrap.querySelector('.material-symbols-outlined').textContent = 'verified';
         } else {
-            iconWrap.className = 'w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center shrink-0';
+            iconWrap.className = 'w-12 h-12 bg-primary-container text-white rounded-full flex items-center justify-center shrink-0';
             iconWrap.querySelector('.material-symbols-outlined').textContent = 'assignment';
         }
         
@@ -1932,7 +1935,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <span class="material-symbols-outlined text-[18px] text-secondary">lightbulb</span>
                             <span class="font-label-sm font-bold text-on-surface uppercase tracking-wider">Panduan Jawaban (Untuk Penilaian)</span>
                         </div>
-                        <textarea class="qb-answer-key w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-sm text-on-surface outline-none resize-y min-h-[60px] p-3 transition-all" placeholder="Tuliskan kunci jawaban atau poin-poin penting yang harus ada dalam jawaban siswa (untuk panduan saat penilaian manual)..."></textarea>
+                        <textarea class="qb-answer-key w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-sm text-on-surface outline-none resize-y min-h-[60px] p-3 transition-all" placeholder="Tuliskan kunci jawaban atau poin-poin penting yang harus ada dalam jawaban peserta"></textarea>
                         <div class="flex items-center gap-3">
                             <span class="font-label-sm text-on-surface-variant">Panjang jawaban:</span>
                             <select class="bg-surface border border-outline-variant/60 rounded-lg px-3 py-1.5 font-body-sm text-on-surface outline-none focus:border-primary transition-colors cursor-pointer">

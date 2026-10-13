@@ -38,7 +38,7 @@ $active_tab = 'beranda';
             <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight text-on-surface">
                 Control Center LMS
             </h1>
-            <p class="font-body-md text-on-surface-variant">Ringkasan aktivitas operasional dan pengelolaan platform Denso Learning System.</p>
+            <p class="font-body-md text-on-surface-variant">Ringkasan aktivitas operasional dan pengelolaan platform Learning Management System.</p>
         </section>
 
         <!-- Keseluruhan Metrik Operasional (Bento Grid) -->
@@ -110,7 +110,7 @@ $active_tab = 'beranda';
                     </div>
                     <div>
                         <div class="flex justify-between mb-1">
-                            <span class="font-label-sm text-on-surface-variant">Completed (Arsip)</span>
+                            <span class="font-label-sm text-on-surface-variant">Completed</span>
                             <span class="font-label-sm font-bold text-secondary"><?= $stats[
                                 'course_completed'
                             ] ?></span>
@@ -157,7 +157,7 @@ $active_tab = 'beranda';
                             <p class="font-body-sm text-on-surface-variant truncate"><?= $user[
                                 'jabatan'
                             ] ?> • <?= $user['role'] ?></p>
-                            <p class="font-label-sm text-[10px] bg-secondary/10 text-secondary border border-secondary/20 rounded-md px-2 py-0.5 inline-block mt-1">L Login: <?= $user[
+                            <p class="font-label-sm text-[10px] bg-secondary/10 text-secondary border border-secondary/20 rounded-md px-2 py-0.5 inline-block mt-1">Login: <?= $user[
                                 'last_login'
                             ] ?></p>
                         </div>

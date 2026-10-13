@@ -44,17 +44,20 @@
                     </p>
                 </div>
 
-                <form class="space-y-6">
+                <form action="?route=/student/forum/create" method="POST" class="space-y-6">
+                    <input type="hidden" name="course_id" value="<?= htmlspecialchars($courseId ?? '1') ?>">
+                    <input type="hidden" name="category_type" value="<?= htmlspecialchars($categoryType ?? 'materi') ?>">
+
                     <!-- Sesi Dropdown -->
                     <div class="space-y-2">
-                        <label class="block font-label-md text-label-md text-on-surface" for="sesi">Pilih Sesi</label>
+                        <label class="block font-label-md text-label-md text-on-surface" for="sesi">Pilih Sesi Terkait</label>
                         <div class="relative">
-                            <select class="w-full appearance-none bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors" id="sesi" name="sesi">
-                                <option disabled="" selected="" value="">Pilih Sesi Terkait...</option>
-                                <option value="1">Sesi 1: Pengenalan K3</option>
-                                <option value="2">Sesi 2: Prosedur Keadaan Darurat</option>
-                                <option value="3">Sesi 3: Instruksi Kerja</option>
-                                <option value="umum">Diskusi Umum Course</option>
+                            <select class="w-full appearance-none bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors" id="sesi" name="sesi" required>
+                                <option value="" disabled <?= empty($sessionId) ? 'selected' : '' ?>>Pilih Sesi Terkait...</option>
+                                <option value="1-S1" <?= ($sessionId === '1-S1' || $sessionId === '1') ? 'selected' : '' ?>>Sesi 1: Pengenalan 5S & K3</option>
+                                <option value="1-S2" <?= ($sessionId === '1-S2' || $sessionId === '2') ? 'selected' : '' ?>>Sesi 2: Sort (Seiri) & Praktek</option>
+                                <option value="quiz" <?= ($sessionId === 'quiz') ? 'selected' : '' ?>>Kuis Course Fundamental 5S</option>
+                                <option value="umum" <?= ($sessionId === 'umum') ? 'selected' : '' ?>>Diskusi Umum / Pengumuman</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
                                 <span class="material-symbols-outlined">expand_more</span>
@@ -65,13 +68,13 @@
                     <!-- Judul Topik -->
                     <div class="space-y-2">
                         <label class="block font-label-md text-label-md text-on-surface" for="judul">Judul Topik</label>
-                        <input class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors" id="judul" name="judul" placeholder="Contoh: Pertanyaan mengenai SOP di Jalur Perakitan" type="text">
+                        <input class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors" id="judul" name="judul" placeholder="Contoh: Pertanyaan mengenai SOP di Jalur Perakitan" type="text" required>
                     </div>
 
                     <!-- Pesan/Konten -->
                     <div class="space-y-2">
                         <label class="block font-label-md text-label-md text-on-surface" for="pesan">Pesan</label>
-                        <textarea class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors resize-y min-h-[120px]" id="pesan" name="pesan" placeholder="Tuliskan pertanyaan atau pendapat Anda di sini secara detail..." rows="6"></textarea>
+                        <textarea class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors resize-y min-h-[120px]" id="pesan" name="pesan" placeholder="Tuliskan pertanyaan atau pendapat Anda di sini secara detail..." rows="6" required></textarea>
                     </div>
 
                     <!-- Attachment Area -->
@@ -86,10 +89,10 @@
                     
                     <!-- Action Buttons -->
                     <div class="flex flex-col-reverse sm:flex-row sm:space-x-4 sm:justify-end pt-4 border-t border-outline-variant mt-8 gap-y-4 sm:gap-y-0">
-                        <a href="?route=/student/course/detail&tab=forum" class="px-6 py-3 border border-outline-variant rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors text-center flex-1 sm:flex-none">
+                        <a href="?route=/student/course/detail&id=<?= urlencode($courseId ?? '1') ?>&tab=forum" class="px-6 py-3 border border-outline-variant rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors text-center flex-1 sm:flex-none">
                             Batal
                         </a>
-                        <button onclick="Swal.fire({title: 'Berhasil!', text: 'Topik berhasil diposting!', icon: 'success', confirmButtonColor: '#b4000b'}).then(() => { window.location.href='?route=/student/course/detail&tab=forum'; });" class="px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center hover:opacity-90 active:scale-95 transition-all shadow-[0_4px_12px_0_rgba(226,6,19,0.2)] flex-1 sm:flex-none" type="button">
+                        <button class="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md flex items-center justify-center hover:opacity-90 active:scale-95 transition-all shadow-[0_4px_12px_0_rgba(226,6,19,0.2)] flex-1 sm:flex-none" type="submit">
                             Posting Topik
                             <span class="material-symbols-outlined ml-2 text-[18px]">send</span>
                         </button>

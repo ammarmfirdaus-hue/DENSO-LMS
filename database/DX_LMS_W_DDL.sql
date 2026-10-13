@@ -373,7 +373,86 @@ CREATE TABLE DX_LMS_T_Activity_Logs (
 
 CREATE INDEX IX_DX_LMS_T_Activity_Logs_employee ON DX_LMS_T_Activity_Logs (employee_npk);
 CREATE INDEX IX_DX_LMS_T_Activity_Logs_type ON DX_LMS_T_Activity_Logs (activity_type);
-CREATE INDEX IX_DX_LMS_T_Activity_Logs_date ON DX_LMS_T_Activity_Logs (created_at);
+
+-- ------------------------------------------------------------
+-- 2.7 DX_LMS_T_Forum_Topics — Tabel Topik Diskusi Forum
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_T_Forum_Topics (
+    topic_id        BIGINT IDENTITY(1,1) NOT NULL,
+    course_id       VARCHAR(50)     NOT NULL,   -- ID Course terkait
+    session_id      VARCHAR(50)     NULL,       -- ID Sesi terkait (opsional)
+    category_type   VARCHAR(50)     NOT NULL DEFAULT 'materi', -- materi, quiz, final_assessment, umum
+    author_npk      VARCHAR(50)     NOT NULL,   -- NPK Pembuat topik
+    author_name     VARCHAR(150)    NOT NULL,
+    author_role     VARCHAR(50)     NOT NULL DEFAULT 'student', -- student, teacher, admin
+    author_avatar   VARCHAR(255)    NULL,
+    author_dept     VARCHAR(150)    NULL,
+    title           NVARCHAR(255)   NOT NULL,   -- Judul topik diskusi
+    content         NVARCHAR(MAX)   NOT NULL,   -- Isi pesan topik
+    attachment_path NVARCHAR(500)   NULL,
+    status          VARCHAR(20)     NOT NULL DEFAULT 'open', -- open, closed, resolved
+    moderation_status VARCHAR(20)   NOT NULL DEFAULT 'approved', -- approved, hidden, flagged
+    likes_count     INT             NOT NULL DEFAULT 0,
+    replies_count   INT             NOT NULL DEFAULT 0,
+    is_pinned       BIT             NOT NULL DEFAULT 0,
+    is_hot          BIT             NOT NULL DEFAULT 0,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    created_by      VARCHAR(50)     NULL,
+    updated_by      VARCHAR(50)     NULL,
+
+    CONSTRAINT PK_DX_LMS_T_Forum_Topics PRIMARY KEY (topic_id)
+);
+
+CREATE INDEX IX_DX_LMS_T_Forum_Topics_course ON DX_LMS_T_Forum_Topics (course_id);
+CREATE INDEX IX_DX_LMS_T_Forum_Topics_session ON DX_LMS_T_Forum_Topics (session_id);
+CREATE INDEX IX_DX_LMS_T_Forum_Topics_category ON DX_LMS_T_Forum_Topics (category_type);
+CREATE INDEX IX_DX_LMS_T_Forum_Topics_status ON DX_LMS_T_Forum_Topics (status);
+
+-- ------------------------------------------------------------
+-- 2.8 DX_LMS_T_Forum_Replies — Tabel Balasan Diskusi Forum
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_T_Forum_Replies (
+    reply_id        BIGINT IDENTITY(1,1) NOT NULL,
+    topic_id        BIGINT          NOT NULL,   -- Relasi ke Topik Forum
+    parent_reply_id BIGINT          NULL,       -- Threading/balasan bertingkat
+    author_npk      VARCHAR(50)     NOT NULL,
+    author_name     VARCHAR(150)    NOT NULL,
+    author_role     VARCHAR(50)     NOT NULL DEFAULT 'student',
+    author_avatar   VARCHAR(255)    NULL,
+    author_dept     VARCHAR(150)    NULL,
+    content         NVARCHAR(MAX)   NOT NULL,
+    attachment_path NVARCHAR(500)   NULL,
+    is_solution     BIT             NOT NULL DEFAULT 0, -- Tandai sebagai jawaban/solusi terverifikasi
+    likes_count     INT             NOT NULL DEFAULT 0,
+    status          VARCHAR(20)     NOT NULL DEFAULT 'active', -- active, hidden, deleted
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    updated_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+    created_by      VARCHAR(50)     NULL,
+    updated_by      VARCHAR(50)     NULL,
+
+    CONSTRAINT PK_DX_LMS_T_Forum_Replies PRIMARY KEY (reply_id),
+    CONSTRAINT FK_DX_LMS_T_Forum_Replies_topic FOREIGN KEY (topic_id) REFERENCES DX_LMS_T_Forum_Topics(topic_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IX_DX_LMS_T_Forum_Replies_topic ON DX_LMS_T_Forum_Replies (topic_id);
+CREATE INDEX IX_DX_LMS_T_Forum_Replies_author ON DX_LMS_T_Forum_Replies (author_npk);
+
+-- ------------------------------------------------------------
+-- 2.9 DX_LMS_T_Forum_Likes — Tabel Riwayat Like Forum
+-- ------------------------------------------------------------
+CREATE TABLE DX_LMS_T_Forum_Likes (
+    like_id         BIGINT IDENTITY(1,1) NOT NULL,
+    topic_id        BIGINT          NULL,
+    reply_id        BIGINT          NULL,
+    employee_npk    VARCHAR(50)     NOT NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT PK_DX_LMS_T_Forum_Likes PRIMARY KEY (like_id)
+);
+
+CREATE INDEX IX_DX_LMS_T_Forum_Likes_topic ON DX_LMS_T_Forum_Likes (topic_id, employee_npk);
+CREATE INDEX IX_DX_LMS_T_Forum_Likes_reply ON DX_LMS_T_Forum_Likes (reply_id, employee_npk);
 
 
 -- ============================================================

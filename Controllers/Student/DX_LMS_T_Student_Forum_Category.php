@@ -6,6 +6,8 @@
  * berdasarkan kategori tertentu (Materi Sesi, Kuis, atau Ujian Akhir).
  * Mendukung navigasi dari halaman pelatihan aktif maupun riwayat.
  */
+require_once 'Core/DX_LMS_M_Controller.php';
+
 class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
 {
     /**
@@ -87,7 +89,15 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
             exit();
         }
 
-        $threads = $forumData['threads'] ?? [];
+        require_once 'Models/DX_LMS_M_Forum.php';
+        $forumModel = new DX_LMS_M_Forum();
+        $dbFilters = ['category_type' => $categoryType];
+        if (!empty($sessionId)) {
+            $dbFilters['session_id'] = $sessionId;
+        }
+        $dbTopics = $forumModel->getTopics($courseId, $dbFilters);
+
+        $threads = !empty($dbTopics) ? $dbTopics : ($forumData['threads'] ?? []);
 
         $this->view('DX_LMS_T_Student_Forum_Category', [
             'courseId' => $courseId,

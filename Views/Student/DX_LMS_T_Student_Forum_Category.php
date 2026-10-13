@@ -445,10 +445,12 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
 
                 <?php foreach ($threads as $th): ?>
                 <?php
-                $initial = strtoupper(substr($th['author'], 0, 1));
-                $isHot = isset($th['is_hot']) && $th['is_hot'];
-                $likes = isset($th['likes']) ? $th['likes'] : mt_rand(2, 25);
-                $role = isset($th['role']) ? $th['role'] : 'Operator Produksi &middot; Line A';
+                $authorName = $th['author_name'] ?? ($th['author'] ?? 'User');
+                $threadId = $th['topic_id'] ?? ($th['id'] ?? 1);
+                $initial = strtoupper(substr($authorName, 0, 1));
+                $isHot = !empty($th['is_hot']);
+                $likes = $th['likes_count'] ?? ($th['likes'] ?? 0);
+                $role = $th['author_dept'] ?? ($th['role'] ?? 'Operator Produksi · Line A');
 
                 $cardClass =
                     'forum-thread-item flex flex-col bg-surface rounded-2xl border border-outline-variant/40 p-5 md:p-6 group relative overflow-hidden transition-all duration-300';
@@ -464,7 +466,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
                 $avatarText = $isRiwayat ? 'text-error' : 'text-secondary';
                 $avatarBorder = $isRiwayat ? 'border-error/10' : 'border-secondary/10';
 
-                $threadUrl = '?route=/student/forum/thread&id=' . e($th['id']) . ($isRiwayat ? '&is_riwayat=true' : '');
+                $threadUrl = '?route=/student/forum/thread&id=' . e((string)$threadId) . ($isRiwayat ? '&is_riwayat=true' : '');
                 ?>
                 <a href="<?= $threadUrl ?>" class="<?= $cardClass ?> <?= $hoverBorder ?>" data-title="<?= htmlspecialchars(
     strtolower($th['title']),
@@ -479,9 +481,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
                                 <?= $initial ?>
                             </div>
                             <div class="md:text-center">
-                                <div class="font-label-md font-bold text-on-surface line-clamp-1"><?= e(
-                                    $th['author'],
-                                ) ?></div>
+                                <div class="font-label-md font-bold text-on-surface line-clamp-1"><?= e($authorName) ?></div>
                                 <div class="font-label-sm text-on-surface-variant text-[11px] truncate"><?= $role ?></div>
                             </div>
                         </div>

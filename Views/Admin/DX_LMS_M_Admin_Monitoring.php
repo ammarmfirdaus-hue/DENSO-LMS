@@ -78,7 +78,7 @@ $active_tab = 'monitoring';
                 </div>
                 <div>
                     <div class="text-2xl font-bold text-red-600">9 Peserta</div>
-                    <p class="text-sm font-medium text-gray-500 mt-0.5">Tertinggal (Lagging)</p>
+                    <p class="text-sm font-medium text-gray-500 mt-0.5">Tertinggal</p>
                 </div>
             </div>
         </div>
@@ -96,19 +96,16 @@ $active_tab = 'monitoring';
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-2">
                             <?php if ($is_completed): ?>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide uppercase inline-flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-0.5 rounded-md text-[11px] font-boldtracking-wide uppercase inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 
                                     <span>Tuntas Selesai</span>
-                                </span>
-                            <?php else: ?>
-                                <span class="bg-red-50 text-red-600 border border-red-200/80 px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide uppercase inline-flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                </span> 600"></span>
                                     <span>Berjalan Aktif</span>
                                 </span>
-                            <?php endif; ?>
+                            <?php endif; ?> 
                             <span class="text-xs font-semibold text-gray-500 ml-1">ID-<?= e(
                                 (string) $mon['course_id'],
-                            ) ?></span>
+                            ) ?></span> 
                         </div>
                         
                         <h3 class="text-lg font-bold text-gray-900 line-clamp-1 truncate mb-2">

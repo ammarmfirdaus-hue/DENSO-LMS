@@ -51,9 +51,9 @@ class DX_LMS_M_Teacher_MockData
             session_start();
         }
 
-        if (!isset($_SESSION['teacher_mock_version']) || $_SESSION['teacher_mock_version'] < 2) {
+        if (!isset($_SESSION['teacher_mock_version']) || $_SESSION['teacher_mock_version'] < 3) {
             unset($_SESSION['teacher_mock_data']);
-            $_SESSION['teacher_mock_version'] = 2;
+            $_SESSION['teacher_mock_version'] = 3;
         }
 
         $courses = self::getStorage('courses', null);
@@ -71,6 +71,14 @@ class DX_LMS_M_Teacher_MockData
                     'pending_reviews' => 2,
                     'sessions' => 6,
                     'assessments' => 1,
+                    'progress' => 68,
+                    'avg_score' => 84,
+                    'updated_at' => '1 Jam yang lalu',
+                ],
+                [
+                    'id' => 3,
+                    'code' => 'QC-201',
+                    'title' => 'Quality Control Basic',
                     'description' => 'Materi standar QC untuk inspektur baru.',
                     'category' => 'Quality',
                     'status' => self::STATUS_DRAFT,
@@ -488,4 +496,92 @@ class DX_LMS_M_Teacher_MockData
         // Reset associative numerical index to linear
         return array_values($result);
     }
+
+    /**
+     * Dapatkan Daftar Peserta dan Capaian Belajar per Course
+     */
+    public static function getCourseParticipants($courseId)
+    {
+        self::initData();
+        $courseId = (int) $courseId;
+
+        $participantSets = [
+            1 => [ // Fundamental 5S & K3
+                ['id' => 1, 'nama' => 'Budi Santoso', 'npk' => '12345', 'jabatan' => 'Operator', 'department' => 'Manufacturing', 'progress' => 100, 'score' => 92, 'status' => 'Lulus', 'last_active' => '2 Jam yang lalu', 'completed_at' => '10 Okt 2026'],
+                ['id' => 2, 'nama' => 'Ahmad Rizal', 'npk' => '67890', 'jabatan' => 'Leader', 'department' => 'Manufacturing', 'progress' => 65, 'score' => 75, 'status' => 'In Progress', 'last_active' => 'Kemarin', 'completed_at' => '-'],
+                ['id' => 3, 'nama' => 'Siti Aminah', 'npk' => '65432', 'jabatan' => 'Staff', 'department' => 'HSE', 'progress' => 100, 'score' => 88, 'status' => 'Lulus', 'last_active' => '3 Jam yang lalu', 'completed_at' => '11 Okt 2026'],
+                ['id' => 4, 'nama' => 'Citra Lestari', 'npk' => '11223', 'jabatan' => 'Inspector', 'department' => 'Quality', 'progress' => 95, 'score' => 78, 'status' => 'Menunggu Validasi', 'last_active' => '4 Jam yang lalu', 'completed_at' => '-'],
+                ['id' => 5, 'nama' => 'Dwi Handoko', 'npk' => '33445', 'jabatan' => 'Operator', 'department' => 'Maintenance', 'progress' => 40, 'score' => 60, 'status' => 'In Progress', 'last_active' => '2 Hari yang lalu', 'completed_at' => '-'],
+                ['id' => 6, 'nama' => 'Eko Prasetyo', 'npk' => '55667', 'jabatan' => 'Operator', 'department' => 'Production A', 'progress' => 30, 'score' => 45, 'status' => 'Tidak Lulus', 'last_active' => '3 Hari yang lalu', 'completed_at' => '-'],
+            ],
+            4 => [ // Lean Manufacturing Essentials
+                ['id' => 11, 'nama' => 'Rian Hidayat', 'npk' => '44551', 'jabatan' => 'Leader', 'department' => 'Production', 'progress' => 100, 'score' => 96, 'status' => 'Lulus', 'last_active' => '1 Minggu yang lalu', 'completed_at' => '05 Okt 2026'],
+                ['id' => 12, 'nama' => 'Agus Setiawan', 'npk' => '44552', 'jabatan' => 'Staff', 'department' => 'Engineering', 'progress' => 100, 'score' => 90, 'status' => 'Lulus', 'last_active' => '1 Minggu yang lalu', 'completed_at' => '06 Okt 2026'],
+                ['id' => 13, 'nama' => 'Dewi Anggraini', 'npk' => '44553', 'jabatan' => 'Supervisor', 'department' => 'Operation', 'progress' => 100, 'score' => 94, 'status' => 'Lulus', 'last_active' => '2 Minggu yang lalu', 'completed_at' => '02 Okt 2026'],
+                ['id' => 14, 'nama' => 'Hendra Wijaya', 'npk' => '44554', 'jabatan' => 'Operator', 'department' => 'Production B', 'progress' => 100, 'score' => 88, 'status' => 'Lulus', 'last_active' => '3 Minggu yang lalu', 'completed_at' => '28 Sep 2026'],
+            ],
+            5 => [ // Advanced Safety Protocols
+                ['id' => 21, 'nama' => 'Fajar Nugraha', 'npk' => '77881', 'jabatan' => 'Staff', 'department' => 'HSE', 'progress' => 85, 'score' => 82, 'status' => 'Menunggu Validasi', 'last_active' => '30 Menit yang lalu', 'completed_at' => '-'],
+                ['id' => 22, 'nama' => 'Bambang Pamungkas', 'npk' => '77882', 'jabatan' => 'Leader', 'department' => 'Maintenance', 'progress' => 50, 'score' => 70, 'status' => 'In Progress', 'last_active' => '5 Jam yang lalu', 'completed_at' => '-'],
+                ['id' => 23, 'nama' => 'Hendra Wijaya', 'npk' => '77883', 'jabatan' => 'Operator', 'department' => 'Production', 'progress' => 25, 'score' => 55, 'status' => 'In Progress', 'last_active' => '2 Hari yang lalu', 'completed_at' => '-'],
+                ['id' => 24, 'nama' => 'Slamet Riyadi', 'npk' => '77884', 'jabatan' => 'Operator', 'department' => 'Quality', 'progress' => 100, 'score' => 90, 'status' => 'Lulus', 'last_active' => '1 Jam yang lalu', 'completed_at' => '12 Okt 2026'],
+            ],
+            7 => [ // Dasar Keselamatan Listrik
+                ['id' => 31, 'nama' => 'Wahyudi Santoso', 'npk' => '88991', 'jabatan' => 'Technician', 'department' => 'Maintenance', 'progress' => 20, 'score' => 0, 'status' => 'In Progress', 'last_active' => 'Kemarin', 'completed_at' => '-'],
+                ['id' => 32, 'nama' => 'Dian Kusuma', 'npk' => '88992', 'jabatan' => 'Operator', 'department' => 'Manufacturing', 'progress' => 15, 'score' => 0, 'status' => 'In Progress', 'last_active' => '3 Hari yang lalu', 'completed_at' => '-'],
+            ]
+        ];
+
+        return $participantSets[$courseId] ?? [
+            ['id' => 99, 'nama' => 'Budi Santoso', 'npk' => '12345', 'jabatan' => 'Operator', 'department' => 'Manufacturing', 'progress' => 100, 'score' => 90, 'status' => 'Lulus', 'last_active' => 'Kemarin', 'completed_at' => '10 Okt 2026'],
+            ['id' => 98, 'nama' => 'Ahmad Rizal', 'npk' => '67890', 'jabatan' => 'Leader', 'department' => 'Manufacturing', 'progress' => 50, 'score' => 60, 'status' => 'In Progress', 'last_active' => '2 Hari yang lalu', 'completed_at' => '-'],
+        ];
+    }
+
+    /**
+     * Dapatkan Rekap Penilaian Peserta per Course
+     */
+    public static function getCourseGrades($courseId, $filterStatus = 'all')
+    {
+        $participants = self::getCourseParticipants($courseId);
+        $grades = [];
+
+        foreach ($participants as $p) {
+            $preTest = max(40, (int)$p['score'] - 15);
+            $postTest = (int)$p['score'];
+            $finalAssessment = (int)$p['score'];
+
+            if ($p['status'] === 'Menunggu Validasi') {
+                $status = 'Menunggu Validasi';
+            } elseif ($p['score'] >= 75) {
+                $status = 'Lulus';
+            } else {
+                $status = ($p['progress'] < 50) ? 'In Progress' : 'Tidak Lulus';
+            }
+
+            $grades[] = [
+                'id' => $p['id'],
+                'name' => $p['nama'],
+                'npk' => $p['npk'],
+                'department' => $p['department'],
+                'jabatan' => $p['jabatan'],
+                'progress' => $p['progress'],
+                'pre_test' => $preTest,
+                'post_test' => $postTest,
+                'final_assessment' => $finalAssessment,
+                'status' => $status,
+                'last_active' => $p['last_active'],
+                'completed_at' => $p['completed_at'] ?? '-',
+            ];
+        }
+
+        if ($filterStatus !== 'all') {
+            $grades = array_filter($grades, function ($g) use ($filterStatus) {
+                return strtolower($g['status']) === strtolower($filterStatus);
+            });
+        }
+
+        return array_values($grades);
+    }
 }
+

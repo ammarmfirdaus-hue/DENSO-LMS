@@ -48,7 +48,7 @@ $userRole = 'Student';
         <!-- Greeting Section -->
         <section class="space-y-stack-sm min-w-0">
             <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface whitespace-nowrap overflow-hidden">
-                Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?> 👋
+                Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?> 
             </h1>
             <p class="font-body-md text-body-md text-on-surface-variant">Leader • Departemen Produksi</p>
         </section>

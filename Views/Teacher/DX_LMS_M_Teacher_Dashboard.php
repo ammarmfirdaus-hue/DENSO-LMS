@@ -65,7 +65,7 @@
             <section class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
                 <!-- Course Diampu (Lebar) -->
                 <div class="col-span-2 bg-surface p-stack-md rounded-xl shadow-sm border border-surface-variant flex items-center space-x-stack-md hover:shadow-md transition-shadow">
-                    <div class="w-12 h-12 bg-primary-container rounded-full flex shrink-0 items-center justify-center text-primary shadow-sm border border-primary/10">
+                    <div class="w-12 h-12 bg-primary-container rounded-full flex shrink-0 items-center justify-center text-white shadow-sm border border-primary/10">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
                     </div>
                     <div class="min-w-0 flex-1">

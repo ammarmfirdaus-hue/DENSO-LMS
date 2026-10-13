@@ -1,757 +1,481 @@
 <?php
 /**
  * DLS Forum Thread Detail View — Social Media Style (X / Threads inspired)
- *
- * Layout mengikuti pola feed media sosial modern:
- * - Avatar di kiri, konten di kanan
- * - Thread line vertikal menghubungkan postingan
- * - Interaksi inline (like, reply) di bawah konten
- * - Composer sticky di bagian bawah
+ * Terintegrasi penuh dengan basis data SQL Server dan mendukung role Student, Teacher, Admin.
  */
-$pageTitle = 'Detail Diskusi - LMS';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Fallback jika controller belum menyertakan data
+if (!isset($topic) || empty($topic)) {
+    require_once 'Models/DX_LMS_M_Forum.php';
+    $fm = new DX_LMS_M_Forum();
+    $tid = isset($_GET['id']) ? (int) $_GET['id'] : 1;
+    $topic = $fm->getTopic($tid);
+    $replies = $topic ? $fm->getReplies($tid) : [];
+}
+
+$userSession = $_SESSION['user'] ?? [];
+$activeRole = $_SESSION['active_role'] ?? ($userSession['role'] ?? 'student');
+$userName = $userSession['fullname'] ?? ($userSession['name'] ?? 'Pengguna');
+$userNpk = $userSession['npk'] ?? '00000';
+$userJabatan = $userSession['jabatan'] ?? 'Peserta';
+
+$page_title = 'Detail Diskusi - LMS';
 include 'includes/components/DX_LMS_M_Tailwind_Head.php';
 ?>
-<style>
-    .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom, 20px);
-    }
-
-    .pt-safe {
-        padding-top: env(safe-area-inset-top, 44px);
-    }
-
-    body {
-        min-height: max(884px, 100dvh);
-    }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes fadeIn {
-        0% {
-            opacity: 0;
-            transform: translateY(8px);
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 44px); }
+        body { min-height: max(884px, 100dvh); }
+        .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
-
-        100% {
-            opacity: 1;
-            transform: translateY(0);
+        .interact-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #5e3f3b;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
         }
-    }
-
-    /* Thread line */
-    .thread-line {
-        position: absolute;
-        left: 19px;
-        top: 48px;
-        bottom: 0;
-        width: 2px;
-        background: var(--thread-line-color, #e5e2e1);
-    }
-
-    @media (min-width: 768px) {
-        .thread-line {
-            left: 23px;
-        }
-    }
-
-    /* Interaction button hover circle effect (like X/Twitter) */
-    .interact-btn {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 9999px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #5e3f3b;
-        transition: all 0.15s ease;
-        cursor: pointer;
-        border: none;
-        background: none;
-    }
-
-    .interact-btn:hover {
-        background: rgba(0, 0, 0, 0.04);
-    }
-
-    .interact-btn.like:hover {
-        color: #e20613;
-        background: rgba(226, 6, 19, 0.06);
-    }
-
-    .interact-btn.like:hover .material-symbols-outlined {
-        color: #e20613;
-    }
-
-    .interact-btn.like.active {
-        color: #e20613;
-    }
-
-    .interact-btn.like.active .material-symbols-outlined {
-        font-variation-settings: 'FILL' 1;
-        color: #e20613;
-    }
-
-    .interact-btn.reply:hover {
-        color: #4355b9;
-        background: rgba(67, 85, 185, 0.06);
-    }
-
-    .interact-btn.reply:hover .material-symbols-outlined {
-        color: #4355b9;
-    }
-
-    .interact-btn.share:hover {
-        color: #00671a;
-        background: rgba(0, 103, 26, 0.06);
-    }
-
-    .interact-btn.share:hover .material-symbols-outlined {
-        color: #00671a;
-    }
-
-    .interact-btn .material-symbols-outlined {
-        font-size: 18px;
-        transition: color 0.15s ease;
-    }
-
-    /* Composer scrollbar */
-    .composer-area::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .composer-area::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .composer-area::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.08);
-        border-radius: 10px;
-    }
-
-    /* Attachment menu animation */
-    .attach-menu {
-        transform-origin: bottom left;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .attach-menu.show {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        pointer-events: auto;
-    }
-
-    .attach-menu.hide {
-        opacity: 0;
-        transform: translateY(6px) scale(0.96);
-        pointer-events: none;
-    }
-
-    /* File preview chip */
-    .file-chip {
-        animation: fadeIn 0.25s ease forwards;
-    }
-</style>
+        .interact-btn:hover { background: rgba(0, 0, 0, 0.04); }
+        .interact-btn.like:hover { color: #e20613; background: rgba(226, 6, 19, 0.06); }
+        .interact-btn.like:hover .material-symbols-outlined { color: #e20613; }
+        .interact-btn.like.active { color: #e20613; }
+        .interact-btn.like.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: #e20613; }
+        .interact-btn .material-symbols-outlined { font-size: 18px; transition: color 0.15s ease; }
+        .composer-area::-webkit-scrollbar { width: 4px; }
+        .composer-area::-webkit-scrollbar-track { background: transparent; }
+        .composer-area::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.08); border-radius: 10px; }
+    </style>
 </head>
 
-<body class="dls-app-shell bg-surface-container-lowest text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container min-h-screen flex flex-col">
+<body class="dls-app-shell bg-surface-container-lowest text-on-surface antialiased min-h-screen flex flex-col">
 
-    <!-- TopAppBar -->
-    <?php
-    $header_title = 'Detail Diskusi';
-    $show_back = true;
-    $notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
-    include 'includes/components/DX_LMS_M_Header.php';
-    ?>
+    <!-- Navigasi & Sidebar Berdasarkan Role -->
+    <?php if ($activeRole === 'teacher'): ?>
+        <?php $active_tab = 'course'; include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
+        <?php
+        $header_title = 'Detail Forum Diskusi';
+        $show_back_button = true;
+        include 'includes/components/DX_LMS_M_Teacher_Header.php';
+        ?>
+    <?php elseif ($activeRole === 'admin'): ?>
+        <?php $active_tab = 'course'; include 'includes/components/DX_LMS_M_Admin_Sidebar.php'; ?>
+        <?php
+        $header_title = 'Detail Forum (Moderasi)';
+        $show_back = true;
+        include 'includes/components/DX_LMS_M_Header.php';
+        ?>
+    <?php else: ?>
+        <?php
+        $header_title = 'Detail Diskusi';
+        $show_back = true;
+        $back_url = $backUrl ?? ('?route=/student/course/detail&id=' . urlencode($topic['course_id'] ?? '1') . '&tab=forum');
+        include 'includes/components/DX_LMS_M_Header.php';
+        ?>
+    <?php endif; ?>
 
-    <!-- 2-Column Layout Wrapper -->
-    <div class="flex flex-col lg:flex-row items-start lg:ml-[240px] pt-2 md:pt-4 lg:pl-8 lg:pr-6 xl:pl-12 gap-8 lg:gap-10 xl:gap-16 w-full lg:w-[calc(100%-240px)]" style="margin-top: 56px;">
+    <!-- Main Content Wrapper -->
+    <div class="flex flex-col lg:flex-row items-start <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:ml-[240px]' : 'lg:ml-[240px]' ?> pt-2 md:pt-4 lg:pl-8 lg:pr-6 xl:pl-12 gap-8 w-full <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:w-[calc(100%-240px)]' : 'lg:w-[calc(100%-240px)]' ?>" style="margin-top: 56px;">
 
         <!-- Feed Container (Left) -->
-        <main class="flex-1 w-full max-w-[680px] mx-auto lg:mx-0 px-0 md:px-0 flex flex-col fade-in <?= !$isRiwayat
-            ? 'pb-[160px] lg:pb-[140px]'
-            : 'pb-12' ?>"> <?php if ($isRiwayat): ?>
-            <!-- Archived Banner -->
-            <div class="mx-4 md:mx-0 mb-4 bg-error-container/10 border border-error/15 rounded-2xl p-4 flex items-center gap-3">
-                <span class="material-symbols-outlined text-error text-[20px]">lock</span>
-                <p class="font-body-md text-on-surface-variant leading-snug flex-1">
-                    Diskusi ini telah diarsipkan dan bersifat <strong class="text-on-surface">read-only</strong>.
-                </p>
+        <main class="flex-1 w-full max-w-[760px] mx-auto lg:mx-0 px-4 md:px-0 flex flex-col fade-in pb-[160px] lg:pb-[140px]">
+
+            <!-- Breadcrumb Navigation -->
+            <div class="flex items-center gap-2 mb-4 text-xs font-semibold text-on-surface-variant/80">
+                <?php if ($activeRole === 'teacher'): ?>
+                    <a href="?route=/teacher/courses" class="hover:text-primary">Course</a>
+                    <span>/</span>
+                    <a href="?route=/teacher/course/detail&course_id=<?= urlencode($topic['course_id'] ?? '1') ?>&tab=forum" class="hover:text-primary">Forum Course</a>
+                <?php elseif ($activeRole === 'admin'): ?>
+                    <a href="?route=/admin/course" class="hover:text-primary">Manajemen Course</a>
+                    <span>/</span>
+                    <a href="?route=/admin/forum&course_id=<?= urlencode($topic['course_id'] ?? '1') ?>" class="hover:text-primary">Forum Diskusi</a>
+                <?php else: ?>
+                    <a href="?route=/student/courses" class="hover:text-secondary">Course</a>
+                    <span>/</span>
+                    <a href="?route=/student/course/detail&id=<?= urlencode($topic['course_id'] ?? '1') ?>&tab=forum" class="hover:text-secondary">Forum</a>
+                <?php endif; ?>
+                <span>/</span>
+                <span class="text-on-surface truncate max-w-[200px]"><?= htmlspecialchars($topic['title'] ?? 'Topik') ?></span>
             </div>
-            <?php endif; ?>
 
             <!-- ============================================ -->
             <!-- ORIGINAL POST (OP) -->
             <!-- ============================================ -->
-            <article class="relative px-4 md:px-6 pt-2 pb-3">
+            <article class="relative bg-surface rounded-2xl border border-outline-variant/40 p-5 md:p-6 shadow-sm mb-6">
                 <!-- Header: Avatar + Info -->
-                <div class="flex items-center gap-3 mb-3">
-                    <!-- Avatar -->
-                    <div class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface-container-high text-on-surface font-bold text-[16px] md:text-[18px] flex items-center justify-center border border-outline-variant/40 shrink-0">
-                        B
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <!-- Avatar -->
+                        <?php
+                        $authorName = $topic['author_name'] ?? 'User';
+                        $authorInitial = strtoupper(substr($authorName, 0, 1));
+                        $authorRole = $topic['author_role'] ?? 'student';
+                        $avatarClass = match ($authorRole) {
+                            'teacher' => 'bg-primary text-white shadow-sm',
+                            'admin' => 'bg-indigo-600 text-white shadow-sm',
+                            default => 'bg-surface-container-high text-on-surface border border-outline-variant/40',
+                        };
+                        ?>
+                        <div class="w-11 h-11 md:w-12 md:h-12 rounded-full <?= $avatarClass ?> font-bold text-[16px] md:text-[18px] flex items-center justify-center shrink-0">
+                            <?= $authorInitial ?>
+                        </div>
+                        <!-- Info -->
+                        <div class="flex flex-col">
+                            <span class="font-bold text-on-surface text-[15px] md:text-[16px] leading-tight flex items-center gap-2">
+                                <?= htmlspecialchars($authorName) ?>
+                                <?php if ($authorRole === 'teacher'): ?>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold border border-primary/20 tracking-wide inline-flex items-center gap-0.5">
+                                        <span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span> PENGAJAR
+                                    </span>
+                                <?php elseif ($authorRole === 'admin'): ?>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 tracking-wide inline-flex items-center gap-0.5">
+                                        <span class="material-symbols-outlined text-[12px]">admin_panel_settings</span> ADMIN
+                                    </span>
+                                <?php else: ?>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary/10 text-secondary font-bold border border-secondary/20 tracking-wide">
+                                        PESERTA
+                                    </span>
+                                <?php endif; ?>
+                            </span>
+                            <span class="text-on-surface-variant text-[12px] leading-tight mt-1">
+                                <?= htmlspecialchars($topic['author_dept'] ?? 'Divisi Manufaktur') ?> · NPK <?= htmlspecialchars($topic['author_npk'] ?? '-') ?>
+                            </span>
+                        </div>
                     </div>
-                    <!-- Info -->
-                    <div class="flex flex-col">
-                        <span class="font-bold text-on-surface text-[15px] md:text-[16px] leading-tight flex items-center gap-1.5">
-                            Budi Santoso
-                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-bold border border-primary/20 tracking-wide">AUTHOR</span>
-                        </span>
-                        <span class="text-on-surface-variant text-[13px] leading-tight mt-0.5">Operator Produksi · Line A</span>
+
+                    <!-- Topic Status Pill -->
+                    <div>
+                        <?php if (($topic['status'] ?? 'open') === 'resolved'): ?>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-300 text-[11px] font-bold px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span> Solusi Terverifikasi
+                            </span>
+                        <?php else: ?>
+                            <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold px-3 py-1 rounded-full inline-flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span> Diskusi Aktif
+                            </span>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Content -->
                 <div class="w-full">
-                    <!-- Topic Title -->
                     <h1 class="font-bold text-on-surface text-[18px] md:text-[22px] leading-snug mb-3">
-                        Bagaimana penerapan 5S yang efektif di area perakitan akhir?
+                        <?= htmlspecialchars($topic['title'] ?? 'Topik Diskusi') ?>
                     </h1>
 
-                    <!-- Body -->
-                    <div class="text-on-surface text-[15px] md:text-[16px] leading-relaxed space-y-3 mb-4">
-                        <p>Saya sering menemukan beberapa alat kerja tidak dikembalikan ke tempat asalnya (Seiton) setelah pergantian shift.</p>
-                        <p>Apakah ada tips atau metode visual management yang lebih baik agar semua anggota tim lebih disiplin menerapkan standar 5S? Karena ini juga berkaitan dengan safety dan efisiensi waktu kerja kita.</p>
+                    <div class="text-on-surface text-[15px] leading-relaxed mb-4 whitespace-pre-wrap">
+                        <?= nl2br(htmlspecialchars($topic['content'] ?? '')) ?>
                     </div>
 
                     <!-- Tags -->
                     <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <span class="px-2.5 py-1 bg-surface-container text-on-surface-variant text-[12px] font-medium rounded-lg border border-outline-variant/40">
-                            5S & Safety
+                        <span class="px-2.5 py-1 bg-surface-container text-on-surface-variant text-[12px] font-medium rounded-lg border border-outline-variant/40 uppercase">
+                            <?= htmlspecialchars($topic['category_type'] ?? 'materi') ?>
                         </span>
-                        <span class="px-2.5 py-1 bg-error/8 text-error text-[12px] font-bold rounded-lg flex items-center gap-1 border border-error/15">
-                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span> Hot
-                        </span>
+                        <?php if (!empty($topic['session_id'])): ?>
+                            <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-[12px] font-semibold rounded-lg border border-indigo-200">
+                                Sesi <?= htmlspecialchars($topic['session_id']) ?>
+                            </span>
+                        <?php endif; ?>
+                        <?php if (!empty($topic['is_hot'])): ?>
+                            <span class="px-2.5 py-1 bg-error/10 text-error text-[12px] font-bold rounded-lg flex items-center gap-1 border border-error/20">
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span> Hot
+                            </span>
+                        <?php endif; ?>
                     </div>
 
-                    <!-- Attachment (Image preview inline, like Twitter media) -->
-                    <div class="rounded-2xl border border-outline-variant/30 overflow-hidden mb-4 cursor-pointer hover:opacity-90 transition-opacity">
-                        <div class="bg-surface-container-high aspect-video flex items-center justify-center relative">
-                            <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40">image</span>
-                            <div class="absolute bottom-3 left-3 bg-on-surface/60 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                                foto_area_perakitan.jpg
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Metadata (Date/Time) -->
-                    <div class="text-on-surface-variant text-[14px] flex items-center flex-wrap gap-2 mb-3">
-                        <span>10:30 WIB</span>
+                    <!-- Metadata (Date/Time & Counter) -->
+                    <div class="text-on-surface-variant text-[13px] flex items-center flex-wrap gap-3 pt-3 border-t border-outline-variant/30">
+                        <span><?= htmlspecialchars($topic['time_formatted'] ?? 'Baru saja') ?></span>
                         <span>·</span>
-                        <span>23 Jun 2026</span>
+                        <span class="font-semibold text-on-surface"><span id="op-replies-count"><?= count($replies ?? []) ?></span> Balasan</span>
                         <span>·</span>
-                        <span class="font-medium text-on-surface">3 Balasan</span>
-                    </div>
-
-                    <!-- Divider -->
-                    <div class="border-t border-outline-variant/30 my-1"></div>
-
-                    <!-- Interaction Row -->
-                    <div class="flex items-center justify-start gap-8 md:gap-12 py-1">
-                        <button type="button" class="interact-btn like group px-3 py-2 -ml-3 hover:bg-error/10 rounded-full transition-colors flex items-center gap-2" onclick="toggleLike(this)" <?= $isRiwayat
-                            ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                            : '' ?>>
-                            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-error text-[22px] md:text-[24px]">favorite</span>
-                            <span class="like-count text-on-surface-variant group-hover:text-error text-[13px] md:text-[14px] font-medium">12</span>
-                        </button>
-                        <button type="button" class="interact-btn share group px-3 py-2 hover:bg-tertiary/10 rounded-full transition-colors flex items-center gap-2" <?= $isRiwayat
-                            ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                            : '' ?>>
-                            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary text-[22px] md:text-[24px]">share</span>
-                            <span class="text-on-surface-variant group-hover:text-tertiary text-[13px] md:text-[14px] font-medium">Bagikan</span>
+                        <button type="button" onclick="toggleTopicLike(<?= (int)$topic['topic_id'] ?>)" class="interact-btn like inline-flex items-center gap-1 hover:text-primary">
+                            <span class="material-symbols-outlined text-[18px]">favorite</span>
+                            <span id="topic-like-count"><?= (int)($topic['likes_count'] ?? 0) ?></span> Suka
                         </button>
                     </div>
                 </div>
             </article>
 
-            <!-- Thick Divider between OP and Replies -->
-            <div class="h-2 md:h-3 bg-surface-container-low border-y border-outline-variant/20 mb-2"></div>
-
             <!-- ============================================ -->
-            <!-- REPLIES -->
+            <!-- DAFTAR BALASAN (REPLIES FEED) -->
             <!-- ============================================ -->
-
-            <!-- Reply 1: Teacher -->
-            <article class="relative px-4 md:px-6 py-4">
-                <div class="flex gap-3 md:gap-4">
-                    <!-- Avatar (Teacher = Primary red) -->
-                    <div class="shrink-0 flex flex-col items-center">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary text-on-primary font-bold text-[16px] md:text-[18px] flex items-center justify-center shadow-sm">
-                            R
-                        </div>
-                        <!-- Thread line to next reply -->
-                        <div class="flex-1 w-[2px] bg-outline-variant/30 mt-2 min-h-[16px]"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 min-w-0 pb-1">
-                        <!-- Header row -->
-                        <div class="flex items-center flex-wrap gap-x-2 gap-y-1 mb-2">
-                            <span class="font-bold text-on-surface text-[15px] leading-tight">Ratnasari</span>
-                            <!-- Verified-style Teacher badge -->
-                            <span class="inline-flex items-center gap-0.5 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[11px] font-bold border border-primary/15">
-                                <span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">verified</span>
-                                Teacher
-                            </span>
-                            <span class="text-on-surface-variant text-[13px]">·</span>
-                            <span class="text-on-surface-variant text-[13px]">1j</span>
-                        </div>
-
-                        <!-- Reply context -->
-                        <div class="text-on-surface-variant text-[13px] mb-2 flex items-center gap-1">
-                            <span>Membalas</span>
-                            <span class="text-primary font-medium">@Budi Santoso</span>
-                        </div>
-
-                        <!-- Body -->
-                        <div class="text-on-surface text-[15px] leading-relaxed mb-3">
-                            Halo Budi, pertanyaan yang sangat bagus. Untuk masalah Seiton, kita bisa menerapkan <strong>"Shadow Board"</strong> di area perakitan. Dengan memberikan siluet alat pada papan penyimpanan, akan langsung terlihat jika ada alat yang hilang atau tidak dikembalikan.
-                        </div>
-
-                        <!-- Interaction Row -->
-                        <div class="flex items-center gap-1 -ml-2.5">
-                            <button type="button" class="interact-btn like" onclick="toggleLike(this)" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined">favorite</span>
-                                <span class="like-count">8</span>
-                            </button>
-                            <button type="button" class="interact-btn share" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined">share</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Divider -->
-            <div class="border-b border-outline-variant/20"></div>
-
-            <!-- Reply 2: Peer Student -->
-            <article class="relative px-4 md:px-6 py-4">
-                <div class="flex gap-3 md:gap-4">
-                    <!-- Avatar (Student = neutral) -->
-                    <div class="shrink-0 flex flex-col items-center">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-surface-container-high text-on-surface font-bold text-[16px] md:text-[18px] flex items-center justify-center border border-outline-variant/40">
-                            A
-                        </div>
-                        <!-- Thread line to next reply -->
-                        <div class="flex-1 w-[2px] bg-outline-variant/30 mt-2 min-h-[16px]"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 min-w-0 pb-1">
-                        <div class="flex items-center flex-wrap gap-x-2 gap-y-1 mb-2">
-                            <span class="font-bold text-on-surface text-[15px] leading-tight">Andi Wibowo</span>
-                            <span class="text-on-surface-variant text-[13px]">·</span>
-                            <span class="text-on-surface-variant text-[13px]">45m</span>
-                        </div>
-
-                        <div class="text-on-surface-variant text-[13px] mb-2 flex items-center gap-1">
-                            <span>Membalas</span>
-                            <span class="text-primary font-medium">@Ratnasari</span>
-                        </div>
-
-                        <div class="text-on-surface text-[15px] leading-relaxed mb-3">
-                            Setuju dengan Bu Ratna. Di Line B kami sudah pakai Shadow Board dan sangat membantu saat serah terima shift. Tinggal foto saja papannya, jadi kita tahu alat mana yang kurang saat mulai dan selesai kerja.
-                        </div>
-
-                        <!-- Inline attachment: document type -->
-                        <div class="rounded-xl border border-outline-variant/30 overflow-hidden mb-3 flex items-center gap-3 p-3 bg-surface hover:bg-surface-container-low transition-colors cursor-pointer group">
-                            <div class="w-10 h-10 rounded-lg bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[22px]">description</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-medium text-on-surface text-[13px] truncate">Checklist_Shadow_Board_Line_B.pdf</div>
-                                <div class="text-on-surface-variant text-[11px]">PDF · 340 KB</div>
-                            </div>
-                            <span class="material-symbols-outlined text-on-surface-variant text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">download</span>
-                        </div>
-
-                        <div class="flex items-center gap-1 -ml-2.5">
-                            <button type="button" class="interact-btn like" onclick="toggleLike(this)" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined">favorite</span>
-                                <span class="like-count">5</span>
-                            </button>
-                            <button type="button" class="interact-btn share" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined">share</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Divider -->
-            <div class="border-b border-outline-variant/20"></div>
-
-            <!-- Reply 3: OP replies back -->
-            <article class="relative px-4 md:px-6 py-4">
-                <div class="flex gap-3 md:gap-4">
-                    <!-- Avatar (OP again) -->
-                    <div class="shrink-0">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-surface-container-high text-on-surface font-bold text-[16px] md:text-[18px] flex items-center justify-center border border-outline-variant/40">
-                            B
-                        </div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 min-w-0 pb-1">
-                        <div class="flex items-center flex-wrap gap-x-2 gap-y-1 mb-2">
-                            <span class="font-bold text-on-surface text-[15px] leading-tight">Budi Santoso</span>
-                            <span class="inline-flex items-center bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full text-[11px] font-medium border border-outline-variant/30">
-                                OP
-                            </span>
-                            <span class="text-on-surface-variant text-[13px]">·</span>
-                            <span class="text-on-surface-variant text-[13px]">Baru saja</span>
-                        </div>
-
-                        <div class="text-on-surface-variant text-[13px] mb-2 flex items-center gap-1">
-                            <span>Membalas</span>
-                            <span class="text-primary font-medium">@Andi Wibowo</span>
-                        </div>
-
-                        <div class="text-on-surface text-[15px] leading-relaxed mb-3">
-                            Terima kasih masukannya Bu Ratna dan Andi. Akan saya usulkan ke supervisor untuk membuat Shadow Board di area kami sore ini. 🙏
-                        </div>
-
-                        <div class="flex items-center gap-1 -ml-2.5">
-                            <button type="button" class="interact-btn like active" onclick="toggleLike(this)" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
-                                <span class="like-count">3</span>
-                            </button>
-                            <button type="button" class="interact-btn share" <?= $isRiwayat
-                                ? 'disabled style="opacity:0.5;cursor:not-allowed"'
-                                : '' ?>>
-                                <span class="material-symbols-outlined">share</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <?php if ($isRiwayat): ?>
-            <!-- Archived End Notice -->
-            <div class="border-t border-outline-variant/20"></div>
-            <div class="flex flex-col items-center py-12 px-6 text-center">
-                <div class="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-on-surface-variant text-[28px]">lock</span>
-                </div>
-                <p class="font-bold text-on-surface text-[15px] mb-1">Diskusi Ditutup</p>
-                <p class="text-on-surface-variant text-[13px] max-w-sm">
-                    Course telah selesai. Anda tidak dapat mengirim balasan baru.
-                </p>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h3 class="font-headline-sm font-bold text-on-surface text-[17px] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">question_answer</span>
+                    Tanggapan & Diskusi (<?= count($replies ?? []) ?>)
+                </h3>
+                <span class="text-xs text-on-surface-variant">Terintegrasi Student · Teacher · Admin</span>
             </div>
-            <?php endif; ?>
+
+            <div id="replies-list" class="space-y-4">
+                <?php if (empty($replies)): ?>
+                    <div id="empty-replies" class="bg-surface rounded-2xl border border-dashed border-outline-variant/60 p-8 text-center text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[36px] mb-2 opacity-50">forum</span>
+                        <p class="font-body-md font-medium">Belum ada tanggapan pada diskusi ini.</p>
+                        <p class="font-body-sm text-[12px] opacity-75 mt-0.5">Tuliskan tanggapan Anda melalui kotak di bawah untuk memulai interaksi.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($replies as $reply): ?>
+                        <?php
+                        $rRole = $reply['author_role'] ?? 'student';
+                        $rInitial = strtoupper(substr($reply['author_name'] ?? 'U', 0, 1));
+                        $isSolution = !empty($reply['is_solution']);
+                        $cardBg = $isSolution ? 'bg-emerald-50/40 border-emerald-300' : 'bg-surface border-outline-variant/40';
+                        $rAvatarClass = match ($rRole) {
+                            'teacher' => 'bg-primary text-white shadow-sm',
+                            'admin' => 'bg-indigo-600 text-white shadow-sm',
+                            default => 'bg-surface-container-high text-on-surface border border-outline-variant/40',
+                        };
+                        ?>
+                        <article id="reply-card-<?= (int)$reply['reply_id'] ?>" class="relative rounded-2xl border <?= $cardBg ?> p-4 md:p-5 transition-all shadow-sm">
+                            <div class="flex gap-3 md:gap-4 items-start">
+                                <!-- Avatar -->
+                                <div class="shrink-0">
+                                    <div class="w-10 h-10 rounded-full <?= $rAvatarClass ?> font-bold text-[15px] flex items-center justify-center">
+                                        <?= $rInitial ?>
+                                    </div>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center flex-wrap justify-between gap-2 mb-2">
+                                        <div class="flex items-center flex-wrap gap-2">
+                                            <span class="font-bold text-on-surface text-[14px] md:text-[15px]">
+                                                <?= htmlspecialchars($reply['author_name']) ?>
+                                            </span>
+
+                                            <?php if ($rRole === 'teacher'): ?>
+                                                <span class="inline-flex items-center gap-0.5 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-bold border border-primary/20">
+                                                    <span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span> PENGAJAR
+                                                </span>
+                                            <?php elseif ($rRole === 'admin'): ?>
+                                                <span class="inline-flex items-center gap-0.5 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-indigo-200">
+                                                    <span class="material-symbols-outlined text-[12px]">admin_panel_settings</span> ADMIN
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-[10px] bg-secondary/10 text-secondary px-2 py-0.5 rounded-full font-bold border border-secondary/20">
+                                                    PESERTA
+                                                </span>
+                                            <?php endif; ?>
+
+                                            <span class="text-on-surface-variant text-[12px]">· <?= htmlspecialchars($reply['time_formatted'] ?? 'Baru saja') ?></span>
+                                        </div>
+
+                                        <!-- Solusi Badge & Action -->
+                                        <div class="flex items-center gap-2">
+                                            <?php if ($isSolution): ?>
+                                                <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
+                                                    <span class="material-symbols-outlined text-[13px]">check_circle</span> Solusi Disetujui
+                                                </span>
+                                            <?php endif; ?>
+
+                                            <!-- Otoritas Menandai Solusi untuk Teacher & Admin -->
+                                            <?php if (in_array($activeRole, ['teacher', 'admin'])): ?>
+                                                <button type="button" onclick="toggleSolution(<?= (int)$reply['reply_id'] ?>, <?= (int)$topic['topic_id'] ?>)" class="text-[11px] font-bold px-2 py-1 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors flex items-center gap-1 <?= $isSolution ? 'text-amber-700 border-amber-300' : 'text-emerald-700 border-emerald-300' ?>">
+                                                    <span class="material-symbols-outlined text-[13px]"><?= $isSolution ? 'cancel' : 'check' ?></span>
+                                                    <?= $isSolution ? 'Batalkan Solusi' : 'Tandai Solusi' ?>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-on-surface text-[14px] leading-relaxed mb-3 whitespace-pre-wrap">
+                                        <?= nl2br(htmlspecialchars($reply['content'])) ?>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 pt-2 border-t border-outline-variant/20 text-xs text-on-surface-variant">
+                                        <button type="button" onclick="toggleReplyLike(<?= (int)$reply['reply_id'] ?>)" class="interact-btn like inline-flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[16px]">favorite</span>
+                                            <span id="reply-like-<?= (int)$reply['reply_id'] ?>"><?= (int)($reply['likes_count'] ?? 0) ?></span>
+                                        </button>
+                                        <span><?= htmlspecialchars($reply['author_dept'] ?? 'Manufacturing') ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
         </main>
+    </div>
 
-        <!-- Right Sidebar (Widgets) -->
-        <aside class="hidden lg:flex flex-col w-[300px] xl:w-[340px] shrink-0 sticky top-[88px] space-y-4 fade-in pb-4 self-start h-fit">
-
-            <!-- Widget 1: Info Course -->
-            <div class="bg-surface-container-low rounded-2xl p-4 md:p-5">
-                <div class="text-[11px] font-bold tracking-wider text-primary uppercase mb-1.5">Dari Course</div>
-                <h3 class="font-bold text-on-surface text-[15px] leading-snug mb-1">Menerapkan 5S di Area Produksi</h3>
-                <div class="flex items-center gap-1.5 text-on-surface-variant text-[12px] mb-3">
-                    <span class="material-symbols-outlined text-[15px]">person</span>
-                    <span>Ratnasari (Teacher)</span>
-                </div>
-                <!-- Mini Progress -->
-                <div class="flex items-center gap-3">
-                    <div class="flex-1 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full" style="width: 60%"></div>
-                    </div>
-                    <span class="text-[11px] font-bold text-on-surface">60%</span>
-                </div>
-            </div>
-
-            <!-- Widget 2: Topik & Peserta -->
-            <div class="bg-surface-container-low rounded-2xl p-4 md:p-5">
-                <h3 class="font-bold text-on-surface text-[15px] mb-3">Info Topik</h3>
-
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="px-2 py-1 rounded-md bg-secondary-container/30 text-secondary-dark text-[11px] font-bold uppercase tracking-wide">
-                        Tanya Jawab
-                    </span>
-                    <span class="px-2 py-1 rounded-md bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase tracking-wide">
-                        Sesi 1
-                    </span>
-                </div>
-
-                <div class="flex items-center justify-between text-[13px] text-on-surface-variant mb-4">
-                    <div class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">chat</span>
-                        <span>3 Balasan</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">favorite</span>
-                        <span>5 Suka</span>
-                    </div>
-                </div>
-
-                <div class="pt-3 border-t border-outline-variant/20">
-                    <p class="text-[12px] font-medium text-on-surface-variant mb-2">Peserta Diskusi</p>
-                    <div class="flex items-center gap-1 flex-wrap">
-                        <div class="w-8 h-8 rounded-full bg-primary text-on-primary text-[11px] font-bold flex items-center justify-center border-2 border-surface" title="Budi Santoso (Teacher)">BS</div>
-                        <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface text-[11px] font-bold flex items-center justify-center border-2 border-surface -ml-2" title="Ratna Sari (OP)">RS</div>
-                        <div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface text-[11px] font-bold flex items-center justify-center border-2 border-surface -ml-2" title="Andi Wibowo">AW</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Widget 3: Diskusi Terkait -->
-            <div class="bg-surface-container-low rounded-2xl p-4 md:p-5">
-                <h3 class="font-bold text-on-surface text-[15px] mb-3">Diskusi Terkait</h3>
-                <div class="space-y-3">
-                    <a href="#" class="group block">
-                        <h4 class="text-[13px] font-medium text-on-surface group-hover:text-primary transition-colors line-clamp-2 leading-snug">Bagaimana membedakan Seiton dan Seiso dalam prakteknya?</h4>
-                        <p class="text-[11px] text-on-surface-variant mt-0.5">12 Balasan · Sesi 2</p>
-                    </a>
-                    <a href="#" class="group block">
-                        <h4 class="text-[13px] font-medium text-on-surface group-hover:text-primary transition-colors line-clamp-2 leading-snug">Contoh form checklist kebersihan harian</h4>
-                        <p class="text-[11px] text-on-surface-variant mt-0.5">8 Balasan · Sesi 1</p>
-                    </a>
-                    <a href="#" class="group block">
-                        <h4 class="text-[13px] font-medium text-on-surface group-hover:text-primary transition-colors line-clamp-2 leading-snug">Sanksi jika melanggar standar 5S?</h4>
-                        <p class="text-[11px] text-on-surface-variant mt-0.5">4 Balasan · Umum</p>
-                    </a>
-                </div>
-                <a href="#" class="block text-center text-[13px] font-medium text-primary mt-3 pt-2 border-t border-outline-variant/20 hover:text-primary-dark transition-colors">Lihat Semua Diskusi</a>
-            </div>
-
-        </aside>
-    </div> <!-- End 2-Column Layout Wrapper -->
-
-    <?php if (!$isRiwayat): ?>
     <!-- ============================================ -->
-    <!-- COMPOSER (Floating Card on Desktop) -->
+    <!-- STICKY BOTTOM COMPOSER -->
     <!-- ============================================ -->
-    <div class="fixed bottom-[80px] lg:bottom-0 left-0 lg:left-[240px] w-full lg:w-[680px] lg:ml-8 xl:ml-12 bg-surface/95 backdrop-blur-md border-t lg:border border-outline-variant/25 z-40 pb-safe md:pb-3 lg:pb-0 lg:mb-4 lg:rounded-[24px] lg:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all" id="composerBar">
-        <div class="w-full px-4 md:px-6 lg:px-4 lg:py-1 relative">
-
-            <!-- File Preview Chips (dynamic) -->
-            <div id="filePreviewContainer" class="hidden gap-2 overflow-x-auto pb-2 pt-3 flex-nowrap" style="scrollbar-width: none;">
-                <!-- chips injected by JS -->
+    <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/40 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] z-40 <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:pl-[260px]' : 'lg:pl-[260px]' ?>">
+        <div class="max-w-[760px] mx-auto flex items-end gap-3">
+            <!-- Current user avatar -->
+            <div class="w-10 h-10 rounded-full <?= $activeRole === 'teacher' ? 'bg-primary text-white' : ($activeRole === 'admin' ? 'bg-indigo-600 text-white' : 'bg-secondary text-white') ?> font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+                <?= strtoupper(substr($userName, 0, 1)) ?>
             </div>
 
-            <!-- Attachment Menu (Popover) — 3 options only -->
-            <div id="attachMenu" class="attach-menu hide absolute bottom-full left-4 mb-3 bg-surface rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-outline-variant/30 w-56 overflow-hidden z-50">
-                <div class="p-1.5">
-                    <button type="button" class="flex items-center gap-3 w-full px-3.5 py-3 hover:bg-surface-container-low rounded-xl text-left transition-colors" onclick="simulateUpload('doc', 'Dokumen')">
-                        <div class="w-9 h-9 rounded-xl bg-secondary-container/20 text-secondary flex items-center justify-center">
-                            <span class="material-symbols-outlined text-[20px]">description</span>
-                        </div>
-                        <span class="text-on-surface text-[14px] font-medium">Dokumen</span>
-                    </button>
-                    <button type="button" class="flex items-center gap-3 w-full px-3.5 py-3 hover:bg-surface-container-low rounded-xl text-left transition-colors" onclick="simulateUpload('media', 'Foto/Video')">
-                        <div class="w-9 h-9 rounded-xl bg-tertiary-container/20 text-tertiary flex items-center justify-center">
-                            <span class="material-symbols-outlined text-[20px]">perm_media</span>
-                        </div>
-                        <span class="text-on-surface text-[14px] font-medium">Foto / Video</span>
-                    </button>
-                    <button type="button" class="flex items-center gap-3 w-full px-3.5 py-3 hover:bg-surface-container-low rounded-xl text-left transition-colors" onclick="simulateUpload('camera', 'Kamera')">
-                        <div class="w-9 h-9 rounded-xl bg-primary-container/10 text-primary flex items-center justify-center">
-                            <span class="material-symbols-outlined text-[20px]">photo_camera</span>
-                        </div>
-                        <span class="text-on-surface text-[14px] font-medium">Kamera</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Input Row — Premium Composer -->
-            <div class="flex items-end gap-3 pt-3 pb-1">
-                <!-- User avatar with online indicator -->
-                <div class="relative shrink-0 mb-1">
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-surface-container-high to-surface-variant text-on-surface font-bold text-[13px] flex items-center justify-center border-2 border-surface shadow-sm">
-                        B
-                    </div>
-                    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-tertiary rounded-full border-2 border-surface"></div>
-                </div>
-
-                <!-- Composer container -->
-                <div class="flex-1 bg-surface rounded-[22px] border border-outline-variant/30 shadow-[0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(0,0,0,0.02)] focus-within:border-primary/40 focus-within:shadow-[0_1px_8px_rgba(180,0,11,0.08),inset_0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-200">
-                    <!-- Textarea -->
-                    <div class="px-4 pt-3 pb-1">
-                        <textarea id="replyInput" class="w-full bg-transparent border-none focus:ring-0 resize-none text-on-surface text-[15px] placeholder:text-on-surface-variant/40 p-0 m-0 leading-relaxed outline-none max-h-36 min-h-[24px] composer-area" placeholder="Tulis balasan..." rows="1" oninput="autoResize(this); validateSend();"></textarea>
-                    </div>
-
-                    <!-- Bottom toolbar -->
-                    <div class="flex items-center justify-between px-2 pb-2 pt-0.5">
-                        <!-- Left action icons -->
-                        <div class="flex items-center">
-                            <button type="button" id="attachBtn" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-primary hover:bg-primary/6 active:scale-90 transition-all" title="Lampirkan file">
-                                <span class="material-symbols-outlined text-[22px]">add_circle</span>
-                            </button>
-                            <button type="button" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-tertiary hover:bg-tertiary/6 active:scale-90 transition-all" title="Format teks">
-                                <span class="material-symbols-outlined text-[20px]">text_format</span>
-                            </button>
-                            <button type="button" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-secondary hover:bg-secondary/6 active:scale-90 transition-all" title="Mention">
-                                <span class="material-symbols-outlined text-[20px]">alternate_email</span>
-                            </button>
-                        </div>
-                        <!-- Send button -->
-                        <button type="button" id="sendBtn" class="bg-primary text-on-primary rounded-full h-9 w-9 flex items-center justify-center transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed disabled:scale-100 hover:scale-105 hover:shadow-md active:scale-95 shadow-[0_2px_8px_rgba(180,0,11,0.25)]" disabled>
-                            <span class="material-symbols-outlined text-[18px]">arrow_upward</span>
-                        </button>
-                    </div>
-                </div>
+            <!-- Composer Input Box -->
+            <div class="flex-1 bg-surface-container-low rounded-2xl border border-outline-variant/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all p-2 flex items-end gap-2">
+                <textarea id="replyContentInput" rows="1" class="w-full bg-transparent border-none outline-none resize-none text-[14px] text-on-surface placeholder:text-on-surface-variant/60 max-h-32 p-1.5 leading-relaxed composer-area" placeholder="Tuliskan balasan atau solusi Anda sebagai <?= htmlspecialchars($userName) ?> (<?= ucfirst($activeRole) ?>)..." oninput="autoExpand(this)"></textarea>
+                
+                <button type="button" id="btnSubmitReply" onclick="sendReply()" class="bg-primary hover:bg-primary-600 text-white rounded-xl px-4 py-2 font-label-md font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all shrink-0">
+                    <span>Kirim</span>
+                    <span class="material-symbols-outlined text-[16px]">send</span>
+                </button>
             </div>
         </div>
     </div>
-    <?php endif; ?>
 
-    <!-- Bottom NavBar -->
-    <?php
-    $active_tab = 'course';
-    include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php';
-    ?>
-
-    <?php if (!$isRiwayat): ?>
     <script>
-        /** ========================================================================= */
-        /** Memuat rujukan atau referensi pemilih (selector) dokumen DOM (Document Object Model). */
-        /** ========================================================================= */
-        const replyInput = document.getElementById('replyInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const attachBtn = document.getElementById('attachBtn');
-        const attachMenu = document.getElementById('attachMenu');
-        const filePreview = document.getElementById('filePreviewContainer');
-        let fileCount = 0;
+        const activeRole = "<?= $activeRole ?>";
+        const currentTopicId = <?= (int)($topic['topic_id'] ?? 1) ?>;
 
-        /** ========================================================================= */
-        /** Fungsionalitas ekspansi bidang teks otomatis berdasarkan kapasitas masukan. */
-        /** ========================================================================= */
-        function autoResize(el) {
-            el.style.height = '';
-            el.style.height = el.scrollHeight + 'px';
+        function autoExpand(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
         }
 
-        /** ========================================================================= */
-        /** Melakukan validasi pengiriman guna memastikan ketersediaan tombol aksi. */
-        /** ========================================================================= */
-        function validateSend() {
-            const hasText = replyInput.value.trim().length > 0;
-            const hasFiles = fileCount > 0;
-            sendBtn.disabled = !(hasText || hasFiles);
+        // Kirim Balasan via AJAX
+        function sendReply() {
+            const input = document.getElementById('replyContentInput');
+            const content = input.value.trim();
+            if (!content) {
+                if (typeof DLS !== 'undefined') {
+                    DLS.toast('Mohon ketikkan pesan balasan terlebih dahulu.', 'warning');
+                } else {
+                    alert('Mohon ketikkan pesan balasan terlebih dahulu.');
+                }
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitReply');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[16px]">sync</span> Mengirim...';
+
+            let endpoint = '?route=/student/forum/reply';
+            if (activeRole === 'teacher') endpoint = '?route=/teacher/forum/reply';
+            if (activeRole === 'admin') endpoint = '?route=/admin/forum/reply';
+
+            const formData = new FormData();
+            formData.append('topic_id', currentTopicId);
+            formData.append('content', content);
+
+            fetch(endpoint, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Kirim</span><span class="material-symbols-outlined text-[16px]">send</span>';
+
+                if (data.success) {
+                    input.value = '';
+                    input.style.height = 'auto';
+
+                    if (typeof DLS !== 'undefined') {
+                        DLS.toast('Balasan berhasil diposting!', 'success');
+                    }
+
+                    // Reload halaman agar thread & keterhubungan data termutakhir
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    if (typeof DLS !== 'undefined') {
+                        DLS.error('Gagal', data.message || 'Terjadi kesalahan saat mengirim balasan.');
+                    } else {
+                        alert(data.message || 'Gagal mengirim balasan.');
+                    }
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Kirim</span><span class="material-symbols-outlined text-[16px]">send</span>';
+                console.error(err);
+                if (typeof DLS !== 'undefined') {
+                    DLS.error('Gagal Jaringan', 'Tidak dapat terhubung ke server.');
+                }
+            });
         }
 
-        /** ========================================================================= */
-        /** Peralihan menu lampiran berkas terintegrasi. */
-        /** ========================================================================= */
-        attachBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (attachMenu.classList.contains('hide')) {
-                attachMenu.classList.remove('hide');
-                attachMenu.classList.add('show');
-            } else {
-                closeMenu();
-            }
-        });
+        // Toggle Like Topik
+        function toggleTopicLike(topicId) {
+            let endpoint = '?route=/student/forum/like';
+            if (activeRole === 'teacher') endpoint = '?route=/teacher/forum/like';
+            if (activeRole === 'admin') endpoint = '?route=/admin/forum/like';
 
-        document.addEventListener('click', (e) => {
-            if (!attachMenu.contains(e.target) && !attachBtn.contains(e.target)) {
-                closeMenu();
-            }
-        });
+            const formData = new FormData();
+            formData.append('topic_id', topicId);
 
-        function closeMenu() {
-            attachMenu.classList.remove('show');
-            attachMenu.classList.add('hide');
+            fetch(endpoint, { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('topic-like-count').textContent = data.likes_count;
+                }
+            });
         }
 
-        /** ========================================================================= */
-        /** Memberikan pengalaman visual simulasi unggahan berkas. */
-        /** ========================================================================= */
-        function simulateUpload(type, label) {
-            closeMenu();
-            fileCount++;
-            const id = 'fp_' + Date.now();
-            let icon = 'description',
-                color = 'text-secondary bg-secondary-container/20';
-            if (type === 'media') {
-                icon = 'perm_media';
-                color = 'text-tertiary bg-tertiary-container/20';
-            }
-            if (type === 'camera') {
-                icon = 'photo_camera';
-                color = 'text-primary bg-primary-container/10';
-            }
-            const name = label + '_' + fileCount + (type === 'doc' ? '.pdf' : type === 'media' ? '.jpg' : '.jpg');
+        // Toggle Like Reply
+        function toggleReplyLike(replyId) {
+            let endpoint = '?route=/student/forum/like';
+            if (activeRole === 'teacher') endpoint = '?route=/teacher/forum/like';
+            if (activeRole === 'admin') endpoint = '?route=/admin/forum/like';
 
-            const chip = document.createElement('div');
-            chip.id = id;
-            chip.className = 'file-chip flex items-center gap-2 px-3 py-2 rounded-xl bg-surface border border-outline-variant/40 shrink-0';
-            chip.innerHTML = `
-            <div class="w-7 h-7 rounded-lg ${color} flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[16px]">${icon}</span>
-            </div>
-            <span class="text-on-surface text-[12px] font-medium truncate max-w-[120px]">${name}</span>
-            <button type="button" onclick="removeChip('${id}')" class="w-5 h-5 rounded-full flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors ml-0.5 shrink-0">
-                <span class="material-symbols-outlined text-[14px]">close</span>
-            </button>
-        `;
-            filePreview.appendChild(chip);
-            filePreview.classList.remove('hidden');
-            filePreview.classList.add('flex');
-            validateSend();
+            const formData = new FormData();
+            formData.append('reply_id', replyId);
+
+            fetch(endpoint, { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const el = document.getElementById('reply-like-' + replyId);
+                    if (el) el.textContent = data.likes_count;
+                }
+            });
         }
 
-        function removeChip(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.remove();
-                fileCount--;
-            }
-            if (fileCount === 0) {
-                filePreview.classList.add('hidden');
-                filePreview.classList.remove('flex');
-            }
-            validateSend();
-        }
+        // Toggle Solusi Terverifikasi (Teacher / Admin)
+        function toggleSolution(replyId, topicId) {
+            let endpoint = '?route=/teacher/forum/solution';
+            if (activeRole === 'admin') endpoint = '?route=/admin/forum/solution';
 
-        /** ========================================================================= */
-        /** Fungsionalitas pengubah mode indikator apresiasi (like). */
-        /** ========================================================================= */
-        function toggleLike(btn) {
-            if (btn.disabled) return;
-            const countEl = btn.querySelector('.like-count');
-            let count = parseInt(countEl.textContent) || 0;
-            const icon = btn.querySelector('.material-symbols-outlined');
+            const formData = new FormData();
+            formData.append('reply_id', replyId);
+            formData.append('topic_id', topicId);
 
-            if (btn.classList.contains('active')) {
-                btn.classList.remove('active');
-                icon.style.fontVariationSettings = "'FILL' 0";
-                count = Math.max(0, count - 1);
-            } else {
-                btn.classList.add('active');
-                icon.style.fontVariationSettings = "'FILL' 1";
-                count++;
-                /** Mengaktifkan animasi berukuran mikro (denyut/pulse) untuk peningkatan kualitas antarmuka. */
-                icon.style.transform = 'scale(1.3)';
-                setTimeout(() => {
-                    icon.style.transform = 'scale(1)';
-                }, 150);
-            }
-            countEl.textContent = count;
+            fetch(endpoint, { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof DLS !== 'undefined') {
+                        DLS.success('Berhasil', 'Status solusi diskusi berhasil diperbarui!');
+                    }
+                    setTimeout(() => { window.location.reload(); }, 600);
+                } else {
+                    if (typeof DLS !== 'undefined') {
+                        DLS.error('Gagal', data.message || 'Gagal mengubah status solusi.');
+                    }
+                }
+            });
         }
     </script>
-    <?php endif; ?>
-
-    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
-    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
-    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
-
 </body>
-
 </html>

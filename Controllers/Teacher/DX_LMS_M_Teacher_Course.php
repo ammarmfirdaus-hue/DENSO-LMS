@@ -65,15 +65,18 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
             ['id' => 2, 'title' => 'Sesi 2: Sort (Seiri)', 'materials' => 1, 'assesments' => 0],
         ];
 
-        $participants = [
-            ['nama' => 'Budi Santoso', 'progress' => 100, 'score' => 90, 'status' => 'Lulus'],
-            ['nama' => 'Ahmad Rizal', 'progress' => 50, 'score' => 0, 'status' => 'In Progress'],
-        ];
+        $participants = DX_LMS_M_Teacher_MockData::getCourseParticipants($courseId);
 
         $activities = DX_LMS_M_Teacher_MockData::getActivities();
         $courseActivities = array_filter($activities, function ($a) use ($course) {
             return strpos(strtolower($a['target']), strtolower($course['title'])) !== false;
         });
+
+        $tab = $_GET['tab'] ?? 'silabus';
+
+        require_once 'Models/DX_LMS_M_Forum.php';
+        $forumModel = new DX_LMS_M_Forum();
+        $forumTopics = $forumModel->getTopics($courseId);
 
         $data = [
             'active_tab' => 'course',
@@ -82,6 +85,8 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
             'syllabus' => $syllabus,
             'participants' => $participants,
             'activities' => $courseActivities,
+            'tab' => $tab,
+            'forumTopics' => $forumTopics,
         ];
 
         $this->view('DX_LMS_T_Teacher_Course_Detail', $data);
