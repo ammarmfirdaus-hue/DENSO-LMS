@@ -94,24 +94,8 @@ try {
     $pdo->exec($sqlReplies);
     echo "DX_LMS_T_Forum_Replies verified/created.\n";
 
-    // 4. Create DX_LMS_T_Forum_Likes table
-    $sqlLikes = "
-    IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DX_LMS_T_Forum_Likes]') AND type in (N'U'))
-    BEGIN
-        CREATE TABLE [dbo].[DX_LMS_T_Forum_Likes] (
-            [like_id] BIGINT IDENTITY(1,1) PRIMARY KEY,
-            [topic_id] BIGINT NULL,
-            [reply_id] BIGINT NULL,
-            [employee_npk] VARCHAR(50) NOT NULL,
-            [created_at] DATETIME2 NOT NULL DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE INDEX IX_DX_LMS_T_Forum_Likes_topic ON [dbo].[DX_LMS_T_Forum_Likes] ([topic_id], [employee_npk]);
-        CREATE INDEX IX_DX_LMS_T_Forum_Likes_reply ON [dbo].[DX_LMS_T_Forum_Likes] ([reply_id], [employee_npk]);
-        PRINT 'Table DX_LMS_T_Forum_Likes created.';
-    END
-    ";
-    $pdo->exec($sqlLikes);
-    echo "DX_LMS_T_Forum_Likes verified/created.\n";
+    // 4. Forum Likes table is deprecated and dropped to simplify architecture
+    $pdo->exec("DROP TABLE IF EXISTS [dbo].[DX_LMS_T_Forum_Likes];");
 
     // 5. Seed initial topic if table empty
     $countTopics = dbQueryOne("SELECT COUNT(*) AS cnt FROM DX_LMS_T_Forum_Topics");

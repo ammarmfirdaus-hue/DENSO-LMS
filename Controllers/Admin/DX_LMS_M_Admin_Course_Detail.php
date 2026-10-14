@@ -1,10 +1,14 @@
 <?php
 /**
- * Controller untuk Detail Course (Drill-down).
+ * Controller untuk Detail Course Admin (Drill-down).
+ * Memuat informasi kurikulum, materi, kuis, dan usulan peserta langsung dari database SQL Server.
  */
 
 require_once 'Core/DX_LMS_M_Controller.php';
-require_once 'includes/DX_LMS_M_Teacher_MockData.php'; // Updated to use Teacher MockData
+require_once 'includes/DX_LMS_M_Config.php';
+require_once 'includes/DX_LMS_M_Db.php';
+require_once 'Models/DX_LMS_M_Courses.php';
+require_once 'includes/DX_LMS_M_Teacher_MockData.php';
 
 class DX_LMS_M_Admin_Course_Detail extends DX_LMS_M_Controller
 {
@@ -16,7 +20,12 @@ class DX_LMS_M_Admin_Course_Detail extends DX_LMS_M_Controller
             return;
         }
 
-        $course = DX_LMS_M_Teacher_MockData::getCourseDetail($id);
+        $courseModel = new DX_LMS_M_Courses();
+        $course = $courseModel->getCourseDetail($id);
+
+        if (!$course) {
+            $course = DX_LMS_M_Teacher_MockData::getCourseDetail($id);
+        }
 
         if (!$course) {
             echo "Data Course tidak ditemukan. <a href='?route=/admin/course'>Kembali</a>";
@@ -27,49 +36,54 @@ class DX_LMS_M_Admin_Course_Detail extends DX_LMS_M_Controller
         $raw = $course['status'] ?? 'Draft';
         $course['status'] = match ($raw) {
             'Draft' => 'Private',
-            'Submitted', 'Approved' => 'Pending Review',
-            'Running' => 'In Progress',
+            'Submitted' => 'Pending Review',
+            'Approved', 'Active', 'Running' => 'In Progress',
             'Completed' => 'Completed',
             'Archived' => 'Archived',
             'Rejected' => 'Rejected',
             default => $raw,
         };
 
-        // Dummy data for detail syllabus and participants to mirror Teacher view exactly
-        $syllabus = [
-            [
-                'id' => 1,
-                'title' => 'Sesi 1: Pengenalan 5S',
-                'materials' => 2,
-                'assesments' => 1,
-                'type' => 'Video',
-                'duration' => '45 Menit',
-            ],
-            [
-                'id' => 2,
-                'title' => 'Sesi 2: Sort (Seiri)',
-                'materials' => 1,
-                'assesments' => 0,
-                'type' => 'Document',
-                'duration' => '30 Menit',
-            ],
-        ];
+        // Ambil silabus & modul sesi riil dari database jika ada
+        $dbSessions = $courseModel->getCourseSessionsWithContent($id);
+        $syllabus = [];
+        if (!empty($dbSessions)) {
+            foreach ($dbSessions as $s) {
+                $firstMat = $s['materials'][0] ?? null;
+                $syllabus[] = [
+                    'id' => $s['session_id'],
+                    'title' => $s['session_title'],
+                    'materials' => count($s['materials'] ?? []),
+                    'assesments' => count($s['quizzes'] ?? []),
+                    'type' => $firstMat ? ucfirst($firstMat['material_type']) : 'Dokumen',
+                    'duration' => '30 Menit',
+                ];
+            }
+        }
 
-        $participants = [
-            ['nama' => 'Budi Santoso', 'progress' => 100, 'score' => 90, 'status' => 'Lulus'],
-            ['nama' => 'Ahmad Rizal', 'progress' => 50, 'score' => 0, 'status' => 'In Progress'],
-        ];
+        // Ambil peserta riil dari database jika ada
+        $dbParticipants = $courseModel->getCourseParticipants($id);
+        $participants = !empty($dbParticipants) ? $dbParticipants : [];
 
-        $activities = DX_LMS_M_Teacher_MockData::getActivities();
-        $courseActivities = array_filter($activities, function ($a) use ($course) {
-            return strpos(strtolower($a['target']), strtolower($course['title'])) !== false;
-        });
+        // Ambil aktivitas audit riil
+        $dbLogs = dbQuery("SELECT TOP 10 activity_type, description, created_at FROM DX_LMS_T_Activity_Logs WHERE reference_id = ? ORDER BY log_id DESC", [(string)$id]);
+        $activities = [];
+        if (!empty($dbLogs)) {
+            foreach ($dbLogs as $l) {
+                $activities[] = [
+                    'action' => $l['description'],
+                    'time' => date('d M Y, H:i', strtotime($l['created_at'])),
+                    'icon' => 'history',
+                    'color_class' => 'bg-primary'
+                ];
+            }
+        }
 
         $this->view('Admin/DX_LMS_M_Admin_Course_Detail', [
             'course' => $course,
             'syllabus' => $syllabus,
             'participants' => $participants,
-            'activities' => $courseActivities,
+            'activities' => $activities,
         ]);
     }
 }

@@ -406,22 +406,26 @@ if (!empty($participants)) {
                         <!-- Modern Participant List -->
                         <div class="flex flex-col gap-3">
                             <?php foreach ($participants as $p): ?>
+                            <?php
+                            $pName = (string) ($p['nama'] ?? $p['name'] ?? $p['fullname'] ?? 'Peserta');
+                            $pScore = $p['score'] ?? 0;
+                            $pProgress = (int) ($p['progress'] ?? 0);
+                            $bgColors = [
+                                'bg-primary/10 text-primary border border-primary/20',
+                                'bg-tertiary/10 text-tertiary border border-tertiary/20',
+                                'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                                'bg-indigo-100 text-indigo-700 border border-indigo-200',
+                            ];
+                            $randColor = $bgColors[abs(crc32($pName)) % count($bgColors)];
+                            $initial = strtoupper(mb_substr($pName, 0, 1));
+                            ?>
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-outline-variant/40 hover:border-primary/40 bg-surface-container-lowest transition-all gap-4">
                                 <div class="flex items-center gap-4">
-                                    <?php
-                                    $bgColors = [
-                                        'bg-primary/10 text-primary border border-primary/20',
-                                        'bg-tertiary/10 text-tertiary border border-tertiary/20',
-                                        'bg-emerald-100 text-emerald-700 border border-emerald-200',
-                                        'bg-indigo-100 text-indigo-700 border border-indigo-200',
-                                    ];
-                                    $randColor = $bgColors[crc32($p['nama']) % count($bgColors)];
-                                    ?>
                                     <div class="w-11 h-11 rounded-full <?= $randColor ?> flex items-center justify-center font-title-sm font-bold shrink-0 shadow-sm">
-                                        <?= strtoupper(substr($p['nama'], 0, 1)) ?>
+                                        <?= $initial ?>
                                     </div>
                                     <div class="flex flex-col">
-                                        <h4 class="font-title-sm font-bold text-on-surface"><?= e($p['nama']) ?></h4>
+                                        <h4 class="font-title-sm font-bold text-on-surface"><?= e($pName) ?></h4>
                                         <p class="font-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
                                             <?php if (
                                                 $courseStatus === 'Pending Review' ||
@@ -429,11 +433,13 @@ if (!empty($participants)) {
                                                 $courseStatus === 'Private' ||
                                                 $courseStatus === 'Draft'
                                             ): ?>
-                                                <span class="italic opacity-80">Kandidat Rekomendasi</span>
+                                                <span class="italic opacity-80">Kandidat Rekomendasi<?= !empty($p['department']) ? ' · ' . e($p['department']) : '' ?></span>
                                             <?php else: ?>
-                                                <span class="material-symbols-outlined text-[14px] text-amber-500">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e(
-                                                    (string) $p['score'],
-                                                ) ?></span>
+                                                <span class="material-symbols-outlined text-[14px] text-amber-500">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e((string) $pScore) ?></span>
+                                                <?php if (!empty($p['department'])): ?>
+                                                    <span class="text-outline-variant mx-1">•</span>
+                                                    <span><?= e($p['department']) ?></span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </p>
                                     </div>
@@ -449,18 +455,13 @@ if (!empty($participants)) {
                                         <span class="px-3 py-1 bg-surface-container-high rounded-full font-label-sm text-[11px] text-on-surface-variant font-medium">Pending Approval</span>
                                     <?php else: ?>
                                         <?php
-                                        $pg = (int) $p['progress'];
-                                        $isFull = $pg === 100;
+                                        $isFull = $pProgress === 100;
                                         ?>
                                         <div class="flex items-center gap-2 md:justify-end">
-                                            <span class="font-label-sm font-bold <?= $isFull
-                                                ? 'text-emerald-600'
-                                                : 'text-primary' ?>"><?= $pg ?>% Selesai</span>
+                                            <span class="font-label-sm font-bold <?= $isFull ? 'text-emerald-600' : 'text-primary' ?>"><?= $pProgress ?>% Selesai</span>
                                         </div>
                                         <div class="w-full h-2 bg-surface-variant/60 rounded-full overflow-hidden">
-                                            <div class="h-full rounded-full transition-all duration-1000 <?= $isFull
-                                                ? 'bg-emerald-500'
-                                                : 'bg-primary' ?>" style="width: <?= $pg ?>%;"></div>
+                                            <div class="h-full rounded-full transition-all duration-1000 <?= $isFull ? 'bg-emerald-500' : 'bg-primary' ?>" style="width: <?= $pProgress ?>%;"></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -514,6 +515,22 @@ if (!empty($participants)) {
                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                 Edit Detail Course
                             </a>
+                        <?php elseif ($courseStatus === 'Pending Review' || $courseStatus === 'Submitted'): ?>
+                            <button type="button" disabled class="w-full py-2.5 px-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 font-label-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed text-center opacity-90">
+                                <span class="material-symbols-outlined text-[18px] text-amber-600">lock</span>
+                                Terkunci (Sedang Direview Admin)
+                            </button>
+                            <button type="button" onclick="confirmRevertDraft('<?= e((string)$course['id']) ?>')" class="w-full py-2.5 px-4 rounded-xl border border-outline-variant bg-surface hover:bg-surface-container text-on-surface font-label-sm font-bold flex items-center justify-center gap-2 transition-all text-center shadow-sm">
+                                <span class="material-symbols-outlined text-[18px] text-primary">undo</span>
+                                Tarik Pengajuan ke Draft
+                            </button>
+                        <?php elseif ($courseStatus === 'Rejected'): ?>
+                            <a href="?route=/teacher/course/create&course_id=<?= e(
+                                (string) $course['id'],
+                            ) ?>" class="w-full py-3 px-4 rounded-xl bg-error hover:bg-error-600 text-white font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-center">
+                                <span class="material-symbols-outlined text-[18px]">build</span>
+                                Perbaiki & Edit Course
+                            </a>
                         <?php elseif ($courseStatus === 'Running' || $courseStatus === 'Completed'): ?>
                             <a href="?route=/teacher/grade&course_id=<?= e(
                                 (string) $course['id'],
@@ -522,12 +539,13 @@ if (!empty($participants)) {
                                 Kelola Penilaian & Capaian
                             </a>
                         <?php endif; ?>
-                            <button onclick="handleTeacherAction('preview')" class="w-full py-3 px-4 rounded-xl border border-outline-variant text-on-surface-variant hover:bg-surface-variant/40 font-label-md font-semibold flex items-center justify-center gap-2 transition-all <?= $canEditRecommendation ||
-                            $courseStatus === 'Running'
-                                ? 'mt-3'
-                                : '' ?>">
+                            <button onclick="handleTeacherAction('preview')" class="w-full py-2.5 px-4 rounded-xl border border-outline-variant text-on-surface-variant hover:bg-surface-variant/40 font-label-md font-semibold flex items-center justify-center gap-2 transition-all mt-2">
                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 Preview Mode Peserta
+                            </button>
+                            <button type="button" onclick="confirmDeleteCourse('<?= e((string)$course['id']) ?>')" class="w-full py-2.5 px-4 rounded-xl border border-error/30 text-error hover:bg-error/10 font-label-sm font-bold flex items-center justify-center gap-2 transition-all text-center mt-2">
+                                <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                                Hapus Course (Permanen)
                             </button>
                     </div>
                 </div>
@@ -605,6 +623,83 @@ if (!empty($participants)) {
                 window.location.href = '?route=/teacher/course/detail&course_id=<?= urlencode((string)($course['id'] ?? 1)) ?>&tab=forum';
             } else if (actionType === 'view_all_participants') {
                 DLS.toast('Menampilkan seluruh daftar peserta terdaftar', 'info');
+            }
+        }
+
+        function confirmRevertDraft(courseId) {
+            const doRevert = () => {
+                window.location.href = '?route=/teacher/course/revert-draft&course_id=' + encodeURIComponent(courseId);
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Tarik Pengajuan ke Draft?',
+                    text: 'Status course akan dikembalikan ke Draft sehingga Anda dapat menyunting kembali kurikulum, materi, dan peserta sebelum dikirim ulang ke Admin.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#E20613',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Kembalikan ke Draft',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        doRevert();
+                    }
+                });
+            } else if (confirm('Kembalikan course ke status Draft agar dapat diedit kembali?')) {
+                doRevert();
+            }
+        }
+
+        function confirmDeleteCourse(courseId) {
+            const doDelete = () => {
+                fetch('?route=/teacher/course/delete&id=' + encodeURIComponent(courseId))
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: 'Berhasil Dihapus!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonColor: '#E20613'
+                                }).then(() => {
+                                    window.location.href = '?route=/teacher/courses';
+                                });
+                            } else {
+                                alert(data.message);
+                                window.location.href = '?route=/teacher/courses';
+                            }
+                        } else {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Gagal Menghapus', data.error || data.message, 'error');
+                            } else {
+                                alert(data.error || data.message);
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        alert('Terjadi kesalahan saat menghapus course.');
+                    });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Course Permanen?',
+                    text: 'PERINGATAN: Course ini dan seluruh materi, kuis, sesi, serta relasinya akan DIHAPUS TOTAL dari database SSMS. Tindakan ini tidak dapat dibatalkan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Hapus Permanen',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        doDelete();
+                    }
+                });
+            } else if (confirm('PERINGATAN: Course ini akan dihapus total secara permanen dari database. Lanjutkan?')) {
+                doDelete();
             }
         }
     </script>

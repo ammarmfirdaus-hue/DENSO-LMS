@@ -52,6 +52,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             <?php endif; ?>
 
             <!-- Wizard Stepper (Horizontal - Enterprise Grade) -->
+            <!-- Wizard Stepper (Horizontal - Enterprise Grade) -->
             <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-5 shadow-sm w-full overflow-x-auto hide-scrollbar relative z-20 mb-8 mt-8">
                 <div class="flex items-center justify-between min-w-[640px] px-2">
                     <?php
@@ -63,31 +64,17 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     ];
 
                     for ($i = 1; $i <= 4; $i++):
-
-                        $isActive = $step === $i;
-                        $isCompleted = $step > $i;
-                        $colorClass = $isActive
-                            ? 'text-primary font-bold'
-                            : ($isCompleted
-                                ? 'text-success font-bold'
-                                : 'text-on-surface-variant font-medium');
-                        $bgClass = $isActive
-                            ? 'bg-primary text-on-primary shadow-md shadow-primary/25 ring-4 ring-primary/10'
-                            : ($isCompleted
-                                ? 'bg-success text-on-success shadow-sm'
-                                : 'bg-surface-container text-on-surface-variant border border-outline-variant');
-                        ?>
+                        $isActive = ($i === 1);
+                        $colorClass = $isActive ? 'text-primary font-bold' : 'text-on-surface-variant font-medium';
+                        $bgClass = $isActive ? 'bg-primary text-on-primary shadow-md shadow-primary/25 ring-4 ring-primary/10' : 'bg-surface-container text-on-surface-variant border border-outline-variant';
+                    ?>
                         <!-- Step Item -->
-                        <div class="flex flex-col items-center gap-1.5 relative z-10 w-32 group cursor-default">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[14px] <?= $bgClass ?> transition-all duration-300">
-                                <?php if ($isCompleted): ?>
-                                    <span class="material-symbols-outlined text-[20px] font-bold">check</span>
-                                <?php else: ?>
-                                    <span class="material-symbols-outlined text-[20px]"><?= $steps[$i]['icon'] ?></span>
-                                <?php endif; ?>
+                        <div id="stepper-item-<?= $i ?>" onclick="wizardGoToStep(<?= $i ?>)" class="flex flex-col items-center gap-1.5 relative z-10 w-32 group cursor-pointer select-none">
+                            <div id="stepper-badge-<?= $i ?>" class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[14px] <?= $bgClass ?> transition-all duration-300">
+                                <span class="stepper-icon material-symbols-outlined text-[20px]"><?= $steps[$i]['icon'] ?></span>
                             </div>
                             <div class="text-center mt-1">
-                                <p class="font-label-sm text-[12px] sm:text-[13px] leading-tight <?= $colorClass ?>">
+                                <p id="stepper-title-<?= $i ?>" class="font-label-sm text-[12px] sm:text-[13px] leading-tight <?= $colorClass ?>">
                                     <?= $i ?>. <?= $steps[$i]['title'] ?>
                                 </p>
                                 <p class="text-[10px] sm:text-[11px] text-on-surface-variant/80 mt-0.5 leading-none">
@@ -98,28 +85,21 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         
                         <!-- Connector Line -->
                         <?php if ($i < 4): ?>
-                            <div class="flex-1 h-[3px] rounded-full <?= $isCompleted
-                                ? 'bg-success'
-                                : 'bg-surface-variant/60' ?> -mt-8 mx-[-16px] z-0 transition-colors duration-300"></div>
+                            <div id="stepper-line-<?= $i ?>" class="flex-1 h-[3px] rounded-full bg-surface-variant/60 -mt-8 mx-[-16px] z-0 transition-colors duration-300"></div>
                         <?php endif; ?>
-                    <?php
-                    endfor;
-                    ?>
+                    <?php endfor; ?>
                 </div>
             </div>
 
-            <!-- Formulir (Simulasi State dengan Method GET Step) -->
-            <form action="?route=/teacher/course/create" method="GET" class="space-y-stack-xl">
-                <!-- Keep route & edit id -->
-                <input type="hidden" name="route" value="/teacher/course/create">
+            <!-- Unified Multi-Step Course Creator Container -->
+            <div id="course-form-wizard" class="space-y-stack-xl">
                 <?php $currentCourseId = $_GET['course_id'] ?? null; ?>
                 <?php if ($currentCourseId): ?>
-                    <input type="hidden" name="course_id" value="<?= e((string) $currentCourseId) ?>">
+                    <input type="hidden" id="edit-course-id" value="<?= e((string) $currentCourseId) ?>">
                 <?php endif; ?>
                 
                 <!-- ====== STEP 1: INFORMASI COURSE ====== -->
-                <?php if ($step === 1): ?>
-                <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+                <section id="wizard-step-panel-1" class="wizard-step-panel bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
                         <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
@@ -137,9 +117,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
                                     Nama Course <span class="text-error">*</span>
                                 </label>
-                                <input type="text" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm" placeholder="Contoh: Fundamental 5S & K3" value="<?= e(
-                                    $course['title'] ?? '',
-                                ) ?>">
+                                <input type="text" id="course-title-input" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm" placeholder="Contoh: Fundamental 5S & K3" value="<?= e($course['title'] ?? '') ?>">
                                 <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[14px] text-primary">info</span> Disertai dengan standar kompetensi operasional PT Denso Indonesia.
                                 </p>
@@ -150,7 +128,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <label class="font-label-md font-bold text-on-surface flex items-center gap-1">
                                     Deskripsi Course
                                 </label>
-                                <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm leading-relaxed" placeholder="Jelaskan tujuan kompetensi, sasaran pembelajaran, dan manfaat setelah menyelesaikan course ini..."><?= e(
+                                <textarea id="course-desc-input" rows="4" class="w-full bg-surface border border-outline-variant rounded-xl p-3.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant/50 shadow-sm leading-relaxed" placeholder="Jelaskan tujuan kompetensi, sasaran pembelajaran, dan manfaat setelah menyelesaikan course ini..."><?= e(
                                     $course['description'] ?? '',
                                 ) ?></textarea>
                                 <p class="text-[12px] text-on-surface-variant/80 mt-1 flex items-center gap-1">
@@ -219,13 +197,11 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                    </div>
                 </section>
-                <?php endif; ?>
 
                 <!-- ====== STEP 2: STRUKTUR COURSE ====== -->
-                <?php if ($step === 2): ?>
-                <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+                <section id="wizard-step-panel-2" class="wizard-step-panel hidden bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-outline-variant/60">
                         <div class="flex items-start gap-4">
@@ -362,11 +338,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         </div>
                     </div>
                 </section>
-                <?php endif; ?>
 
                 <!-- ====== STEP 3: TARGET AUDIENCE (RECOMMENDATION) ====== -->
-                <?php if ($step === 3): ?>
-                <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+                <section id="wizard-step-panel-3" class="wizard-step-panel hidden bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
                         <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
@@ -429,8 +403,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
                                 <div class="bg-primary-container/30 px-5 py-3 border-b border-outline-variant flex flex-wrap items-center justify-between gap-2">
                                     <label class="flex items-center gap-2.5 font-label-sm font-bold text-on-surface cursor-pointer select-none">
-                                        <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
-                                        <span id="emp-count-display">Pilih Semua (7 Kandidat Relevan Ditemukan)</span>
+                                        <input type="checkbox" id="select-all-candidates" onchange="toggleSelectAllCandidates(this)" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
+                                        <span id="emp-count-display">Pilih Semua (Kandidat Relevan Ditemukan)</span>
                                     </label>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
                                         <span class="material-symbols-outlined text-[14px]">check_circle</span> Target Aktif
@@ -438,107 +412,54 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-body-sm max-h-[460px] overflow-y-auto" id="candidate-list-container">
                                     <?php
-                                    $emps = [
-                                        [
-                                            'name' => 'Budi Santoso',
-                                            'npk' => '12345',
-                                            'jabatan' => 'Operator',
-                                            'golongan' => 'Gol 1',
-                                            'departemen' => 'Manufacturing',
-                                            'divisi' => 'Produksi',
-                                            'seksi' => 'Assembling',
-                                        ],
-                                        [
-                                            'name' => 'Citra Lestari',
-                                            'npk' => '11223',
-                                            'jabatan' => 'Supervisor',
-                                            'golongan' => 'Gol 3',
-                                            'departemen' => 'Quality',
-                                            'divisi' => 'QA',
-                                            'seksi' => 'Pemeriksaan',
-                                        ],
-                                        [
-                                            'name' => 'Ahmad Rizal',
-                                            'npk' => '67890',
-                                            'jabatan' => 'Leader',
-                                            'golongan' => 'Gol 2',
-                                            'departemen' => 'Manufacturing',
-                                            'divisi' => 'Produksi',
-                                            'seksi' => 'Assembling',
-                                        ],
-                                        [
-                                            'name' => 'Dian Sastro',
-                                            'npk' => '23456',
-                                            'jabatan' => 'Manager',
-                                            'golongan' => 'Gol 4',
-                                            'departemen' => 'Engineering',
-                                            'divisi' => 'PE',
-                                            'seksi' => 'Desain',
-                                        ],
-                                        [
-                                            'name' => 'Eko Prasetyo',
-                                            'npk' => '34567',
-                                            'jabatan' => 'Operator',
-                                            'golongan' => 'Gol 1',
-                                            'departemen' => 'Manufacturing',
-                                            'divisi' => 'Produksi',
-                                            'seksi' => 'Machining',
-                                        ],
-                                        [
-                                            'name' => 'Fani Amelia',
-                                            'npk' => '45678',
-                                            'jabatan' => 'Staff',
-                                            'golongan' => 'Gol 2',
-                                            'departemen' => 'HR',
-                                            'divisi' => 'Personalia',
-                                            'seksi' => 'Rekrutmen',
-                                        ],
-                                        [
-                                            'name' => 'Gilang Ramadhan',
-                                            'npk' => '56789',
-                                            'jabatan' => 'Staff',
-                                            'golongan' => 'Gol 2',
-                                            'departemen' => 'Finance',
-                                            'divisi' => 'Akuntansi',
-                                            'seksi' => 'Pajak',
-                                        ],
+                                    $candidateList = !empty($candidates) ? $candidates : [
+                                        ['employee_id' => 1, 'name' => 'Budi Santoso', 'npk' => '12345', 'jabatan' => 'Operator', 'golongan' => 'I-1', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Assembling'],
+                                        ['employee_id' => 6, 'name' => 'Citra Lestari', 'npk' => '11223', 'jabatan' => 'Supervisor', 'golongan' => 'III-1', 'departemen' => 'Quality', 'divisi' => 'QA', 'seksi' => 'Pemeriksaan'],
+                                        ['employee_id' => 2, 'name' => 'Ahmad Rizal', 'npk' => '67890', 'jabatan' => 'Leader', 'golongan' => 'II-2', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Assembling'],
+                                        ['employee_id' => 7, 'name' => 'Dian Sastro', 'npk' => '23456', 'jabatan' => 'Manager', 'golongan' => 'IV-1', 'departemen' => 'Engineering', 'divisi' => 'PE', 'seksi' => 'Desain'],
+                                        ['employee_id' => 8, 'name' => 'Eko Prasetyo', 'npk' => '34567', 'jabatan' => 'Operator', 'golongan' => 'I-2', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Machining'],
+                                        ['employee_id' => 9, 'name' => 'Fani Amelia', 'npk' => '45678', 'jabatan' => 'Staff', 'golongan' => 'II-1', 'departemen' => 'HR', 'divisi' => 'Personalia', 'seksi' => 'Rekrutmen'],
+                                        ['employee_id' => 10, 'name' => 'Gilang Ramadhan', 'npk' => '56789', 'jabatan' => 'Staff', 'golongan' => 'II-2', 'departemen' => 'Finance', 'divisi' => 'Akuntansi', 'seksi' => 'Pajak'],
                                     ];
-                                    foreach ($emps as $emp):
-                                        $initials = strtoupper(substr($emp['name'], 0, 1)); ?>
+                                    foreach ($candidateList as $emp):
+                                        $empName = $emp['fullname'] ?? ($emp['name'] ?? 'Karyawan');
+                                        $empId = $emp['employee_id'] ?? 0;
+                                        $initials = strtoupper(substr($empName, 0, 1));
+                                        $jabatanVal = strtolower($emp['jabatan'] ?? '');
+                                        $golonganVal = strtolower($emp['golongan'] ?? '');
+                                        $deptVal = strtolower($emp['department'] ?? ($emp['departemen'] ?? ''));
+                                        $divVal = strtolower($emp['division'] ?? ($emp['divisi'] ?? ''));
+                                        $seksiVal = strtolower($emp['section'] ?? ($emp['seksi'] ?? ''));
+                                    ?>
                                     <label class="emp-card flex items-center gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group"
-                                           data-jabatan="<?= e(strtolower($emp['jabatan'])) ?>" 
-                                           data-golongan="<?= e(strtolower($emp['golongan'])) ?>" 
-                                           data-departemen="<?= e(strtolower($emp['departemen'])) ?>" 
-                                           data-divisi="<?= e(strtolower($emp['divisi'])) ?>" 
-                                           data-seksi="<?= e(strtolower($emp['seksi'])) ?>">
-                                        <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" checked>
+                                           data-emp-id="<?= e($empId) ?>"
+                                           data-npk="<?= e($emp['npk']) ?>"
+                                           data-name="<?= e($empName) ?>"
+                                           data-jabatan="<?= e($jabatanVal) ?>" 
+                                           data-golongan="<?= e($golonganVal) ?>" 
+                                           data-departemen="<?= e($deptVal) ?>" 
+                                           data-divisi="<?= e($divVal) ?>" 
+                                           data-seksi="<?= e($seksiVal) ?>">
+                                        <input type="checkbox" onchange="updateCandidateCount()" class="candidate-check w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" value="<?= e($empId) ?>" data-npk="<?= e($emp['npk']) ?>" data-name="<?= e($empName) ?>" checked>
                                         <div class="w-10 h-10 rounded-xl bg-primary-container/60 text-primary font-bold flex items-center justify-center shrink-0">
                                             <?= e($initials) ?>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e(
-                                                    $emp['name'],
-                                                ) ?></p>
-                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e(
-                                                    $emp['npk'],
-                                                ) ?></span>
+                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e($empName) ?></p>
+                                                <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e($emp['npk']) ?></span>
                                             </div>
                                             <p class="font-label-sm text-on-surface-variant text-[12px] mt-0.5 flex items-center gap-1.5 truncate">
-                                                <span class="material-symbols-outlined text-[14px]">work</span> <?= e(
-                                                    $emp['jabatan'],
-                                                ) ?> • <?= e($emp['dept'] ?? $emp['departemen']) ?>
+                                                <span class="material-symbols-outlined text-[14px]">work</span> <?= e($emp['jabatan']) ?> • <?= e($emp['department'] ?? ($emp['departemen'] ?? '')) ?>
                                             </p>
                                         </div>
                                     </label>
-                                    <?php
-                                    endforeach;
-                                    ?>
+                                    <?php endforeach; ?>
                                 </div>
                                 <div class="bg-surface-container-low px-5 py-3 border-t border-outline-variant/60 flex items-center justify-between font-label-sm">
                                     <span class="text-on-surface-variant text-[12px]">Kandidat akan diusulkan pada saat pengiriman course ke Admin</span>
                                     <span id="emp-count-bottom" class="font-bold text-primary flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> 7 Karyawan Terpilih
+                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num"><?= count($candidateList) ?></span> Karyawan Terpilih
                                     </span>
                                 </div>
                             </div>
@@ -579,11 +500,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         </div>
                     <?php endif; ?>
                 </section>
-                <?php endif; ?>
 
                 <!-- ====== STEP 4: REVIEW & SUBMIT ====== -->
-                <?php if ($step === 4): ?>
-                <section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+                <section id="wizard-step-panel-4" class="wizard-step-panel hidden bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
                         <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
@@ -604,18 +523,12 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     <span class="font-label-xs font-bold text-on-surface-variant uppercase tracking-wider px-2.5 py-1 rounded-full bg-surface-container">Identitas Course</span>
                                     <span class="material-symbols-outlined text-primary text-[22px]">info</span>
                                 </div>
-                                <h4 class="font-title-md font-bold text-on-surface mb-1 line-clamp-2"><?= e(
-                                    $course['title'] ?? 'Nama Course',
-                                ) ?></h4>
-                                <p class="font-body-sm text-on-surface-variant/80 line-clamp-2"><?= e(
-                                    $course['description'] ?? 'Deskripsi course belum diisi.',
-                                ) ?></p>
+                                <h4 id="review-title" class="font-title-md font-bold text-on-surface mb-1 line-clamp-2"><?= e($course['title'] ?? 'Nama Course') ?></h4>
+                                <p id="review-desc" class="font-body-sm text-on-surface-variant/80 line-clamp-2"><?= e($course['description'] ?? 'Deskripsi course belum diisi.') ?></p>
                             </div>
                             <div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between font-label-sm">
                                 <span class="text-on-surface-variant">Kategori</span>
-                                <span class="font-bold text-on-surface"><?= e($course['category'] ?? 'Umum') ?> • <?= e(
-     $course['code'] ?? '-',
- ) ?></span>
+                                <span id="review-category-code" class="font-bold text-on-surface"><?= e($course['category'] ?? 'Umum') ?></span>
                             </div>
                         </div>
 
@@ -626,12 +539,12 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     <span class="font-label-xs font-bold text-on-surface-variant uppercase tracking-wider px-2.5 py-1 rounded-full bg-surface-container">Kurikulum</span>
                                     <span class="material-symbols-outlined text-primary text-[22px]">library_books</span>
                                 </div>
-                                <h4 class="font-title-md font-bold text-on-surface mb-1">1 Sesi Pembelajaran</h4>
-                                <p class="font-body-sm text-on-surface-variant/80">Terdiri dari modul materi PDF, evaluasi latihan kuis, dan ujian akhir kompetensi.</p>
+                                <h4 id="review-sessions-count" class="font-title-md font-bold text-on-surface mb-1">1 Sesi Pembelajaran</h4>
+                                <p id="review-sessions-desc" class="font-body-sm text-on-surface-variant/80">Terdiri dari modul materi pembelajaran dan evaluasi kuis.</p>
                             </div>
                             <div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between font-label-sm">
                                 <span class="text-on-surface-variant">Status Materi</span>
-                                <span class="font-bold text-success flex items-center gap-1">
+                                <span id="review-materials-status" class="font-bold text-success flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">check_circle</span> Siap Digunakan
                                 </span>
                             </div>
@@ -644,8 +557,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     <span class="font-label-xs font-bold text-on-surface-variant uppercase tracking-wider px-2.5 py-1 rounded-full bg-surface-container">Rekomendasi</span>
                                     <span class="material-symbols-outlined text-secondary text-[22px]">groups</span>
                                 </div>
-                                <h4 class="font-title-md font-bold text-on-surface mb-1">3 Karyawan Terpilih</h4>
-                                <p class="font-body-sm text-on-surface-variant/80">Diusulkan berdasarkan kesesuaian departemen, jabatan, dan golongan kompetensi.</p>
+                                <h4 id="review-candidates-count" class="font-title-md font-bold text-on-surface mb-1"><?= count($candidateList) ?> Karyawan Terpilih</h4>
+                                <p id="review-candidates-desc" class="font-body-sm text-on-surface-variant/80">Diusulkan berdasarkan kesesuaian departemen, jabatan, dan golongan kompetensi.</p>
                             </div>
                             <div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between font-label-sm">
                                 <span class="text-on-surface-variant">Persetujuan</span>
@@ -664,49 +577,41 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <div>
                             <h5 class="font-title-sm font-bold text-on-surface">Konfirmasi Pengiriman ke Admin</h5>
                             <p class="font-body-sm text-on-surface-variant mt-1 leading-relaxed">
-                                Menekan tombol <span class="font-bold text-primary">"Submit"</span> berarti mengajukan course ini kepada tim Admin untuk peninjauan (review) dan aktivasi kelas. Setelah diajukan, course akan berstatus <span class="font-bold text-on-surface">Submitted</span> hingga disetujui.
+                                Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> berarti mengajukan course ini secara resmi ke database Denso LMS untuk peninjauan (review) dan aktivasi kelas oleh Admin. Anda juga dapat memilih <span class="font-bold text-on-surface">"Simpan Draft"</span> jika masih ingin menyempurnakan kurikulum.
                             </p>
                         </div>
                     </div>
                 </section>
-                <?php endif; ?>
 
                 <!-- Wizard Navigation Actions (Sticky Bottom on Desktop, Fixed Below on Mobile) -->
                 <div class="fixed bottom-0 left-0 lg:left-[240px] right-0 bg-surface shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.08)] border-t border-outline-variant/60 z-40 transition-all drop-shadow-sm pb-safe">
                     <div class="w-full flex justify-between items-center px-4 sm:px-6 lg:px-8 h-20 lg:h-24">
                         <!-- Left Action -->
                         <div>
-                            <?php if ($step > 1): ?>
-                                <button type="submit" name="step" value="<?= $step -
-                                    1 ?>" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container hover:border-on-surface-variant/40 shadow-sm transition-all flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[18px]">arrow_back</span> Kembali
-                                </button>
-                            <?php else: ?>
-                                <button type="button" onclick="window.history.back()" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container hover:border-on-surface-variant/40 shadow-sm transition-all flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[18px]">close</span> Batal
-                                </button>
-                            <?php endif; ?>
+                            <button type="button" id="wizard-btn-prev" onclick="wizardPrevStep()" class="hidden px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container hover:border-on-surface-variant/40 shadow-sm transition-all flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Kembali
+                            </button>
+                            <button type="button" id="wizard-btn-cancel" onclick="window.history.back()" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container hover:border-on-surface-variant/40 shadow-sm transition-all flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">close</span> Batal
+                            </button>
                         </div>
 
                         <!-- Right Action -->
-                        <div class="flex gap-2">
-                            <?php if ($step === 4): ?>
-                                <button type="button" onclick="Swal.fire({title: 'Submit Berhasil!', text: 'Course berhasil disubmit ke Admin.', icon: 'success', confirmButtonColor: '#E20613'}).then(() => { window.location.href='?route=/teacher/course/detail&course_id=<?= e(
-                                    $course['id'] ?? 1,
-                                ) ?>';});" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
-                                    Submit ke Admin <span class="material-symbols-outlined text-[18px]">send</span>
-                                </button>
-                            <?php else: ?>
-                                <button type="submit" name="step" value="<?= $step +
-                                    1 ?>" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
-                                    Selanjutnya <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-                                </button>
-                            <?php endif; ?>
+                        <div class="flex items-center gap-3">
+                            <button type="button" id="wizard-btn-draft" onclick="submitCourseToDatabase('Draft')" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container shadow-sm transition-all flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">draft</span> Simpan Draft
+                            </button>
+                            <button type="button" id="wizard-btn-next" onclick="wizardNextStep()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
+                                Selanjutnya <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                            </button>
+                            <button type="button" id="wizard-btn-submit" onclick="submitCourseToDatabase('Submitted')" class="hidden px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
+                                Submit ke Admin <span class="material-symbols-outlined text-[18px]">send</span>
+                            </button>
                         </div>
                     </div>
                 </div>
                 
-            </form>
+            </div>
         </div>
     </main>
 
@@ -913,6 +818,384 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     </div>
 
     <script>
+    // ==============================================
+    // Multi-Step Wizard Engine & SQL Server Persistence
+    // ==============================================
+    let currentWizardStep = 1;
+
+    function wizardGoToStep(step) {
+        if (step < 1 || step > 4) return;
+        
+        // If attempting to go past Step 1, validate that Course Name is filled
+        if (step > 1) {
+            const titleInput = document.getElementById('course-title-input');
+            if (!titleInput || !titleInput.value.trim()) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Judul Wajib Diisi',
+                        text: 'Silakan isi Nama Course pada Langkah 1 terlebih dahulu.',
+                        icon: 'warning',
+                        confirmButtonColor: '#E20613'
+                    });
+                } else {
+                    alert('Silakan isi Nama Course terlebih dahulu.');
+                }
+                if (titleInput) titleInput.focus();
+                return;
+            }
+        }
+
+        currentWizardStep = step;
+
+        // Toggle panels
+        for (let i = 1; i <= 4; i++) {
+            const panel = document.getElementById('wizard-step-panel-' + i);
+            if (panel) {
+                if (i === step) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update stepper header indicators
+        const stepIcons = { 1: 'info', 2: 'library_books', 3: 'groups', 4: 'done_all' };
+        for (let i = 1; i <= 4; i++) {
+            const badge = document.getElementById('stepper-badge-' + i);
+            const title = document.getElementById('stepper-title-' + i);
+            const line = document.getElementById('stepper-line-' + i);
+            const iconSpan = badge ? badge.querySelector('.stepper-icon') : null;
+
+            if (badge) {
+                badge.className = 'w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[14px] transition-all duration-300';
+                
+                if (i < step) {
+                    // Completed
+                    badge.classList.add('bg-success', 'text-on-success');
+                    if (iconSpan) iconSpan.textContent = 'check';
+                    if (title) {
+                        title.className = 'font-label-sm text-[12px] sm:text-[13px] leading-tight text-success font-bold';
+                    }
+                } else if (i === step) {
+                    // Active
+                    badge.classList.add('bg-primary', 'text-on-primary', 'shadow-md', 'shadow-primary/25', 'ring-4', 'ring-primary/10');
+                    if (iconSpan) iconSpan.textContent = stepIcons[i];
+                    if (title) {
+                        title.className = 'font-label-sm text-[12px] sm:text-[13px] leading-tight text-primary font-bold';
+                    }
+                } else {
+                    // Upcoming
+                    badge.classList.add('bg-surface-container', 'text-on-surface-variant', 'border', 'border-outline-variant');
+                    if (iconSpan) iconSpan.textContent = stepIcons[i];
+                    if (title) {
+                        title.className = 'font-label-sm text-[12px] sm:text-[13px] leading-tight text-on-surface-variant font-medium';
+                    }
+                }
+            }
+
+            if (line) {
+                line.className = 'flex-1 h-[3px] rounded-full -mt-8 mx-[-16px] z-0 transition-colors duration-300 ' + (i < step ? 'bg-success' : 'bg-surface-variant/60');
+            }
+        }
+
+        // Toggle navigation buttons
+        const btnPrev = document.getElementById('wizard-btn-prev');
+        const btnCancel = document.getElementById('wizard-btn-cancel');
+        const btnNext = document.getElementById('wizard-btn-next');
+        const btnSubmit = document.getElementById('wizard-btn-submit');
+
+        if (btnPrev && btnCancel) {
+            if (step > 1) {
+                btnPrev.classList.remove('hidden');
+                btnCancel.classList.add('hidden');
+            } else {
+                btnPrev.classList.add('hidden');
+                btnCancel.classList.remove('hidden');
+            }
+        }
+
+        if (btnNext && btnSubmit) {
+            if (step === 4) {
+                btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+                renderReviewStep4();
+            } else {
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            }
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function wizardNextStep() {
+        if (currentWizardStep < 4) {
+            wizardGoToStep(currentWizardStep + 1);
+        }
+    }
+
+    function wizardPrevStep() {
+        if (currentWizardStep > 1) {
+            wizardGoToStep(currentWizardStep - 1);
+        }
+    }
+
+    function renderReviewStep4() {
+        // 1. Identity
+        const titleInput = document.getElementById('course-title-input');
+        const descInput = document.getElementById('course-desc-input');
+        const title = titleInput ? titleInput.value.trim() : '';
+        const desc = descInput ? descInput.value.trim() : '';
+        
+        const reviewTitle = document.getElementById('review-title');
+        const reviewDesc = document.getElementById('review-desc');
+        const reviewCategory = document.getElementById('review-category-code');
+
+        if (reviewTitle) reviewTitle.textContent = title || 'Nama Course Belum Diisi';
+        if (reviewDesc) reviewDesc.textContent = desc || 'Deskripsi course belum diisi.';
+
+        // Selected Tags
+        const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
+        if (reviewCategory) {
+            reviewCategory.textContent = selectedTags.length > 0 ? selectedTags.join(', ') : 'Umum';
+        }
+
+        // 2. Curriculum
+        const sessions = document.querySelectorAll('.session-block');
+        const sessionCount = sessions.length;
+        let materialCount = 0;
+        sessions.forEach(sess => {
+            materialCount += sess.querySelectorAll('.module-block').length;
+        });
+
+        const reviewSessionsCount = document.getElementById('review-sessions-count');
+        const reviewSessionsDesc = document.getElementById('review-sessions-desc');
+        if (reviewSessionsCount) {
+            reviewSessionsCount.textContent = sessionCount + ' Sesi Pembelajaran (' + materialCount + ' Modul)';
+        }
+        if (reviewSessionsDesc) {
+            reviewSessionsDesc.textContent = 'Mencakup ' + sessionCount + ' sesi dengan materi kurikulum dan evaluasi kompetensi.';
+        }
+
+        // 3. Candidates
+        const selectedEmps = document.querySelectorAll('.emp-checkbox:checked');
+        const empCount = selectedEmps.length;
+        const reviewCandidatesCount = document.getElementById('review-candidates-count');
+        const reviewCandidatesDesc = document.getElementById('review-candidates-desc');
+        if (reviewCandidatesCount) {
+            reviewCandidatesCount.textContent = empCount + ' Karyawan Terpilih';
+        }
+        if (reviewCandidatesDesc) {
+            reviewCandidatesDesc.textContent = empCount > 0 
+                ? 'Kandidat telah diseleksi berdasarkan jabatan, golongan, dan departemen Denso.'
+                : 'Belum ada karyawan terpilih (course terbuka untuk target audience rekomendasi).';
+        }
+    }
+
+    function collectCoursePayload(status) {
+        const editCourseId = document.getElementById('edit-course-id')?.value || null;
+        const title = document.getElementById('course-title-input')?.value.trim() || 'Untitled Course';
+        const description = document.getElementById('course-desc-input')?.value.trim() || '';
+        const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
+        const category = selectedTags.length > 0 ? selectedTags[0] : 'Umum';
+
+        // Candidate IDs
+        const candidateEmployeeIds = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+
+        // Filter selections for targeting
+        const targetJabatan = document.getElementById('filter-jabatan')?.value || '';
+        const targetGolongan = document.getElementById('filter-golongan')?.value || '';
+        const targetDepartemen = document.getElementById('filter-departemen')?.value || '';
+
+        // Sessions & Materials
+        const sessions = [];
+        const sessionBlocks = document.querySelectorAll('#sessions-container .session-block');
+        sessionBlocks.forEach((sess, sIdx) => {
+            const titleEl = sess.querySelector('h4');
+            const sessionTitle = titleEl ? titleEl.textContent.trim() : ('Sesi ' + (sIdx + 1));
+
+            const materials = [];
+            sess.querySelectorAll('.materi-builder-list .module-block').forEach((mod, mIdx) => {
+                const modTitleInput = mod.querySelector('input[type="text"]');
+                const modTitle = modTitleInput ? (modTitleInput.value.trim() || ('Materi ' + (mIdx + 1))) : ('Materi ' + (mIdx + 1));
+                const typeLabel = mod.querySelector('.font-label-sm')?.textContent.trim().toUpperCase() || 'DOCUMENT';
+                
+                let matType = 'document';
+                if (typeLabel.includes('VIDEO') || typeLabel.includes('YOUTUBE')) matType = 'video';
+                else if (typeLabel.includes('PDF')) matType = 'pdf';
+                else if (typeLabel.includes('TEXT') || typeLabel.includes('TEKS')) matType = 'text';
+
+                // Get content from saved state if any
+                let content = '';
+                const mbState = mod.querySelector('.mb-saved-state');
+                if (mbState) {
+                    content = mbState.getAttribute('data-pages') || '';
+                }
+
+                materials.push({
+                    title: modTitle,
+                    type: matType,
+                    content: content,
+                    estimated_duration: 15,
+                    sequence_order: mIdx + 1
+                });
+            });
+
+            // Session Quiz if any
+            let quiz = null;
+            const qzList = sess.querySelector('.quiz-items-list');
+            if (qzList) {
+                const qzQuestions = [];
+                qzList.querySelectorAll('.qb-saved-state .ab-question-block, .qb-saved-state .qb-question-item').forEach((qEl, qIdx) => {
+                    const qText = qEl.querySelector('textarea')?.value || qEl.querySelector('textarea')?.textContent || ('Pertanyaan ' + (qIdx + 1));
+                    const choices = [];
+                    qEl.querySelectorAll('.ab-option-row, .qb-option-row').forEach((optRow, oIdx) => {
+                        const optText = optRow.querySelector('input[type="text"]')?.value || ('Pilihan ' + String.fromCharCode(65 + oIdx));
+                        const isCorrect = !!optRow.querySelector('input[type="radio"]:checked');
+                        choices.push({
+                            choice_text: optText,
+                            is_correct: isCorrect ? 1 : 0,
+                            sequence_order: oIdx + 1
+                        });
+                    });
+                    qzQuestions.push({
+                        question_text: qText,
+                        question_type: 'multiple_choice',
+                        score_weight: 10,
+                        sequence_order: qIdx + 1,
+                        choices: choices
+                    });
+                });
+
+                if (qzQuestions.length > 0) {
+                    quiz = {
+                        title: 'Quiz ' + sessionTitle,
+                        passing_score: 70,
+                        duration_minutes: 20,
+                        questions: qzQuestions
+                    };
+                }
+            }
+
+            sessions.push({
+                title: sessionTitle,
+                description: '',
+                sequence_order: sIdx + 1,
+                materials: materials,
+                quiz: quiz
+            });
+        });
+
+        return {
+            course_id: editCourseId,
+            title: title,
+            description: description,
+            category: category,
+            tags: selectedTags,
+            level: 'Beginner',
+            status: status, // 'Draft' or 'Submitted'
+            target_jabatan: targetJabatan,
+            target_golongan: targetGolongan,
+            target_departemen: targetDepartemen,
+            candidate_employee_ids: candidateEmployeeIds,
+            sessions: sessions
+        };
+    }
+
+    function submitCourseToDatabase(status) {
+        const titleInput = document.getElementById('course-title-input');
+        if (!titleInput || !titleInput.value.trim()) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Judul Diperlukan',
+                    text: 'Nama Course wajib diisi sebelum menyimpan data ke database.',
+                    icon: 'warning',
+                    confirmButtonColor: '#E20613'
+                });
+            } else {
+                alert('Nama Course wajib diisi.');
+            }
+            wizardGoToStep(1);
+            if (titleInput) titleInput.focus();
+            return;
+        }
+
+        const payload = collectCoursePayload(status);
+
+        const isSubmitted = (status === 'Submitted');
+        const loadingTitle = isSubmitted ? 'Mengirim Course ke Admin...' : 'Menyimpan Draft Course...';
+        const loadingText = 'Sedang memproses penyimpanan ke database MS SQL Server...';
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: loadingTitle,
+                text: loadingText,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        fetch('?route=/teacher/course/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: isSubmitted ? 'Berhasil Diajukan!' : 'Draft Tersimpan!',
+                        text: data.message || 'Data course berhasil disimpan ke database SQL Server.',
+                        icon: 'success',
+                        confirmButtonColor: '#E20613',
+                        confirmButtonText: 'Buka Halaman Course'
+                    }).then(() => {
+                        window.location.href = data.redirect_url || ('?route=/teacher/course/detail&course_id=' + (data.course_id || ''));
+                    });
+                } else {
+                    alert('Course berhasil disimpan!');
+                    window.location.href = data.redirect_url || '?route=/teacher/courses';
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Gagal Menyimpan',
+                        text: data.error || 'Terjadi kendala saat menyimpan course.',
+                        icon: 'error',
+                        confirmButtonColor: '#E20613'
+                    });
+                } else {
+                    alert('Gagal: ' + (data.error || 'Error'));
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Submit error:', error);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Koneksi Terputus',
+                    text: 'Gagal menghubungi server database. Periksa koneksi lokal SQL Server Anda.',
+                    icon: 'error',
+                    confirmButtonColor: '#E20613'
+                });
+            } else {
+                alert('Koneksi database error.');
+            }
+        });
+    }
+
     function updateSessionNumbers() {
         const container = document.getElementById('sessions-container');
         if(!container) return;

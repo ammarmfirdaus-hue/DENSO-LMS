@@ -251,9 +251,14 @@ $active_tab = 'course';
                                     <span class="font-body-sm text-[11px] text-on-surface-variant italic">
                                         <?= e($contextLine) ?>
                                     </span>
-                                    <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-4 py-2 rounded-lg transition-colors">
-                                        <?= e($ctaText) ?>
-                                    </a>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-3 py-1.5 rounded-lg transition-colors">
+                                            <?= e($ctaText) ?>
+                                        </a>
+                                        <button type="button" onclick="confirmDeleteCourseAdminCard('<?= e((string)$course['id']) ?>', '<?= e(addslashes($course['title'])) ?>')" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-outline hover:text-error hover:border-error/40 hover:bg-error/5 flex items-center justify-center transition-colors" title="Hapus Course Permanen">
+                                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -266,6 +271,60 @@ $active_tab = 'course';
     <!-- Bottom Nav untuk Handphone -->
     <?php include 'includes/components/DX_LMS_M_Admin_Bottom_Nav.php'; ?>
 
-    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js"></script>
+    <script src="assets/js/DX_LMS_M_Helpers.js"></script>
+    <script>
+        function confirmDeleteCourseAdminCard(courseId, title) {
+            const doDelete = () => {
+                fetch('?route=/admin/course/delete&id=' + encodeURIComponent(courseId))
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: 'Berhasil Dihapus!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonColor: '#E20613'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                alert(data.message);
+                                window.location.reload();
+                            }
+                        } else {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Gagal Menghapus', data.error || data.message, 'error');
+                            } else {
+                                alert(data.error || data.message);
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        alert('Terjadi kesalahan saat menghapus course.');
+                    });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Course Permanen?',
+                    text: 'PERINGATAN: Course "' + title + '" dan seluruh sesi, kuis, materi, serta relasinya akan DIHAPUS TOTAL dari database SSMS. Tindakan ini tidak dapat dibatalkan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Hapus Permanen',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        doDelete();
+                    }
+                });
+            } else if (confirm('PERINGATAN: Course "' + title + '" akan dihapus total secara permanen dari database. Lanjutkan?')) {
+                doDelete();
+            }
+        }
+    </script>
 </body>
 </html>

@@ -66,6 +66,9 @@ $router->add('/teacher/course/material', 'DX_LMS_M_Teacher_Course@material');
 $router->add('/teacher/course/add-material', 'DX_LMS_M_Teacher_Course@addMaterial');
 $router->add('/teacher/course/detail', 'DX_LMS_M_Teacher_Course@detail');
 $router->add('/teacher/course/create', 'DX_LMS_M_Teacher_Course@create');
+$router->add('/teacher/course/store', 'DX_LMS_M_Teacher_Course@store');
+$router->add('/teacher/course/revert-draft', 'DX_LMS_M_Teacher_Course@revertDraft');
+$router->add('/teacher/course/delete', 'DX_LMS_M_Teacher_Course@delete');
 $router->add('/teacher/grade', 'DX_LMS_T_Teacher_Grade@index');
 $router->add('/teacher/forum', 'DX_LMS_T_Teacher_Forum@index');
 $router->add('/teacher/forum/thread', 'DX_LMS_T_Teacher_Forum@thread');
@@ -99,6 +102,11 @@ $router->add('/admin/forum/new', 'DX_LMS_M_Admin_Forum@newTopic');
 
 $router->add('/admin/user/detail', 'DX_LMS_M_Admin_User_Detail@index');
 $router->add('/admin/course/detail', 'DX_LMS_M_Admin_Course_Detail@index');
+$router->add('/admin/course/approve', 'DX_LMS_M_Admin_Course@approve');
+$router->add('/admin/course/reject', 'DX_LMS_M_Admin_Course@reject');
+$router->add('/admin/course/archive', 'DX_LMS_M_Admin_Course@archive');
+$router->add('/admin/course/unarchive', 'DX_LMS_M_Admin_Course@unarchive');
+$router->add('/admin/course/delete', 'DX_LMS_M_Admin_Course@delete');
 
 /** Menjalankan permintaan yang masuk berdasarkan rute yang sesuai. */
 $route = $_GET['route'] ?? '/';

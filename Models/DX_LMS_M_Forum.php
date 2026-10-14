@@ -24,16 +24,35 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
     public function getTopics($courseId = null, array $filters = [])
     {
         $sql = "SELECT t.*, 
+                       e.fullname AS author_name,
+                       e.npk AS author_npk,
+                       e.role AS author_role,
+                       '' AS author_avatar,
+                       COALESCE(dept.department_name, '') AS author_dept,
                        (SELECT COUNT(*) FROM DX_LMS_T_Forum_Replies r WHERE r.topic_id = t.topic_id AND r.status = 'active') AS total_replies,
-                       (SELECT TOP 1 r.author_name FROM DX_LMS_T_Forum_Replies r WHERE r.topic_id = t.topic_id AND r.status = 'active' ORDER BY r.created_at DESC) AS latest_replier,
+                       (SELECT TOP 1 re.fullname FROM DX_LMS_T_Forum_Replies r JOIN DX_LMS_M_Employees re ON re.employee_id = r.employee_id WHERE r.topic_id = t.topic_id AND r.status = 'active' ORDER BY r.created_at DESC) AS latest_replier,
                        (SELECT TOP 1 r.created_at FROM DX_LMS_T_Forum_Replies r WHERE r.topic_id = t.topic_id AND r.status = 'active' ORDER BY r.created_at DESC) AS latest_reply_at
                 FROM DX_LMS_T_Forum_Topics t
+                LEFT JOIN DX_LMS_M_Employees e ON e.employee_id = t.employee_id
+                LEFT JOIN DX_LMS_M_Departments dept ON dept.department_id = e.department_id
                 WHERE t.moderation_status != 'hidden'";
         $params = [];
 
         if ($courseId !== null && $courseId !== '' && $courseId !== 'all') {
-            $sql .= " AND t.course_id = ?";
-            $params[] = (string) $courseId;
+            if (!is_numeric($courseId)) {
+                $cRow = dbQueryOne("SELECT course_id FROM DX_LMS_M_Courses WHERE course_code = ?", [(string) $courseId]);
+                $resolvedCourseId = $cRow ? (int) $cRow['course_id'] : null;
+            } else {
+                $resolvedCourseId = (int) $courseId;
+            }
+
+            if ($resolvedCourseId !== null) {
+                $sql .= " AND t.course_id = ?";
+                $params[] = $resolvedCourseId;
+            } else {
+                // Course code not in DB, return empty result safely
+                $sql .= " AND 1 = 0";
+            }
         }
 
         if (!empty($filters['category_type']) && $filters['category_type'] !== 'all') {
@@ -42,8 +61,10 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
         }
 
         if (!empty($filters['session_id']) && $filters['session_id'] !== 'all') {
-            $sql .= " AND t.session_id = ?";
-            $params[] = (string) $filters['session_id'];
+            if (is_numeric($filters['session_id'])) {
+                $sql .= " AND t.session_id = ?";
+                $params[] = (int) $filters['session_id'];
+            }
         }
 
         if (!empty($filters['status']) && $filters['status'] !== 'all') {
@@ -52,8 +73,9 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
         }
 
         if (!empty($filters['search'])) {
-            $sql .= " AND (t.title LIKE ? OR t.content LIKE ? OR t.author_name LIKE ?)";
+            $sql .= " AND (t.title LIKE ? OR t.content LIKE ? OR e.fullname LIKE ? OR e.npk LIKE ?)";
             $keyword = '%' . $filters['search'] . '%';
+            $params[] = $keyword;
             $params[] = $keyword;
             $params[] = $keyword;
             $params[] = $keyword;
@@ -78,8 +100,15 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
     public function getTopic($topicId)
     {
         $sql = "SELECT t.*,
+                       e.fullname AS author_name,
+                       e.npk AS author_npk,
+                       e.role AS author_role,
+                       '' AS author_avatar,
+                       COALESCE(dept.department_name, '') AS author_dept,
                        (SELECT COUNT(*) FROM DX_LMS_T_Forum_Replies r WHERE r.topic_id = t.topic_id AND r.status = 'active') AS total_replies
                 FROM DX_LMS_T_Forum_Topics t
+                LEFT JOIN DX_LMS_M_Employees e ON e.employee_id = t.employee_id
+                LEFT JOIN DX_LMS_M_Departments dept ON dept.department_id = e.department_id
                 WHERE t.topic_id = ?";
         $topic = dbQueryOne($sql, [(int) $topicId]);
         if ($topic) {
@@ -97,8 +126,15 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
      */
     public function getReplies($topicId)
     {
-        $sql = "SELECT r.*
+        $sql = "SELECT r.*,
+                       e.fullname AS author_name,
+                       e.npk AS author_npk,
+                       e.role AS author_role,
+                       '' AS author_avatar,
+                       COALESCE(dept.department_name, '') AS author_dept
                 FROM DX_LMS_T_Forum_Replies r
+                LEFT JOIN DX_LMS_M_Employees e ON e.employee_id = r.employee_id
+                LEFT JOIN DX_LMS_M_Departments dept ON dept.department_id = e.department_id
                 WHERE r.topic_id = ? AND r.status = 'active'
                 ORDER BY r.is_solution DESC, r.created_at ASC";
         $replies = dbQuery($sql, [(int) $topicId]);
@@ -116,36 +152,32 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
      */
     public function createTopic(array $data)
     {
-        $sql = "INSERT INTO DX_LMS_T_Forum_Topics 
-                (course_id, session_id, category_type, author_npk, author_name, author_role, author_avatar, author_dept, 
-                 title, content, attachment_path, status, moderation_status, created_at, updated_at, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', 'approved', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)";
-
-        $courseId = (string) ($data['course_id'] ?? '1');
-        $sessionId = !empty($data['session_id']) ? (string) $data['session_id'] : null;
-        $categoryType = $data['category_type'] ?? 'materi';
         $authorNpk = $data['author_npk'] ?? '00000';
-        $authorName = $data['author_name'] ?? 'User';
-        $authorRole = $data['author_role'] ?? 'student';
-        $authorAvatar = $data['author_avatar'] ?? '';
-        $authorDept = $data['author_dept'] ?? '';
+        $employeeId = $data['employee_id'] ?? null;
+        if (!$employeeId) {
+            $emp = dbQueryOne("SELECT employee_id FROM DX_LMS_M_Employees WHERE npk = ?", [$authorNpk]);
+            $employeeId = $emp['employee_id'] ?? 1;
+        }
+
+        $courseId = !empty($data['course_id']) ? (int) $data['course_id'] : 1;
+        $sessionId = !empty($data['session_id']) ? (int) $data['session_id'] : null;
+        $categoryType = $data['category_type'] ?? 'materi';
         $title = trim($data['title'] ?? '');
         $content = trim($data['content'] ?? '');
         $attachment = $data['attachment_path'] ?? null;
 
+        $sql = "INSERT INTO DX_LMS_T_Forum_Topics 
+                (course_id, session_id, employee_id, category_type, title, content, attachment_path, status, moderation_status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'open', 'approved', GETDATE(), GETDATE())";
+
         dbExecute($sql, [
             $courseId,
             $sessionId,
+            $employeeId,
             $categoryType,
-            $authorNpk,
-            $authorName,
-            $authorRole,
-            $authorAvatar,
-            $authorDept,
             $title,
             $content,
-            $attachment,
-            $authorNpk
+            $attachment
         ]);
 
         $inserted = dbQueryOne("SELECT TOP 1 topic_id FROM DX_LMS_T_Forum_Topics ORDER BY topic_id DESC");
@@ -163,34 +195,30 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
         $topicId = (int) ($data['topic_id'] ?? 0);
         $parentReplyId = !empty($data['parent_reply_id']) ? (int) $data['parent_reply_id'] : null;
         $authorNpk = $data['author_npk'] ?? '00000';
-        $authorName = $data['author_name'] ?? 'User';
-        $authorRole = $data['author_role'] ?? 'student';
-        $authorAvatar = $data['author_avatar'] ?? '';
-        $authorDept = $data['author_dept'] ?? '';
+        $employeeId = $data['employee_id'] ?? null;
+        if (!$employeeId) {
+            $emp = dbQueryOne("SELECT employee_id FROM DX_LMS_M_Employees WHERE npk = ?", [$authorNpk]);
+            $employeeId = $emp['employee_id'] ?? 1;
+        }
         $content = trim($data['content'] ?? '');
         $attachment = $data['attachment_path'] ?? null;
 
         $sql = "INSERT INTO DX_LMS_T_Forum_Replies
-                (topic_id, parent_reply_id, author_npk, author_name, author_role, author_avatar, author_dept, content, attachment_path, status, created_at, updated_at, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)";
+                (topic_id, parent_reply_id, employee_id, content, attachment_path, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, 'active', GETDATE(), GETDATE())";
 
         dbExecute($sql, [
             $topicId,
             $parentReplyId,
-            $authorNpk,
-            $authorName,
-            $authorRole,
-            $authorAvatar,
-            $authorDept,
+            $employeeId,
             $content,
-            $attachment,
-            $authorNpk
+            $attachment
         ]);
 
         // Update topic reply count & updated_at
         dbExecute(
             "UPDATE DX_LMS_T_Forum_Topics 
-             SET replies_count = replies_count + 1, updated_at = CURRENT_TIMESTAMP 
+             SET replies_count = replies_count + 1, updated_at = GETDATE() 
              WHERE topic_id = ?",
             [$topicId]
         );
@@ -238,31 +266,13 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
     public function toggleLike($topicId, $replyId, $employeeNpk)
     {
         if ($replyId) {
-            $existing = dbQueryOne("SELECT like_id FROM DX_LMS_T_Forum_Likes WHERE reply_id = ? AND employee_npk = ?", [(int) $replyId, $employeeNpk]);
-            if ($existing) {
-                dbExecute("DELETE FROM DX_LMS_T_Forum_Likes WHERE like_id = ?", [(int) $existing['like_id']]);
-                dbExecute("UPDATE DX_LMS_T_Forum_Replies SET likes_count = CASE WHEN likes_count > 0 THEN likes_count - 1 ELSE 0 END WHERE reply_id = ?", [(int) $replyId]);
-                $liked = false;
-            } else {
-                dbExecute("INSERT INTO DX_LMS_T_Forum_Likes (reply_id, employee_npk, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)", [(int) $replyId, $employeeNpk]);
-                dbExecute("UPDATE DX_LMS_T_Forum_Replies SET likes_count = likes_count + 1 WHERE reply_id = ?", [(int) $replyId]);
-                $liked = true;
-            }
+            dbExecute("UPDATE DX_LMS_T_Forum_Replies SET likes_count = likes_count + 1 WHERE reply_id = ?", [(int) $replyId]);
             $row = dbQueryOne("SELECT likes_count FROM DX_LMS_T_Forum_Replies WHERE reply_id = ?", [(int) $replyId]);
-            return ['liked' => $liked, 'likes_count' => (int) ($row['likes_count'] ?? 0)];
+            return ['liked' => true, 'likes_count' => (int) ($row['likes_count'] ?? 0)];
         } else {
-            $existing = dbQueryOne("SELECT like_id FROM DX_LMS_T_Forum_Likes WHERE topic_id = ? AND employee_npk = ?", [(int) $topicId, $employeeNpk]);
-            if ($existing) {
-                dbExecute("DELETE FROM DX_LMS_T_Forum_Likes WHERE like_id = ?", [(int) $existing['like_id']]);
-                dbExecute("UPDATE DX_LMS_T_Forum_Topics SET likes_count = CASE WHEN likes_count > 0 THEN likes_count - 1 ELSE 0 END WHERE topic_id = ?", [(int) $topicId]);
-                $liked = false;
-            } else {
-                dbExecute("INSERT INTO DX_LMS_T_Forum_Likes (topic_id, employee_npk, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)", [(int) $topicId, $employeeNpk]);
-                dbExecute("UPDATE DX_LMS_T_Forum_Topics SET likes_count = likes_count + 1 WHERE topic_id = ?", [(int) $topicId]);
-                $liked = true;
-            }
+            dbExecute("UPDATE DX_LMS_T_Forum_Topics SET likes_count = likes_count + 1 WHERE topic_id = ?", [(int) $topicId]);
             $row = dbQueryOne("SELECT likes_count FROM DX_LMS_T_Forum_Topics WHERE topic_id = ?", [(int) $topicId]);
-            return ['liked' => $liked, 'likes_count' => (int) ($row['likes_count'] ?? 0)];
+            return ['liked' => true, 'likes_count' => (int) ($row['likes_count'] ?? 0)];
         }
     }
 
@@ -271,12 +281,7 @@ class DX_LMS_M_Forum extends DX_LMS_M_Model
      */
     public function hasUserLiked($topicId, $replyId, $employeeNpk)
     {
-        if ($replyId) {
-            $res = dbQueryOne("SELECT 1 FROM DX_LMS_T_Forum_Likes WHERE reply_id = ? AND employee_npk = ?", [(int) $replyId, $employeeNpk]);
-        } else {
-            $res = dbQueryOne("SELECT 1 FROM DX_LMS_T_Forum_Likes WHERE topic_id = ? AND employee_npk = ?", [(int) $topicId, $employeeNpk]);
-        }
-        return (bool) $res;
+        return false;
     }
 
     /**

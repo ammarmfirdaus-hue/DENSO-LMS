@@ -267,22 +267,26 @@ $active_tab = 'course';
                         <!-- Modern Participant List -->
                         <div class="flex flex-col gap-3">
                             <?php foreach ($participants as $p): ?>
+                            <?php
+                            $pName = (string) ($p['nama'] ?? $p['name'] ?? $p['fullname'] ?? 'Peserta');
+                            $pScore = $p['score'] ?? 0;
+                            $pProgress = (int) ($p['progress'] ?? 0);
+                            $bgColors = [
+                                'bg-primary/10 text-primary border border-primary/20',
+                                'bg-tertiary/10 text-tertiary border border-tertiary/20',
+                                'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                                'bg-indigo-100 text-indigo-700 border border-indigo-200',
+                            ];
+                            $randColor = $bgColors[abs(crc32($pName)) % count($bgColors)];
+                            $initial = strtoupper(mb_substr($pName, 0, 1));
+                            ?>
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-outline-variant/40 hover:border-primary/40 bg-surface-container-lowest transition-all gap-4">
                                 <div class="flex items-center gap-4">
-                                    <?php
-                                    $bgColors = [
-                                        'bg-primary/10 text-primary border border-primary/20',
-                                        'bg-tertiary/10 text-tertiary border border-tertiary/20',
-                                        'bg-emerald-100 text-emerald-700 border border-emerald-200',
-                                        'bg-indigo-100 text-indigo-700 border border-indigo-200',
-                                    ];
-                                    $randColor = $bgColors[crc32($p['nama']) % count($bgColors)];
-                                    ?>
                                     <div class="w-11 h-11 rounded-full <?= $randColor ?> flex items-center justify-center font-title-sm font-bold shrink-0 shadow-sm">
-                                        <?= strtoupper(substr($p['nama'], 0, 1)) ?>
+                                        <?= $initial ?>
                                     </div>
                                     <div class="flex flex-col">
-                                        <h4 class="font-title-sm font-bold text-on-surface"><?= e($p['nama']) ?></h4>
+                                        <h4 class="font-title-sm font-bold text-on-surface"><?= e($pName) ?></h4>
                                         <p class="font-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
                                             <?php if (
                                                 $courseStatus === 'Pending Review' ||
@@ -290,9 +294,13 @@ $active_tab = 'course';
                                                 $courseStatus === 'Private' ||
                                                 $courseStatus === 'Draft'
                                             ): ?>
-                                                <span class="italic opacity-80">Kandidat Rekomendasi</span>
+                                                <span class="italic opacity-80">Kandidat Rekomendasi<?= !empty($p['department']) ? ' · ' . e($p['department']) : '' ?></span>
                                             <?php else: ?>
-                                                <span class="material-symbols-outlined text-[14px] text-amber-500">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e((string) $p['score']) ?></span>
+                                                <span class="material-symbols-outlined text-[14px] text-amber-500">military_tech</span> Skor Akhir: <span class="font-bold text-on-surface"><?= e((string) $pScore) ?></span>
+                                                <?php if (!empty($p['department'])): ?>
+                                                    <span class="text-outline-variant mx-1">•</span>
+                                                    <span><?= e($p['department']) ?></span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </p>
                                     </div>
@@ -308,14 +316,13 @@ $active_tab = 'course';
                                         <span class="px-3 py-1 bg-surface-container-high rounded-full font-label-sm text-[11px] text-on-surface-variant font-medium">Pending Approval</span>
                                     <?php else: ?>
                                         <?php
-                                        $pg = (int) $p['progress'];
-                                        $isFull = $pg === 100;
+                                        $isFull = $pProgress === 100;
                                         ?>
                                         <div class="flex items-center gap-2 md:justify-end">
-                                            <span class="font-label-sm font-bold <?= $isFull ? 'text-emerald-600' : 'text-primary' ?>"><?= $pg ?>% Selesai</span>
+                                            <span class="font-label-sm font-bold <?= $isFull ? 'text-emerald-600' : 'text-primary' ?>"><?= $pProgress ?>% Selesai</span>
                                         </div>
                                         <div class="w-full h-2 bg-surface-variant/60 rounded-full overflow-hidden">
-                                            <div class="h-full rounded-full transition-all duration-1000 <?= $isFull ? 'bg-emerald-500' : 'bg-primary' ?>" style="width: <?= $pg ?>%;"></div>
+                                            <div class="h-full rounded-full transition-all duration-1000 <?= $isFull ? 'bg-emerald-500' : 'bg-primary' ?>" style="width: <?= $pProgress ?>%;"></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -380,6 +387,11 @@ $active_tab = 'course';
                                 Arsipkan / Nonaktifkan Course
                             </button>
                         <?php endif; ?>
+
+                        <button onclick="handleAdminAction('delete')" class="w-full py-2.5 px-4 rounded-xl border border-error/30 text-error hover:bg-error/10 font-label-sm font-bold flex items-center justify-center gap-2 transition-all mt-2">
+                            <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                            Hapus Course Permanen
+                        </button>
                     </div>
                 </div>
 
@@ -515,6 +527,8 @@ $active_tab = 'course';
                 return;
             }
 
+            const courseId = '<?= e((string)$course['id']) ?>';
+
             if (actionType === 'approve') {
                 DLS.confirm(
                     'Setujui Course Ini?',
@@ -524,7 +538,20 @@ $active_tab = 'course';
                     'question'
                 ).then((result) => {
                     if (result && (result.isConfirmed || result === true)) {
-                        DLS.success('Berhasil Disetujui', 'Course berhasil dipublikasikan ke katalog aktif LMS.');
+                        fetch('?route=/admin/course/approve&id=' + encodeURIComponent(courseId))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    DLS.success('Berhasil Disetujui', data.message || 'Course berhasil dipublikasikan ke katalog aktif LMS.').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    DLS.error('Gagal', data.error || 'Terjadi kesalahan sistem.');
+                                }
+                            })
+                            .catch(err => {
+                                DLS.error('Error', 'Gagal menghubungi server.');
+                            });
                     }
                 });
             } else if (actionType === 'reject') {
@@ -540,7 +567,15 @@ $active_tab = 'course';
                     'warning'
                 ).then((result) => {
                     if (result && (result.isConfirmed || result === true)) {
-                        DLS.success('Diarsipkan', 'Course telah berhasil diarsipkan.');
+                        fetch('?route=/admin/course/archive&id=' + encodeURIComponent(courseId))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    DLS.success('Diarsipkan', data.message).then(() => window.location.reload());
+                                } else {
+                                    DLS.error('Gagal', data.error);
+                                }
+                            });
                     }
                 });
             } else if (actionType === 'unarchive') {
@@ -552,7 +587,38 @@ $active_tab = 'course';
                     'question'
                 ).then((result) => {
                     if (result && (result.isConfirmed || result === true)) {
-                        DLS.success('Diaktifkan', 'Course telah berhasil diaktifkan kembali.');
+                        fetch('?route=/admin/course/unarchive&id=' + encodeURIComponent(courseId))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    DLS.success('Diaktifkan', data.message).then(() => window.location.reload());
+                                } else {
+                                    DLS.error('Gagal', data.error);
+                                }
+                            });
+                    }
+                });
+            } else if (actionType === 'delete') {
+                DLS.confirm(
+                    'Hapus Course Permanen?',
+                    'PERINGATAN: Course ini dan seluruh materi, kuis, sesi, serta relasinya akan DIHAPUS TOTAL dari database SSMS. Tindakan ini tidak dapat dibatalkan!',
+                    'Ya, Hapus Permanen',
+                    'Batal',
+                    'error'
+                ).then((result) => {
+                    if (result && (result.isConfirmed || result === true)) {
+                        fetch('?route=/admin/course/delete&id=' + encodeURIComponent(courseId))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    DLS.success('Berhasil Dihapus', data.message).then(() => {
+                                        window.location.href = '?route=/admin/course';
+                                    });
+                                } else {
+                                    DLS.error('Gagal Menghapus', data.error);
+                                }
+                            })
+                            .catch(() => DLS.error('Error', 'Terjadi kesalahan sistem saat menghapus course.'));
                     }
                 });
             } else if (actionType === 'forum') {
@@ -591,6 +657,7 @@ $active_tab = 'course';
 
             closeRejectionModal();
 
+            const courseId = '<?= e((string)$course['id']) ?>';
             if (typeof DLS !== 'undefined') {
                 DLS.confirm(
                     'Kirim Catatan Revisi?',
@@ -600,9 +667,22 @@ $active_tab = 'course';
                     'warning'
                 ).then((result) => {
                     if (result && (result.isConfirmed || result === true)) {
-                        DLS.success('Revisi Diminta', 'Catatan penolakan dan instruksi revisi telah berhasil dikirimkan ke instruktur.');
-                        const noteInput = document.getElementById('rejectionNoteText');
-                        if (noteInput) noteInput.value = '';
+                        fetch('?route=/admin/course/reject', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: courseId, notes: noteText })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                DLS.success('Revisi Diminta', data.message).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                DLS.error('Gagal', data.error);
+                            }
+                        })
+                        .catch(() => DLS.error('Error', 'Gagal mengirim catatan revisi.'));
                     } else {
                         openRejectionModal();
                     }
