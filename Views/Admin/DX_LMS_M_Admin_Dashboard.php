@@ -31,7 +31,7 @@ $active_tab = 'beranda';
     <?php include 'includes/components/DX_LMS_M_Header.php'; ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 overflow-y-auto pt-[72px] px-container-margin pb-[88px] lg:ml-[240px]">
+    <main class="dls-main flex-1 overflow-y-auto pt-[88px] px-container-margin pb-[88px] lg:ml-[240px]">
         
         <!-- Welcome Section -->
         <section class="space-y-stack-sm min-w-0 mb-stack-lg">

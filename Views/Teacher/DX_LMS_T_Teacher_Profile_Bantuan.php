@@ -66,7 +66,7 @@ $active_tab = 'profil'; ?>
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-32 pt-[72px] flex flex-col gap-5">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-32 pt-[88px] flex flex-col gap-5">
         <div class="max-w-[800px] w-full mx-auto flex flex-col gap-5">
 
             <!-- ===== HEADER ===== -->

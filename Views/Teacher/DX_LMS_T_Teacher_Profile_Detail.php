@@ -111,7 +111,7 @@ if (!function_exists('formatMonthYear')) {
     <?php include 'includes/components/DX_LMS_M_Teacher_Sidebar.php'; ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-32 pt-[72px] flex flex-col gap-5">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-32 pt-[88px] flex flex-col gap-5">
 
         <!-- Max width container for larger screens -->
         <div class="max-w-[900px] w-full mx-auto flex flex-col gap-5">

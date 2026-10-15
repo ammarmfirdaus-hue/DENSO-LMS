@@ -38,7 +38,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     ?>
 
     <!-- Main Content Canvas (Full-Width Fluid Layout without Empty Margins) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[120px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[120px] pt-[88px]">
         <div class="w-full space-y-stack-xl relative">
             
             <?php if (($course['status'] ?? '') === 'Submitted' || ($course['status'] ?? '') === 'Approved'): ?>
@@ -98,6 +98,76 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     <input type="hidden" id="edit-course-id" value="<?= e((string) $currentCourseId) ?>">
                 <?php endif; ?>
                 
+                <?php if (!empty($course['status']) && strtolower($course['status']) === 'rejected'): ?>
+                <!-- Rejection Notice Banner from Admin (Option A: Slim Collapsible Banner) -->
+                <div id="rejection-notice-wrapper" class="bg-error/5 border border-error/25 hover:border-error/40 rounded-2xl p-3 sm:px-4 sm:py-3 shadow-xs transition-all duration-300 mb-6">
+                    <!-- Slim Header Bar (Always visible across all 4 steps without pushing content down) -->
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer select-none" onclick="toggleRejectionDrawer()">
+                            <div class="w-8 h-8 rounded-xl bg-error text-white flex items-center justify-center shrink-0 shadow-xs">
+                                <span class="material-symbols-outlined text-[18px]">assignment_late</span>
+                            </div>
+                            <div class="min-w-0 flex items-center gap-2 flex-wrap">
+                                <span class="font-label-sm font-bold text-error uppercase tracking-wider text-[12px] sm:text-[13px] shrink-0 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                                    Revisi Admin:
+                                </span>
+                                <span class="font-body-md text-on-surface font-semibold italic text-[13px] sm:text-[14px] truncate max-w-[240px] sm:max-w-md lg:max-w-xl">
+                                    "<?= e($course['rejection_note']['note'] ?? 'Mohon periksa kembali materi dan kurikulum.') ?>"
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Actions & Metadata -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <?php if (!empty($course['rejection_note']['date'])): ?>
+                            <span class="hidden md:inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant bg-surface px-2.5 py-1 rounded-lg border border-outline-variant/60 shadow-2xs">
+                                <span class="material-symbols-outlined text-[13px] text-error">schedule</span>
+                                <?= e($course['rejection_note']['date']) ?>
+                            </span>
+                            <?php endif; ?>
+                            <button type="button" onclick="toggleRejectionDrawer()" id="rejection-toggle-btn" class="inline-flex items-center gap-1 text-[12px] font-bold text-error hover:text-white hover:bg-error bg-surface border border-error/30 px-3 py-1.5 rounded-xl transition-all shadow-2xs select-none cursor-pointer" title="Buka/Tutup Catatan Lengkap">
+                                <span id="rejection-toggle-text">Detail Catatan</span>
+                                <span id="rejection-toggle-icon" class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Expandable Drawer Content -->
+                    <div id="rejection-drawer-content" class="hidden border-t border-error/20 mt-3 pt-3 space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-[12px] font-bold text-error flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">account_circle</span>
+                                Reviewer: <?= e($course['rejection_note']['admin_name'] ?? 'Admin LMS') ?>
+                            </span>
+                            <?php if (!empty($course['rejection_note']['date'])): ?>
+                            <span class="md:hidden text-[11px] font-medium text-on-surface-variant flex items-center gap-1 bg-surface px-2 py-0.5 rounded border border-outline-variant/40">
+                                <span class="material-symbols-outlined text-[12px] text-error">schedule</span>
+                                <?= e($course['rejection_note']['date']) ?>
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="bg-surface p-3.5 rounded-xl border border-error/20 shadow-2xs">
+                            <p class="font-label-sm font-bold text-error uppercase tracking-wider text-[10px] mb-1">Catatan Perbaikan Lengkap:</p>
+                            <p class="font-body-md font-bold text-on-surface italic text-[14px] leading-relaxed whitespace-pre-line">
+                                "<?= e($course['rejection_note']['note'] ?? 'Mohon periksa kembali materi dan kurikulum.') ?>"
+                            </p>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2 pt-1 text-[12px] text-on-surface-variant">
+                            <p class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[15px] text-error shrink-0">info</span>
+                                <span>Sesuaikan kurikulum/materi sesuai arahan di atas, lalu ajukan kembali di <strong>Step 4 (Review)</strong>.</span>
+                            </p>
+                            <button type="button" onclick="toggleRejectionDrawer()" class="text-[11px] font-bold text-error hover:underline shrink-0">
+                                Sembunyikan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- ====== STEP 1: INFORMASI COURSE ====== -->
                 <section id="wizard-step-panel-1" class="wizard-step-panel bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
@@ -219,12 +289,32 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     </div>
                     
                     <div class="space-y-4" id="sessions-container">
-                        <!-- Sesi 1 Dummy -->
-                        <div class="session-block border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm">
+                        <?php
+                        $renderSessions = !empty($existing_sessions) ? $existing_sessions : [
+                            [
+                                'session_id' => 0,
+                                'session_title' => 'Sesi 1: Dasar Materi',
+                                'materials' => [
+                                    [
+                                        'material_title' => 'Materi Pengantar Kompetensi',
+                                        'material_type' => 'document',
+                                        'material_description' => 'Silakan pelajari materi pengantar berikut sebelum melanjutkan ke kuis.',
+                                    ]
+                                ],
+                                'quizzes' => []
+                            ]
+                        ];
+                        foreach ($renderSessions as $sIdx => $sess):
+                            $sNum = $sIdx + 1;
+                            $sTitle = $sess['session_title'] ?? ('Sesi ' . $sNum . ': Modul Pembelajaran');
+                            $sMats = $sess['materials'] ?? [];
+                            $sQuizzes = $sess['quizzes'] ?? [];
+                        ?>
+                        <div class="session-block border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm" data-session-id="<?= e((string)($sess['session_id'] ?? 0)) ?>">
                             <div class="bg-surface-container-low px-4 py-3 border-b border-outline-variant/60 flex justify-between items-center cursor-move">
                                 <div class="flex items-center gap-3">
                                     <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface cursor-grab">drag_indicator</span>
-                                    <h4 class="font-title-sm font-bold text-on-surface">Sesi 1: Dasar Materi</h4>
+                                    <h4 class="font-title-sm font-bold text-on-surface"><?= e($sTitle) ?></h4>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button type="button" onclick="editSessionTitle(this)" class="material-symbols-outlined text-[20px] text-on-surface-variant hover:text-primary transition-colors" title="Edit Judul Sesi">edit</button>
@@ -246,33 +336,29 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <div class="bg-surface-container-lowest p-5 flex flex-col session-workspace" data-workspace="materi">
                                 <!-- Dynamic List -->
                                 <div class="materi-builder-list space-y-3 mb-5 empty:hidden">
-                                    <!-- Pre-filled Sample -->
-                                    <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-secondary-container text-secondary flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined">quiz</span>
-                                        </div>
-                                        <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm text-secondary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Pre-Test</p>
-                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="Pre-Test Dasar Evaluasi" placeholder="Judul Modul...">
-                                        </div>
-                                        <button type="button" onclick="openAssessmentBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Soal">settings</button>
-                                        <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
-                                    </div>
+                                    <?php foreach ($sMats as $mIdx => $mat): 
+                                        $mTitle = $mat['material_title'] ?? ('Materi ' . ($mIdx + 1));
+                                        $mType = strtolower($mat['material_type'] ?? 'document');
+                                        $mDesc = $mat['material_description'] ?? '';
+                                        $icon = ($mType === 'video') ? 'play_circle' : (($mType === 'pdf') ? 'picture_as_pdf' : 'description');
+                                    ?>
                                     <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
                                         <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined">description</span>
+                                            <span class="material-symbols-outlined"><?= $icon ?></span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
                                             <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Materi</p>
-                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="Materi PDF SOP Standar" placeholder="Judul Modul...">
+                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="<?= e($mTitle) ?>" placeholder="Judul Modul...">
                                         </div>
+                                        <div class="mb-saved-state hidden" data-pages="<?= e($mDesc) ?>"></div>
                                         <button type="button" onclick="openMaterialBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Materi">settings</button>
                                         <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
                                     </div>
+                                    <?php endforeach; ?>
                                 </div>
                                 
                                 <!-- Empty State Hint -->
-                                <div class="materi-empty-hint hidden flex-col items-center justify-center py-6 text-center text-on-surface-variant">
+                                <div class="materi-empty-hint <?= empty($sMats) ? 'flex' : 'hidden' ?> flex-col items-center justify-center py-6 text-center text-on-surface-variant">
                                     <span class="material-symbols-outlined text-[48px] text-surface-variant mb-2">auto_awesome_mosaic</span>
                                     <p class="font-bold font-title-md text-on-surface">Belum ada modul</p>
                                     <p class="font-body-sm max-w-sm mt-1">Tambahkan pre-test, materi, atau post-test di bawah ini untuk menyusun sesi pembelajaran.</p>
@@ -299,14 +385,24 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <div class="bg-surface-container-lowest p-5 flex-col hidden" data-workspace="quiz">
                                 <!-- Quiz Items List -->
                                 <div class="quiz-items-list space-y-3 mb-5">
+                                    <?php
+                                    $hasCustomQuiz = !empty($sQuizzes);
+                                    $quizCount = 0;
+                                    $quizTitle = 'Quiz Course';
+                                    if ($hasCustomQuiz) {
+                                        $qz0 = $sQuizzes[0];
+                                        $quizTitle = $qz0['quiz_title'] ?? 'Quiz Course';
+                                        $quizCount = count($qz0['questions'] ?? []);
+                                    }
+                                    ?>
                                     <!-- Quiz Course -->
                                     <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
                                         <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
                                             <span class="material-symbols-outlined">assignment</span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Quiz Course</p>
-                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface">0</span> Pertanyaan</p>
+                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold"><?= e($quizTitle) ?></p>
+                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface"><?= $quizCount ?></span> Pertanyaan</p>
                                         </div>
                                         <button type="button" onclick="openQuizBuilder(this, 'quiz')" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors shadow-sm lg:opacity-0 group-hover:opacity-100 focus:opacity-100">
                                             <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
@@ -336,6 +432,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                             </div>
                         </div>
+                        <?php endforeach; ?>
                     </div>
                 </section>
 
@@ -440,7 +537,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                            data-departemen="<?= e($deptVal) ?>" 
                                            data-divisi="<?= e($divVal) ?>" 
                                            data-seksi="<?= e($seksiVal) ?>">
-                                        <input type="checkbox" onchange="updateCandidateCount()" class="candidate-check w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" value="<?= e($empId) ?>" data-npk="<?= e($emp['npk']) ?>" data-name="<?= e($empName) ?>" checked>
+                                        <input type="checkbox" onchange="updateCandidateCount()" class="candidate-check emp-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" value="<?= e($empId) ?>" data-npk="<?= e($emp['npk']) ?>" data-name="<?= e($empName) ?>" checked>
                                         <div class="w-10 h-10 rounded-xl bg-primary-container/60 text-primary font-bold flex items-center justify-center shrink-0">
                                             <?= e($initials) ?>
                                         </div>
@@ -465,13 +562,40 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             </div>
                             
                             <script>
+                            function toggleSelectAllCandidates(masterEl) {
+                                const isChecked = masterEl.checked;
+                                const cards = document.querySelectorAll('.emp-card');
+                                cards.forEach(card => {
+                                    if (card.style.display !== 'none') {
+                                        const cb = card.querySelector('.candidate-check');
+                                        if (cb) cb.checked = isChecked;
+                                    }
+                                });
+                                updateCandidateCount();
+                            }
+
+                            function updateCandidateCount() {
+                                const allChecks = document.querySelectorAll('.emp-card .candidate-check:checked, .emp-card .emp-checkbox:checked');
+                                const count = allChecks.length;
+                                const numEl = document.getElementById('emp-count-num');
+                                if (numEl) numEl.textContent = count;
+                                const bottomEl = document.getElementById('emp-count-bottom');
+                                if (bottomEl) {
+                                    bottomEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num">${count}</span> Karyawan Terpilih`;
+                                }
+                                const reviewCountEl = document.getElementById('review-candidates-count');
+                                if (reviewCountEl) {
+                                    reviewCountEl.textContent = `${count} Karyawan Terpilih`;
+                                }
+                            }
+
                             function applyCandidateFilter() {
                                 const filters = {
-                                    jabatan: document.getElementById('filter-jabatan')?.value.toLowerCase() || '',
-                                    golongan: document.getElementById('filter-golongan')?.value.toLowerCase() || '',
-                                    departemen: document.getElementById('filter-departemen')?.value.toLowerCase() || '',
-                                    divisi: document.getElementById('filter-divisi')?.value.toLowerCase() || '',
-                                    seksi: document.getElementById('filter-seksi')?.value.toLowerCase() || ''
+                                    jabatan: document.getElementById('filter-jabatan')?.value.toLowerCase().trim() || '',
+                                    golongan: document.getElementById('filter-golongan')?.value.toLowerCase().trim() || '',
+                                    departemen: document.getElementById('filter-departemen')?.value.toLowerCase().trim() || '',
+                                    divisi: document.getElementById('filter-divisi')?.value.toLowerCase().trim() || '',
+                                    seksi: document.getElementById('filter-seksi')?.value.toLowerCase().trim() || ''
                                 };
                                 
                                 let visibleCount = 0;
@@ -493,8 +617,11 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     }
                                 });
 
-                                document.getElementById('emp-count-display').innerText = `Pilih Semua (${visibleCount} Kandidat Relevan Ditemukan)`;
-                                document.getElementById('emp-count-bottom').innerHTML = `<span class="material-symbols-outlined text-[16px]">how_to_reg</span> ${visibleCount} Karyawan Terpilih`;
+                                const displayEl = document.getElementById('emp-count-display');
+                                if (displayEl) {
+                                    displayEl.innerText = `Pilih Semua (${visibleCount} Kandidat Relevan Ditemukan)`;
+                                }
+                                updateCandidateCount();
                             }
                             </script>
                         </div>
@@ -575,9 +702,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <span class="material-symbols-outlined text-[22px]">gavel</span>
                         </div>
                         <div>
-                            <h5 class="font-title-sm font-bold text-on-surface">Konfirmasi Pengiriman ke Admin</h5>
+                            <h5 class="font-title-sm font-bold text-on-surface"><?= (!empty($course['status']) && strtolower($course['status']) === 'rejected') ? 'Pengajuan Ulang Perbaikan Course ke Admin' : 'Konfirmasi Pengiriman ke Admin' ?></h5>
                             <p class="font-body-sm text-on-surface-variant mt-1 leading-relaxed">
-                                Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> berarti mengajukan course ini secara resmi ke database Denso LMS untuk peninjauan (review) dan aktivasi kelas oleh Admin. Anda juga dapat memilih <span class="font-bold text-on-surface">"Simpan Draft"</span> jika masih ingin menyempurnakan kurikulum.
+                                <?= (!empty($course['status']) && strtolower($course['status']) === 'rejected') ? 'Course ini telah disesuaikan berdasarkan catatan instruksi revisi Admin. Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> akan mengirimkan revisi terbaru ke sistem untuk peninjauan ulang dan persetujuan.' : 'Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> berarti mengajukan course ini secara resmi ke database Denso LMS untuk peninjauan (review) dan aktivasi kelas oleh Admin. Anda juga dapat memilih <span class="font-bold text-on-surface">"Simpan Draft"</span> jika masih ingin menyempurnakan kurikulum.' ?>
                             </p>
                         </div>
                     </div>
@@ -823,6 +950,25 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     // ==============================================
     let currentWizardStep = 1;
 
+    // Toggle Rejection Notice Drawer (Option A: Slim Collapsible Banner)
+    function toggleRejectionDrawer() {
+        const drawer = document.getElementById('rejection-drawer-content');
+        const icon = document.getElementById('rejection-toggle-icon');
+        const text = document.getElementById('rejection-toggle-text');
+        if (!drawer) return;
+        
+        const isHidden = drawer.classList.contains('hidden');
+        if (isHidden) {
+            drawer.classList.remove('hidden');
+            if (icon) icon.textContent = 'expand_less';
+            if (text) text.textContent = 'Tutup Catatan';
+        } else {
+            drawer.classList.add('hidden');
+            if (icon) icon.textContent = 'expand_more';
+            if (text) text.textContent = 'Detail Catatan';
+        }
+    }
+
     function wizardGoToStep(step) {
         if (step < 1 || step > 4) return;
         
@@ -1047,12 +1193,12 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             const qzList = sess.querySelector('.quiz-items-list');
             if (qzList) {
                 const qzQuestions = [];
-                qzList.querySelectorAll('.qb-saved-state .ab-question-block, .qb-saved-state .qb-question-item').forEach((qEl, qIdx) => {
+                qzList.querySelectorAll('.qb-saved-state .qb-question-block, .qb-saved-state .ab-question-block, .qb-saved-state .qb-question-item').forEach((qEl, qIdx) => {
                     const qText = qEl.querySelector('textarea')?.value || qEl.querySelector('textarea')?.textContent || ('Pertanyaan ' + (qIdx + 1));
                     const choices = [];
-                    qEl.querySelectorAll('.ab-option-row, .qb-option-row').forEach((optRow, oIdx) => {
-                        const optText = optRow.querySelector('input[type="text"]')?.value || ('Pilihan ' + String.fromCharCode(65 + oIdx));
-                        const isCorrect = !!optRow.querySelector('input[type="radio"]:checked');
+                    qEl.querySelectorAll('.qb-option-row, .ab-option-row').forEach((optRow, oIdx) => {
+                        const optText = optRow.querySelector('input[type="text"]')?.value || optRow.querySelector('input[type="text"]')?.getAttribute('value') || ('Pilihan ' + String.fromCharCode(65 + oIdx));
+                        const isCorrect = !!(optRow.querySelector('input[type="radio"]:checked') || optRow.querySelector('input[type="radio"][checked]'));
                         choices.push({
                             choice_text: optText,
                             is_correct: isCorrect ? 1 : 0,

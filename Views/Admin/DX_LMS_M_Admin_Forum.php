@@ -13,7 +13,7 @@
     <?php include 'includes/components/DX_LMS_M_Header.php'; ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[72px] bg-[#FAFAFA] min-h-screen">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[88px] bg-[#FAFAFA] min-h-screen">
         <div class="max-w-7xl mx-auto space-y-6">
 
             <!-- Breadcrumbs -->

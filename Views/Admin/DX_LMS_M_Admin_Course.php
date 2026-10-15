@@ -27,7 +27,7 @@ $active_tab = 'course';
     <?php include 'includes/components/DX_LMS_M_Admin_Sidebar.php'; ?>
     <?php include 'includes/components/DX_LMS_M_Header.php'; ?>
 
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-4">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[88px]">
         
         <?php
         $current_filter = strtolower($_GET['status'] ?? 'all');

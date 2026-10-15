@@ -11,7 +11,8 @@ $courseStatus = $course['status'] ?? 'Draft';
 $badgeColor = 'bg-surface-container-high text-on-surface-variant';
 $badgeBorder = 'border-outline-variant/40';
 $badgeDot = 'bg-on-surface-variant';
-$canEditRecommendation = false;
+$canEditCourse = ($courseStatus !== 'Submitted' && $courseStatus !== 'Pending Review');
+$canEditRecommendation = $canEditCourse;
 
 switch ($courseStatus) {
     case 'Draft':
@@ -19,7 +20,11 @@ switch ($courseStatus) {
         $badgeColor = 'bg-surface-container-high text-on-surface-variant';
         $badgeBorder = 'border-outline-variant/50';
         $badgeDot = 'bg-on-surface-variant';
-        $canEditRecommendation = $courseStatus === 'Draft';
+        break;
+    case 'Rejected':
+        $badgeColor = 'bg-red-100 text-red-800';
+        $badgeBorder = 'border-red-300';
+        $badgeDot = 'bg-red-500';
         break;
     case 'Pending Review':
     case 'Submitted':
@@ -87,7 +92,7 @@ if (!empty($participants)) {
     ?>
 
     <!-- Main Content Canvas (Full-Width Fluid Layout Tanpa Ruang Kosong Berlebih) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[72px] bg-[#FAFAFA]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[88px] bg-[#FAFAFA]">
         
         <!-- Full-Width Fluid Grid (2 Kolom Kiri, 1 Kolom Kanan) -->
         <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
@@ -137,9 +142,9 @@ if (!empty($participants)) {
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
                             <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 block mb-1">Target Peserta</span>
-                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[18px] text-tertiary">engineering</span>
-                                    Leader & SPV
+                                <span class="font-title-sm font-bold text-on-surface flex items-center gap-1.5 truncate" title="<?= e($course['target_positions'] ?? 'Semua Posisi') ?>">
+                                    <span class="material-symbols-outlined text-[18px] text-tertiary shrink-0">engineering</span>
+                                    <span class="truncate"><?= e($course['target_positions'] ?? 'Semua Posisi') ?></span>
                                 </span>
                             </div>
                             <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/40">
@@ -172,6 +177,51 @@ if (!empty($participants)) {
                         </div>
                     </div>
                 </div>
+
+                <?php if ($courseStatus === 'Rejected'): ?>
+                <!-- Rejection Notice Banner from Admin -->
+                <div class="mb-6 bg-error/5 border-2 border-error/30 rounded-3xl p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-error text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <span class="material-symbols-outlined text-[26px]">assignment_late</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <h3 class="font-headline-sm font-bold text-error flex items-center gap-2">
+                                    Catatan Revisi dari Admin
+                                </h3>
+                                <?php if (!empty($course['rejection_note']['date'])): ?>
+                                <span class="text-[12px] font-medium text-on-surface-variant flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-lg border border-outline-variant/40">
+                                    <span class="material-symbols-outlined text-[14px] text-error">schedule</span>
+                                    <?= e($course['rejection_note']['date']) ?>
+                                </span>
+                                <?php endif; ?>
+                            </div>
+                            <p class="font-body-sm text-on-surface-variant mb-3">Admin telah meninjau pengajuan course ini dan meminta perbaikan dengan catatan berikut:</p>
+                            
+                            <div class="bg-white border-l-4 border-error rounded-r-xl p-4 shadow-xs text-on-surface mb-4">
+                                <div class="flex items-center gap-2 text-[11px] font-bold text-error uppercase tracking-wider mb-1">
+                                    <span class="material-symbols-outlined text-[15px]">rate_review</span>
+                                    Instruksi Perbaikan Admin (<?= e($course['rejection_note']['admin_name'] ?? 'Admin LMS') ?>):
+                                </div>
+                                <p class="font-body-md font-bold text-on-surface leading-relaxed text-[15px]">
+                                    "<?= e($course['rejection_note']['note'] ?? 'Mohon periksa kembali materi dan evaluasi kurikulum.') ?>"
+                                </p>
+                            </div>
+                            
+                            <div class="flex flex-wrap items-center gap-3">
+                                <a href="?route=/teacher/course/create&course_id=<?= e((string)$course['id']) ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-error hover:bg-error-600 text-white font-label-md font-bold shadow-sm transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]">build</span>
+                                    Buka Wizard Penyuntingan Course
+                                </a>
+                                <span class="text-[12px] text-on-surface-variant/80 italic">
+                                    Setelah disunting, Anda dapat mengajukan kembali course ini ke Admin.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Navigation Tabs (Silabus, Forum Diskusi, Monitoring Peserta) -->
                 <?php $tab = $tab ?? 'silabus'; ?>
@@ -272,69 +322,190 @@ if (!empty($participants)) {
                 <?php if ($tab === 'silabus'): ?>
                 <!-- Structured Learning Tree (Silabus & Materi Panel) -->
                 <section class="bg-white rounded-3xl p-6 lg:p-8 border border-outline-variant/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-8">
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/30">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-outline-variant/30">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <span class="material-symbols-outlined text-[22px]">auto_stories</span>
                             </div>
                             <div>
                                 <h3 class="font-headline-sm font-bold text-on-surface">Silabus & Materi Kurikulum</h3>
-                                <p class="font-body-sm text-on-surface-variant">Struktur sesi pemotongan kompetensi dan dokumen pelatihan</p>
+                                <p class="font-body-sm text-on-surface-variant">Struktur sesi, materi pembelajaran, dan kuis kompetensi dari database SQL Server</p>
                             </div>
                         </div>
-                        <?php if ($canEditRecommendation): ?>
-                        <button class="bg-primary/10 text-primary px-4 py-2 rounded-xl font-label-md font-bold hover:bg-primary/20 transition-colors flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[20px]">add</span> Tambah Sesi
+                        <?php if ($canEditCourse): ?>
+                        <button type="button" onclick="openSessionModal('add', <?= (int)$course['id'] ?>)" class="bg-primary hover:bg-primary-600 text-white px-4 py-2.5 rounded-xl font-label-md font-bold transition-colors flex items-center gap-1.5 shadow-sm text-xs sm:text-sm shrink-0">
+                            <span class="material-symbols-outlined text-[18px]">add_circle</span> Tambah Sesi Baru
                         </button>
                         <?php else: ?>
                         <span class="px-3 py-1 bg-surface-container rounded-full font-label-sm font-semibold text-on-surface-variant">
-                            <?= e((string) count($syllabus)) ?> Modul
+                            <?= e((string) count($syllabus)) ?> Sesi Terdaftar
                         </span>
                         <?php endif; ?>
                     </div>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <?php if (empty($syllabus)): ?>
-                            <div class="bg-surface-container-lowest p-10 rounded-2xl border-2 border-dashed border-outline-variant/60 flex flex-col items-center justify-center text-on-surface-variant">
-                                <span class="material-symbols-outlined text-[40px] mb-3 opacity-40">data_alert</span>
-                                <p class="font-body-md text-center">Belum ada silabus atau materi yang ditambahkan.</p>
+                            <div class="bg-surface-container-lowest p-12 rounded-2xl border-2 border-dashed border-outline-variant/60 flex flex-col items-center justify-center text-on-surface-variant text-center">
+                                <span class="material-symbols-outlined text-[48px] mb-3 text-outline-variant">menu_book</span>
+                                <p class="font-headline-sm font-bold text-on-surface mb-1">Belum Ada Sesi atau Materi</p>
+                                <p class="font-body-sm text-on-surface-variant max-w-md mb-4">Course ini belum memiliki struktur kurikulum. Silakan tambahkan sesi pembelajaran pertama.</p>
+                                <?php if ($canEditCourse): ?>
+                                <button type="button" onclick="openSessionModal('add', <?= (int)$course['id'] ?>)" class="bg-primary hover:bg-primary-600 text-white px-5 py-2.5 rounded-xl font-label-md font-bold transition-colors flex items-center gap-2 shadow-sm text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">add</span> Tambah Sesi Sekarang
+                                </button>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
-                            <div class="flex flex-col gap-3">
+                            <div class="flex flex-col gap-5">
                                 <?php foreach ($syllabus as $index => $sess): ?>
-                                    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all group">
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-10 h-10 rounded-xl bg-primary text-on-primary font-bold font-mono text-sm flex items-center justify-center shrink-0 shadow-sm">
+                                    <?php
+                                    $sessionId = (int) ($sess['session_id'] ?? $sess['id']);
+                                    $mats = $sess['materials_list'] ?? [];
+                                    $qzs = $sess['quizzes_list'] ?? [];
+                                    ?>
+                                    <div class="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-5 sm:p-6 hover:border-primary/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all">
+                                        <!-- Header Sesi -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
+                                            <div class="flex items-start gap-4">
+                                                <div class="w-10 h-10 rounded-xl bg-primary text-white font-bold font-mono text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5">
                                                     <?= sprintf('%02d', $index + 1) ?>
                                                 </div>
                                                 <div>
-                                                    <h4 class="font-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+                                                    <h4 class="font-title-md font-bold text-on-surface text-base sm:text-lg">
                                                         <?= e($sess['title']) ?>
                                                     </h4>
-                                                    <span class="font-label-sm text-on-surface-variant">Modul Komponen Terverifikasi</span>
+                                                    <?php if (!empty($sess['description'])): ?>
+                                                        <p class="font-body-sm text-xs text-on-surface-variant mt-0.5 leading-snug"><?= e($sess['description']) ?></p>
+                                                    <?php endif; ?>
+                                                    <div class="flex items-center gap-3 mt-2">
+                                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-md">
+                                                            <span class="material-symbols-outlined text-[14px]">article</span>
+                                                            <?= count($mats) ?> Materi
+                                                        </span>
+                                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-md">
+                                                            <span class="material-symbols-outlined text-[14px]">quiz</span>
+                                                            <?= count($qzs) ?> Kuis / Assessment
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             
-                                            <!-- Pill Metrics for Session -->
-                                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 shrink-0">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-on-surface-variant font-label-sm border border-outline-variant/60 shadow-sm">
-                                                        <span class="material-symbols-outlined text-[16px] text-primary">article</span>
-                                                        <?= e((string) ($sess['materials'] ?? 0)) ?> Materi
-                                                    </span>
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-on-surface-variant font-label-sm border border-outline-variant/60 shadow-sm">
-                                                        <span class="material-symbols-outlined text-[16px] text-orange-500">quiz</span>
-                                                        <?= e((string) ($sess['assesments'] ?? 0)) ?> Assessment
-                                                    </span>
-                                                </div>
-                                                
-                                                <?php if ($canEditRecommendation): ?>
-                                                <button class="text-primary font-label-sm font-bold hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                                                    <span class="material-symbols-outlined text-[16px]">edit</span> Edit Konten
+                                            <!-- Action Buttons Sesi -->
+                                            <?php if ($canEditCourse): ?>
+                                            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                                <button type="button" onclick="openMaterialModal('add', <?= $sessionId ?>)" class="px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/5 font-label-sm font-bold text-xs flex items-center gap-1 transition-colors" title="Tambah Materi ke Sesi Ini">
+                                                    <span class="material-symbols-outlined text-[16px]">post_add</span> + Materi
                                                 </button>
-                                                <?php endif; ?>
+                                                <button type="button" onclick="openQuizModal('add', <?= $sessionId ?>, <?= (int)$course['id'] ?>)" class="px-3 py-1.5 rounded-lg border border-purple-600 text-purple-700 hover:bg-purple-50 font-label-sm font-bold text-xs flex items-center gap-1 transition-colors" title="Tambah Kuis ke Sesi Ini">
+                                                    <span class="material-symbols-outlined text-[16px]">quiz</span> + Kuis
+                                                </button>
+                                                <button type="button" onclick="openSessionModal('edit', <?= (int)$course['id'] ?>, <?= $sessionId ?>, '<?= e(addslashes($sess['title'])) ?>', '<?= e(addslashes($sess['description'] ?? '')) ?>')" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-secondary hover:bg-secondary/10 flex items-center justify-center transition-colors" title="Edit Judul Sesi">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                </button>
+                                                <button type="button" onclick="deleteSession(<?= $sessionId ?>, '<?= e(addslashes($sess['title'])) ?>')" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-error hover:bg-error/10 flex items-center justify-center transition-colors" title="Hapus Sesi">
+                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
                                             </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Konten Modul Materi di dalam Sesi -->
+                                        <div class="mt-4 space-y-3">
+                                            <?php if (!empty($mats)): ?>
+                                                <div class="space-y-2">
+                                                    <p class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Materi Pembelajaran:</p>
+                                                    <?php foreach ($mats as $m): ?>
+                                                    <?php
+                                                    $matId = (int) ($m['material_id'] ?? 0);
+                                                    $matType = strtolower($m['material_type'] ?? 'text');
+                                                    $matIcon = match ($matType) {
+                                                        'video' => 'play_circle',
+                                                        'pdf', 'document' => 'picture_as_pdf',
+                                                        default => 'article',
+                                                    };
+                                                    $matIconColor = match ($matType) {
+                                                        'video' => 'text-blue-600 bg-blue-50',
+                                                        'pdf', 'document' => 'text-red-600 bg-red-50',
+                                                        default => 'text-emerald-600 bg-emerald-50',
+                                                    };
+                                                    ?>
+                                                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-surface hover:bg-surface-container-low border border-outline-variant/40 transition-colors">
+                                                        <div class="flex items-center gap-3 min-w-0">
+                                                            <div class="w-9 h-9 rounded-lg <?= $matIconColor ?> flex items-center justify-center shrink-0">
+                                                                <span class="material-symbols-outlined text-[20px]"><?= $matIcon ?></span>
+                                                            </div>
+                                                            <div class="min-w-0">
+                                                                <p class="font-label-md font-bold text-on-surface truncate"><?= e($m['material_title']) ?></p>
+                                                                <p class="text-[11px] text-on-surface-variant mt-0.5">
+                                                                    <?= e(ucfirst($matType)) ?> • Durasi: <?= e($m['duration'] ?? '15 Menit') ?>
+                                                                    <?php if (!empty($m['file_path'])): ?>
+                                                                        • <span class="font-mono text-[10px] text-primary truncate"><?= e($m['file_path']) ?></span>
+                                                                    <?php endif; ?>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <?php if ($canEditCourse): ?>
+                                                        <div class="flex items-center gap-1.5 shrink-0 ml-3">
+                                                            <button type="button" onclick="openMaterialModal('edit', <?= $sessionId ?>, <?= $matId ?>, '<?= e(addslashes($m['material_title'])) ?>', '<?= e(addslashes($matType)) ?>', '<?= e(addslashes($m['duration'] ?? '15 Menit')) ?>', '<?= e(addslashes($m['material_description'] ?? '')) ?>', '<?= e(addslashes($m['file_path'] ?? '')) ?>')" class="p-1.5 rounded-lg text-secondary hover:bg-secondary/10 flex items-center justify-center transition-colors" title="Edit Materi">
+                                                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                            </button>
+                                                            <button type="button" onclick="deleteMaterial(<?= $matId ?>, '<?= e(addslashes($m['material_title'])) ?>')" class="p-1.5 rounded-lg text-error hover:bg-error/10 flex items-center justify-center transition-colors" title="Hapus Materi">
+                                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                            </button>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <!-- Konten Kuis di dalam Sesi -->
+                                            <?php if (!empty($qzs)): ?>
+                                                <div class="space-y-2 mt-3 pt-2">
+                                                    <p class="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Kuis & Uji Kompetensi Sesi:</p>
+                                                    <?php foreach ($qzs as $q): ?>
+                                                    <?php $quizId = (int) ($q['quiz_id'] ?? 0); ?>
+                                                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-purple-50/40 hover:bg-purple-50 border border-purple-200/60 transition-colors">
+                                                        <div class="flex items-center gap-3 min-w-0">
+                                                            <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                                                                <span class="material-symbols-outlined text-[20px]">quiz</span>
+                                                            </div>
+                                                            <div class="min-w-0">
+                                                                <p class="font-label-md font-bold text-on-surface truncate"><?= e($q['quiz_title']) ?></p>
+                                                                <p class="text-[11px] text-on-surface-variant mt-0.5">
+                                                                    Tipe: <?= e(ucfirst($q['quiz_type'] ?? 'Kuis')) ?> • Durasi: <?= e((string)($q['quiz_duration'] ?? 20)) ?> Menit • Passing Grade: <?= e((string)($q['quiz_passing_grade'] ?? 75)) ?>% • <?= count($q['questions'] ?? []) ?> Soal
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <?php if ($canEditCourse): ?>
+                                                        <div class="flex items-center gap-1.5 shrink-0 ml-3">
+                                                            <button type="button" onclick="deleteQuiz(<?= $quizId ?>, '<?= e(addslashes($q['quiz_title'])) ?>')" class="p-1.5 rounded-lg text-error hover:bg-error/10 flex items-center justify-center transition-colors" title="Hapus Kuis">
+                                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                            </button>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <!-- Placeholder jika sesi masih kosong -->
+                                            <?php if (empty($mats) && empty($qzs)): ?>
+                                                <div class="p-4 rounded-xl border border-dashed border-outline-variant/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left bg-surface/50">
+                                                    <span class="font-body-sm text-xs text-on-surface-variant italic">Sesi ini belum memiliki materi bacaan atau kuis evaluasi.</span>
+                                                    <?php if ($canEditCourse): ?>
+                                                    <div class="flex items-center gap-2">
+                                                        <button type="button" onclick="openMaterialModal('add', <?= $sessionId ?>)" class="text-primary hover:underline font-label-sm font-bold text-xs flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[14px]">add</span> Tambah Materi
+                                                        </button>
+                                                        <span class="text-outline-variant">|</span>
+                                                        <button type="button" onclick="openQuizModal('add', <?= $sessionId ?>, <?= (int)$course['id'] ?>)" class="text-purple-700 hover:underline font-label-sm font-bold text-xs flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[14px]">add</span> Tambah Kuis
+                                                        </button>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -699,6 +870,428 @@ if (!empty($participants)) {
                     }
                 });
             } else if (confirm('PERINGATAN: Course ini akan dihapus total secara permanen dari database. Lanjutkan?')) {
+                doDelete();
+            }
+        }
+    </script>
+    <!-- Modal Kelola Sesi -->
+    <div id="sessionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-outline-variant/40 animate-scale-in">
+            <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30 mb-4">
+                <h3 id="sessionModalTitle" class="font-headline-sm font-bold text-on-surface text-lg">Tambah Sesi Pembelajaran</h3>
+                <button type="button" onclick="closeSessionModal()" class="text-on-surface-variant hover:text-on-surface">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="sessionForm" onsubmit="event.preventDefault(); submitSessionModal();" class="space-y-4">
+                <input type="hidden" id="sessModalCourseId" value="<?= (int)($course['id'] ?? 0) ?>">
+                <input type="hidden" id="sessModalSessionId" value="0">
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Judul Sesi <span class="text-error">*</span></label>
+                    <input type="text" id="sessModalTitle" required placeholder="Contoh: Sesi 1: Dasar Keselamatan & 5S" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm font-medium">
+                </div>
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Deskripsi Sesi (Opsional)</label>
+                    <textarea id="sessModalDesc" rows="3" placeholder="Jelaskan ringkasan materi atau tujuan dari sesi ini..." class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/30">
+                    <button type="button" onclick="closeSessionModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-on-surface-variant font-label-md font-bold hover:bg-surface-variant text-xs">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-600 text-white font-label-md font-bold text-xs shadow-sm">Simpan Sesi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Kelola Materi -->
+    <div id="materialModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-outline-variant/40 animate-scale-in">
+            <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30 mb-4">
+                <h3 id="materialModalTitle" class="font-headline-sm font-bold text-on-surface text-lg">Tambah Materi Pembelajaran</h3>
+                <button type="button" onclick="closeMaterialModal()" class="text-on-surface-variant hover:text-on-surface">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="materialForm" onsubmit="event.preventDefault(); submitMaterialModal();" class="space-y-4">
+                <input type="hidden" id="matModalSessionId" value="0">
+                <input type="hidden" id="matModalMaterialId" value="0">
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Judul Materi <span class="text-error">*</span></label>
+                    <input type="text" id="matModalTitle" required placeholder="Contoh: Prosedur Penggunaan APD Standar" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm font-medium">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Tipe Media</label>
+                        <select id="matModalType" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                            <option value="text">Artikel / Teks Bacaan</option>
+                            <option value="pdf">Dokumen PDF / SOP</option>
+                            <option value="video">Video Tutorial</option>
+                            <option value="document">Dokumen Office / Excel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Estimasi Durasi</label>
+                        <input type="text" id="matModalDuration" placeholder="Contoh: 15 Menit" value="15 Menit" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">URL / File Path</label>
+                    <input type="text" id="matModalFilePath" placeholder="Contoh: uploads/materials/modul_k3.pdf atau URL video" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                </div>
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Konten / Ringkasan Materi</label>
+                    <textarea id="matModalContent" rows="3" placeholder="Tuliskan isi ringkasan materi atau instruksi bacaan..." class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/30">
+                    <button type="button" onclick="closeMaterialModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-on-surface-variant font-label-md font-bold hover:bg-surface-variant text-xs">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-600 text-white font-label-md font-bold text-xs shadow-sm">Simpan Materi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Kelola Kuis -->
+    <div id="quizModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-outline-variant/40 animate-scale-in max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30 mb-4">
+                <h3 id="quizModalTitle" class="font-headline-sm font-bold text-on-surface text-lg">Tambah Kuis Pembelajaran</h3>
+                <button type="button" onclick="closeQuizModal()" class="text-on-surface-variant hover:text-on-surface">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="quizForm" onsubmit="event.preventDefault(); submitQuizModal();" class="space-y-4">
+                <input type="hidden" id="quizModalCourseId" value="<?= (int)($course['id'] ?? 0) ?>">
+                <input type="hidden" id="quizModalSessionId" value="0">
+                <input type="hidden" id="quizModalQuizId" value="0">
+                <div>
+                    <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Judul Kuis <span class="text-error">*</span></label>
+                    <input type="text" id="quizModalTitleInput" required placeholder="Contoh: Kuis Evaluasi 5S" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm font-medium">
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Tipe</label>
+                        <select id="quizModalType" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                            <option value="quiz">Kuis Sesi</option>
+                            <option value="pre_test">Pre-Test</option>
+                            <option value="post_test">Post-Test</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Durasi (Mnt)</label>
+                        <input type="number" id="quizModalDuration" min="5" max="180" value="20" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                    </div>
+                    <div>
+                        <label class="block font-label-md font-bold text-on-surface text-xs uppercase tracking-wider mb-1">Passing Grade (%)</label>
+                        <input type="number" id="quizModalPassingGrade" min="0" max="100" value="75" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant bg-surface focus:outline-none focus:border-primary text-sm">
+                    </div>
+                </div>
+
+                <!-- Soal Sampel Awal -->
+                <div class="p-4 rounded-xl border border-purple-200 bg-purple-50/40 space-y-3">
+                    <p class="font-label-md font-bold text-purple-900 text-xs uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">help</span>
+                        Butir Soal Pertama
+                    </p>
+                    <div>
+                        <textarea id="quizModalQuestionText" rows="2" placeholder="Tuliskan pertanyaan kuis di sini..." class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-white text-xs"></textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <p class="text-[10px] font-bold text-on-surface-variant uppercase">Pilihan Jawaban (Pilihan A adalah Kunci Jawaban):</p>
+                        <input type="text" id="quizModalOptA" placeholder="Pilihan A (Benar)" class="w-full px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50/30 text-xs">
+                        <input type="text" id="quizModalOptB" placeholder="Pilihan B" class="w-full px-3 py-1.5 rounded-lg border border-outline-variant bg-white text-xs">
+                        <input type="text" id="quizModalOptC" placeholder="Pilihan C" class="w-full px-3 py-1.5 rounded-lg border border-outline-variant bg-white text-xs">
+                        <input type="text" id="quizModalOptD" placeholder="Pilihan D" class="w-full px-3 py-1.5 rounded-lg border border-outline-variant bg-white text-xs">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/30">
+                    <button type="button" onclick="closeQuizModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-on-surface-variant font-label-md font-bold hover:bg-surface-variant text-xs">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-label-md font-bold text-xs shadow-sm">Simpan Kuis</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Sesi Handlers
+        function openSessionModal(mode, courseId, sessionId = 0, title = '', desc = '') {
+            document.getElementById('sessModalCourseId').value = courseId;
+            document.getElementById('sessModalSessionId').value = sessionId;
+            document.getElementById('sessModalTitle').value = title;
+            document.getElementById('sessModalDesc').value = desc;
+            document.getElementById('sessionModalTitle').textContent = mode === 'edit' ? 'Edit Sesi Pembelajaran' : 'Tambah Sesi Baru';
+            document.getElementById('sessionModal').classList.remove('hidden');
+        }
+
+        function closeSessionModal() {
+            document.getElementById('sessionModal').classList.add('hidden');
+        }
+
+        function submitSessionModal() {
+            const courseId = document.getElementById('sessModalCourseId').value;
+            const sessionId = document.getElementById('sessModalSessionId').value;
+            const title = document.getElementById('sessModalTitle').value.trim();
+            const desc = document.getElementById('sessModalDesc').value.trim();
+
+            if (!title) return;
+
+            fetch('?route=/teacher/course/session/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    session_id: sessionId,
+                    session_title: title,
+                    session_description: desc
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeSessionModal();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ title: 'Berhasil!', text: data.message, icon: 'success', confirmButtonColor: '#E20613' })
+                            .then(() => window.location.reload());
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert(data.message || 'Gagal menyimpan sesi');
+                }
+            })
+            .catch(err => alert('Terjadi kesalahan saat menyimpan sesi.'));
+        }
+
+        function deleteSession(sessionId, title) {
+            const doDelete = () => {
+                fetch('?route=/teacher/course/session/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Gagal menghapus sesi');
+                    }
+                });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Sesi?',
+                    text: 'Sesi "' + title + '" dan seluruh materi di dalamnya akan dihapus dari SSMS.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Hapus Sesi',
+                    cancelButtonText: 'Batal'
+                }).then(res => { if (res.isConfirmed) doDelete(); });
+            } else if (confirm('Hapus sesi "' + title + '"?')) {
+                doDelete();
+            }
+        }
+
+        // Modal Materi Handlers
+        function openMaterialModal(mode, sessionId, materialId = 0, title = '', type = 'text', duration = '15 Menit', desc = '', filePath = '') {
+            document.getElementById('matModalSessionId').value = sessionId;
+            document.getElementById('matModalMaterialId').value = materialId;
+            document.getElementById('matModalTitle').value = title;
+            document.getElementById('matModalType').value = type;
+            document.getElementById('matModalDuration').value = duration;
+            document.getElementById('matModalFilePath').value = filePath;
+            document.getElementById('matModalContent').value = desc;
+            document.getElementById('materialModalTitle').textContent = mode === 'edit' ? 'Edit Materi Pembelajaran' : 'Tambah Materi Baru';
+            document.getElementById('materialModal').classList.remove('hidden');
+        }
+
+        function closeMaterialModal() {
+            document.getElementById('materialModal').classList.add('hidden');
+        }
+
+        function submitMaterialModal() {
+            const sessionId = document.getElementById('matModalSessionId').value;
+            const materialId = document.getElementById('matModalMaterialId').value;
+            const title = document.getElementById('matModalTitle').value.trim();
+            const type = document.getElementById('matModalType').value;
+            const duration = document.getElementById('matModalDuration').value.trim();
+            const filePath = document.getElementById('matModalFilePath').value.trim();
+            const content = document.getElementById('matModalContent').value.trim();
+
+            if (!title) return;
+
+            fetch('?route=/teacher/course/material/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    material_id: materialId,
+                    material_title: title,
+                    material_type: type,
+                    duration: duration,
+                    file_path: filePath,
+                    material_description: content
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeMaterialModal();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ title: 'Berhasil!', text: data.message, icon: 'success', confirmButtonColor: '#E20613' })
+                            .then(() => window.location.reload());
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert(data.message || 'Gagal menyimpan materi');
+                }
+            })
+            .catch(err => alert('Terjadi kesalahan saat menyimpan materi.'));
+        }
+
+        function deleteMaterial(materialId, title) {
+            const doDelete = () => {
+                fetch('?route=/teacher/course/material/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ material_id: materialId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Gagal menghapus materi');
+                    }
+                });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Materi?',
+                    text: 'Materi "' + title + '" akan dihapus permanen dari SSMS.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Hapus Materi',
+                    cancelButtonText: 'Batal'
+                }).then(res => { if (res.isConfirmed) doDelete(); });
+            } else if (confirm('Hapus materi "' + title + '"?')) {
+                doDelete();
+            }
+        }
+
+        // Modal Kuis Handlers
+        function openQuizModal(mode, sessionId, courseId, quizId = 0, title = '', duration = 20, passingGrade = 75) {
+            document.getElementById('quizModalSessionId').value = sessionId;
+            document.getElementById('quizModalCourseId').value = courseId;
+            document.getElementById('quizModalQuizId').value = quizId;
+            document.getElementById('quizModalTitleInput').value = title || 'Kuis Pemahaman';
+            document.getElementById('quizModalDuration').value = duration;
+            document.getElementById('quizModalPassingGrade').value = passingGrade;
+            document.getElementById('quizModal').classList.remove('hidden');
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quizModal').classList.add('hidden');
+        }
+
+        function submitQuizModal() {
+            const sessionId = document.getElementById('quizModalSessionId').value;
+            const courseId = document.getElementById('quizModalCourseId').value;
+            const quizId = document.getElementById('quizModalQuizId').value;
+            const title = document.getElementById('quizModalTitleInput').value.trim();
+            const type = document.getElementById('quizModalType').value;
+            const duration = document.getElementById('quizModalDuration').value;
+            const passingGrade = document.getElementById('quizModalPassingGrade').value;
+
+            const qText = document.getElementById('quizModalQuestionText').value.trim();
+            const optA = document.getElementById('quizModalOptA').value.trim();
+            const optB = document.getElementById('quizModalOptB').value.trim();
+            const optC = document.getElementById('quizModalOptC').value.trim();
+            const optD = document.getElementById('quizModalOptD').value.trim();
+
+            const questions = [];
+            if (qText) {
+                questions.push({
+                    text: qText,
+                    type: 'multiple_choice',
+                    options: [
+                        { text: optA || 'Pilihan Benar', is_correct: 1 },
+                        { text: optB || 'Pilihan Salah 1', is_correct: 0 },
+                        { text: optC || 'Pilihan Salah 2', is_correct: 0 },
+                        { text: optD || 'Pilihan Salah 3', is_correct: 0 }
+                    ]
+                });
+            }
+
+            fetch('?route=/teacher/course/quiz/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    session_id: sessionId,
+                    quiz_id: quizId,
+                    quiz_title: title,
+                    quiz_type: type,
+                    quiz_duration: duration,
+                    quiz_passing_grade: passingGrade,
+                    questions: questions
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeQuizModal();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ title: 'Berhasil!', text: data.message, icon: 'success', confirmButtonColor: '#E20613' })
+                            .then(() => window.location.reload());
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert(data.message || 'Gagal menyimpan kuis');
+                }
+            })
+            .catch(err => alert('Terjadi kesalahan saat menyimpan kuis.'));
+        }
+
+        function deleteQuiz(quizId, title) {
+            const doDelete = () => {
+                fetch('?route=/teacher/course/quiz/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quiz_id: quizId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Gagal menghapus kuis');
+                    }
+                });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Kuis?',
+                    text: 'Kuis "' + title + '" akan dihapus permanen dari SSMS.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Hapus Kuis',
+                    cancelButtonText: 'Batal'
+                }).then(res => { if (res.isConfirmed) doDelete(); });
+            } else if (confirm('Hapus kuis "' + title + '"?')) {
                 doDelete();
             }
         }

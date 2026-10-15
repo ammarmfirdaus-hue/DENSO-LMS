@@ -38,7 +38,7 @@ $active_tab = 'profil'; ?>
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 px-4 lg:px-8 py-6 lg:py-8 flex flex-col pb-32 mt-14 lg:ml-[240px] lg:w-[calc(100%-240px)]">
+    <main class="dls-main flex-1 px-4 lg:px-8 py-6 lg:py-8 flex flex-col pb-32 pt-[88px] lg:ml-[240px] lg:w-[calc(100%-240px)]">
 
         <div class="w-full max-w-3xl mx-auto flex flex-col gap-5">
 

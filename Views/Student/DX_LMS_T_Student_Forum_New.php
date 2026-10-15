@@ -32,7 +32,7 @@
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 flex flex-col min-w-0 pb-16 lg:pb-0 lg:ml-[240px] pt-[72px] px-container-margin w-full">
+    <main class="dls-main flex-1 flex flex-col min-w-0 pb-16 lg:pb-0 lg:ml-[240px] pt-[88px] px-container-margin w-full">
         <div class="max-w-3xl mx-auto w-full py-stack-lg">
             <!-- Form Container -->
             <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-6 space-y-6">

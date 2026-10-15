@@ -113,7 +113,7 @@ if (!function_exists('formatMonthYear')) {
     <?php include 'includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 px-container-margin py-5 flex flex-col gap-5 pb-32 mt-14 lg:ml-[240px] lg:w-[calc(100%-240px)]">
+    <main class="dls-main flex-1 px-container-margin py-5 flex flex-col gap-5 pb-32 pt-[88px] lg:ml-[240px] lg:w-[calc(100%-240px)]">
 
         <!-- Max width container for larger screens -->
         <div class="max-w-[900px] w-full mx-auto flex flex-col gap-5">

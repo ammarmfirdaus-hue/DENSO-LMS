@@ -39,7 +39,7 @@ $filterStatus = $filterStatus ?? 'all';
     ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[88px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[88px] pt-[88px]">
         <div class="max-w-6xl mx-auto space-y-6">
             
             <!-- Course Selector & Banner -->

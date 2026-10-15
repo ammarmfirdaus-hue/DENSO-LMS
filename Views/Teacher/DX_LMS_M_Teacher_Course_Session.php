@@ -28,7 +28,7 @@
     ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[88px]">
         <div class="max-w-4xl mx-auto space-y-stack-xl">
             <!-- Header Section -->
             <section class="flex flex-col gap-1 mb-6">

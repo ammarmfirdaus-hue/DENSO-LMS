@@ -38,12 +38,12 @@
 @layer utilities {
     /* Layout utama student — main content area */
     .dls-main {
-        @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+        @apply flex-1 px-container-margin pt-[88px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
     }
 
     /* Layout sub-halaman (sama dengan dls-main saat ini) */
     .dls-main-sub {
-        @apply flex-1 px-container-margin pt-[56px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
+        @apply flex-1 px-container-margin pt-[88px] pb-[88px] overflow-y-auto space-y-stack-lg lg:ml-[240px] lg:w-[calc(100%-240px)];
     }
 
     /* Menyembunyikan elemen (utility custom) */

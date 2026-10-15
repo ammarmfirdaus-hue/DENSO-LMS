@@ -253,4 +253,37 @@ class DX_LMS_M_Employees extends DX_LMS_M_Model
     {
         return $this->getActiveEmployees();
     }
+
+    /**
+     * Mendapatkan Opsi Filter Target Rekomendasi Peserta dari database SSMS.
+     * Mengambil nilai distinktif jabatan, golongan, departemen, divisi, dan seksi.
+     *
+     * @return array
+     */
+    public function getTargetFilterOptions(): array
+    {
+        try {
+            $jabatans = array_column(dbQuery("SELECT DISTINCT jabatan FROM {$this->table} WHERE jabatan IS NOT NULL AND status = 'Active' ORDER BY jabatan ASC"), 'jabatan');
+            $golongans = array_column(dbQuery("SELECT DISTINCT golongan FROM {$this->table} WHERE golongan IS NOT NULL AND status = 'Active' ORDER BY golongan ASC"), 'golongan');
+            $departments = array_column(dbQuery("SELECT DISTINCT department FROM {$this->table} WHERE department IS NOT NULL AND status = 'Active' ORDER BY department ASC"), 'department');
+            $divisions = array_column(dbQuery("SELECT DISTINCT division FROM {$this->table} WHERE division IS NOT NULL AND status = 'Active' ORDER BY division ASC"), 'division');
+            $sections = array_column(dbQuery("SELECT DISTINCT section FROM {$this->table} WHERE section IS NOT NULL AND status = 'Active' ORDER BY section ASC"), 'section');
+
+            return [
+                'jabatan' => !empty($jabatans) ? $jabatans : ['Operator', 'Staff', 'Leader', 'Supervisor', 'Manager'],
+                'golongan' => !empty($golongans) ? $golongans : ['I-1', 'I-2', 'II-1', 'II-2', 'III-1', 'IV-1', 'IV-2'],
+                'departemen' => !empty($departments) ? $departments : ['Manufacturing', 'Quality', 'Maintenance', 'Engineering', 'HR'],
+                'divisi' => !empty($divisions) ? $divisions : ['Produksi', 'QA', 'Technical Division', 'Human Capital'],
+                'seksi' => !empty($sections) ? $sections : ['Assembling', 'Machining', 'Quality Control Section', 'Training & Education (TRE)'],
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'jabatan' => ['Operator', 'Staff', 'Leader', 'Supervisor', 'Manager'],
+                'golongan' => ['I-1', 'I-2', 'II-1', 'II-2', 'III-1', 'IV-1', 'IV-2'],
+                'departemen' => ['Manufacturing', 'Quality', 'Maintenance', 'Engineering', 'HR'],
+                'divisi' => ['Produksi', 'QA', 'Technical Division', 'Human Capital'],
+                'seksi' => ['Assembling', 'Machining', 'Quality Control Section', 'Training & Education (TRE)'],
+            ];
+        }
+    }
 }

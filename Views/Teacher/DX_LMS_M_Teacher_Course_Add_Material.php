@@ -28,7 +28,7 @@
     ?>
 
     <!-- Main Content -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[88px]">
         <div class="max-w-2xl mx-auto">
             
             <form action="?route=/teacher/course/material" method="POST" class="bg-surface-container-lowest rounded-2xl p-stack-lg shadow-[0_4px_12px_0_rgba(0,0,0,0.03)] border border-surface-variant space-y-5">

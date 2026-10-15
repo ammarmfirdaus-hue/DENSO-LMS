@@ -108,9 +108,12 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 c.created_by,
                 u.fullname AS teacher_name,
                 u.npk AS teacher_npk,
+                COUNT(DISTINCT s.session_id) AS sessions,
                 COUNT(DISTINCT s.session_id) AS sessions_count,
                 COUNT(DISTINCT m.material_id) AS materials_count,
+                COUNT(DISTINCT q.quiz_id) AS assessments,
                 COUNT(DISTINCT q.quiz_id) AS quizzes_count,
+                COUNT(DISTINCT e.enrollment_id) AS participants,
                 COUNT(DISTINCT e.enrollment_id) AS participants_count,
                 ISNULL(AVG(ch.progress_percentage), 0) AS avg_progress,
                 ISNULL(AVG(ch.final_score), 0) AS avg_score
@@ -129,11 +132,66 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
         ";
 
         try {
-            return dbQueryOne($sql, [$courseId]);
+            $course = dbQueryOne($sql, [$courseId]);
+            if ($course) {
+                // Ambil target posisi, departemen & golongan riil dari SSMS
+                $targets = dbQuery("
+                    SELECT p.position_name, d.department_name, g.golongan_name
+                    FROM DX_LMS_M_Course_Targets ct
+                    LEFT JOIN DX_LMS_M_Positions p ON ct.position_id = p.position_id
+                    LEFT JOIN DX_LMS_M_Departments d ON ct.department_id = d.department_id
+                    LEFT JOIN DX_LMS_M_Golongan g ON ct.golongan_id = g.golongan_id
+                    WHERE ct.course_id = ?
+                ", [$courseId]);
+
+                $positions = array_filter(array_unique(array_column($targets, 'position_name')));
+                $depts = array_filter(array_unique(array_column($targets, 'department_name')));
+                $course['target_positions'] = !empty($positions) ? implode(', ', $positions) : 'Semua Posisi';
+                $course['target_departments'] = !empty($depts) ? implode(', ', $depts) : 'Semua Departemen';
+                $course['rejection_note'] = $this->getCourseRejectionNote($courseId);
+            }
+            return $course;
         } catch (Throwable $e) {
             error_log("DX_LMS_M_Courses::getCourseDetail Error: " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Mengambil catatan penolakan/revisi terbaru dari Admin untuk course tertentu.
+     *
+     * @param int $courseId ID Course.
+     * @return array|null Informasi catatan revisi, tanggal, dan pengirim.
+     */
+    public function getCourseRejectionNote($courseId)
+    {
+        $log = dbQueryOne("
+            SELECT TOP 1 l.description, l.created_at, e.fullname AS admin_name
+            FROM DX_LMS_T_Activity_Logs l
+            LEFT JOIN DX_LMS_M_Employees e ON l.employee_id = e.employee_id
+            WHERE l.activity_type = 'reject_course' AND l.reference_id = ?
+            ORDER BY l.log_id DESC
+        ", [(string) $courseId]);
+
+        if (!$log) {
+            return null;
+        }
+
+        $desc = $log['description'] ?? '';
+        $note = $desc;
+        if (strpos($desc, ': ') !== false) {
+            $parts = explode(': ', $desc, 2);
+            $note = trim($parts[1] ?? $desc);
+        }
+
+        return [
+            'note' => $note,
+            'full_description' => $desc,
+            'admin_name' => $log['admin_name'] ?? 'Admin LMS',
+            'created_at' => $log['created_at'],
+            'date' => date('d M Y, H:i', strtotime($log['created_at'])),
+            'time_ago' => timeAgo($log['created_at']),
+        ];
     }
 
     /**
@@ -312,36 +370,72 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 $passingGrade = 75;
             }
 
-            // Generate Kode Course Unik
-            $prefix = 'CRS-' . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $title), 0, 3));
-            if (strlen($prefix) < 7) {
-                $prefix = str_pad($prefix, 7, 'X');
-            }
-            $randomNum = rand(100, 999);
-            $courseCode = $prefix . '-' . $randomNum;
+            $isUpdate = false;
+            $courseId = (int) ($data['course_id'] ?? 0);
+            $courseCode = '';
 
-            // Pastikan tidak ada duplikasi course_code
-            $codeCheck = dbQueryOne("SELECT course_id FROM DX_LMS_M_Courses WHERE course_code = ?", [$courseCode]);
-            if ($codeCheck) {
-                $courseCode = $prefix . '-' . rand(1000, 9999);
-            }
+            if ($courseId > 0) {
+                $existing = dbQueryOne("SELECT course_id, course_code, created_by, course_status FROM DX_LMS_M_Courses WHERE course_id = ?", [$courseId]);
+                if (!$existing) {
+                    throw new Exception("Course dengan ID {$courseId} tidak ditemukan.");
+                }
+                // Validasi hak akses keamanan
+                if ((int) $existing['created_by'] !== (int) $teacherEmployeeId) {
+                    throw new Exception("Akses Ditolak: Anda tidak memiliki hak akses untuk mengubah course ini.");
+                }
 
-            // Simpan ke DX_LMS_M_Courses
-            $stmtCourse = $pdo->prepare("
-                INSERT INTO DX_LMS_M_Courses 
-                (course_code, title, description, category, course_status, passing_grade, created_by, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
-            ");
-            $stmtCourse->execute([
-                $courseCode,
-                $title,
-                $description,
-                $category,
-                $status,
-                $passingGrade,
-                $teacherEmployeeId
-            ]);
-            $courseId = (int) $pdo->lastInsertId();
+                $courseCode = $existing['course_code'];
+                $isUpdate = true;
+
+                $stmtUpdate = $pdo->prepare("
+                    UPDATE DX_LMS_M_Courses 
+                    SET title = ?, description = ?, category = ?, course_status = ?, passing_grade = ?, updated_at = GETDATE()
+                    WHERE course_id = ?
+                ");
+                $stmtUpdate->execute([$title, $description, $category, $status, $passingGrade, $courseId]);
+
+                // Bersihkan sesi lama jika wizard mengirimkan struktur baru yang lengkap
+                if (!empty($data['sessions'])) {
+                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?))", [$courseId]);
+                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?)", [$courseId]);
+                    dbExecute("DELETE FROM DX_LMS_M_Quizzes WHERE course_id = ?", [$courseId]);
+                    dbExecute("DELETE FROM DX_LMS_M_Course_Materials WHERE session_id IN (SELECT session_id FROM DX_LMS_M_Course_Sessions WHERE course_id = ?)", [$courseId]);
+                    dbExecute("DELETE FROM DX_LMS_M_Course_Sessions WHERE course_id = ?", [$courseId]);
+                }
+
+                dbExecute("DELETE FROM DX_LMS_M_Course_Targets WHERE course_id = ?", [$courseId]);
+            } else {
+                // Generate Kode Course Unik
+                $prefix = 'CRS-' . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $title), 0, 3));
+                if (strlen($prefix) < 7) {
+                    $prefix = str_pad($prefix, 7, 'X');
+                }
+                $randomNum = rand(100, 999);
+                $courseCode = $prefix . '-' . $randomNum;
+
+                // Pastikan tidak ada duplikasi course_code
+                $codeCheck = dbQueryOne("SELECT course_id FROM DX_LMS_M_Courses WHERE course_code = ?", [$courseCode]);
+                if ($codeCheck) {
+                    $courseCode = $prefix . '-' . rand(1000, 9999);
+                }
+
+                // Simpan ke DX_LMS_M_Courses
+                $stmtCourse = $pdo->prepare("
+                    INSERT INTO DX_LMS_M_Courses 
+                    (course_code, title, description, category, course_status, passing_grade, created_by, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
+                ");
+                $stmtCourse->execute([
+                    $courseCode,
+                    $title,
+                    $description,
+                    $category,
+                    $status,
+                    $passingGrade,
+                    $teacherEmployeeId
+                ]);
+                $courseId = (int) $pdo->lastInsertId();
+            }
 
             // 2. Simpan Target Audience / Rekomendasi Filter
             $targets = $data['targets'] ?? [];
@@ -415,18 +509,48 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 $sessionId = (int) $pdo->lastInsertId();
 
                 $materialOrder = 1;
-                $modules = $sessData['modules'] ?? [];
+                $modules = $sessData['modules'] ?? ($sessData['materials'] ?? []);
 
                 foreach ($modules as $mod) {
-                    $modType = strtolower(trim($mod['type'] ?? 'materi'));
+                    $rawType = strtolower(trim($mod['type'] ?? 'materi'));
                     $modTitle = trim($mod['title'] ?? 'Modul ' . $materialOrder);
 
-                    if ($modType === 'materi') {
-                        // Simpan Modul Materi
-                        $contentPages = isset($mod['pages']) ? (is_array($mod['pages']) ? json_encode($mod['pages']) : $mod['pages']) : ($mod['content'] ?? '');
-                        $matType = $mod['material_type'] ?? 'text';
+                    if (in_array($rawType, ['pre-test', 'pre_test'])) {
+                        // Simpan Kuis Pre-Test
+                        $stmtQuiz->execute([
+                            $courseId,
+                            $sessionId,
+                            'pre_test',
+                            $modTitle,
+                            $mod['instructions'] ?? ($mod['description'] ?? 'Kerjakan pre-test untuk mengukur pemahaman awal.'),
+                            (int) ($mod['duration'] ?? 15),
+                            (int) ($mod['attempt_limit'] ?? 1),
+                            (int) ($mod['passing_grade'] ?? ($mod['passing_score'] ?? 60))
+                        ]);
+                        $quizId = (int) $pdo->lastInsertId();
+                        $this->saveQuizQuestions($pdo, $stmtQuestion, $stmtChoice, $quizId, $mod['questions'] ?? []);
+                    } elseif (in_array($rawType, ['post-test', 'post_test', 'final_assessment', 'final'])) {
+                        // Simpan Kuis Post-Test
+                        $stmtQuiz->execute([
+                            $courseId,
+                            $sessionId,
+                            'post_test',
+                            $modTitle,
+                            $mod['instructions'] ?? ($mod['description'] ?? 'Kerjakan post-test untuk mengukur pencapaian kompetensi.'),
+                            (int) ($mod['duration'] ?? 20),
+                            (int) ($mod['attempt_limit'] ?? 3),
+                            (int) ($mod['passing_grade'] ?? ($mod['passing_score'] ?? 75))
+                        ]);
+                        $quizId = (int) $pdo->lastInsertId();
+                        $this->saveQuizQuestions($pdo, $stmtQuestion, $stmtChoice, $quizId, $mod['questions'] ?? []);
+                    } else {
+                        // Simpan Modul Materi (materi, document, pdf, video, text, link, etc.)
+                        $contentPages = isset($mod['pages']) 
+                            ? (is_array($mod['pages']) ? json_encode($mod['pages']) : $mod['pages']) 
+                            : ($mod['content'] ?? ($mod['description'] ?? ''));
+                        $matType = in_array($rawType, ['video', 'pdf', 'text', 'document', 'link']) ? $rawType : ($mod['material_type'] ?? 'document');
                         $filePath = $mod['file_path'] ?? null;
-                        $duration = $mod['duration'] ?? '15 Menit';
+                        $duration = !empty($mod['duration']) ? (string)$mod['duration'] : (!empty($mod['estimated_duration']) ? $mod['estimated_duration'] . ' Menit' : '15 Menit');
 
                         $stmtMaterial->execute([
                             $sessionId,
@@ -437,34 +561,6 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                             $duration,
                             $materialOrder++
                         ]);
-                    } elseif ($modType === 'pre-test' || $modType === 'pre_test') {
-                        // Simpan Kuis Pre-Test
-                        $stmtQuiz->execute([
-                            $courseId,
-                            $sessionId,
-                            'pre_test',
-                            $modTitle,
-                            $mod['instructions'] ?? 'Kerjakan pre-test untuk mengukur pemahaman awal.',
-                            (int) ($mod['duration'] ?? 15),
-                            (int) ($mod['attempt_limit'] ?? 1),
-                            (int) ($mod['passing_grade'] ?? 60)
-                        ]);
-                        $quizId = (int) $pdo->lastInsertId();
-                        $this->saveQuizQuestions($pdo, $stmtQuestion, $stmtChoice, $quizId, $mod['questions'] ?? []);
-                    } elseif ($modType === 'post-test' || $modType === 'post_test') {
-                        // Simpan Kuis Post-Test
-                        $stmtQuiz->execute([
-                            $courseId,
-                            $sessionId,
-                            'post_test',
-                            $modTitle,
-                            $mod['instructions'] ?? 'Kerjakan post-test untuk mengukur pencapaian kompetensi.',
-                            (int) ($mod['duration'] ?? 20),
-                            (int) ($mod['attempt_limit'] ?? 3),
-                            (int) ($mod['passing_grade'] ?? 75)
-                        ]);
-                        $quizId = (int) $pdo->lastInsertId();
-                        $this->saveQuizQuestions($pdo, $stmtQuestion, $stmtChoice, $quizId, $mod['questions'] ?? []);
                     }
                 }
 
@@ -477,9 +573,9 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                         'quiz',
                         $qData['title'] ?? ('Quiz Sesi ' . $sessionOrder),
                         $qData['description'] ?? 'Latihan evaluasi mandiri sesi.',
-                        (int) ($qData['duration'] ?? 20),
+                        (int) ($qData['duration_minutes'] ?? ($qData['duration'] ?? 20)),
                         (int) ($qData['attempt_limit'] ?? 3),
-                        (int) ($qData['passing_grade'] ?? 75)
+                        (int) ($qData['passing_grade'] ?? ($qData['passing_score'] ?? 70))
                     ]);
                     $quizId = (int) $pdo->lastInsertId();
                     $this->saveQuizQuestions($pdo, $stmtQuestion, $stmtChoice, $quizId, $qData['questions'] ?? []);
@@ -593,15 +689,21 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             ]);
 
             // 7. Log Aktivitas
+            $actType = $isUpdate ? 'update_course' : 'create_course';
+            $actDesc = $isUpdate 
+                ? "Pengajar memperbarui course '{$title}' ({$courseCode}) dengan status {$status}"
+                : "Pengajar membuat course '{$title}' ({$courseCode}) dengan status {$status}";
+
             $stmtLog = $pdo->prepare("
                 INSERT INTO DX_LMS_T_Activity_Logs 
                 (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
-                VALUES (?, 'create_course', ?, ?, ?, ?, GETDATE())
+                VALUES (?, ?, ?, ?, ?, ?, GETDATE())
             ");
             $stmtLog->execute([
                 $teacherEmployeeId,
+                $actType,
                 (string) $courseId,
-                "Pengajar membuat course '{$title}' ({$courseCode}) dengan status {$status}",
+                $actDesc,
                 $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
                 $_SERVER['HTTP_USER_AGENT'] ?? 'Internal DLS App'
             ]);
@@ -614,7 +716,9 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 'course_id' => $courseId,
                 'course_code' => $courseCode,
                 'title' => $title,
-                'message' => "Course '{$title}' berhasil disimpan di database SQL Server."
+                'message' => $isUpdate
+                    ? "Course '{$title}' berhasil diperbarui di database SQL Server."
+                    : "Course '{$title}' berhasil disimpan di database SQL Server."
             ];
 
         } catch (Throwable $e) {
@@ -753,6 +857,397 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                     $stmtChoice->execute([$questionId, $optText, $isCorrect, $cOrder++]);
                 }
             }
+        }
+    }
+
+    /**
+     * Menyimpan Sesi Pembelajaran (Tambah baru atau update)
+     */
+    public function saveCourseSession($courseId, $teacherEmployeeId, $data)
+    {
+        $courseId = (int) $courseId;
+        $course = dbQueryOne("SELECT course_id, created_by, course_status FROM DX_LMS_M_Courses WHERE course_id = ?", [$courseId]);
+        if (!$course) {
+            return ['success' => false, 'message' => 'Course tidak ditemukan.'];
+        }
+        if ((int) $course['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $sessionId = (int) ($data['session_id'] ?? 0);
+        $title = trim($data['session_title'] ?? ($data['title'] ?? ''));
+        $description = trim($data['session_description'] ?? ($data['description'] ?? ''));
+
+        if (empty($title)) {
+            return ['success' => false, 'message' => 'Judul sesi wajib diisi.'];
+        }
+
+        if ($sessionId > 0) {
+            dbExecute("
+                UPDATE DX_LMS_M_Course_Sessions 
+                SET session_title = ?, session_description = ?, updated_at = GETDATE()
+                WHERE session_id = ? AND course_id = ?
+            ", [$title, $description, $sessionId, $courseId]);
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'edit_session', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $courseId,
+                "Pengajar memperbarui sesi '{$title}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            return ['success' => true, 'session_id' => $sessionId, 'message' => "Sesi '{$title}' berhasil diperbarui."];
+        } else {
+            $maxOrderRow = dbQueryOne("SELECT ISNULL(MAX(session_order), 0) + 1 AS next_order FROM DX_LMS_M_Course_Sessions WHERE course_id = ?", [$courseId]);
+            $nextOrder = (int) ($maxOrderRow['next_order'] ?? 1);
+
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("
+                INSERT INTO DX_LMS_M_Course_Sessions 
+                (course_id, session_title, session_description, session_order, session_status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 'Active', GETDATE(), GETDATE())
+            ");
+            $stmt->execute([$courseId, $title, $description, $nextOrder]);
+            $newSessionId = (int) $pdo->lastInsertId();
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'add_session', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $courseId,
+                "Pengajar menambahkan sesi baru '{$title}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            return ['success' => true, 'session_id' => $newSessionId, 'message' => "Sesi '{$title}' berhasil ditambahkan ke course."];
+        }
+    }
+
+    /**
+     * Menghapus Sesi Pembelajaran secara bertingkat
+     */
+    public function deleteCourseSession($sessionId, $teacherEmployeeId)
+    {
+        $sessionId = (int) $sessionId;
+        $session = dbQueryOne("
+            SELECT s.session_id, s.session_title, s.course_id, c.created_by 
+            FROM DX_LMS_M_Course_Sessions s
+            INNER JOIN DX_LMS_M_Courses c ON s.course_id = c.course_id
+            WHERE s.session_id = ?
+        ", [$sessionId]);
+
+        if (!$session) {
+            return ['success' => false, 'message' => 'Sesi tidak ditemukan.'];
+        }
+        if ((int) $session['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $pdo = getDBConnection();
+        $pdo->beginTransaction();
+        try {
+            // Hapus kuis sesi & butir soal
+            dbExecute("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE session_id = ?))", [$sessionId]);
+            dbExecute("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE session_id = ?)", [$sessionId]);
+            dbExecute("DELETE FROM DX_LMS_M_Quizzes WHERE session_id = ?", [$sessionId]);
+
+            // Hapus materi progres & materi
+            dbExecute("DELETE FROM DX_LMS_T_Material_Progress WHERE material_id IN (SELECT material_id FROM DX_LMS_M_Course_Materials WHERE session_id = ?)", [$sessionId]);
+            dbExecute("DELETE FROM DX_LMS_M_Course_Materials WHERE session_id = ?", [$sessionId]);
+
+            // Hapus sesi
+            dbExecute("DELETE FROM DX_LMS_M_Course_Sessions WHERE session_id = ?", [$sessionId]);
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'delete_session', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $session['course_id'],
+                "Pengajar menghapus sesi '{$session['session_title']}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            $pdo->commit();
+            return ['success' => true, 'message' => "Sesi '{$session['session_title']}' berhasil dihapus."];
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            return ['success' => false, 'message' => 'Gagal menghapus sesi: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Menyimpan Materi Pembelajaran (Tambah baru atau update)
+     */
+    public function saveCourseMaterial($sessionId, $teacherEmployeeId, $data)
+    {
+        $sessionId = (int) $sessionId;
+        $session = dbQueryOne("
+            SELECT s.session_id, s.course_id, c.created_by 
+            FROM DX_LMS_M_Course_Sessions s
+            INNER JOIN DX_LMS_M_Courses c ON s.course_id = c.course_id
+            WHERE s.session_id = ?
+        ", [$sessionId]);
+
+        if (!$session) {
+            return ['success' => false, 'message' => 'Sesi tidak ditemukan.'];
+        }
+        if ((int) $session['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $materialId = (int) ($data['material_id'] ?? 0);
+        $title = trim($data['material_title'] ?? ($data['title'] ?? ''));
+        $type = trim($data['material_type'] ?? ($data['type'] ?? 'text'));
+        $duration = trim($data['duration'] ?? '15 Menit');
+        $filePath = trim($data['file_path'] ?? '');
+        $description = trim($data['material_description'] ?? ($data['content'] ?? ''));
+
+        if (empty($title)) {
+            return ['success' => false, 'message' => 'Judul materi wajib diisi.'];
+        }
+
+        if ($materialId > 0) {
+            dbExecute("
+                UPDATE DX_LMS_M_Course_Materials 
+                SET material_title = ?, material_description = ?, material_type = ?, file_path = ?, duration = ?, updated_at = GETDATE()
+                WHERE material_id = ? AND session_id = ?
+            ", [$title, $description, $type, $filePath, $duration, $materialId, $sessionId]);
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'edit_material', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $session['course_id'],
+                "Pengajar memperbarui materi '{$title}' ({$type})",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            return ['success' => true, 'material_id' => $materialId, 'message' => "Materi '{$title}' berhasil diperbarui."];
+        } else {
+            $maxOrderRow = dbQueryOne("SELECT ISNULL(MAX(material_order), 0) + 1 AS next_order FROM DX_LMS_M_Course_Materials WHERE session_id = ?", [$sessionId]);
+            $nextOrder = (int) ($maxOrderRow['next_order'] ?? 1);
+
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("
+                INSERT INTO DX_LMS_M_Course_Materials 
+                (session_id, material_title, material_description, material_type, file_path, duration, material_order, material_status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'Active', GETDATE(), GETDATE())
+            ");
+            $stmt->execute([$sessionId, $title, $description, $type, $filePath, $duration, $nextOrder]);
+            $newMaterialId = (int) $pdo->lastInsertId();
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'add_material', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $session['course_id'],
+                "Pengajar menambahkan materi baru '{$title}' ({$type})",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            return ['success' => true, 'material_id' => $newMaterialId, 'message' => "Materi '{$title}' berhasil ditambahkan ke sesi."];
+        }
+    }
+
+    /**
+     * Menghapus Materi Pembelajaran
+     */
+    public function deleteCourseMaterial($materialId, $teacherEmployeeId)
+    {
+        $materialId = (int) $materialId;
+        $mat = dbQueryOne("
+            SELECT m.material_id, m.material_title, s.course_id, c.created_by 
+            FROM DX_LMS_M_Course_Materials m
+            INNER JOIN DX_LMS_M_Course_Sessions s ON m.session_id = s.session_id
+            INNER JOIN DX_LMS_M_Courses c ON s.course_id = c.course_id
+            WHERE m.material_id = ?
+        ", [$materialId]);
+
+        if (!$mat) {
+            return ['success' => false, 'message' => 'Materi tidak ditemukan.'];
+        }
+        if ((int) $mat['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $pdo = getDBConnection();
+        $pdo->beginTransaction();
+        try {
+            dbExecute("DELETE FROM DX_LMS_T_Material_Progress WHERE material_id = ?", [$materialId]);
+            dbExecute("DELETE FROM DX_LMS_M_Course_Materials WHERE material_id = ?", [$materialId]);
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'delete_material', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $mat['course_id'],
+                "Pengajar menghapus materi '{$mat['material_title']}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            $pdo->commit();
+            return ['success' => true, 'message' => "Materi '{$mat['material_title']}' berhasil dihapus."];
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            return ['success' => false, 'message' => 'Gagal menghapus materi: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Menyimpan Kuis / Assessment (Tambah baru atau update)
+     */
+    public function saveCourseQuiz($courseId, $sessionId, $teacherEmployeeId, $data)
+    {
+        $courseId = (int) $courseId;
+        $course = dbQueryOne("SELECT course_id, created_by FROM DX_LMS_M_Courses WHERE course_id = ?", [$courseId]);
+        if (!$course) {
+            return ['success' => false, 'message' => 'Course tidak ditemukan.'];
+        }
+        if ((int) $course['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $quizId = (int) ($data['quiz_id'] ?? 0);
+        $title = trim($data['quiz_title'] ?? ($data['title'] ?? 'Kuis Pemahaman'));
+        $desc = trim($data['quiz_description'] ?? ($data['description'] ?? ''));
+        $quizType = trim($data['quiz_type'] ?? 'quiz');
+        $duration = (int) ($data['quiz_duration'] ?? ($data['duration'] ?? 20));
+        $passingGrade = (int) ($data['quiz_passing_grade'] ?? ($data['passing_grade'] ?? 75));
+        $attemptLimit = (int) ($data['quiz_attempt_limit'] ?? 3);
+        $sessId = $sessionId > 0 ? (int) $sessionId : null;
+
+        $pdo = getDBConnection();
+        $pdo->beginTransaction();
+        try {
+            if ($quizId > 0) {
+                dbExecute("
+                    UPDATE DX_LMS_M_Quizzes 
+                    SET quiz_title = ?, quiz_description = ?, quiz_duration = ?, quiz_passing_grade = ?, quiz_attempt_limit = ?, updated_at = GETDATE()
+                    WHERE quiz_id = ? AND course_id = ?
+                ", [$title, $desc, $duration, $passingGrade, $attemptLimit, $quizId, $courseId]);
+
+                if (!empty($data['questions'])) {
+                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id = ?)", [$quizId]);
+                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id = ?", [$quizId]);
+                    $stmtQ = $pdo->prepare("INSERT INTO DX_LMS_M_Quiz_Questions (quiz_id, question_text, question_type, question_order, question_status, created_at, updated_at) VALUES (?, ?, ?, ?, 'Active', GETDATE(), GETDATE())");
+                    $stmtC = $pdo->prepare("INSERT INTO DX_LMS_M_Quiz_Choices (question_id, choice_text, is_correct, choice_order, created_at, updated_at) VALUES (?, ?, ?, ?, GETDATE(), GETDATE())");
+                    $this->saveQuizQuestions($pdo, $stmtQ, $stmtC, $quizId, $data['questions']);
+                }
+
+                dbExecute("
+                    INSERT INTO DX_LMS_T_Activity_Logs 
+                    (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                    VALUES (?, 'edit_quiz', ?, ?, ?, ?, GETDATE())
+                ", [
+                    $teacherEmployeeId,
+                    (string) $courseId,
+                    "Pengajar memperbarui kuis '{$title}'",
+                    $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                    $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+                ]);
+
+                $pdo->commit();
+                return ['success' => true, 'quiz_id' => $quizId, 'message' => "Kuis '{$title}' berhasil diperbarui."];
+            } else {
+                $stmt = $pdo->prepare("
+                    INSERT INTO DX_LMS_M_Quizzes 
+                    (course_id, session_id, quiz_type, quiz_title, quiz_description, quiz_duration, quiz_attempt_limit, quiz_passing_grade, quiz_status, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Active', GETDATE(), GETDATE())
+                ");
+                $stmt->execute([$courseId, $sessId, $quizType, $title, $desc, $duration, $attemptLimit, $passingGrade]);
+                $newQuizId = (int) $pdo->lastInsertId();
+
+                $stmtQ = $pdo->prepare("INSERT INTO DX_LMS_M_Quiz_Questions (quiz_id, question_text, question_type, question_order, question_status, created_at, updated_at) VALUES (?, ?, ?, ?, 'Active', GETDATE(), GETDATE())");
+                $stmtC = $pdo->prepare("INSERT INTO DX_LMS_M_Quiz_Choices (question_id, choice_text, is_correct, choice_order, created_at, updated_at) VALUES (?, ?, ?, ?, GETDATE(), GETDATE())");
+                $this->saveQuizQuestions($pdo, $stmtQ, $stmtC, $newQuizId, $data['questions'] ?? []);
+
+                dbExecute("
+                    INSERT INTO DX_LMS_T_Activity_Logs 
+                    (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                    VALUES (?, 'add_quiz', ?, ?, ?, ?, GETDATE())
+                ", [
+                    $teacherEmployeeId,
+                    (string) $courseId,
+                    "Pengajar menambahkan kuis baru '{$title}'",
+                    $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                    $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+                ]);
+
+                $pdo->commit();
+                return ['success' => true, 'quiz_id' => $newQuizId, 'message' => "Kuis '{$title}' berhasil ditambahkan."];
+            }
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            return ['success' => false, 'message' => 'Gagal menyimpan kuis: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Menghapus Kuis
+     */
+    public function deleteCourseQuiz($quizId, $teacherEmployeeId)
+    {
+        $quizId = (int) $quizId;
+        $quiz = dbQueryOne("
+            SELECT q.quiz_id, q.quiz_title, q.course_id, c.created_by 
+            FROM DX_LMS_M_Quizzes q
+            INNER JOIN DX_LMS_M_Courses c ON q.course_id = c.course_id
+            WHERE q.quiz_id = ?
+        ", [$quizId]);
+
+        if (!$quiz) {
+            return ['success' => false, 'message' => 'Kuis tidak ditemukan.'];
+        }
+        if ((int) $quiz['created_by'] !== (int) $teacherEmployeeId) {
+            return ['success' => false, 'message' => 'Akses ditolak: Anda bukan pemilik course ini.'];
+        }
+
+        $pdo = getDBConnection();
+        $pdo->beginTransaction();
+        try {
+            dbExecute("DELETE FROM DX_LMS_T_Quiz_Answers WHERE attempt_id IN (SELECT attempt_id FROM DX_LMS_T_Quiz_Attempts WHERE quiz_id = ?)", [$quizId]);
+            dbExecute("DELETE FROM DX_LMS_T_Quiz_Attempts WHERE quiz_id = ?", [$quizId]);
+            dbExecute("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id = ?)", [$quizId]);
+            dbExecute("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id = ?", [$quizId]);
+            dbExecute("DELETE FROM DX_LMS_M_Quizzes WHERE quiz_id = ?", [$quizId]);
+
+            dbExecute("
+                INSERT INTO DX_LMS_T_Activity_Logs 
+                (employee_id, activity_type, reference_id, description, ip_address, user_agent, created_at)
+                VALUES (?, 'delete_quiz', ?, ?, ?, ?, GETDATE())
+            ", [
+                $teacherEmployeeId,
+                (string) $quiz['course_id'],
+                "Pengajar menghapus kuis '{$quiz['quiz_title']}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher'
+            ]);
+
+            $pdo->commit();
+            return ['success' => true, 'message' => "Kuis '{$quiz['quiz_title']}' berhasil dihapus."];
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            return ['success' => false, 'message' => 'Gagal menghapus kuis: ' . $e->getMessage()];
         }
     }
 }

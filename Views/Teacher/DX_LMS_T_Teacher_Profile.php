@@ -27,7 +27,7 @@
     ?>
 
     <!-- Main Content Canvas (Match Student Structure) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin py-4 lg:py-8 flex flex-col pb-32 pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin py-4 lg:py-8 flex flex-col pb-32 pt-[88px]">
         <div class="w-full max-w-3xl mx-auto flex flex-col gap-5">
             
             <!-- Top Profile Card -->

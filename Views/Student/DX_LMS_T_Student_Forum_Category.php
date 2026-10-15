@@ -50,7 +50,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
 
-    <main class="dls-main flex-1 flex flex-col min-w-0 pb-16">
+    <main class="dls-main flex-1 flex flex-col min-w-0 pb-16 pt-[88px]">
         <div class="max-w-[1200px] w-full mx-auto px-4 md:px-8 py-6 space-y-6">
 
 

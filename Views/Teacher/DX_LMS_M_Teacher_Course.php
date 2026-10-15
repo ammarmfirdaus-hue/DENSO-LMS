@@ -75,7 +75,7 @@ if ($current_filter === 'all') {
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[88px]">
         
         <section class="w-full space-y-stack-md">
             
@@ -174,7 +174,7 @@ if ($current_filter === 'all') {
                         $contextLine = match ($displayStat) {
                             'Private' => 'Belum diajukan ke admin',
                             'Pending Review' => 'Menunggu review admin',
-                            'Rejected' => 'Perlu revisi segera',
+                            'Rejected' => !empty($course['rejection_note']) ? 'Catatan: "' . e(mb_strimwidth($course['rejection_note'], 0, 36, '...')) . '"' : 'Perlu revisi segera',
                             'Completed' => 'Course telah selesai',
                             'Archived' => 'Course telah diarsipkan',
                             default => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
@@ -225,7 +225,7 @@ if ($current_filter === 'all') {
                                 <h3 class="font-headline-sm font-bold text-[16px] text-on-surface leading-snug line-clamp-2 min-h-[2.75rem] mt-1" title="<?= e(
                                     $course['title'],
                                 ) ?>">
-                                    <?= e($course['title']) ?>
+                                    <a href="<?= $ctaHref ?>" class="hover:text-primary transition-colors focus:outline-none focus:underline"><?= e($course['title']) ?></a>
                                 </h3>
 
                                 <!-- 3. Category (No Code) -->
@@ -283,10 +283,10 @@ if ($current_filter === 'all') {
                                 </span>
                                 <!-- Right: Action Buttons -->
                                 <div class="flex items-center gap-1.5 shrink-0">
-                                    <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-3 py-1.5 rounded-lg transition-colors <?= $ctaCls ?>">
+                                    <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-3 py-1.5 rounded-lg transition-colors cursor-pointer <?= $ctaCls ?>">
                                         <?= e($ctaText) ?>
                                     </a>
-                                    <button type="button" onclick="confirmDeleteCourseCard('<?= e((string)$course['id']) ?>', '<?= e(addslashes($course['title'])) ?>')" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-outline hover:text-error hover:border-error/40 hover:bg-error/5 flex items-center justify-center transition-colors" title="Hapus Course Permanen">
+                                    <button type="button" data-id="<?= e((string)$course['id']) ?>" data-title="<?= e($course['title']) ?>" onclick="confirmDeleteCourseCard(this)" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-outline hover:text-error hover:border-error/40 hover:bg-error/5 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Course Permanen">
                                         <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </button>
                                 </div>
@@ -309,7 +309,15 @@ if ($current_filter === 'all') {
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js"></script>
     <script src="assets/js/DX_LMS_M_Helpers.js"></script>
     <script>
-        function confirmDeleteCourseCard(courseId, title) {
+        function confirmDeleteCourseCard(elOrId, rawTitle) {
+            let courseId = elOrId;
+            let title = rawTitle;
+            if (typeof elOrId === 'object' && elOrId !== null) {
+                courseId = elOrId.getAttribute('data-id');
+                title = elOrId.getAttribute('data-title');
+            }
+            if (!courseId) return;
+
             const doDelete = () => {
                 fetch('?route=/teacher/course/delete&id=' + encodeURIComponent(courseId))
                     .then(res => res.json())

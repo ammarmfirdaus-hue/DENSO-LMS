@@ -99,7 +99,7 @@ if ($isHistoryMode) {
         <div class="w-10"></div> <!-- Spacer -->
     </header>
 
-    <main class="dls-main flex-1 w-full bg-surface-container-low p-container-margin lg:w-[calc(100%-240px)] lg:ml-[240px]">
+    <main class="dls-main flex-1 w-full bg-surface-container-low p-container-margin lg:w-[calc(100%-240px)] lg:ml-[240px] pt-[88px]">
         <div class="max-w-3xl mx-auto mt-4 mb-8">
 
             <?php if ($isHistoryMode): ?>

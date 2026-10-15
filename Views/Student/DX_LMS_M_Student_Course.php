@@ -25,7 +25,7 @@
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px] pt-[72px] px-container-margin">
+    <main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px] pt-[88px] px-container-margin">
         <!-- Header & Filters Section -->
         <section class="space-y-stack-sm">
             <h1 class="font-headline-md text-headline-md text-on-surface">My Course</h1>

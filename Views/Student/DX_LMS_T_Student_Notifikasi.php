@@ -82,7 +82,7 @@ $typeStyles = [
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 pt-[72px] pb-[90px] px-container-margin w-full lg:ml-[240px] transition-all duration-300">
+    <main class="dls-main flex-1 pt-[88px] pb-[90px] px-container-margin w-full lg:ml-[240px] transition-all duration-300">
         <!-- Summary & Controls Panel -->
         <div class="relative overflow-hidden bg-gradient-to-br from-surface-container-lowest to-surface-container-low rounded-[2rem] p-6 md:p-8 mb-8 shadow-sm border border-outline-variant/30 flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
             <!-- Decor pattern -->

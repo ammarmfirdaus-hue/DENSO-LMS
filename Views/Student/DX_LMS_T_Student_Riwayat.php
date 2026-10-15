@@ -36,7 +36,7 @@ $active_tab = 'riwayat'; ?>
     $notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
-    <main class="dls-main flex-1 pt-[72px] pb-32 lg:ml-[240px] transition-all duration-300">
+    <main class="dls-main flex-1 pt-[88px] pb-32 lg:ml-[240px] transition-all duration-300">
         <!-- Header & Stats Section -->
         <section class="px-container-margin py-6">
             <h1 class="font-headline-lg text-headline-lg text-on-background mb-1">Riwayat Belajar</h1>

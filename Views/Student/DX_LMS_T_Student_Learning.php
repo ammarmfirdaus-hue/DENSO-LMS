@@ -88,7 +88,7 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] mt-[60px] mb-[72px] sm:mb-[80px] bg-slate-50 overflow-y-auto content-scroll relative flex flex-col items-center transition-all duration-300">
+    <main class="flex-1 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] mt-[80px] mb-[72px] sm:mb-[80px] bg-slate-50 overflow-y-auto content-scroll relative flex flex-col items-center transition-all duration-300">
         <div class="w-full xl:max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col fade-in pb-10">
             <?php if ($material['type'] === 'video'): ?>
             <!-- Video Container -->

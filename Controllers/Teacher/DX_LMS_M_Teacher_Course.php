@@ -17,16 +17,18 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
     public function index()
     {
         $teacherUser = $this->redirectIfNotTeacher();
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
 
         $courseModel = new DX_LMS_M_Courses();
         $filterStatus = $_GET['status'] ?? 'all';
 
-        // Ambil course dari Database SQL Server
-        $dbCourses = $courseModel->getAllForTeacher(null, $filterStatus);
+        // Ambil course dari Database SQL Server khusus milik pengajar yang sedang login
+        $dbCourses = $courseModel->getAllForTeacher($teacherId, $filterStatus);
 
         // Format dbCourses agar sesuai dengan UI Teacher List
         $formattedDbCourses = [];
         foreach ($dbCourses as $dbc) {
+            $isRej = strtolower($dbc['status'] ?? '') === 'rejected';
             $formattedDbCourses[] = [
                 'id' => $dbc['id'],
                 'code' => $dbc['code'],
@@ -42,6 +44,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
                 'progress' => (int) $dbc['progress'],
                 'avg_score' => (int) $dbc['avg_score'],
                 'updated_at' => timeAgo($dbc['updated_at'] ?? date('Y-m-d H:i:s')),
+                'rejection_note' => $isRej ? ($courseModel->getCourseRejectionNote($dbc['id'])['note'] ?? 'Perlu revisi segera') : null,
             ];
         }
 
@@ -62,12 +65,14 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
     public function detail()
     {
         $teacherUser = $this->redirectIfNotTeacher();
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
 
-        $courseId = $_GET['course_id'] ?? 1;
+        $courseId = !empty($_GET['course_id']) ? (int)$_GET['course_id'] : 1;
         $courseModel = new DX_LMS_M_Courses();
         $course = $courseModel->getCourseDetail($courseId);
 
-        if (!$course) {
+        // Keamanan: Validasi bahwa course ada dan dimiliki oleh pengajar ini
+        if (!$course || (int)$course['created_by'] !== $teacherId) {
             header('Location: ?route=/teacher/courses');
             exit();
         }
@@ -79,9 +84,14 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
             foreach ($dbSessions as $s) {
                 $syllabus[] = [
                     'id' => $s['session_id'],
+                    'session_id' => $s['session_id'],
                     'title' => $s['session_title'],
+                    'description' => $s['session_description'] ?? '',
+                    'order' => $s['session_order'] ?? 1,
                     'materials' => count($s['materials'] ?? []),
+                    'materials_list' => $s['materials'] ?? [],
                     'assesments' => count($s['quizzes'] ?? []),
+                    'quizzes_list' => $s['quizzes'] ?? [],
                 ];
             }
         }
@@ -132,29 +142,35 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
     {
         $teacherUser = $this->redirectIfNotTeacher();
 
-        $courseId = $_GET['course_id'] ?? null;
+        $courseId = !empty($_GET['course_id']) ? (int) $_GET['course_id'] : null;
         $course = null;
+        $existingSessions = [];
+        $courseModel = new DX_LMS_M_Courses();
+        $empModel = new DX_LMS_M_Employees();
+
         if ($courseId) {
-            $courseModel = new DX_LMS_M_Courses();
             $course = $courseModel->getCourseDetail($courseId);
-            if (!$course) {
-                require_once 'includes/DX_LMS_M_Teacher_MockData.php';
-                $course = DX_LMS_M_Teacher_MockData::getCourseDetail($courseId);
+            if ($course) {
+                // Keamanan: Validasi kepemilikan course
+                $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+                if ((int) $course['created_by'] !== $teacherId && ($teacherUser['role'] ?? '') !== 'admin') {
+                    header('Location: ?route=/teacher/courses');
+                    exit();
+                }
+                $existingSessions = $courseModel->getCourseSessionsWithContent($courseId);
             }
         }
 
-        require_once 'includes/DX_LMS_M_Teacher_MockData.php';
-        $filters = DX_LMS_M_Teacher_MockData::getTargetFilterOptions();
-
-        // Ambil seluruh kandidat karyawan riil dari database (Standar Denso)
-        $empModel = new DX_LMS_M_Employees();
+        // Ambil filter dan kandidat karyawan riil dari SSMS database
+        $filters = $empModel->getTargetFilterOptions();
         $candidates = $empModel->getCandidatesForTargeting();
 
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
             'user' => $teacherUser,
-            'course' => $course, // null if new course
+            'course' => $course,
+            'existing_sessions' => $existingSessions,
             'filters' => $filters,
             'candidates' => $candidates,
         ];
@@ -274,7 +290,8 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         }
 
         // Validasi hak akses: hanya pembuat atau admin
-        if ($course['created_by'] != $teacherUser['employee_id'] && ($teacherUser['role'] ?? '') !== 'admin') {
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+        if ((int)$course['created_by'] !== $teacherId && ($teacherUser['role'] ?? '') !== 'admin') {
             $this->jsonResponse(['success' => false, 'error' => 'Anda tidak memiliki hak untuk menghapus course ini.'], 403);
             return;
         }
@@ -287,6 +304,97 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         } else {
             $this->jsonResponse(['success' => false, 'error' => $result['message']], 500);
         }
+    }
+
+    /**
+     * API Menyimpan Sesi (In-Place)
+     */
+    public function saveSessionApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $courseId = (int) ($input['course_id'] ?? 0);
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->saveCourseSession($courseId, $teacherId, $input);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
+    }
+
+    /**
+     * API Menghapus Sesi
+     */
+    public function deleteSessionApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $sessionId = (int) ($input['session_id'] ?? ($_GET['session_id'] ?? 0));
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->deleteCourseSession($sessionId, $teacherId);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
+    }
+
+    /**
+     * API Menyimpan Materi (In-Place)
+     */
+    public function saveMaterialApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $sessionId = (int) ($input['session_id'] ?? 0);
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->saveCourseMaterial($sessionId, $teacherId, $input);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
+    }
+
+    /**
+     * API Menghapus Materi
+     */
+    public function deleteMaterialApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $materialId = (int) ($input['material_id'] ?? ($_GET['material_id'] ?? 0));
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->deleteCourseMaterial($materialId, $teacherId);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
+    }
+
+    /**
+     * API Menyimpan Kuis (In-Place)
+     */
+    public function saveQuizApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $courseId = (int) ($input['course_id'] ?? 0);
+        $sessionId = (int) ($input['session_id'] ?? 0);
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->saveCourseQuiz($courseId, $sessionId, $teacherId, $input);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
+    }
+
+    /**
+     * API Menghapus Kuis
+     */
+    public function deleteQuizApi()
+    {
+        $teacherUser = $this->redirectIfNotTeacher();
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $quizId = (int) ($input['quiz_id'] ?? ($_GET['quiz_id'] ?? 0));
+        $teacherId = (int) ($teacherUser['employee_id'] ?? 2);
+
+        $courseModel = new DX_LMS_M_Courses();
+        $result = $courseModel->deleteCourseQuiz($quizId, $teacherId);
+        $this->jsonResponse($result, $result['success'] ? 200 : 400);
     }
 
     private function jsonResponse($data, $statusCode = 200)
@@ -306,6 +414,17 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         if (!$teacherUser) {
             header('Location: ?route=/login');
             exit();
+        }
+        if (empty($teacherUser['employee_id'])) {
+            $emp = dbQueryOne("SELECT employee_id, role, jabatan, golongan FROM DX_LMS_M_Employees WHERE npk = ?", [$teacherUser['npk'] ?? '']);
+            $teacherUser['employee_id'] = (int) ($emp['employee_id'] ?? 2);
+            $teacherUser['id'] = $teacherUser['employee_id'];
+            $_SESSION['user']['employee_id'] = $teacherUser['employee_id'];
+            $_SESSION['user']['id'] = $teacherUser['employee_id'];
+            if (isset($_SESSION['roles']['teacher'])) {
+                $_SESSION['roles']['teacher']['employee_id'] = $teacherUser['employee_id'];
+                $_SESSION['roles']['teacher']['id'] = $teacherUser['employee_id'];
+            }
         }
         return $teacherUser;
     }

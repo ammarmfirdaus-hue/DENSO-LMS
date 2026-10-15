@@ -27,7 +27,7 @@
     include 'includes/components/DX_LMS_M_Teacher_Header.php';
     ?>
 
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[72px]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-container-margin pb-[88px] pt-[88px]">
         <div class="max-w-4xl mx-auto space-y-stack-xl">
             <!-- Info Sesi -->
             <section class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0_4px_12px_0_rgba(0,0,0,0.03)] border border-surface-variant">

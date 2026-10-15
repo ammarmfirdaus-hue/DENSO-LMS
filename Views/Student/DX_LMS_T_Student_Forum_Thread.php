@@ -92,7 +92,7 @@ include 'includes/components/DX_LMS_M_Tailwind_Head.php';
     <?php endif; ?>
 
     <!-- Main Content Wrapper -->
-    <div class="flex flex-col lg:flex-row items-start <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:ml-[240px]' : 'lg:ml-[240px]' ?> pt-2 md:pt-4 lg:pl-8 lg:pr-6 xl:pl-12 gap-8 w-full <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:w-[calc(100%-240px)]' : 'lg:w-[calc(100%-240px)]' ?>" style="margin-top: 56px;">
+    <div class="flex flex-col lg:flex-row items-start <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:ml-[240px]' : 'lg:ml-[240px]' ?> pt-8 md:pt-8 lg:pl-8 lg:pr-6 xl:pl-12 gap-8 w-full <?= in_array($activeRole, ['teacher', 'admin']) ? 'lg:w-[calc(100%-240px)]' : 'lg:w-[calc(100%-240px)]' ?>" style="margin-top: 56px;">
 
         <!-- Feed Container (Left) -->
         <main class="flex-1 w-full max-w-[760px] mx-auto lg:mx-0 px-4 md:px-0 flex flex-col fade-in pb-[160px] lg:pb-[140px]">

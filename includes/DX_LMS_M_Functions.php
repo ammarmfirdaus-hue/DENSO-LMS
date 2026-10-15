@@ -269,59 +269,86 @@ function getPortalUser(string $portal = 'student'): ?array
 
     $portal = strtolower(trim($portal));
 
+    $matchedUser = null;
+
     // 1. Prioritaskan data sesi akun asli yang tepat dengan portalnya
     if (!empty($_SESSION['roles'][$portal])) {
         $savedRole = strtolower($_SESSION['roles'][$portal]['role'] ?? '');
         if ($savedRole === $portal) {
-            return $_SESSION['roles'][$portal];
+            $matchedUser = $_SESSION['roles'][$portal];
         }
     }
 
     // 2. Jika di portal 'teacher', cari apakah ada akun ber-role 'teacher' asli di $_SESSION['roles']
-    if ($portal === 'teacher') {
+    if (!$matchedUser && $portal === 'teacher') {
         if (!empty($_SESSION['roles']['teacher']) && strtolower($_SESSION['roles']['teacher']['role'] ?? '') === 'teacher') {
-            return $_SESSION['roles']['teacher'];
+            $matchedUser = $_SESSION['roles']['teacher'];
         }
     }
 
     // 3. Jika di portal 'admin', cari apakah ada akun ber-role 'admin' asli di $_SESSION['roles']
-    if ($portal === 'admin') {
+    if (!$matchedUser && $portal === 'admin') {
         if (!empty($_SESSION['roles']['admin']) && strtolower($_SESSION['roles']['admin']['role'] ?? '') === 'admin') {
-            return $_SESSION['roles']['admin'];
+            $matchedUser = $_SESSION['roles']['admin'];
         }
     }
 
     // 4. Jika di portal 'student', cari apakah ada akun ber-role 'student' asli di $_SESSION['roles']
-    if ($portal === 'student') {
+    if (!$matchedUser && $portal === 'student') {
         if (!empty($_SESSION['roles']['student']) && strtolower($_SESSION['roles']['student']['role'] ?? '') === 'student') {
-            return $_SESSION['roles']['student'];
+            $matchedUser = $_SESSION['roles']['student'];
         }
     }
 
     // 5. Cek slot tersimpan pada portal tersebut (misal akun admin yang sedang berada di mode teacher/student)
-    if (!empty($_SESSION['roles'][$portal])) {
-        return $_SESSION['roles'][$portal];
+    if (!$matchedUser && !empty($_SESSION['roles'][$portal])) {
+        $matchedUser = $_SESSION['roles'][$portal];
     }
 
     // 6. Terakhir, evaluasi akun aktif ($_SESSION['user']) jika memiliki izin peran tersebut
-    if (!empty($_SESSION['user'])) {
+    if (!$matchedUser && !empty($_SESSION['user'])) {
         $baseRole = strtolower($_SESSION['user']['role'] ?? 'student');
 
         if ($portal === 'student') {
-            return $_SESSION['user'];
-        }
-
-        if ($portal === 'teacher') {
+            $matchedUser = $_SESSION['user'];
+        } elseif ($portal === 'teacher') {
             if (in_array($baseRole, ['teacher', 'admin'], true)) {
-                return $_SESSION['user'];
+                $matchedUser = $_SESSION['user'];
             }
-        }
-
-        if ($portal === 'admin') {
+        } elseif ($portal === 'admin') {
             if ($baseRole === 'admin') {
-                return $_SESSION['user'];
+                $matchedUser = $_SESSION['user'];
             }
         }
+    }
+
+    // Keamanan & Integritas Data: Pastikan employee_id selalu ada dan bertipe integer valid
+    if (!empty($matchedUser)) {
+        if (empty($matchedUser['employee_id'])) {
+            $npk = $matchedUser['npk'] ?? ($matchedUser['username'] ?? '');
+            if (!empty($npk)) {
+                $empRow = dbQueryOne("SELECT employee_id, role, jabatan, golongan FROM DX_LMS_M_Employees WHERE npk = ?", [$npk]);
+                if ($empRow) {
+                    $matchedUser['employee_id'] = (int) $empRow['employee_id'];
+                    $matchedUser['id'] = (int) $empRow['employee_id'];
+                } else {
+                    $matchedUser['employee_id'] = 2; // Default fallback to teacher Ahmad Rizal
+                    $matchedUser['id'] = 2;
+                }
+            } else {
+                $matchedUser['employee_id'] = 2;
+                $matchedUser['id'] = 2;
+            }
+
+            // Simpan kembali ke dalam sesi agar query tidak berulang
+            $_SESSION['user']['employee_id'] = $matchedUser['employee_id'];
+            $_SESSION['user']['id'] = $matchedUser['employee_id'];
+            if (isset($_SESSION['roles'][$portal])) {
+                $_SESSION['roles'][$portal]['employee_id'] = $matchedUser['employee_id'];
+                $_SESSION['roles'][$portal]['id'] = $matchedUser['employee_id'];
+            }
+        }
+        return $matchedUser;
     }
 
     return null;

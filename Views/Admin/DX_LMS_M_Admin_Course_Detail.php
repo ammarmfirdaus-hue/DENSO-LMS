@@ -82,7 +82,7 @@ $active_tab = 'course';
     <?php include 'includes/components/DX_LMS_M_Header.php'; ?>
 
     <!-- Main Content Canvas (Full-Width Fluid Layout Tanpa Ruang Kosong Berlebih) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[72px] bg-[#FAFAFA]">
+    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-24 pt-[88px] bg-[#FAFAFA]">
         
 
 

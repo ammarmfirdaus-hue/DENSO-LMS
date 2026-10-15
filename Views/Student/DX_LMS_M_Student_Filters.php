@@ -16,7 +16,7 @@
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
 
-    <main class="dls-main flex flex-col h-full pt-[72px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300">
+    <main class="dls-main flex flex-col h-full pt-[88px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300">
         <section class="flex-none pt-4">
             <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menampilkan course yang spesifik.</p>
 

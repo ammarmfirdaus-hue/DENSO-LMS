@@ -45,7 +45,7 @@ $userRole = 'Student';
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 overflow-y-auto space-y-stack-lg pt-[72px] px-container-margin pb-[88px]">
+    <main class="dls-main flex-1 overflow-y-auto space-y-stack-lg pt-[88px] px-container-margin pb-[88px]">
         <!-- Greeting Section -->
         <section class="space-y-stack-sm min-w-0">
             <h1 class="font-headline-lg font-bold text-[clamp(16px,5.5vw,26px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface whitespace-nowrap overflow-hidden">

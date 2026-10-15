@@ -82,6 +82,8 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
 
                     /** Menyimpan data penting (esensial) ke dalam sesi (session). */
                     $userData = [
+                        'employee_id' => (int) $user['employee_id'],
+                        'id' => (int) $user['employee_id'],
                         'npk' => $user['npk'],
                         'username' => $user['npk'],
                         'name' => $user['fullname'],
