@@ -353,13 +353,14 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             }
 
             $description = trim($data['description'] ?? '');
-            $category = trim($data['category'] ?? 'Umum');
-            if (empty($category) && !empty($data['tags'])) {
+            $category = trim($data['category'] ?? '');
+            if ((empty($category) || $category === 'Umum') && !empty($data['tags'])) {
                 $category = is_array($data['tags']) ? implode(', ', $data['tags']) : $data['tags'];
             }
             if (empty($category)) {
-                $category = 'Engineering';
+                $category = 'Umum';
             }
+            $category = substr($category, 0, 50);
 
             $status = in_array(($data['status'] ?? ''), ['Draft', 'Submitted', 'Approved', 'Active'])
                 ? $data['status']
@@ -438,18 +439,34 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             }
 
             // 2. Simpan Target Audience / Rekomendasi Filter
-            $targets = $data['targets'] ?? [];
-            $targetPositions = $targets['positions'] ?? ($targets['jabatan'] ?? []);
-            $targetGolongans = $targets['golongans'] ?? ($targets['golongan'] ?? []);
-            $targetDepts = $targets['departments'] ?? ($targets['departemen'] ?? []);
+            $targetJabatan = trim($data['target_jabatan'] ?? '');
+            $targetGolongan = trim($data['target_golongan'] ?? '');
+            $targetDept = trim($data['target_departemen'] ?? '');
+
+            $posId = null;
+            if (!empty($targetJabatan)) {
+                $posRow = dbQueryOne("SELECT position_id FROM DX_LMS_M_Positions WHERE LOWER(position_name) = LOWER(?)", [$targetJabatan]);
+                if ($posRow) $posId = (int) $posRow['position_id'];
+            }
+
+            $golId = null;
+            if (!empty($targetGolongan)) {
+                $golRow = dbQueryOne("SELECT golongan_id FROM DX_LMS_M_Golongan WHERE LOWER(golongan_name) = LOWER(?)", [$targetGolongan]);
+                if ($golRow) $golId = (int) $golRow['golongan_id'];
+            }
+
+            $deptId = null;
+            if (!empty($targetDept)) {
+                $deptRow = dbQueryOne("SELECT department_id FROM DX_LMS_M_Departments WHERE LOWER(department_name) = LOWER(?)", [$targetDept]);
+                if ($deptRow) $deptId = (int) $deptRow['department_id'];
+            }
 
             $stmtTarget = $pdo->prepare("
                 INSERT INTO DX_LMS_M_Course_Targets 
                 (course_id, position_id, golongan_id, department_id, assigned_by, target_type, target_status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, 'Target_Audience', 'Active', GETDATE(), GETDATE())
             ");
-            // Buat record target awal
-            $stmtTarget->execute([$courseId, null, null, null, $teacherEmployeeId]);
+            $stmtTarget->execute([$courseId, $posId, $golId, $deptId, $teacherEmployeeId]);
 
             // 3. Simpan Sesi Kurikulum & Konten Modul
             $sessions = $data['sessions'] ?? [];

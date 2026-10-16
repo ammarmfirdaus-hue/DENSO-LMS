@@ -145,6 +145,11 @@ module.exports = {
                 'error-container': '#ffdad6',
                 'on-error-container': '#93000a',
 
+                warning: '#d97706',
+                'on-warning': '#ffffff',
+                'warning-container': '#fef3c7',
+                'on-warning-container': '#78350f',
+
                 background: '#fcf9f8',
                 'on-background': '#1b1c1c',
                 surface: '#fcf9f8',

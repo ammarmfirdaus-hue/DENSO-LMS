@@ -74,6 +74,12 @@
     --dls-on-error: #ffffff;
     --dls-on-error-container: #93000a;
 
+    /* Warning */
+    --dls-warning: #d97706;
+    --dls-warning-container: #fef3c7;
+    --dls-on-warning: #ffffff;
+    --dls-on-warning-container: #78350f;
+
     /* Surface */
     --dls-surface: #fcf9f8;
     --dls-surface-dim: #dcd9d9;

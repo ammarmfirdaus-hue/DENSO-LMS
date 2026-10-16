@@ -66,7 +66,7 @@
             <!-- Summary Cards (Bento Grid) -->
             <section class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
                 <!-- Course Diampu (Lebar) -->
-                <div class="col-span-2 bg-surface p-stack-md rounded-xl shadow-sm border border-surface-variant flex items-center space-x-stack-md hover:shadow-md transition-shadow">
+                <div class="col-span-2 bg-white p-stack-md rounded-xl shadow-sm border border-outline-variant/60 flex items-center space-x-stack-md hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-primary-container rounded-full flex shrink-0 items-center justify-center text-white shadow-sm border border-primary/10">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
                     </div>
@@ -83,7 +83,7 @@
                     </div>
                 </div>
                 <!-- Peserta Aktif -->
-                <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-surface-variant flex flex-col justify-center items-center text-center space-y-2 hover:shadow-md transition-shadow">
+                <div class="bg-white p-stack-md rounded-xl shadow-sm border border-outline-variant/60 flex flex-col justify-center items-center text-center space-y-2 hover:shadow-md transition-shadow">
                     <div class="w-10 h-10 bg-secondary-container/50 rounded-full flex items-center justify-center text-secondary mb-1">
                         <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">groups</span>
                     </div>
@@ -95,7 +95,7 @@
                     </div>
                 </div>
                 <!-- Pending Review -->
-                <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-surface-variant flex flex-col justify-center items-center text-center space-y-2 hover:shadow-md transition-shadow">
+                <div class="bg-white p-stack-md rounded-xl shadow-sm border border-outline-variant/60 flex flex-col justify-center items-center text-center space-y-2 hover:shadow-md transition-shadow">
                     <div class="w-10 h-10 bg-error-container/50 rounded-full flex items-center justify-center text-error mb-1">
                         <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
                     </div>
@@ -127,12 +127,12 @@
                         <?php endif; ?>
                     </div>
                     <?php if (!empty($pending_actions)): ?>
-                    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 p-4 flex-1 flex flex-col justify-between overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/60 p-4 flex-1 flex flex-col justify-between overflow-hidden">
                         <div class="relative border-l-2 border-surface-variant ml-4 space-y-6 py-2">
                             <?php foreach ($pending_actions as $act): ?>
                                 <div class="relative pl-6">
                                     <!-- Timeline Dot -->
-                                    <div class="absolute -left-[5px] top-1.5 w-[8px] h-[8px] rounded-full border-2 border-surface <?= ($act['type'] ?? '') === 'rejected' ? 'bg-rose-500 ring-4 ring-rose-100' : 'bg-secondary ring-4 ring-secondary/20' ?> shadow-2xs z-10"></div>
+                                    <div class="absolute -left-[5px] top-1.5 w-[8px] h-[8px] rounded-full border-2 border-white <?= ($act['type'] ?? '') === 'rejected' ? 'bg-rose-500 ring-4 ring-rose-100' : 'bg-secondary ring-4 ring-secondary/20' ?> shadow-2xs z-10"></div>
                                     
                                     <div class="flex items-start gap-3">
                                         <div class="w-8 h-8 rounded-lg shrink-0 <?= ($act['type'] ?? '') === 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-surface-container text-on-surface-variant border border-outline-variant/30' ?> flex items-center justify-center shadow-2xs mt-0.5">
@@ -186,7 +186,7 @@
                         </div>
 
                         <!-- Footer Info to Balance Height -->
-                        <div class="px-4 py-2.5 -mx-4 -mb-4 bg-surface-container-lowest/70 border-t border-outline-variant/30 flex items-center justify-between mt-auto">
+                        <div class="px-4 py-2.5 -mx-4 -mb-4 bg-gray-50/70 border-t border-outline-variant/30 flex items-center justify-between mt-auto">
                             <span class="text-[11px] text-on-surface-variant flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                                 Prioritaskan revisi sebelum mengajukan kembali
@@ -197,7 +197,7 @@
                         </div>
                     </div>
                     <?php else: ?>
-                    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 flex-1 flex flex-col items-center justify-center text-center p-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/60 flex-1 flex flex-col items-center justify-center text-center p-8">
                         <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 border border-emerald-100">
                             <span class="material-symbols-outlined text-[32px]">task_alt</span>
                         </div>
@@ -216,12 +216,12 @@
                         </h2>
                         <a class="font-label-sm font-bold text-secondary hover:underline" href="?route=/teacher/aktivitas">Lihat Log</a>
                     </div>
-                    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 p-4 flex-1 flex flex-col justify-between">
+                    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/60 p-4 flex-1 flex flex-col justify-between">
                         <div class="relative border-l-2 border-surface-variant ml-4 space-y-6 py-2">
                             <?php foreach ($activities as $i => $act): ?>
                                 <div class="relative pl-6">
                                     <!-- Timeline Dot -->
-                                    <div class="absolute -left-[5px] top-1 w-[8px] h-[8px] rounded-full border-2 border-surface bg-outline-variant ring-4 ring-surface-variant shadow-sm z-10 <?php if (
+                                    <div class="absolute -left-[5px] top-1 w-[8px] h-[8px] rounded-full border-2 border-white bg-outline-variant ring-4 ring-surface-variant shadow-sm z-10 <?php if (
                                         $i === 0
                                     ) {
                                         echo 'bg-secondary ring-secondary/20';

@@ -38,7 +38,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     ?>
 
     <!-- Main Content Canvas (Full-Width Fluid Layout without Empty Margins) -->
-    <main class="dls-main flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[120px] pt-[88px]">
+    <main class="dls-main overflow-y-visible flex-1 w-full lg:ml-[240px] px-4 sm:px-6 lg:px-8 pb-[120px] pt-[88px]">
         <div class="w-full space-y-stack-xl relative">
             
             <?php if (($course['status'] ?? '') === 'Submitted' || ($course['status'] ?? '') === 'Approved'): ?>
@@ -208,62 +208,72 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             
                             <!-- Tags Multi-Select Field -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-1.5 md:col-span-2">
-                                    <label class="font-label-md font-bold text-on-surface flex items-center gap-2">
-                                        Tags <span class="text-on-surface-variant font-normal text-xs">(Pilih kategori relevan)</span>
-                                    </label>
-                                    
-                                    <!-- Custom Searchable Dropdown Multi-Select -->
-                                    <div class="relative" id="tags-dropdown-container">
-                                        <!-- Selected Tags Display & Trigger -->
-                                        <div id="tags-trigger" class="min-h-[48px] bg-surface-container-lowest border border-outline-variant rounded-xl p-2.5 flex flex-wrap gap-2 items-center cursor-pointer hover:border-primary transition-all shadow-sm">
-                                            <!-- Selected tags will be injected here by JS -->
-                                            <div id="tags-placeholder" class="text-on-surface-variant font-body-md px-2 py-1">Pilih tags...</div>
-                                            <div class="ml-auto flex items-center pr-2">
-                                                <span class="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Dropdown Menu -->
-                                        <div id="tags-menu" class="absolute left-0 w-full mt-2 bg-surface-container border border-outline-variant rounded-xl shadow-lg z-50 hidden flex flex-col max-h-[300px] overflow-hidden">
-                                            <div class="p-3 border-b border-outline-variant sticky top-0 bg-surface-container rounded-t-xl z-20">
-                                                <div class="relative">
-                                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-                                                    <input type="text" id="tags-search" class="w-full bg-surface border border-outline-variant rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary transition-all" placeholder="Cari tag, misal: Quality, Safety...">
-                                                </div>
-                                            </div>
-                                            <div class="overflow-y-auto p-2 flex flex-col gap-1 flex-1 overscroll-contain" id="tags-options">
-                                                <?php
-                                                $availableTags = [
-                                                    'Automation',
-                                                    'Compliance',
-                                                    'Core',
-                                                    'Culture',
-                                                    'Engineering',
-                                                    'HR',
-                                                    'Leadership',
-                                                    'Maintenance',
-                                                    'Management',
-                                                    'Problem Solving',
-                                                    'Productivity',
-                                                    'Quality',
-                                                    'Safety',
-                                                    'Soft Skill',
-                                                ];
-                                                foreach ($availableTags as $tag): ?>
-                                                <label class="tag-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors" data-value="<?= strtolower(
-                                                    $tag,
-                                                ) ?>">
-                                                    <input type="checkbox" class="tag-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" value="<?= $tag ?>">
-                                                    <span class="font-body-md text-on-surface flex-1"><?= $tag ?></span>
-                                                </label>
-                                                <?php endforeach;
-                                                ?>
-                                            </div>
+                                <div class="space-y-3 md:col-span-2 pt-1">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <label class="font-label-md font-bold text-on-surface flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-[18px] text-primary">sell</span>
+                                            Tags / Kategori Course
+                                            <span class="text-on-surface-variant font-normal text-xs">(Pilih kategori kompetensi yang relevan)</span>
+                                        </label>
+                                        <div class="flex items-center gap-2 self-start sm:self-auto">
+                                            <span id="tags-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full border border-outline-variant/60 bg-surface-container-low text-on-surface-variant transition-colors">
+                                                0 Terpilih
+                                            </span>
+                                            <button type="button" id="tags-reset-btn" onclick="resetAllTags()" class="text-xs font-semibold text-rose-700 hover:text-rose-900 hover:underline hidden transition-colors">
+                                                Reset Pilihan
+                                            </button>
                                         </div>
                                     </div>
-                                    <p class="text-[12px] text-on-surface-variant/80 mt-1">
-                                        Pilih satu atau lebih kategori yang relevan agar mempermudah kurasi dan filter course.
+                                    
+                                    <!-- Inline Selectable Chips Container -->
+                                    <div class="p-4 bg-white border border-outline-variant/80 rounded-2xl shadow-2xs space-y-3">
+                                        <p class="text-[12px] text-on-surface-variant/90 flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[15px] text-primary">touch_app</span>
+                                            Klik kategori di bawah ini untuk memilih kompetensi course:
+                                        </p>
+                                        
+                                        <div class="flex flex-wrap gap-2.5" id="tags-chips-wrapper">
+                                            <?php
+                                            $savedCategory = $course['category'] ?? '';
+                                            $savedTags = array_map('trim', explode(',', strtolower($savedCategory)));
+                                            
+                                            // 14 Kategori Standar Industri LMS PT Denso Indonesia
+                                            $availableTags = [
+                                                ['name' => 'Safety', 'icon' => 'health_and_safety'],
+                                                ['name' => 'Quality', 'icon' => 'verified'],
+                                                ['name' => 'Core', 'label' => 'Core (5S & K3)', 'icon' => 'stars'],
+                                                ['name' => 'Maintenance', 'icon' => 'build'],
+                                                ['name' => 'Engineering', 'icon' => 'precision_manufacturing'],
+                                                ['name' => 'Productivity', 'icon' => 'trending_up'],
+                                                ['name' => 'Automation', 'icon' => 'smart_toy'],
+                                                ['name' => 'Problem Solving', 'icon' => 'psychology'],
+                                                ['name' => 'Compliance', 'icon' => 'gavel'],
+                                                ['name' => 'Leadership', 'icon' => 'supervisor_account'],
+                                                ['name' => 'Management', 'icon' => 'work'],
+                                                ['name' => 'Culture', 'icon' => 'diversity_3'],
+                                                ['name' => 'HR', 'icon' => 'badge'],
+                                                ['name' => 'Soft Skill', 'icon' => 'lightbulb'],
+                                            ];
+
+                                            foreach ($availableTags as $tagItem):
+                                                $tagName = $tagItem['name'];
+                                                $tagLabel = $tagItem['label'] ?? $tagName;
+                                                $tagIcon = $tagItem['icon'];
+                                                $isTagChecked = in_array(strtolower($tagName), $savedTags) || in_array(strtolower($tagLabel), $savedTags);
+                                            ?>
+                                            <label class="tag-chip group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-[13px] font-semibold cursor-pointer select-none transition-all duration-200 <?= $isTagChecked ? 'bg-rose-50 text-rose-800 border-primary ring-2 ring-primary/10 shadow-xs' : 'bg-white text-on-surface border-outline-variant/70 hover:border-primary/60 hover:bg-rose-50/40 hover:text-primary shadow-2xs' ?>" data-default-icon="<?= e($tagIcon) ?>">
+                                                <input type="checkbox" class="tag-checkbox sr-only" value="<?= e($tagName) ?>" <?= $isTagChecked ? 'checked' : '' ?>>
+                                                <span class="material-symbols-outlined tag-chip-icon text-[16px] transition-transform group-hover:scale-110 <?= $isTagChecked ? 'text-primary' : 'text-outline group-hover:text-primary' ?>">
+                                                    <?= $isTagChecked ? 'check_circle' : $tagIcon ?>
+                                                </span>
+                                                <span class="tag-chip-label"><?= e($tagLabel) ?></span>
+                                            </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                    <p class="text-[11.5px] text-on-surface-variant/80 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px] text-emerald-600">info</span>
+                                        Kategori yang dipilih akan otomatis tercantum pada katalog course karyawan dan ringkasan pengajuan review.
                                     </p>
                                 </div>
                             </div>
@@ -340,19 +350,50 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                         $mTitle = $mat['material_title'] ?? ('Materi ' . ($mIdx + 1));
                                         $mType = strtolower($mat['material_type'] ?? 'document');
                                         $mDesc = $mat['material_description'] ?? '';
-                                        $icon = ($mType === 'video') ? 'play_circle' : (($mType === 'pdf') ? 'picture_as_pdf' : 'description');
+                                        $isPreTest = in_array($mType, ['pre-test', 'pre_test']);
+                                        $isPostTest = in_array($mType, ['post-test', 'post_test']);
+
+                                        if ($isPreTest) {
+                                            $badgeTitle = 'Pre-Test';
+                                            $badgeBg = 'bg-secondary-container/40 text-secondary';
+                                            $badgeText = 'text-secondary';
+                                            $icon = 'quiz';
+                                            $kelolaClass = 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-white';
+                                            $kelolaOnClick = 'openAssessmentBuilder(this)';
+                                        } elseif ($isPostTest) {
+                                            $badgeTitle = 'Post-Test';
+                                            $badgeBg = 'bg-warning-container/40 text-warning-800 dark:text-warning';
+                                            $badgeText = 'text-warning-800 dark:text-warning';
+                                            $icon = 'assignment_turned_in';
+                                            $kelolaClass = 'bg-warning/15 text-warning-800 dark:text-warning hover:bg-warning hover:text-white';
+                                            $kelolaOnClick = 'openAssessmentBuilder(this)';
+                                        } else {
+                                            $badgeTitle = 'Materi';
+                                            $badgeBg = 'bg-primary-container text-white';
+                                            $badgeText = 'text-primary';
+                                            $icon = ($mType === 'video') ? 'play_circle' : (($mType === 'pdf') ? 'picture_as_pdf' : 'description');
+                                            $kelolaClass = 'bg-primary/10 text-primary hover:bg-primary hover:text-white';
+                                            $kelolaOnClick = 'openMaterialBuilder(this)';
+                                        }
                                     ?>
                                     <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
+                                        <div class="w-10 h-10 rounded-lg <?= $badgeBg ?> flex items-center justify-center shrink-0">
                                             <span class="material-symbols-outlined"><?= $icon ?></span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Materi</p>
-                                            <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="<?= e($mTitle) ?>" placeholder="Judul Modul...">
+                                            <p class="font-label-sm <?= $badgeText ?> mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold"><?= $badgeTitle ?></p>
+                                            <div class="relative flex items-center group/title max-w-lg">
+                                                <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-outline-variant/40 hover:border-primary focus:border-primary focus:bg-surface-container-low/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-on-surface text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-on-surface-variant/50" value="<?= e($mTitle) ?>" placeholder="Klik untuk isi judul <?= strtolower($badgeTitle) ?>..." title="Klik untuk mengubah judul modul">
+                                                <span class="material-symbols-outlined text-[15px] text-on-surface-variant/40 absolute right-1.5 pointer-events-none group-hover/title:text-primary transition-colors" title="Dapat diedit langsung">edit</span>
+                                            </div>
                                         </div>
                                         <div class="mb-saved-state hidden" data-pages="<?= e($mDesc) ?>"></div>
-                                        <button type="button" onclick="openMaterialBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Materi">settings</button>
-                                        <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <button type="button" onclick="<?= $kelolaOnClick ?>" class="flex items-center gap-1.5 px-3 py-1.5 <?= $kelolaClass ?> rounded-lg font-label-sm font-bold transition-all shadow-xs" title="Kelola <?= $badgeTitle ?>">
+                                                <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                            </button>
+                                            <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container/20 hover:text-error transition-colors p-1.5 rounded-lg text-[20px]" title="Hapus Modul">delete</button>
+                                        </div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -367,15 +408,15 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <!-- Action Toolbar -->
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-dashed border-outline-variant">
                                     <button type="button" onclick="appendModuleBlock(this, 'Pre-Test', 'quiz', 'secondary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-secondary/5 hover:border-secondary transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary group-hover:scale-110 transition-transform">add_circle</span>
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary group-hover:scale-110 transition-transform">quiz</span>
                                         <span class="font-label-sm font-bold text-on-surface group-hover:text-secondary">Pre-Test</span>
                                     </button>
                                     <button type="button" onclick="appendModuleBlock(this, 'Materi', 'description', 'primary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-primary/5 hover:border-primary transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:scale-110 transition-transform">add_circle</span>
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:scale-110 transition-transform">description</span>
                                         <span class="font-label-sm font-bold text-on-surface group-hover:text-primary">Materi</span>
                                     </button>
-                                    <button type="button" onclick="appendModuleBlock(this, 'Post-Test', 'task', 'warning')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-warning/5 hover:border-warning transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-warning group-hover:scale-110 transition-transform">add_circle</span>
+                                    <button type="button" onclick="appendModuleBlock(this, 'Post-Test', 'assignment_turned_in', 'warning')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-warning/10 hover:border-warning transition-all group">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-warning group-hover:scale-110 transition-transform">assignment_turned_in</span>
                                         <span class="font-label-sm font-bold text-on-surface group-hover:text-warning">Post-Test</span>
                                     </button>
                                 </div>
@@ -704,7 +745,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <div>
                             <h5 class="font-title-sm font-bold text-on-surface"><?= (!empty($course['status']) && strtolower($course['status']) === 'rejected') ? 'Pengajuan Ulang Perbaikan Course ke Admin' : 'Konfirmasi Pengiriman ke Admin' ?></h5>
                             <p class="font-body-sm text-on-surface-variant mt-1 leading-relaxed">
-                                <?= (!empty($course['status']) && strtolower($course['status']) === 'rejected') ? 'Course ini telah disesuaikan berdasarkan catatan instruksi revisi Admin. Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> akan mengirimkan revisi terbaru ke sistem untuk peninjauan ulang dan persetujuan.' : 'Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> berarti mengajukan course ini secara resmi ke database Denso LMS untuk peninjauan (review) dan aktivasi kelas oleh Admin. Anda juga dapat memilih <span class="font-bold text-on-surface">"Simpan Draft"</span> jika masih ingin menyempurnakan kurikulum.' ?>
+                                <?= (!empty($course['status']) && strtolower($course['status']) === 'rejected') ? 'Course ini telah disesuaikan berdasarkan catatan instruksi revisi Admin. Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> akan mengirimkan revisi terbaru ke sistem untuk peninjauan ulang dan persetujuan.' : 'Menekan tombol <span class="font-bold text-primary">"Submit ke Admin"</span> berarti mengajukan course ini secara resmi ke database Denso LMS untuk peninjauan (review) dan aktivasi kelas oleh Admin. Anda juga dapat memilih <span class="font-bold text-on-surface">"Simpan Perubahan"</span> jika masih ingin menyempurnakan kurikulum.' ?>
                             </p>
                         </div>
                     </div>
@@ -725,8 +766,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
                         <!-- Right Action -->
                         <div class="flex items-center gap-3">
-                            <button type="button" id="wizard-btn-draft" onclick="submitCourseToDatabase('Draft')" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-surface text-on-surface font-label-md font-bold hover:bg-surface-container shadow-sm transition-all flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[18px]">draft</span> Simpan Draft
+                            <button type="button" id="wizard-btn-draft" onclick="submitCourseToDatabase('Draft')" class="px-5 py-2.5 rounded-xl border border-outline-variant bg-white text-on-surface font-label-md font-bold hover:bg-surface-container shadow-sm transition-all flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[18px]">save</span> Simpan Perubahan
                             </button>
                             <button type="button" id="wizard-btn-next" onclick="wizardNextStep()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-600 shadow-md shadow-primary/25 hover:shadow-lg transition-all flex items-center gap-2">
                                 Selanjutnya <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
@@ -834,7 +875,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <div class="max-w-4xl mx-auto mt-8">
                     <div class="bg-surface-container-low/40 border-2 border-dashed border-outline-variant/60 rounded-2xl p-6 flex flex-col items-center">
                         <p class="font-label-md font-bold text-on-surface-variant flex items-center gap-2 mb-5">
-                            <span class="material-symbols-outlined text-[20px]">add_circle</span> Tambah Blok Konten
+                            <span class="material-symbols-outlined text-[20px]"></span> Tambah Blok Konten
                         </p>
                         <div class="flex flex-wrap justify-center gap-4 w-full">
                             <button type="button" onclick="mbAddBlock('text')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
@@ -849,11 +890,11 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 </div>
                                 <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Gambar / Ilustrasi</span>
                             </button>
-                            <button type="button" onclick="mbAddBlock('youtube')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
+                            <button type="button" onclick="mbPromptAddVideoBlock()" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
                                 <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
                                     <span class="material-symbols-outlined text-[26px] text-on-surface-variant group-hover:text-primary transition-colors">play_circle</span>
                                 </div>
-                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Video YouTube</span>
+                                <span class="font-label-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Video (YouTube / MP4)</span>
                             </button>
                             <button type="button" onclick="mbAddBlock('document')" class="flex-1 min-w-[120px] max-w-[150px] flex flex-col items-center gap-3 p-5 border border-outline-variant/60 bg-surface rounded-2xl hover:bg-primary/5 hover:border-primary/40 hover:shadow-md transition-all group hover:-translate-y-1">
                                 <div class="w-12 h-12 rounded-full bg-surface-container-high/50 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
@@ -1108,25 +1149,51 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         }
 
         // 2. Curriculum
-        const sessions = document.querySelectorAll('.session-block');
+        const sessions = document.querySelectorAll('#sessions-container .session-block');
         const sessionCount = sessions.length;
         let materialCount = 0;
+        let assessmentCount = 0;
         sessions.forEach(sess => {
-            materialCount += sess.querySelectorAll('.module-block').length;
+            sess.querySelectorAll('.materi-builder-list .module-block').forEach(m => {
+                const label = m.querySelector('.font-label-sm')?.textContent.trim().toLowerCase() || '';
+                if (label.includes('test')) assessmentCount++;
+                else materialCount++;
+            });
+            sess.querySelectorAll('.quiz-items-list .quiz-module-block').forEach(qb => {
+                const count = parseInt(qb.querySelector('.qz-question-count')?.textContent.trim() || '0');
+                if (count > 0) assessmentCount++;
+            });
         });
 
         const reviewSessionsCount = document.getElementById('review-sessions-count');
         const reviewSessionsDesc = document.getElementById('review-sessions-desc');
+        const reviewMaterialsStatus = document.getElementById('review-materials-status');
+        
+        let summaryParts = [];
+        if (materialCount > 0) summaryParts.push(materialCount + ' Modul');
+        if (assessmentCount > 0) summaryParts.push(assessmentCount + ' Evaluasi/Tes');
+        const totalItems = materialCount + assessmentCount;
+
         if (reviewSessionsCount) {
-            reviewSessionsCount.textContent = sessionCount + ' Sesi Pembelajaran (' + materialCount + ' Modul)';
+            reviewSessionsCount.textContent = sessionCount + ' Sesi Pembelajaran' + (totalItems > 0 ? ' (' + summaryParts.join(', ') + ')' : ' (0 Modul)');
         }
         if (reviewSessionsDesc) {
             reviewSessionsDesc.textContent = 'Mencakup ' + sessionCount + ' sesi dengan materi kurikulum dan evaluasi kompetensi.';
         }
+        if (reviewMaterialsStatus) {
+            if (totalItems > 0) {
+                reviewMaterialsStatus.className = 'font-bold text-success flex items-center gap-1';
+                reviewMaterialsStatus.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Siap Digunakan';
+            } else {
+                reviewMaterialsStatus.className = 'font-bold text-warning flex items-center gap-1';
+                reviewMaterialsStatus.innerHTML = '<span class="material-symbols-outlined text-[16px]">pending</span> Belum Ada Modul';
+            }
+        }
 
         // 3. Candidates
-        const selectedEmps = document.querySelectorAll('.emp-checkbox:checked');
-        const empCount = selectedEmps.length;
+        const selectedEmps = document.querySelectorAll('.candidate-check:checked, .emp-checkbox:checked');
+        const uniqueEmpIds = new Set(Array.from(selectedEmps).map(cb => cb.value));
+        const empCount = uniqueEmpIds.size;
         const reviewCandidatesCount = document.getElementById('review-candidates-count');
         const reviewCandidatesDesc = document.getElementById('review-candidates-desc');
         if (reviewCandidatesCount) {
@@ -1144,15 +1211,74 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const title = document.getElementById('course-title-input')?.value.trim() || 'Untitled Course';
         const description = document.getElementById('course-desc-input')?.value.trim() || '';
         const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
-        const category = selectedTags.length > 0 ? selectedTags[0] : 'Umum';
+        const category = selectedTags.length > 0 ? selectedTags.join(', ').substring(0, 50) : 'Umum';
 
         // Candidate IDs
-        const candidateEmployeeIds = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+        const candidateEmployeeIds = Array.from(new Set(Array.from(document.querySelectorAll('.emp-checkbox:checked, .candidate-check:checked')).map(cb => cb.value)));
 
         // Filter selections for targeting
         const targetJabatan = document.getElementById('filter-jabatan')?.value || '';
         const targetGolongan = document.getElementById('filter-golongan')?.value || '';
         const targetDepartemen = document.getElementById('filter-departemen')?.value || '';
+
+        // Helper to extract assessment questions from .ab-saved-state
+        function extractAbQuestions(stateDiv) {
+            if (!stateDiv) return [];
+            const questions = [];
+            stateDiv.querySelectorAll('.ab-question-block').forEach((qEl, qIdx) => {
+                const qText = qEl.querySelector('textarea')?.value || qEl.querySelector('textarea')?.textContent || ('Pertanyaan ' + (qIdx + 1));
+                const weight = parseInt(qEl.querySelector('.ab-weight')?.value || qEl.querySelector('.ab-weight')?.getAttribute('value') || '5');
+                const choices = [];
+                qEl.querySelectorAll('.ab-option-row').forEach((optRow, oIdx) => {
+                    const optInput = optRow.querySelector('input[type="text"]');
+                    const optText = optInput ? (optInput.value || optInput.getAttribute('value') || '') : '';
+                    const isCorrect = !!(optRow.querySelector('input[type="radio"]:checked') || optRow.querySelector('input[type="radio"][checked]'));
+                    choices.push({
+                        choice_text: optText || ('Pilihan ' + String.fromCharCode(65 + oIdx)),
+                        is_correct: isCorrect ? 1 : 0,
+                        choice_order: oIdx + 1
+                    });
+                });
+                questions.push({
+                    question_text: qText,
+                    question_type: 'multiple_choice',
+                    question_order: qIdx + 1,
+                    score_weight: weight,
+                    choices: choices
+                });
+            });
+            return questions;
+        }
+
+        // Helper to extract quiz questions from .qb-saved-state
+        function extractQbQuestions(stateDiv) {
+            if (!stateDiv) return [];
+            const questions = [];
+            stateDiv.querySelectorAll('.qb-question-block').forEach((qEl, qIdx) => {
+                const qText = qEl.querySelector('textarea')?.value || qEl.querySelector('textarea')?.textContent || ('Pertanyaan ' + (qIdx + 1));
+                const choices = [];
+                qEl.querySelectorAll('.qb-option-row, .ab-option-row').forEach((optRow, oIdx) => {
+                    const optInput = optRow.querySelector('input[type="text"]');
+                    const optText = optInput ? (optInput.value || optInput.getAttribute('value') || '') : '';
+                    const isCorrect = !!(optRow.querySelector('input[type="radio"]:checked') || optRow.querySelector('input[type="radio"][checked]'));
+                    choices.push({
+                        choice_text: optText || ('Pilihan ' + String.fromCharCode(65 + oIdx)),
+                        is_correct: isCorrect ? 1 : 0,
+                        choice_order: oIdx + 1
+                    });
+                });
+                questions.push({
+                    question_text: qText,
+                    question_type: 'multiple_choice',
+                    score_weight: 10,
+                    question_order: qIdx + 1,
+                    choices: choices
+                });
+            });
+            return questions;
+        }
+
+        let courseFinalAssessment = null;
 
         // Sessions & Materials
         const sessions = [];
@@ -1164,63 +1290,85 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             const materials = [];
             sess.querySelectorAll('.materi-builder-list .module-block').forEach((mod, mIdx) => {
                 const modTitleInput = mod.querySelector('input[type="text"]');
-                const modTitle = modTitleInput ? (modTitleInput.value.trim() || ('Materi ' + (mIdx + 1))) : ('Materi ' + (mIdx + 1));
-                const typeLabel = mod.querySelector('.font-label-sm')?.textContent.trim().toUpperCase() || 'DOCUMENT';
+                const modTitle = modTitleInput ? (modTitleInput.value.trim() || ('Modul ' + (mIdx + 1))) : ('Modul ' + (mIdx + 1));
+                const typeLabel = mod.querySelector('.font-label-sm')?.textContent.trim().toLowerCase() || 'materi';
                 
-                let matType = 'document';
-                if (typeLabel.includes('VIDEO') || typeLabel.includes('YOUTUBE')) matType = 'video';
-                else if (typeLabel.includes('PDF')) matType = 'pdf';
-                else if (typeLabel.includes('TEXT') || typeLabel.includes('TEKS')) matType = 'text';
+                if (typeLabel.includes('pre-test') || typeLabel.includes('pre_test')) {
+                    const abState = mod.querySelector('.ab-saved-state');
+                    const questions = extractAbQuestions(abState);
+                    materials.push({
+                        title: modTitle,
+                        type: 'pre_test',
+                        instructions: abState ? (abState.getAttribute('data-instruction') || '') : '',
+                        duration: 15,
+                        attempt_limit: 1,
+                        passing_grade: 60,
+                        questions: questions,
+                        sequence_order: mIdx + 1
+                    });
+                } else if (typeLabel.includes('post-test') || typeLabel.includes('post_test')) {
+                    const abState = mod.querySelector('.ab-saved-state');
+                    const questions = extractAbQuestions(abState);
+                    materials.push({
+                        title: modTitle,
+                        type: 'post_test',
+                        instructions: abState ? (abState.getAttribute('data-instruction') || '') : '',
+                        duration: 20,
+                        attempt_limit: 3,
+                        passing_grade: 75,
+                        questions: questions,
+                        sequence_order: mIdx + 1
+                    });
+                } else {
+                    let matType = 'document';
+                    const iconName = mod.querySelector('.material-symbols-outlined')?.textContent.trim() || '';
+                    if (iconName === 'play_circle') matType = 'video';
+                    else if (iconName === 'picture_as_pdf') matType = 'pdf';
 
-                // Get content from saved state if any
-                let content = '';
-                const mbState = mod.querySelector('.mb-saved-state');
-                if (mbState) {
-                    content = mbState.getAttribute('data-pages') || '';
+                    const mbState = mod.querySelector('.mb-saved-state');
+                    const content = mbState ? (mbState.getAttribute('data-pages') || '') : '';
+
+                    materials.push({
+                        title: modTitle,
+                        type: matType,
+                        content: content,
+                        estimated_duration: 15,
+                        sequence_order: mIdx + 1
+                    });
                 }
-
-                materials.push({
-                    title: modTitle,
-                    type: matType,
-                    content: content,
-                    estimated_duration: 15,
-                    sequence_order: mIdx + 1
-                });
             });
 
-            // Session Quiz if any
+            // Session Quiz & Final Assessment from quiz workspace
             let quiz = null;
             const qzList = sess.querySelector('.quiz-items-list');
             if (qzList) {
-                const qzQuestions = [];
-                qzList.querySelectorAll('.qb-saved-state .qb-question-block, .qb-saved-state .ab-question-block, .qb-saved-state .qb-question-item').forEach((qEl, qIdx) => {
-                    const qText = qEl.querySelector('textarea')?.value || qEl.querySelector('textarea')?.textContent || ('Pertanyaan ' + (qIdx + 1));
-                    const choices = [];
-                    qEl.querySelectorAll('.qb-option-row, .ab-option-row').forEach((optRow, oIdx) => {
-                        const optText = optRow.querySelector('input[type="text"]')?.value || optRow.querySelector('input[type="text"]')?.getAttribute('value') || ('Pilihan ' + String.fromCharCode(65 + oIdx));
-                        const isCorrect = !!(optRow.querySelector('input[type="radio"]:checked') || optRow.querySelector('input[type="radio"][checked]'));
-                        choices.push({
-                            choice_text: optText,
-                            is_correct: isCorrect ? 1 : 0,
-                            sequence_order: oIdx + 1
-                        });
-                    });
-                    qzQuestions.push({
-                        question_text: qText,
-                        question_type: 'multiple_choice',
-                        score_weight: 10,
-                        sequence_order: qIdx + 1,
-                        choices: choices
-                    });
-                });
-
-                if (qzQuestions.length > 0) {
-                    quiz = {
-                        title: 'Quiz ' + sessionTitle,
-                        passing_score: 70,
-                        duration_minutes: 20,
-                        questions: qzQuestions
-                    };
+                // Find regular quiz block (item 0)
+                const regularQuizBlock = qzList.children[0];
+                if (regularQuizBlock) {
+                    const qState = regularQuizBlock.querySelector('.qb-saved-state');
+                    const qQuestions = extractQbQuestions(qState);
+                    if (qQuestions.length > 0) {
+                        quiz = {
+                            title: 'Quiz ' + sessionTitle,
+                            passing_score: 70,
+                            duration_minutes: 20,
+                            questions: qQuestions
+                        };
+                    }
+                }
+                // Find final assessment block (item 1)
+                const finalBlock = qzList.children[1];
+                if (finalBlock) {
+                    const fState = finalBlock.querySelector('.qb-saved-state');
+                    const fQuestions = extractQbQuestions(fState);
+                    if (fQuestions.length > 0) {
+                        courseFinalAssessment = {
+                            title: 'Final Assessment: ' + title,
+                            passing_score: 75,
+                            duration_minutes: 45,
+                            questions: fQuestions
+                        };
+                    }
                 }
             }
 
@@ -1245,7 +1393,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             target_golongan: targetGolongan,
             target_departemen: targetDepartemen,
             candidate_employee_ids: candidateEmployeeIds,
-            sessions: sessions
+            sessions: sessions,
+            final_assessment: courseFinalAssessment
         };
     }
 
@@ -1270,7 +1419,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const payload = collectCoursePayload(status);
 
         const isSubmitted = (status === 'Submitted');
-        const loadingTitle = isSubmitted ? 'Mengirim Course ke Admin...' : 'Menyimpan Draft Course...';
+        const loadingTitle = isSubmitted ? 'Mengirim Course ke Admin...' : 'Menyimpan Perubahan Course...';
         const loadingText = 'Sedang memproses penyimpanan ke database MS SQL Server...';
 
         if (typeof Swal !== 'undefined') {
@@ -1302,7 +1451,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             if (data.success) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: isSubmitted ? 'Berhasil Diajukan!' : 'Draft Tersimpan!',
+                        title: isSubmitted ? 'Berhasil Diajukan!' : 'Perubahan Berhasil Disimpan!',
                         text: data.message || 'Data course berhasil disimpan ke database SQL Server.',
                         icon: 'success',
                         confirmButtonColor: '#E20613',
@@ -1407,14 +1556,42 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         const sessions = container.querySelectorAll('.session-block');
         
         if (sessions.length <= 1) {
-            Swal.fire({title: 'Perhatian', text: 'Minimal harus ada 1 sesi dalam course.', icon: 'warning', confirmButtonColor: '#E20613'});
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Perhatian',
+                    text: 'Minimal harus ada 1 sesi dalam course.',
+                    icon: 'warning',
+                    confirmButtonColor: '#E20613'
+                });
+            } else {
+                alert('Minimal harus ada 1 sesi dalam course.');
+            }
             return;
         }
-        
-        if (confirm('Apakah Anda yakin ingin menghapus sesi ini beserta semua materinya?')) {
-            const session = btn.closest('.session-block');
-            
-            // Add a small fade out animation
+
+        const session = btn.closest('.session-block');
+        const sessionTitle = session.querySelector('.session-title-input')?.value || 'Sesi ini';
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Sesi Course?',
+                text: `Apakah Anda yakin ingin menghapus "${sessionTitle}" beserta seluruh materi, kuis, dan asesmen di dalamnya?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus Sesi',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    session.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                    setTimeout(() => {
+                        session.remove();
+                        updateSessionNumbers();
+                    }, 300);
+                }
+            });
+        } else if (confirm('Apakah Anda yakin ingin menghapus sesi ini beserta semua materinya?')) {
             session.classList.add('opacity-0', 'transition-opacity', 'duration-300');
             setTimeout(() => {
                 session.remove();
@@ -1444,45 +1621,52 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         
         const list = workspace.querySelector('.materi-builder-list');
         
-        // Define color classes based on context
-        let bagdeBgClass = '', bagdeTextClass = '';
-        if(colorContext === 'secondary') {
-            bagdeBgClass = 'bg-secondary-container';
-            bagdeTextClass = 'text-secondary';
-        } else if (colorContext === 'warning') {
-            bagdeBgClass = 'bg-warning-container/30';
-            bagdeTextClass = 'text-warning';
-        } else {
-            bagdeBgClass = 'bg-primary-container';
-            bagdeTextClass = 'text-primary';
-        }
-
-        // Construct template with gear based on type
-        let actionButtons = `<button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Modul">delete</button>`;
+        let badgeBgClass = '', badgeTextClass = '', iconName = icon;
+        let kelolaBtnClass = '';
+        let kelolaOnClick = 'openMaterialBuilder(this)';
+        let defaultPlaceholder = 'Isi judul modul baru...';
         
-        if (colorContext === 'secondary' || colorContext === 'warning') { // pre-test or post-test
-            actionButtons = `
-                <button type="button" onclick="openAssessmentBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Soal">settings</button>
-                ${actionButtons}
-            `;
-        } else { // materi type
-            actionButtons = `
-                <button type="button" onclick="openMaterialBuilder(this)" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 lg:opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Isi Materi">settings</button>
-                ${actionButtons}
-            `;
+        if (colorContext === 'secondary' || title.toLowerCase().includes('pre-test')) {
+            badgeBgClass = 'bg-secondary-container/40 text-secondary';
+            badgeTextClass = 'text-secondary';
+            iconName = 'quiz';
+            kelolaBtnClass = 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-white';
+            kelolaOnClick = 'openAssessmentBuilder(this)';
+            defaultPlaceholder = 'Contoh: Pre-Test Pemahaman Awal';
+        } else if (colorContext === 'warning' || title.toLowerCase().includes('post-test')) {
+            badgeBgClass = 'bg-warning-container/40 text-warning-800 dark:text-warning';
+            badgeTextClass = 'text-warning-800 dark:text-warning';
+            iconName = 'assignment_turned_in';
+            kelolaBtnClass = 'bg-warning/15 text-warning-800 dark:text-warning hover:bg-warning hover:text-white';
+            kelolaOnClick = 'openAssessmentBuilder(this)';
+            defaultPlaceholder = 'Contoh: Post-Test Evaluasi Akhir Sesi';
+        } else {
+            badgeBgClass = 'bg-primary-container text-white';
+            badgeTextClass = 'text-primary';
+            iconName = icon || 'description';
+            kelolaBtnClass = 'bg-primary/10 text-primary hover:bg-primary hover:text-white';
+            kelolaOnClick = 'openMaterialBuilder(this)';
+            defaultPlaceholder = 'Contoh: SOP Standar Operasional Kerja';
         }
 
-        const iconColorClass = (colorContext === 'primary') ? 'text-white' : bagdeTextClass;
         const template = `
             <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group animate-fade-in-down">
-                <div class="w-10 h-10 rounded-lg ${bagdeBgClass} ${iconColorClass} flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined">${icon}</span>
+                <div class="w-10 h-10 rounded-lg ${badgeBgClass} flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined">${iconName}</span>
                 </div>
                 <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <p class="font-label-sm ${bagdeTextClass} mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">${title}</p>
-                    <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-transparent hover:border-outline focus:border-primary outline-none font-title-sm font-bold text-on-surface pb-1 text-[13px] sm:text-[14px] transition-all" value="" placeholder="Isi judul modifikasi baru...">
+                    <p class="font-label-sm ${badgeTextClass} mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">${title}</p>
+                    <div class="relative flex items-center group/title max-w-lg">
+                        <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-outline-variant/40 hover:border-primary focus:border-primary focus:bg-surface-container-low/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-on-surface text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-on-surface-variant/50" value="" placeholder="${defaultPlaceholder}" title="Klik untuk mengubah judul modul">
+                        <span class="material-symbols-outlined text-[15px] text-on-surface-variant/40 absolute right-1.5 pointer-events-none group-hover/title:text-primary transition-colors" title="Dapat diedit langsung">edit</span>
+                    </div>
                 </div>
-                ${actionButtons}
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="${kelolaOnClick}" class="flex items-center gap-1.5 px-3 py-1.5 ${kelolaBtnClass} rounded-lg font-label-sm font-bold transition-all shadow-xs" title="Kelola ${title}">
+                        <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                    </button>
+                    <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container/20 hover:text-error transition-colors p-1.5 rounded-lg text-[20px]" title="Hapus Modul">delete</button>
+                </div>
             </div>
         `;
         
@@ -1643,8 +1827,30 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     }
 
     function abDeleteQuestion(btn) {
-        if(confirm('Hapus soal ini?')) {
-            const block = btn.closest('.ab-question-block');
+        const block = btn.closest('.ab-question-block');
+        const qIndex = block ? (block.getAttribute('data-index') || '') : '';
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Soal ' + (qIndex ? qIndex : '') + '?',
+                text: 'Pertanyaan dan seluruh opsi pilihan jawaban ini akan dihapus dari modul tes.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus Soal',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    block.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-200');
+                    setTimeout(() => {
+                        block.remove();
+                        abRenumberQuestions();
+                        abCalculateTotal();
+                    }, 200);
+                }
+            });
+        } else if (confirm('Hapus soal ini?')) {
             block.classList.add('opacity-0', 'transition-opacity');
             setTimeout(() => {
                 block.remove();
@@ -1692,9 +1898,27 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         <button type="button" onclick="abDeleteQuestion(this)" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container hover:text-error transition-colors p-1.5 rounded-lg" title="Hapus Soal">delete</button>
                     </div>
                 </div>
-                <div class="p-6 space-y-6">
+                <div class="p-6 space-y-5">
                     <div class="group relative">
                         <textarea class="w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary focus:bg-surface-container-lowest rounded-xl font-body-md text-on-surface outline-none transition-all resize-y min-h-[80px] p-4 shadow-sm" placeholder="Tuliskan pertanyaan Anda secara spesifik di sini..."></textarea>
+                    </div>
+                    
+                    <!-- Media Support (Image & Video) Side by Side -->
+                    <div class="qb-media-attach-container grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="qb-image-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 hover:text-primary transition-all cursor-pointer group bg-surface-container-lowest" onclick="this.querySelector('input[type=file]').click()">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">add_photo_alternate</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Gambar (Opsional)</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+                            </div>
+                        </div>
+                        <div class="qb-video-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-secondary hover:bg-secondary/5 hover:text-secondary transition-all cursor-pointer group bg-surface-container-lowest" onclick="qbAttachVideoPrompt(this)">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-secondary">video_library</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Video (Opsional)</span>
+                                <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="ab-options-container grid gap-3 pl-0 sm:pl-4 transition-all">
@@ -1970,7 +2194,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         }, 600);
     }
 
-    function mbAddBlock(type) {
+    function mbAddBlock(type, videoMode = 'youtube') {
         const canvas = document.getElementById('mb-page-canvas');
         let markup = '';
         const blockId = 'mb-blk-' + Date.now();
@@ -2019,13 +2243,14 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     <input type="text" class="w-full bg-transparent border-b border-outline-variant/40 focus:border-primary outline-none font-body-sm text-on-surface-variant py-2 transition-colors" placeholder="Keterangan gambar (opsional)...">
                 </div>
             </div>`;
-        } else if (type === 'youtube') {
+        } else if (type === 'youtube' || type === 'video' || type === 'video_local') {
+            const initialMode = (type === 'video_local' || videoMode === 'local') ? 'local' : 'youtube';
             markup = `
             <div class="mb-content-block bg-surface-container-lowest border border-outline-variant/60 rounded-2xl overflow-hidden shadow-sm hover:border-outline-variant transition-colors animate-fade-in-down" id="${blockId}">
-                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/40 bg-surface-container-low/20">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px] text-primary">play_circle</span>
-                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Video YouTube</span>
+                        <span class="font-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Video Pembelajaran</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <button type="button" onclick="mbMoveBlock(this, -1)" class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1 rounded transition-colors" title="Pindah Atas">arrow_upward</button>
@@ -2035,17 +2260,43 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     </div>
                 </div>
                 <div class="p-5 space-y-4">
-                    <div class="flex gap-3">
-                        <div class="flex-1 relative">
-                            <input type="url" class="mb-yt-url w-full bg-transparent border border-outline-variant/60 focus:border-primary rounded-xl font-body-md text-on-surface outline-none transition-all px-4 py-3 pr-24" placeholder="Tempel URL YouTube di sini (contoh: https://youtube.com/watch?v=...)">
-                            <button type="button" onclick="mbEmbedYoutube(this)" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors">Muat</button>
+                    <!-- Segmented Button Mode Switcher -->
+                    <div class="flex items-center gap-2 p-1 bg-surface-container-low rounded-xl w-fit border border-outline-variant/50">
+                        <button type="button" onclick="mbSwitchVideoMode(this, 'youtube')" class="mb-vtab-yt px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 ${initialMode === 'youtube' ? 'bg-surface text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}">
+                            <span class="material-symbols-outlined text-[16px] text-error">play_circle</span> Link YouTube
+                        </button>
+                        <button type="button" onclick="mbSwitchVideoMode(this, 'local')" class="mb-vtab-local px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 ${initialMode === 'local' ? 'bg-surface text-secondary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}">
+                            <span class="material-symbols-outlined text-[16px] text-secondary">upload_file</span> Upload Video Lokal (MP4)
+                        </button>
+                    </div>
+
+                    <!-- Panel 1: YouTube Mode -->
+                    <div class="mb-video-yt-panel space-y-4 ${initialMode === 'youtube' ? '' : 'hidden'}">
+                        <div class="flex gap-3">
+                            <div class="flex-1 relative">
+                                <input type="url" class="mb-yt-url w-full bg-transparent border border-outline-variant/60 focus:border-primary rounded-xl font-body-md text-on-surface outline-none transition-all px-4 py-3 pr-24" placeholder="Tempel URL YouTube di sini (contoh: https://youtube.com/watch?v=...)">
+                                <button type="button" onclick="mbEmbedYoutube(this)" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors">Muat</button>
+                            </div>
+                        </div>
+                        <div class="mb-yt-preview rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/40 aspect-video flex items-center justify-center">
+                            <div class="text-center text-on-surface-variant p-6">
+                                <span class="material-symbols-outlined text-[48px] mb-2 opacity-40">smart_display</span>
+                                <p class="font-body-sm">Pratinjau video YouTube akan muncul di sini</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-yt-preview rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/40 aspect-video flex items-center justify-center">
-                        <div class="text-center text-on-surface-variant p-6">
-                            <span class="material-symbols-outlined text-[48px] mb-2 opacity-40">smart_display</span>
-                            <p class="font-body-sm">Pratinjau video akan muncul di sini</p>
+
+                    <!-- Panel 2: Local Video Upload Mode -->
+                    <div class="mb-video-local-panel space-y-4 ${initialMode === 'local' ? '' : 'hidden'}">
+                        <div class="mb-video-local-dropzone border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-secondary hover:bg-secondary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
+                            <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-[32px] text-secondary">video_file</span>
+                            </div>
+                            <p class="font-label-md font-bold text-on-surface group-hover:text-secondary">Klik untuk unggah file video</p>
+                            <p class="font-body-sm text-on-surface-variant/70">Mendukung MP4, WebM (Maks 100MB) • Dapat diputar secara offline</p>
+                            <input type="file" accept="video/mp4,video/webm" class="hidden mb-video-file-input" onchange="mbPreviewVideoFile(this)">
                         </div>
+                        <div class="mb-video-local-preview hidden"></div>
                     </div>
                 </div>
             </div>`;
@@ -2080,6 +2331,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         // Smooth scroll to new block
         const scrollArea = document.getElementById('mb-scroll-area');
         setTimeout(() => { scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' }); }, 100);
+        return blockId;
     }
 
     function mbMoveBlock(btn, direction) {
@@ -2146,6 +2398,113 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         }
         
         previewDiv.innerHTML = `<iframe class="w-full h-full rounded-xl" src="https://www.youtube.com/embed/${videoId}" title="YouTube Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
+
+    function mbPromptAddVideoBlock() {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Tambah Video Pembelajaran',
+                text: 'Pilih metode untuk menambahkan media video pada materi:',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '🔗 Link YouTube',
+                denyButtonText: '📁 Upload File Video',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#E20613',
+                denyButtonColor: '#4355B9',
+                cancelButtonColor: '#6B7280',
+                width: '560px',
+                hideClass: {
+                    popup: '',
+                    backdrop: ''
+                },
+                customClass: {
+                    actions: '!flex !flex-row !flex-nowrap !items-center !justify-center !gap-2.5',
+                    confirmButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap',
+                    denyButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap',
+                    cancelButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap'
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    mbAddBlock('video', 'youtube');
+                } else if (res.isDenied) {
+                    Swal.close();
+                    setTimeout(() => {
+                        const blockId = mbAddBlock('video', 'local');
+                        const newBlock = document.getElementById(blockId);
+                        const fileInput = newBlock ? newBlock.querySelector('.mb-video-file-input') : null;
+                        if (fileInput) {
+                            fileInput.value = '';
+                            fileInput.click();
+                        }
+                    }, 20);
+                }
+            });
+        } else {
+            mbAddBlock('video', 'youtube');
+        }
+    }
+
+    function mbSwitchVideoMode(btn, mode) {
+        const block = btn.closest('.mb-content-block');
+        const ytPanel = block.querySelector('.mb-video-yt-panel');
+        const localPanel = block.querySelector('.mb-video-local-panel');
+        const ytTab = block.querySelector('.mb-vtab-yt');
+        const localTab = block.querySelector('.mb-vtab-local');
+        
+        if (mode === 'youtube') {
+            ytPanel.classList.remove('hidden');
+            localPanel.classList.add('hidden');
+            ytTab.className = 'mb-vtab-yt px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 bg-surface text-primary shadow-xs';
+            localTab.className = 'mb-vtab-local px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface';
+        } else {
+            ytPanel.classList.add('hidden');
+            localPanel.classList.remove('hidden');
+            ytTab.className = 'mb-vtab-yt px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface';
+            localTab.className = 'mb-vtab-local px-3.5 py-1.5 rounded-lg font-label-sm font-bold transition-all flex items-center gap-1.5 bg-surface text-secondary shadow-xs';
+        }
+    }
+
+    function mbPreviewVideoFile(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const fileUrl = URL.createObjectURL(file);
+        const block = input.closest('.mb-content-block');
+        const dropzone = block.querySelector('.mb-video-local-dropzone');
+        const previewDiv = block.querySelector('.mb-video-local-preview');
+        
+        dropzone.classList.add('hidden');
+        previewDiv.classList.remove('hidden');
+        previewDiv.innerHTML = `
+            <div class="relative rounded-xl overflow-hidden border border-outline-variant/60 bg-black shadow-md group">
+                <video src="${fileUrl}" controls class="w-full max-h-[380px] object-contain rounded-xl bg-black"></video>
+                <div class="absolute top-3 right-3 flex items-center gap-2 z-10">
+                    <span class="bg-black/60 backdrop-blur-md text-white font-label-sm text-xs px-2.5 py-1 rounded-md border border-white/20 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px] text-success">offline_bolt</span> Offline Ready
+                    </span>
+                    <button type="button" onclick="mbResetLocalVideo(this)" class="bg-surface/90 hover:bg-surface text-on-surface hover:text-error backdrop-blur-sm border border-outline-variant/80 rounded-lg p-1.5 material-symbols-outlined transition-colors text-[18px] shadow-sm" title="Hapus / Ganti Video">close</button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mt-2 px-1">
+                <span class="font-bold flex items-center gap-1 truncate max-w-[70%]">
+                    <span class="material-symbols-outlined text-[16px] text-secondary">movie</span> ${file.name}
+                </span>
+                <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+            </div>
+        `;
+    }
+
+    function mbResetLocalVideo(btn) {
+        const block = btn.closest('.mb-content-block');
+        const dropzone = block.querySelector('.mb-video-local-dropzone');
+        const previewDiv = block.querySelector('.mb-video-local-preview');
+        const fileInput = block.querySelector('.mb-video-file-input');
+        
+        if (fileInput) fileInput.value = '';
+        previewDiv.innerHTML = '';
+        previewDiv.classList.add('hidden');
+        dropzone.classList.remove('hidden');
     }
 
     // ==============================================
@@ -2267,12 +2626,36 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
     function qbDeleteQuestion(btn) {
         const block = btn.closest('.qb-question-block');
-        block.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-200');
-        setTimeout(() => {
-            block.remove();
-            qbRenumberQuestions();
-            qbCalculateTotal();
-        }, 200);
+        const qIndex = block ? (block.getAttribute('data-index') || '') : '';
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Soal ' + (qIndex ? qIndex : '') + '?',
+                text: 'Pertanyaan dan seluruh pilihan jawaban ini akan dihapus dari daftar.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus Soal',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    block.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-200');
+                    setTimeout(() => {
+                        block.remove();
+                        qbRenumberQuestions();
+                        qbCalculateTotal();
+                    }, 200);
+                }
+            });
+        } else if (confirm('Hapus soal ini?')) {
+            block.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-200');
+            setTimeout(() => {
+                block.remove();
+                qbRenumberQuestions();
+                qbCalculateTotal();
+            }, 200);
+        }
     }
 
     function qbRenumberQuestions() {
@@ -2319,12 +2702,21 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 <div class="p-5 space-y-4">
                     <textarea class="qb-question-body w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-md text-on-surface outline-none resize-y min-h-[80px] p-4 transition-all" placeholder="Tuliskan pertanyaan Anda secara spesifik di sini..."></textarea>
                     
-                    <!-- Image Support for MC -->
-                    <div class="qb-image-attach">
-                        <div class="border border-dashed border-outline-variant rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
-                            <span class="material-symbols-outlined text-[20px] group-hover:text-primary">add_photo_alternate</span>
-                            <span class="font-label-sm font-bold group-hover:text-primary">Lampirkan Gambar Pendukung (Opsional)</span>
-                            <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+                    <!-- Media Support (Image & Video) Side by Side -->
+                    <div class="qb-media-attach-container grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="qb-image-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 hover:text-primary transition-all cursor-pointer group bg-surface-container-lowest" onclick="this.querySelector('input[type=file]').click()">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">add_photo_alternate</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Gambar (Opsional)</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+                            </div>
+                        </div>
+                        <div class="qb-video-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-secondary hover:bg-secondary/5 hover:text-secondary transition-all cursor-pointer group bg-surface-container-lowest" onclick="qbAttachVideoPrompt(this)">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-secondary">video_library</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Video (Opsional)</span>
+                                <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
+                            </div>
                         </div>
                     </div>
                     
@@ -2357,6 +2749,24 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                 </div>
                 <div class="p-5 space-y-4">
                     <textarea class="qb-question-body w-full bg-transparent border border-outline-variant/40 hover:border-outline focus:border-primary rounded-xl font-body-md text-on-surface outline-none resize-y min-h-[80px] p-4 transition-all" placeholder="Tuliskan pertanyaan essay / isian Anda di sini..."></textarea>
+                    
+                    <!-- Media Support (Image & Video) Side by Side for Essay -->
+                    <div class="qb-media-attach-container grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="qb-image-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 hover:text-primary transition-all cursor-pointer group bg-surface-container-lowest" onclick="this.querySelector('input[type=file]').click()">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">add_photo_alternate</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Gambar (Opsional)</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+                            </div>
+                        </div>
+                        <div class="qb-video-attach">
+                            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-secondary hover:bg-secondary/5 hover:text-secondary transition-all cursor-pointer group bg-surface-container-lowest" onclick="qbAttachVideoPrompt(this)">
+                                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-secondary">video_library</span>
+                                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Video (Opsional)</span>
+                                <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Answer Guidance -->
                     <div class="bg-surface-container-low border border-outline-variant/40 rounded-xl p-4 space-y-3">
@@ -2429,10 +2839,10 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         reader.onload = (e) => {
             const attachDiv = input.closest('.qb-image-attach');
             attachDiv.innerHTML = `
-                <div class="relative rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container-low">
-                    <img src="${e.target.result}" class="w-full max-h-[300px] object-contain" alt="Question Image">
-                    <div class="absolute top-2 right-2">
-                        <button type="button" onclick="qbRemoveQuestionImage(this)" class="bg-surface/80 backdrop-blur-sm border border-outline-variant rounded-lg p-1.5 material-symbols-outlined text-on-surface-variant hover:text-error transition-colors text-[18px]" title="Hapus Gambar">close</button>
+                <div class="relative rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container-low shadow-sm">
+                    <img src="${e.target.result}" class="w-full max-h-[220px] object-contain rounded-xl" alt="Question Image">
+                    <div class="absolute top-2 right-2 z-10">
+                        <button type="button" onclick="qbRemoveQuestionImage(this)" class="bg-surface/90 backdrop-blur-sm border border-outline-variant/80 rounded-lg p-1.5 material-symbols-outlined text-on-surface hover:text-error transition-colors text-[18px] shadow-sm" title="Hapus Gambar">close</button>
                     </div>
                 </div>
             `;
@@ -2443,10 +2853,148 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
     function qbRemoveQuestionImage(btn) {
         const attachDiv = btn.closest('.qb-image-attach');
         attachDiv.innerHTML = `
-            <div class="border border-dashed border-outline-variant rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group" onclick="this.querySelector('input[type=file]').click()">
-                <span class="material-symbols-outlined text-[20px] group-hover:text-primary">add_photo_alternate</span>
-                <span class="font-label-sm font-bold group-hover:text-primary">Lampirkan Gambar Pendukung (Opsional)</span>
+            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:bg-primary/5 hover:text-primary transition-all cursor-pointer group bg-surface-container-lowest" onclick="this.querySelector('input[type=file]').click()">
+                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">add_photo_alternate</span>
+                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Gambar (Opsional)</span>
                 <input type="file" accept="image/*" class="hidden" onchange="qbPreviewQuestionImage(this)">
+            </div>
+        `;
+    }
+
+    function qbAttachVideoPrompt(triggerEl) {
+        const attachDiv = triggerEl.classList.contains('qb-video-attach') ? triggerEl : triggerEl.closest('.qb-video-attach');
+        if (!attachDiv) return;
+        
+        let fileInput = attachDiv.querySelector('.qb-video-file-input');
+        if (!fileInput) {
+            fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'video/mp4,video/webm';
+            fileInput.className = 'hidden qb-video-file-input';
+            fileInput.onchange = function() { qbPreviewQuestionVideoFile(this); };
+            attachDiv.appendChild(fileInput);
+        }
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Lampirkan Video Pendukung',
+                text: 'Pilih metode untuk menambahkan media video pada soal ini:',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '🔗 Link YouTube',
+                denyButtonText: '📁 Upload File Video',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#E20613',
+                denyButtonColor: '#4355B9',
+                cancelButtonColor: '#6B7280',
+                width: '560px',
+                hideClass: {
+                    popup: '',
+                    backdrop: ''
+                },
+                customClass: {
+                    actions: '!flex !flex-row !flex-nowrap !items-center !justify-center !gap-2.5',
+                    confirmButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap',
+                    denyButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap',
+                    cancelButton: '!m-0 !px-4 !py-2.5 !text-sm !font-bold !rounded-xl !whitespace-nowrap'
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    Swal.fire({
+                        title: 'Masukkan URL YouTube',
+                        input: 'url',
+                        inputPlaceholder: 'https://www.youtube.com/watch?v=... atau https://youtu.be/...',
+                        showCancelButton: true,
+                        confirmButtonText: 'Terapkan Video',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#E20613',
+                        cancelButtonColor: '#6B7280',
+                        inputValidator: (value) => {
+                            if (!value) return 'URL video wajib diisi!';
+                            if (!value.includes('youtube.com') && !value.includes('youtu.be')) {
+                                return 'Harap masukkan link YouTube yang valid.';
+                            }
+                        }
+                    }).then((ytRes) => {
+                        if (ytRes.isConfirmed && ytRes.value) {
+                            qbEmbedYoutubeVideo(attachDiv, ytRes.value);
+                        }
+                    });
+                } else if (res.isDenied) {
+                    Swal.close();
+                    setTimeout(() => {
+                        if (fileInput) {
+                            fileInput.value = '';
+                            fileInput.click();
+                        }
+                    }, 20);
+                }
+            });
+        } else {
+            const yt = prompt('Masukkan URL video YouTube:');
+            if (yt) qbEmbedYoutubeVideo(attachDiv, yt);
+        }
+    }
+
+    function qbEmbedYoutubeVideo(attachDiv, url) {
+        let videoId = '';
+        const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+        if (match) videoId = match[1];
+        
+        if (!videoId) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('URL Tidak Valid', 'Format link YouTube tidak dikenali.', 'error');
+            } else {
+                alert('URL YouTube tidak dikenali.');
+            }
+            return;
+        }
+
+        attachDiv.innerHTML = `
+            <div class="relative rounded-xl overflow-hidden border border-outline-variant/60 bg-black shadow-sm group">
+                <iframe class="w-full h-[220px] rounded-xl" src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                <div class="absolute top-2 right-2 z-10">
+                    <button type="button" onclick="qbRemoveQuestionVideo(this)" class="bg-surface/90 backdrop-blur-sm border border-outline-variant/80 rounded-lg p-1.5 material-symbols-outlined text-on-surface hover:text-error transition-colors text-[18px] shadow-sm" title="Hapus Video">close</button>
+                </div>
+            </div>
+            <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
+        `;
+    }
+
+    function qbPreviewQuestionVideoFile(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const fileUrl = URL.createObjectURL(file);
+        const attachDiv = input.closest('.qb-video-attach');
+        if (!attachDiv) return;
+        
+        if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+            Swal.close();
+        }
+        
+        attachDiv.innerHTML = `
+            <div class="relative rounded-xl overflow-hidden border border-outline-variant/60 bg-black/95 shadow-sm group">
+                <video src="${fileUrl}" controls class="w-full max-h-[220px] object-contain rounded-xl"></video>
+                <div class="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+                    <button type="button" onclick="qbRemoveQuestionVideo(this)" class="bg-surface/90 hover:bg-surface text-on-surface hover:text-error backdrop-blur-sm border border-outline-variant/80 rounded-lg p-1.5 material-symbols-outlined transition-colors text-[18px] shadow-sm" title="Hapus Video">close</button>
+                </div>
+            </div>
+            <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
+        `;
+    }
+
+    function qbRemoveQuestionVideo(btn) {
+        const attachDiv = btn.closest('.qb-video-attach');
+        if (!attachDiv) return;
+        if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+            Swal.close();
+        }
+        attachDiv.innerHTML = `
+            <div class="border border-dashed border-outline-variant/80 rounded-xl p-3 flex items-center justify-center gap-2 text-on-surface-variant hover:border-secondary hover:bg-secondary/5 hover:text-secondary transition-all cursor-pointer group bg-surface-container-lowest" onclick="qbAttachVideoPrompt(this)">
+                <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-secondary">video_library</span>
+                <span class="font-label-sm font-bold text-xs sm:text-[13px]">Lampirkan Video (Opsional)</span>
+                <input type="file" accept="video/mp4,video/webm" class="hidden qb-video-file-input" onchange="qbPreviewQuestionVideoFile(this)">
             </div>
         `;
     }
@@ -2459,103 +3007,68 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             checkEmptyHintList(list);
         });
 
-        // Existing tags dropdown logic below...
-
-        const container = document.getElementById('tags-dropdown-container');
-        if(!container) return;
-        
-        const trigger = document.getElementById('tags-trigger');
-        const menu = document.getElementById('tags-menu');
-        const searchInput = document.getElementById('tags-search');
-        const checkboxes = document.querySelectorAll('.tag-checkbox');
-        const optionsContainer = document.getElementById('tags-options');
-        
-        // Toggle Dropdown
-        trigger.addEventListener('click', (e) => {
-            // Prevent toggling if clicked on a "close" icon inside the trigger
-            if(e.target.textContent === 'close') return;
-            menu.classList.toggle('hidden');
-            if(!menu.classList.contains('hidden')) {
-                searchInput.focus();
-                document.body.classList.add('overflow-hidden');
-            } else {
-                document.body.classList.remove('overflow-hidden');
-            }
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!container.contains(e.target)) {
-                menu.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        });
-
-        // Search Filter
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const options = optionsContainer.querySelectorAll('.tag-option');
+        // Inline Tags Selectable Chips Handler
+        function updateTagChipsState() {
+            const chips = document.querySelectorAll('.tag-chip');
+            const countBadge = document.getElementById('tags-count-badge');
+            const resetBtn = document.getElementById('tags-reset-btn');
             
-            options.forEach(opt => {
-                const val = opt.getAttribute('data-value');
-                if (val.includes(term)) {
-                    opt.style.display = 'flex';
-                } else {
-                    opt.style.display = 'none';
+            let checkedCount = 0;
+            chips.forEach(chip => {
+                const cb = chip.querySelector('.tag-checkbox');
+                const icon = chip.querySelector('.tag-chip-icon');
+                const defaultIcon = chip.getAttribute('data-default-icon') || 'sell';
+                
+                if (cb && cb.checked) {
+                    checkedCount++;
+                    chip.classList.add('bg-rose-50', 'text-rose-800', 'border-primary', 'ring-2', 'ring-primary/10', 'shadow-xs');
+                    chip.classList.remove('bg-white', 'text-on-surface', 'border-outline-variant/70', 'shadow-2xs');
+                    if (icon) {
+                        icon.textContent = 'check_circle';
+                        icon.classList.add('text-primary');
+                        icon.classList.remove('text-outline');
+                    }
+                } else if (cb) {
+                    chip.classList.remove('bg-rose-50', 'text-rose-800', 'border-primary', 'ring-2', 'ring-primary/10', 'shadow-xs');
+                    chip.classList.add('bg-white', 'text-on-surface', 'border-outline-variant/70', 'shadow-2xs');
+                    if (icon) {
+                        icon.textContent = defaultIcon;
+                        icon.classList.remove('text-primary');
+                        icon.classList.add('text-outline');
+                    }
                 }
             });
-        });
 
-        // Update selected tags display
-        function updateDisplay() {
-            const selected = Array.from(checkboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            if (countBadge) {
+                countBadge.textContent = checkedCount > 0 ? (checkedCount + ' Terpilih') : '0 Terpilih';
+                if (checkedCount > 0) {
+                    countBadge.classList.add('bg-primary/10', 'text-primary', 'border-primary/30');
+                    countBadge.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+                } else {
+                    countBadge.classList.remove('bg-primary/10', 'text-primary', 'border-primary/30');
+                    countBadge.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+                }
+            }
 
-            // Clear old tags except for the chevron icon logic
-            const tagsAndPlaceholder = Array.from(trigger.children).filter(el => !el.classList.contains('ml-auto'));
-            tagsAndPlaceholder.forEach(el => el.remove());
-
-            if (selected.length === 0) {
-                const p = document.createElement('div');
-                p.id = 'tags-placeholder';
-                p.className = 'text-on-surface-variant font-body-md px-2 py-1';
-                p.textContent = 'Pilih tags...';
-                trigger.insertBefore(p, trigger.lastElementChild);
-            } else {
-                selected.forEach(tagText => {
-                    const badge = document.createElement('span');
-                    badge.className = 'inline-flex items-center gap-1 pl-3 pr-2 py-1 bg-primary-container text-on-primary-container border border-primary rounded-full text-xs font-semibold shadow-sm';
-                    
-                    const text = document.createElement('span');
-                    text.textContent = tagText;
-                    
-                    const removeBtn = document.createElement('span');
-                    removeBtn.className = 'material-symbols-outlined text-[14px] cursor-pointer hover:bg-black/10 rounded-full w-4 h-4 flex items-center justify-center transition-colors font-bold z-10 relative';
-                    removeBtn.textContent = 'close';
-                    removeBtn.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation(); // Stop event so dropdown toggle doesn't trigger
-                        const cb = Array.from(checkboxes).find(c => c.value === tagText);
-                        if(cb) {
-                            cb.checked = false;
-                            updateDisplay();
-                        }
-                    };
-                    
-                    badge.appendChild(text);
-                    badge.appendChild(removeBtn);
-                    trigger.insertBefore(badge, trigger.lastElementChild);
-                });
+            if (resetBtn) {
+                resetBtn.classList.toggle('hidden', checkedCount === 0);
             }
         }
 
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateDisplay);
+        window.resetAllTags = function() {
+            document.querySelectorAll('.tag-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateTagChipsState();
+        };
+
+        // Bind change events to tag checkboxes
+        document.querySelectorAll('.tag-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateTagChipsState);
         });
-        
-        // Initial state
-        updateDisplay();
+
+        // Initial state execution
+        updateTagChipsState();
     });
     </script>
 

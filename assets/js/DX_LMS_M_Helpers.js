@@ -2,7 +2,7 @@
  * DLS Helper Functions untuk Learning Management System.
  *
  * File ini menyediakan wrapper functions untuk SweetAlert2 dengan styling
- * dan behavior yang konsisten sesuai design system DLS.
+ * dan behavior yang konsisten sesuai design system LMS.
  *
  * Dependencies: SweetAlert2 (harus dimuat terlebih dahulu)
  *
