@@ -1,0 +1,11 @@
+{
+  "name": "dls-native-student-assets",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/css/DX_LMS_W_Tailwind_Input.css -o ./public/assets/css/DX_LMS_M_Tailwind_Output.css --minify",
+    "watch:css": "tailwindcss -i ./assets/css/DX_LMS_W_Tailwind_Input.css -o ./public/assets/css/DX_LMS_M_Tailwind_Output.css --watch"
+  },
+  "devDependencies": {"@tailwindcss/cli": "^4.3.3", "tailwindcss": "^4.3.3"},
+  "overrides": {"@parcel/watcher": "^2.6.0", "micromatch": "^4.0.8", "braces": "^3.0.3"}
+}

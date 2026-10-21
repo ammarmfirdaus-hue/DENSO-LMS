@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@font-face { font-family: Inter; src: url('/assets/fonts/DX_LMS_M_Inter_Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Inter; src: url('/assets/fonts/DX_LMS_M_Inter_Medium.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: Inter; src: url('/assets/fonts/DX_LMS_M_Inter_Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Material Symbols Outlined'; src: url('/assets/fonts/DX_LMS_M_MaterialSymbolsOutlined.ttf') format('truetype'); font-weight: 100 700; font-style: normal; font-display: block; }
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #b4000b;
+  --color-primary-container: #e20613;
+  --color-secondary: #4355b9;
+  --color-secondary-container: #8596ff;
+  --color-tertiary: #00671a;
+  --color-surface: #fcf9f8;
+  --color-surface-low: #f6f3f2;
+  --color-surface-container: #f0eded;
+  --color-on-surface: #1b1c1c;
+  --color-muted: #5e3f3b;
+  --color-outline: #e9bcb6;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-surface); color: var(--color-on-surface); font-family: Inter, sans-serif; }
+button, input { font: inherit; }
+.material-symbol { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 22px; line-height: 1; display: inline-block; white-space: nowrap; }

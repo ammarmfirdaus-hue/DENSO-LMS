@@ -1,18 +1,35 @@
-# Environment Files
+# Local environment files: keep example templates trackable.
 .env
-.env.local
 .env.*
-
-# Project Documentation
-AGENTS.md
-DESIGN.md
-PRD.md
+!.env.example
+!.env.*.example
 
 # Dependencies
-vendor/
 node_modules/
+vendor/
 
-# IDE and Editor Directories
+# Build output and caches
+dist/
+build/
+coverage/
+.vite/
+.cache/
+.phpunit.cache/
+
+# Runtime data and logs
+**/uploads/
+**/storage/
+*.log
+npm-debug.log*
+error_log
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# IDE and editor files
 .vscode/
 .idea/
 *.suo
@@ -20,7 +37,7 @@ node_modules/
 *.njsproj
 *.sln
 
-# OS generated files
+# Operating system files
 .DS_Store
 .DS_Store?
 ._*
@@ -29,16 +46,5 @@ node_modules/
 ehthumbs.db
 Thumbs.db
 
-# Log files
-*.log
-error_log
-
-# User Uploads / Temp Data (Adjust if needed)
-/uploads/
-/storage/
-*.tmp
-*.bak
-*.swp
-
-# Specific Project Exclusions
+# Locally installed PHP runtime
 /php-8.3.31/
