@@ -112,15 +112,6 @@ Database Teacher/Admin dan Student memang dipisahkan. Sinkronisasi opsional di b
 
 Setiap aplikasi memiliki seeder data dummy yang aman dijalankan berulang kali. Lihat [README Backend](Backend-LMS-Admin-Teacher/README.md) dan [README Student](NATIVE-LMS-Student/README.md) untuk perintah dan NPK akun demo. Launcher data dummy meminta password khusus demo; password tersebut diatur pada akun berawalan `DLS-DEMO-` setiap kali seeder dijalankan. Seeder tidak menghapus data dan tidak mengubah akun di luar akun demo. Jalankan hanya pada database pengembangan. Seed Admin/Teacher dan Student berjalan ke database terpisah tanpa memerlukan sinkronisasi Student.
 
-## Dasar keamanan
-
-- Jangan commit file `.env` atau kredensial asli.
-- Gunakan akun SQL Server dan MySQL khusus dengan hak minimum; jangan gunakan `sa` atau `root` di lingkungan deployment.
-- Secret JWT divalidasi saat API mulai. Token berlaku 15 menit dan diverifikasi berdasarkan algoritma, issuer, serta audience yang ditetapkan.
-- Cookie sesi Student menggunakan HttpOnly dan SameSite=Lax. Halaman terlindungi dan endpoint API memerlukan sesi Student.
-- Akses ke kedua database memakai prepared statement atau parameterized query.
-- Port pengembangan hanya terikat ke loopback. Untuk deployment, gunakan HTTPS, reverse proxy, secret yang kuat, pencatatan error produksi, dan konfigurasi origin yang eksplisit.
-
 ## Catatan migrasi
 
 Workspace React Teacher/Admin mencakup login, ringkasan dashboard, pengelolaan course/sesi/materi, aktivitas, progress pelajar tersinkron, moderasi forum, dan pengelolaan akun Admin. Workspace Student mempertahankan halaman dan styling yang ada; ringkasan dashboard/course memakai MySQL API, sementara sebagian halaman pembelajaran, kuis, notifikasi, dan forum masih berisi data contoh. README setiap proyek menjelaskan endpoint yang tersedia dan batas implementasinya.
