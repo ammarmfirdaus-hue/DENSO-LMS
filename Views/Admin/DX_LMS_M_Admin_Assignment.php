@@ -204,9 +204,17 @@ $active_tab = 'assignment';
                                             <div class="font-bold text-gray-900 group-hover:text-red-600 cursor-pointer transition-colors" onclick="window.location.href='?route=/admin/course/detail&id=101'">
                                                 <?= e($asg['course_title']) ?>
                                             </div>
-                                            <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                                                Dibuat: <?= e($asg['date']) ?>
+                                            <div class="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                                                <span class="flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                    <?= e($asg['date']) ?>
+                                                </span>
+                                                <?php if (!empty($asg['teacher_name'])): ?>
+                                                    <span class="text-indigo-600 font-semibold flex items-center gap-0.5">
+                                                        <span class="material-symbols-outlined text-[13px]">person</span>
+                                                        PIC: <?= e($asg['teacher_name']) ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
@@ -346,71 +354,230 @@ $active_tab = 'assignment';
             });
         }
 
-        // Modal Buat Penugasan Baru (Simple & Professional)
+        // Data master untuk modal assignment
+        const teachersList = <?= json_encode($teachers ?? []) ?>;
+        const departmentsList = <?= json_encode($departments ?? []) ?>;
+        const positionsList = <?= json_encode($positions ?? []) ?>;
+        const golongansList = <?= json_encode($golongans ?? []) ?>;
+
+        // Modal Buat Penugasan Baru (Connected to SQL Server)
         function showNewAssignmentModal() {
+            let teacherOptions = '<option value="">-- Pilih Pengajar (Teacher PIC) --</option>';
+            teachersList.forEach(t => {
+                const sub = (t.teacher_type ? `[${t.teacher_type}] ` : '') + (t.department ? ` - ${t.department}` : '');
+                teacherOptions += `<option value="${t.employee_id}">${t.fullname} (${t.jabatan || 'Teacher'})${sub}</option>`;
+            });
+
+            let deptOptions = '<option value="">-- Semua Departemen --</option>';
+            departmentsList.forEach(d => {
+                deptOptions += `<option value="${d.department_id}">${d.department_name}</option>`;
+            });
+
+            let posOptions = '<option value="">-- Semua Jabatan --</option>';
+            positionsList.forEach(p => {
+                posOptions += `<option value="${p.position_id}">${p.position_name}</option>`;
+            });
+
+            let golOptions = '<option value="">-- Semua Golongan --</option>';
+            golongansList.forEach(g => {
+                golOptions += `<option value="${g.golongan_id}">${g.golongan_name}</option>`;
+            });
+
             Swal.fire({
                 title: false,
-                width: 500,
+                width: 560,
                 padding: 0,
                 showConfirmButton: true,
                 showCancelButton: true,
-                confirmButtonText: 'Buat Penugasan',
+                confirmButtonText: 'Kirimkan Penugasan',
                 cancelButtonText: 'Batal',
+                focusConfirm: false,
                 customClass: {
-                    popup: 'rounded-xl overflow-hidden border border-gray-200 shadow-xl text-left bg-white',
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white rounded-lg px-5 py-2 font-semibold text-xs border-0 shadow-sm ml-2',
-                    cancelButton: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-5 py-2 rounded-lg font-semibold text-xs'
+                    popup: 'rounded-2xl overflow-hidden border border-gray-200 shadow-2xl text-left bg-white',
+                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white rounded-xl px-5 py-2.5 font-bold text-xs border-0 shadow-sm ml-2 transition-all',
+                    cancelButton: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-xl font-bold text-xs transition-all'
                 },
                 html: `
-                    <div class="px-6 pt-6 pb-4 border-b border-gray-200">
-                        <h3 class="text-base font-bold text-gray-900">Buat Penugasan Baru</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Tentukan course dan kriteria target karyawan</p>
-                    </div>
-
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Course yang Ditugaskan</label>
-                            <select class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
-                                <option value="k3">Dasar Keselamatan Kerja (K3) - [K3-001]</option>
-                                <option value="5s">5S & Kaizen Fundamentals - [KZN-102]</option>
-                                <option value="iso">Pengenalan ISO 9001:2015 - [ISO-901]</option>
-                                <option value="plc">Basic Programmable Logic Controller - [ENG-204]</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Tipe Target Karyawan</label>
-                            <select class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
-                                <option value="jabatan">Jabatan & Golongan (misal: Operator Gol 1-3)</option>
-                                <option value="dept">Departemen / Line Produksi (misal: Engineering Line A)</option>
-                                <option value="user">Spesifik User (Pilih Karyawan Tertentu)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Kriteria Audiens</label>
-                            <select class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
-                                <option value="op1">Seluruh Operator Produksi (Golongan 1 - 3)</option>
-                                <option value="stf">Staff & Leader Engineering (Golongan 3 - 4)</option>
-                                <option value="qa">Seluruh Quality Assurance Department</option>
-                                <option value="line">Operator Manufacturing Line A</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Target Selesai (SLA)</label>
-                            <select class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
-                                <option value="14">14 Hari Kerja (Standard SOP)</option>
-                                <option value="30">30 Hari Kerja (Regular Training)</option>
-                                <option value="7">7 Hari Kerja (Safety Compliance)</option>
-                            </select>
-                        </div>
-
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 text-xs text-gray-600">
-                            Sistem akan menyalurkan penugasan dan notifikasi secara otomatis sesuai kriteria yang dipilih.
+                    <div class="px-6 pt-6 pb-4 border-b border-gray-200 bg-gray-50/60">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                                <span class="material-symbols-outlined text-[20px]">add_task</span>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-900 leading-tight">Buat Penugasan Course Baru</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Tugaskan Teacher menyusun materi & atur kriteria peserta</p>
+                            </div>
                         </div>
                     </div>
-                `
+
+                    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                        <!-- Judul Course -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-red-600">title</span> Judul Course yang Ditugaskan <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="asg-title" placeholder="Contoh: Standarisasi K3 Produksi & APD Plant 1" class="w-full p-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900" />
+                        </div>
+
+                        <!-- Pilih Teacher PIC -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-red-600">person_pin</span> Pengajar (Teacher PIC) <span class="text-red-500">*</span>
+                            </label>
+                            <select id="asg-teacher" class="w-full p-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 font-medium">
+                                ${teacherOptions}
+                            </select>
+                        </div>
+
+                        <!-- Grid Kategori & SLA -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-800 mb-1.5">Kategori Pelatihan</label>
+                                <select id="asg-category" class="w-full p-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
+                                    <option value="Mandat Korporat">Mandat Korporat</option>
+                                    <option value="K3 & Safety">K3 & Keselamatan Kerja</option>
+                                    <option value="Teknik & Manufaktur">Teknik & Manufaktur</option>
+                                    <option value="Quality & ISO">Quality & ISO</option>
+                                    <option value="Soft Skills">Soft Skills & Leadership</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-800 mb-1.5">Target Penyusunan (SLA)</label>
+                                <select id="asg-sla" class="w-full p-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-800">
+                                    <option value="14">14 Hari Kerja (Standard)</option>
+                                    <option value="7">7 Hari Kerja (Mendesak / Safety)</option>
+                                    <option value="30">30 Hari Kerja (Reguler)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Kriteria Target Audiens Peserta -->
+                        <div class="p-4 bg-red-50/40 rounded-xl border border-red-100 space-y-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-red-600 text-[18px]">group_add</span>
+                                <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wide">Kriteria Target Peserta Mandat</h4>
+                            </div>
+                            <p class="text-[11px] text-gray-600 leading-relaxed">
+                                Sistem akan memfilter peserta otomatis di Step 3 Pembuatan Course Pengajar berdasarkan kriteria ini.
+                            </p>
+
+                            <div class="space-y-2.5 pt-1">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Departemen Sasaran</label>
+                                    <select id="asg-dept" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 bg-white text-gray-800">
+                                        ${deptOptions}
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Jabatan Sasaran</label>
+                                        <select id="asg-pos" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 bg-white text-gray-800">
+                                            ${posOptions}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Golongan Sasaran</label>
+                                        <select id="asg-gol" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 bg-white text-gray-800">
+                                            ${golOptions}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Catatan / Arahan Admin -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-red-600">note_alt</span> Catatan / Arahan Khusus ke Pengajar
+                            </label>
+                            <textarea id="asg-notes" rows="2" placeholder="Tulis instruksi khusus (misal: harap sertakan video operasional dan pre-test)..." class="w-full p-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"></textarea>
+                        </div>
+                    </div>
+                `,
+                preConfirm: () => {
+                    const title = document.getElementById('asg-title')?.value.trim();
+                    const teacherId = document.getElementById('asg-teacher')?.value;
+                    const category = document.getElementById('asg-category')?.value;
+                    const slaDays = document.getElementById('asg-sla')?.value;
+                    const deptId = document.getElementById('asg-dept')?.value;
+                    const posId = document.getElementById('asg-pos')?.value;
+                    const golId = document.getElementById('asg-gol')?.value;
+                    const notes = document.getElementById('asg-notes')?.value.trim();
+
+                    if (!title) {
+                        Swal.showValidationMessage('Judul course wajib diisi');
+                        return false;
+                    }
+                    if (!teacherId) {
+                        Swal.showValidationMessage('Pilih Pengajar (Teacher PIC) yang ditugaskan');
+                        return false;
+                    }
+
+                    return {
+                        title: title,
+                        teacher_id: teacherId,
+                        category: category,
+                        sla_days: slaDays,
+                        department_id: deptId || null,
+                        position_id: posId || null,
+                        golongan_id: golId || null,
+                        notes: notes
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: 'Menyimpan Penugasan...',
+                        text: 'Meneruskan penugasan dan mengirim notifikasi ke pengajar.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch('?route=/admin/assignment/store', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(result.value)
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Penugasan Berhasil!',
+                                text: res.message,
+                                confirmButtonText: 'Selesai',
+                                customClass: {
+                                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white rounded-xl px-5 py-2 font-bold text-xs'
+                                }
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal Menyimpan',
+                                text: res.message || 'Terjadi kesalahan sistem.',
+                                confirmButtonText: 'Tutup'
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error assigning course:', err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Gagal',
+                            text: 'Gagal menghubungi server untuk menyimpan penugasan.',
+                            confirmButtonText: 'Tutup'
+                        });
+                    });
+                }
             });
         }
     </script>

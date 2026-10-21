@@ -7,49 +7,14 @@
  */
 
 // Lifecycle UI Logic
-$courseStatus = $course['status'] ?? 'Draft';
-$badgeColor = 'bg-surface-container-high text-on-surface-variant';
-$badgeBorder = 'border-outline-variant/40';
-$badgeDot = 'bg-on-surface-variant';
-$canEditCourse = ($courseStatus !== 'Submitted' && $courseStatus !== 'Pending Review');
+// Lifecycle UI Logic
+$courseStatus = getCourseDisplayStatus($course['status'] ?? 'Private', $course['updated_at'] ?? null);
+$badgeInfo = getCourseStatusBadgeInfo($courseStatus);
+$badgeColor = $badgeInfo['badgeColor'];
+$badgeBorder = $badgeInfo['badgeBorder'];
+$badgeDot = $badgeInfo['badgeDot'];
+$canEditCourse = in_array($courseStatus, ['Private', 'Draft', 'Rejected'], true);
 $canEditRecommendation = $canEditCourse;
-
-switch ($courseStatus) {
-    case 'Draft':
-    case 'Private':
-        $badgeColor = 'bg-surface-container-high text-on-surface-variant';
-        $badgeBorder = 'border-outline-variant/50';
-        $badgeDot = 'bg-on-surface-variant';
-        break;
-    case 'Rejected':
-        $badgeColor = 'bg-red-100 text-red-800';
-        $badgeBorder = 'border-red-300';
-        $badgeDot = 'bg-red-500';
-        break;
-    case 'Pending Review':
-    case 'Submitted':
-        $badgeColor = 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
-        $badgeBorder = 'border-amber-300 dark:border-amber-700';
-        $badgeDot = 'bg-amber-500 animate-pulse';
-        break;
-    case 'Approved':
-        $badgeColor = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
-        $badgeBorder = 'border-emerald-300 dark:border-emerald-700';
-        $badgeDot = 'bg-emerald-500';
-        break;
-    case 'In Progress':
-    case 'Running':
-        $badgeColor = 'bg-primary-container text-on-primary-container';
-        $badgeBorder = 'border-primary/30';
-        $badgeDot = 'bg-primary animate-pulse';
-        break;
-    case 'Completed':
-    case 'Archived':
-        $badgeColor = 'bg-surface-container text-outline';
-        $badgeBorder = 'border-outline-variant/40';
-        $badgeDot = 'bg-outline';
-        break;
-}
 
 // Executive Analytics Calculation
 $avgProgress = 0;
@@ -558,7 +523,7 @@ if (!empty($participants)) {
                                 <p class="font-body-md text-info-900/80">Rekomendasi target peserta telah disubmit. Anda tidak dapat menyunting data ini sampai status berubah.</p>
                             </div>
                         </div>
-                    <?php elseif ($courseStatus === 'Draft' && empty($participants)): ?>
+                    <?php elseif (($courseStatus === 'Private' || $courseStatus === 'Draft') && empty($participants)): ?>
                         <div class="bg-warning/10 border-l-4 border-warning p-6 rounded-r-xl flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4 text-center sm:text-left">
                             <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm text-warning relative top-1">
                                 <span class="material-symbols-outlined text-[24px]">group_add</span>
@@ -693,7 +658,7 @@ if (!empty($participants)) {
                             </button>
                             <button type="button" onclick="confirmRevertDraft('<?= e((string)$course['id']) ?>')" class="w-full py-2.5 px-4 rounded-xl border border-outline-variant bg-surface hover:bg-surface-container text-on-surface font-label-sm font-bold flex items-center justify-center gap-2 transition-all text-center shadow-sm">
                                 <span class="material-symbols-outlined text-[18px] text-primary">undo</span>
-                                Tarik Pengajuan ke Draft
+                                Tarik Pengajuan ke Private
                             </button>
                         <?php elseif ($courseStatus === 'Rejected'): ?>
                             <a href="?route=/teacher/course/create&course_id=<?= e(
@@ -702,7 +667,7 @@ if (!empty($participants)) {
                                 <span class="material-symbols-outlined text-[18px]">build</span>
                                 Perbaiki & Edit Course
                             </a>
-                        <?php elseif ($courseStatus === 'Running' || $courseStatus === 'Completed'): ?>
+                        <?php elseif ($courseStatus === 'In Progress' || $courseStatus === 'Approved' || $courseStatus === 'Running' || $courseStatus === 'Completed'): ?>
                             <a href="?route=/teacher/grade&course_id=<?= e(
                                 (string) $course['id'],
                             ) ?>" class="w-full py-3 px-4 rounded-xl border border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 font-label-md font-bold flex items-center justify-center gap-2 transition-all text-center">
@@ -804,20 +769,20 @@ if (!empty($participants)) {
 
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    title: 'Tarik Pengajuan ke Draft?',
-                    text: 'Status course akan dikembalikan ke Draft sehingga Anda dapat menyunting kembali kurikulum, materi, dan peserta sebelum dikirim ulang ke Admin.',
+                    title: 'Tarik Pengajuan ke Private?',
+                    text: 'Status course akan dikembalikan ke Private sehingga Anda dapat menyunting kembali kurikulum, materi, dan peserta sebelum dikirim ulang ke Admin.',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#E20613',
                     cancelButtonColor: '#6B7280',
-                    confirmButtonText: 'Ya, Kembalikan ke Draft',
+                    confirmButtonText: 'Ya, Kembalikan ke Private',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         doRevert();
                     }
                 });
-            } else if (confirm('Kembalikan course ke status Draft agar dapat diedit kembali?')) {
+            } else if (confirm('Kembalikan course ke status Private agar dapat diedit kembali?')) {
                 doRevert();
             }
         }

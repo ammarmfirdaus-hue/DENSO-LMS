@@ -69,6 +69,8 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
 
                 /** Melakukan verifikasi ketersediaan pengguna dan kecocokan kata sandi. */
                 if ($user && password_verify($password, $user['password'])) {
+                    // Mencegah Session Fixation (OWASP A07)
+                    session_regenerate_id(true);
                     unset($_SESSION['course_filters']);
                     $baseRole = strtolower($user['role'] ?? 'student');
 

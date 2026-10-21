@@ -12,20 +12,16 @@ $current_filter = strtolower($current_filter_raw) === 'all' ? 'all' : urldecode(
 
 $filteredCourses = [];
 foreach ($courses as $course) {
-    // Map raw status safely to UI Status
-    $rawStat = $course['status'] ?? 'Draft';
-    $displayStat = match ($rawStat) {
-        'Draft' => 'Private',
-        'Submitted' => 'Pending Review',
-        'Rejected' => 'Rejected',
-        'Approved', 'Running' => 'In Progress',
-        'Completed' => 'Completed',
-        'Archived' => 'Archived',
-        default => 'Private',
-    };
+    // Map raw status safely to UI Status using unified helper
+    $rawStat = $course['status'] ?? 'Private';
+    $displayStat = getCourseDisplayStatus($rawStat, $course['raw_updated_at'] ?? null);
     $course['_mapped_status'] = $displayStat;
 
-    if ($current_filter === 'all' || strtolower($current_filter) === strtolower($displayStat)) {
+    if (
+        $current_filter === 'all' || 
+        strtolower($current_filter) === strtolower($displayStat) ||
+        (strtolower($current_filter) === 'in progress' && $displayStat === 'Approved')
+    ) {
         $filteredCourses[] = $course;
     }
 }
@@ -36,9 +32,10 @@ if ($current_filter === 'all') {
         'Rejected' => 1,
         'Pending Review' => 2,
         'Private' => 3,
-        'In Progress' => 4,
-        'Completed' => 5,
-        'Archived' => 6,
+        'Approved' => 4,
+        'In Progress' => 5,
+        'Completed' => 6,
+        'Archived' => 7,
     ];
     usort($filteredCourses, function ($a, $b) use ($priority) {
         $pA = $priority[$a['_mapped_status']] ?? 99;
@@ -143,71 +140,29 @@ if ($current_filter === 'all') {
                     <?php foreach ($filteredCourses as $course): ?>
                         <?php
                         $displayStat = $course['_mapped_status'];
+                        $badgeInfo = getCourseStatusBadgeInfo($displayStat);
+                        $actionInfo = getCourseActionInfo($displayStat, $course['id']);
+
+                        $badgeCls = $badgeInfo['badgeCls'];
+                        $progressBarHex = $badgeInfo['progressBarHex'];
+                        $progressTextColor = $badgeInfo['progressTextColor'];
+
                         $progress = (int) ($course['progress'] ?? 0);
-
-                        $badgeCls = match ($displayStat) {
-                            'Private' => 'text-gray-700 bg-gray-50 border-gray-300 shadow-sm',
-                            'Pending Review' => 'text-amber-700 bg-amber-50 border-amber-200',
-                            'Rejected' => 'text-red-700 bg-red-50 border-red-200',
-                            'In Progress' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                            'Completed' => 'text-blue-700 bg-blue-50 border-blue-200',
-                            'Archived' => 'text-gray-500 bg-gray-100 border-gray-200',
-                            default => 'text-gray-700 bg-gray-50 border-gray-300 shadow-sm',
-                        };
-
-                        $progressBarHex = match ($displayStat) {
-                            'In Progress' => '#10B981',
-                            'Completed' => '#3B82F6',
-                            'Pending Review', 'Rejected' => '#F59E0B',
-                            'Archived' => '#6B7280',
-                            default => '#9CA3AF',
-                        };
-
-                        $progressTextColor = match ($displayStat) {
-                            'In Progress' => 'text-emerald-600',
-                            'Completed' => 'text-blue-600',
-                            'Pending Review', 'Rejected' => 'text-amber-600',
-                            'Archived' => 'text-gray-500',
-                            default => 'text-on-surface-variant',
-                        };
 
                         $contextLine = match ($displayStat) {
                             'Private' => 'Belum diajukan ke admin',
                             'Pending Review' => 'Menunggu review admin',
-                            'Rejected' => !empty($course['rejection_note']) ? 'Catatan: "' . e(mb_strimwidth($course['rejection_note'], 0, 36, '...')) . '"' : 'Perlu revisi segera',
+                            'Rejected' => !empty($course['rejection_note'])
+                                ? 'Catatan: "' . e(mb_strimwidth($course['rejection_note'], 0, 36, '...')) . '"'
+                                : 'Perlu revisi segera',
                             'Completed' => 'Course telah selesai',
                             'Archived' => 'Course telah diarsipkan',
                             default => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
                         };
 
-                        $ctaText = match ($displayStat) {
-                            'Private' => 'Edit Course',
-                            'Pending Review' => 'Lihat Detail',
-                            'Rejected' => 'Perbaiki Course',
-                            'In Progress' => 'Kelola Penilaian',
-                            'Completed' => 'Lihat Detail',
-                            'Archived' => 'Lihat Arsip',
-                            default => 'Detail',
-                        };
-
-                        $ctaHref = match ($displayStat) {
-                            'Private', 'Rejected' => '?route=/teacher/course/create&course_id=' .
-                                e((string) $course['id']),
-                            'In Progress' => '?route=/teacher/grade&course_id=' . e((string) $course['id']),
-                            default => '?route=/teacher/course/detail&course_id=' . e((string) $course['id']),
-                        };
-
-                        $ctaCls = match ($displayStat) {
-                            'Private' => 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400',
-                            'Pending Review'
-                                => 'text-amber-700 border-amber-300 hover:bg-amber-50 hover:border-amber-400',
-                            'Rejected' => 'text-red-700 border-red-300 hover:bg-red-50 hover:border-red-400',
-                            'In Progress'
-                                => 'text-emerald-700 border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400',
-                            'Completed' => 'text-blue-700 border-blue-300 hover:bg-blue-50 hover:border-blue-400',
-                            'Archived' => 'text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300',
-                            default => 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400',
-                        };
+                        $ctaText = $actionInfo['text'];
+                        $ctaHref = $actionInfo['href'];
+                        $ctaCls = $actionInfo['cls'];
                         ?>
                         <div class="course-card flex flex-col h-full bg-white rounded-xl border border-outline-variant/60 overflow-hidden hover:border-outline-variant hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all duration-300">
                             
@@ -225,7 +180,9 @@ if ($current_filter === 'all') {
                                 <h3 class="font-headline-sm font-bold text-[16px] text-on-surface leading-snug line-clamp-2 min-h-[2.75rem] mt-1" title="<?= e(
                                     $course['title'],
                                 ) ?>">
-                                    <a href="<?= $ctaHref ?>" class="hover:text-primary transition-colors focus:outline-none focus:underline"><?= e($course['title']) ?></a>
+                                    <a href="<?= $ctaHref ?>" class="hover:text-primary transition-colors focus:outline-none focus:underline"><?= e(
+    $course['title'],
+) ?></a>
                                 </h3>
 
                                 <!-- 3. Category (No Code) -->
@@ -286,7 +243,9 @@ if ($current_filter === 'all') {
                                     <a href="<?= $ctaHref ?>" class="inline-flex items-center justify-center font-label-md font-bold text-on-surface border border-outline-variant hover:bg-surface-variant px-3 py-1.5 rounded-lg transition-colors cursor-pointer <?= $ctaCls ?>">
                                         <?= e($ctaText) ?>
                                     </a>
-                                    <button type="button" data-id="<?= e((string)$course['id']) ?>" data-title="<?= e($course['title']) ?>" onclick="confirmDeleteCourseCard(this)" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-outline hover:text-error hover:border-error/40 hover:bg-error/5 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Course Permanen">
+                                    <button type="button" data-id="<?= e((string) $course['id']) ?>" data-title="<?= e(
+    $course['title'],
+) ?>" onclick="confirmDeleteCourseCard(this)" class="w-8 h-8 rounded-lg border border-outline-variant/60 text-outline hover:text-error hover:border-error/40 hover:bg-error/5 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Course Permanen">
                                         <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </button>
                                 </div>

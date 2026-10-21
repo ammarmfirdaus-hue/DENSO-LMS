@@ -45,22 +45,22 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
         $totalArchivedCourses = 0;  // Diarsipkan
 
         foreach ($rawCourses as $dbc) {
-            $st = strtolower($dbc['status'] ?? 'draft');
-            if (in_array($st, ['active', 'running', 'approved'])) {
+            $disp = getCourseDisplayStatus($dbc['status'] ?? 'Private', $dbc['updated_at'] ?? null);
+            if ($disp === 'In Progress' || $disp === 'Approved') {
                 $totalActiveCourses++;
-            } elseif ($st === 'submitted') {
+            } elseif ($disp === 'Pending Review') {
                 $totalSubmittedCourses++;
-            } elseif ($st === 'draft') {
+            } elseif ($disp === 'Private') {
                 $totalDraftCourses++;
-            } elseif ($st === 'rejected') {
+            } elseif ($disp === 'Rejected') {
                 $totalRejectedCourses++;
-            } elseif ($st === 'completed') {
+            } elseif ($disp === 'Completed') {
                 $totalCompletedCourses++;
-            } elseif ($st === 'archived') {
+            } elseif ($disp === 'Archived') {
                 $totalArchivedCourses++;
             }
 
-            $isRej = $st === 'rejected';
+            $isRej = $disp === 'Rejected';
             $courses[] = [
                 'id' => $dbc['id'],
                 'code' => $dbc['code'],
@@ -68,6 +68,7 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
                 'description' => $dbc['description'],
                 'category' => $dbc['category'],
                 'status' => $dbc['status'],
+                'raw_updated_at' => $dbc['updated_at'] ?? null,
                 'icon' => 'school',
                 'participants' => (int) $dbc['participants'],
                 'pending_reviews' => (int) $dbc['pending_reviews'],
@@ -101,8 +102,59 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
             'pending_review' => $totalSubmittedCourses,
         ];
 
+        // Hitung notifikasi belum dibaca untuk lonceng header
+        $unreadNotifRow = dbQueryOne("SELECT COUNT(*) AS total FROM DX_LMS_T_Notifications WHERE employee_id = ? AND is_read = 0", [$teacherId]);
+        $unreadNotifs = (int) ($unreadNotifRow['total'] ?? 0);
+        $stats['unread_notifs'] = $unreadNotifs;
+
         // 3. Tugas Prioritas / Perlu Tindak Lanjut Riil
         $pendingActions = [];
+
+        // Deteksi course MANDAT PENUGASAN DARI ADMIN (Prioritas Tertinggi)
+        $mandateCourses = dbQuery("
+            SELECT 
+                c.course_id, 
+                c.course_code, 
+                c.title, 
+                c.description, 
+                c.created_at, 
+                c.updated_at,
+                ct.assigned_by, 
+                admin_emp.fullname AS admin_name,
+                d.department_name, 
+                p.position_name, 
+                g.golongan_name
+            FROM DX_LMS_M_Courses c
+            INNER JOIN DX_LMS_M_Course_Targets ct ON c.course_id = ct.course_id AND ct.target_type = 'Corporate_Mandate'
+            LEFT JOIN DX_LMS_M_Employees admin_emp ON ct.assigned_by = admin_emp.employee_id
+            LEFT JOIN DX_LMS_M_Departments d ON ct.department_id = d.department_id
+            LEFT JOIN DX_LMS_M_Positions p ON ct.position_id = p.position_id
+            LEFT JOIN DX_LMS_M_Golongan g ON ct.golongan_id = g.golongan_id
+            WHERE c.created_by = ? AND LOWER(c.course_status) = 'draft'
+            ORDER BY c.created_at DESC
+        ", [$teacherId]);
+
+        foreach ($mandateCourses as $mc) {
+            $targetDesc = [];
+            if (!empty($mc['department_name'])) $targetDesc[] = $mc['department_name'];
+            if (!empty($mc['position_name'])) $targetDesc[] = $mc['position_name'];
+            if (!empty($mc['golongan_name'])) $targetDesc[] = $mc['golongan_name'];
+            $targetStr = !empty($targetDesc) ? implode(' • ', $targetDesc) : 'Seluruh Target Terkait';
+
+            $pendingActions[] = [
+                'type' => 'corporate_mandate',
+                'title' => 'Tugas Penugasan Course: ' . $mc['title'],
+                'message' => 'Mandat resmi dari Admin LMS (' . ($mc['admin_name'] ?? 'Admin') . '). Sasaran: ' . $targetStr . '. ' . $mc['description'],
+                'raw_note' => $mc['description'],
+                'admin_name' => $mc['admin_name'] ?? 'Admin LMS',
+                'time_ago' => timeAgo($mc['created_at']),
+                'link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $mc['course_id']),
+                'edit_link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $mc['course_id']),
+                'icon' => 'campaign',
+                'badge' => 'Mandat Korporat',
+                'cta_text' => 'Mulai Susun Course',
+            ];
+        }
 
         // Deteksi course yang ditolak (Rejected) -> butuh revisi segera
         $rejectedCourses = dbQuery("
@@ -126,28 +178,33 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
                 'link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $rc['course_id']),
                 'edit_link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $rc['course_id']),
                 'icon' => 'assignment_late',
+                'cta_text' => 'Perbaiki Course Sekarang',
             ];
         }
 
-        // Deteksi course berstatus Draft yang belum diajukan
+        // Deteksi course berstatus Private biasa (Bukan mandat) yang belum diajukan
         $draftCourses = dbQuery("
-            SELECT TOP 2 course_id, title, updated_at 
-            FROM DX_LMS_M_Courses 
-            WHERE created_by = ? AND LOWER(course_status) = 'draft'
-            ORDER BY updated_at DESC
+            SELECT TOP 2 c.course_id, c.title, c.updated_at 
+            FROM DX_LMS_M_Courses c
+            WHERE c.created_by = ? AND LOWER(c.course_status) IN ('draft', 'private')
+              AND c.course_id NOT IN (
+                  SELECT course_id FROM DX_LMS_M_Course_Targets WHERE target_type = 'Corporate_Mandate'
+              )
+            ORDER BY c.updated_at DESC
         ", [$teacherId]);
 
         foreach ($draftCourses as $dc) {
             $pendingActions[] = [
-                'type' => 'draft',
-                'title' => 'Draft Belum Diajukan: ' . $dc['title'],
+                'type' => 'private',
+                'title' => 'Course Private Belum Diajukan: ' . $dc['title'],
                 'message' => 'Lengkapi silabus atau target peserta lalu kirimkan ke Admin untuk kurasi.',
                 'raw_note' => '',
                 'admin_name' => '',
-                'time_ago' => !empty($dc['updated_at']) ? 'Draft ' . date('d M Y', strtotime($dc['updated_at'])) : 'Draft tersimpan',
+                'time_ago' => !empty($dc['updated_at']) ? 'Private ' . date('d M Y', strtotime($dc['updated_at'])) : 'Private tersimpan',
                 'link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $dc['course_id']),
                 'edit_link' => '?route=/teacher/course/create&course_id=' . urlencode((string) $dc['course_id']),
                 'icon' => 'edit_document',
+                'cta_text' => 'Lanjutkan Edit Course',
             ];
         }
 
@@ -167,7 +224,10 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
                 $icon = 'history';
                 $colorClass = 'bg-primary text-white';
 
-                if (str_contains($actType, 'create')) {
+                if (str_contains($actType, 'assign')) {
+                    $icon = 'assignment_turned_in';
+                    $colorClass = 'bg-red-600 text-white';
+                } elseif (str_contains($actType, 'create')) {
                     $icon = 'add_circle';
                     $colorClass = 'bg-emerald-600 text-white';
                 } elseif (str_contains($actType, 'delete')) {
@@ -203,6 +263,7 @@ class DX_LMS_M_Teacher_Dashboard extends DX_LMS_M_Controller
             'activities' => $activities,
             'pending_actions' => $displayedPendingActions,
             'total_pending_actions' => $totalPendingActionsCount,
+            'notif_count' => $unreadNotifs,
         ];
 
         $this->view('DX_LMS_M_Teacher_Dashboard', $data);

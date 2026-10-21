@@ -22,8 +22,8 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         $courseModel = new DX_LMS_M_Courses();
         $filterStatus = $_GET['status'] ?? 'all';
 
-        // Ambil course dari Database SQL Server khusus milik pengajar yang sedang login
-        $dbCourses = $courseModel->getAllForTeacher($teacherId, $filterStatus);
+        // Ambil semua course milik pengajar dari SQL Server, lalu mapping status konsisten di View/PHP
+        $dbCourses = $courseModel->getAllForTeacher($teacherId, 'all');
 
         // Format dbCourses agar sesuai dengan UI Teacher List
         $formattedDbCourses = [];
@@ -36,6 +36,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
                 'description' => $dbc['description'],
                 'category' => $dbc['category'],
                 'status' => $dbc['status'],
+                'raw_updated_at' => $dbc['updated_at'] ?? null,
                 'icon' => 'school',
                 'participants' => (int) $dbc['participants'],
                 'pending_reviews' => (int) $dbc['pending_reviews'],
@@ -148,6 +149,10 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
         $courseModel = new DX_LMS_M_Courses();
         $empModel = new DX_LMS_M_Employees();
 
+        $isCorporateMandate = false;
+        $mandateTarget = null;
+        $mandateCandidates = [];
+
         if ($courseId) {
             $course = $courseModel->getCourseDetail($courseId);
             if ($course) {
@@ -158,6 +163,17 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
                     exit();
                 }
                 $existingSessions = $courseModel->getCourseSessionsWithContent($courseId);
+
+                // Cek apakah course ini merupakan mandat penugasan dari Admin
+                $mandateTarget = $courseModel->getCorporateMandateForCourse($courseId);
+                if ($mandateTarget) {
+                    $isCorporateMandate = true;
+                    $mandateCandidates = $empModel->getMandatedCandidates(
+                        $mandateTarget['department_id'] ?? null,
+                        $mandateTarget['position_id'] ?? null,
+                        $mandateTarget['golongan_id'] ?? null
+                    );
+                }
             }
         }
 
@@ -173,6 +189,9 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
             'existing_sessions' => $existingSessions,
             'filters' => $filters,
             'candidates' => $candidates,
+            'isCorporateMandate' => $isCorporateMandate,
+            'mandateTarget' => $mandateTarget,
+            'mandateCandidates' => $mandateCandidates,
         ];
 
         $this->view('DX_LMS_T_Teacher_Course_Create', $data);
@@ -256,7 +275,7 @@ class DX_LMS_M_Teacher_Course extends DX_LMS_M_Controller
                 ", [
                     $teacherUser['employee_id'] ?? 2,
                     (string)$courseId,
-                    "Pengajar menarik kembali pengajuan course '{$course['title']}' ke status Draft untuk penyuntingan",
+                    "Pengajar menarik kembali pengajuan course '{$course['title']}' ke status Private untuk penyuntingan",
                     $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
                     $_SERVER['HTTP_USER_AGENT'] ?? 'DLS Teacher Portal'
                 ]);

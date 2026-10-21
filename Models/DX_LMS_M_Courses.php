@@ -149,10 +149,53 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 $course['target_positions'] = !empty($positions) ? implode(', ', $positions) : 'Semua Posisi';
                 $course['target_departments'] = !empty($depts) ? implode(', ', $depts) : 'Semua Departemen';
                 $course['rejection_note'] = $this->getCourseRejectionNote($courseId);
+                $course['corporate_mandate'] = $this->getCorporateMandateForCourse($courseId);
             }
             return $course;
         } catch (Throwable $e) {
             error_log("DX_LMS_M_Courses::getCourseDetail Error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Memeriksa dan mengambil informasi Penugasan Mandat Korporat (Corporate Mandate) dari Admin.
+     *
+     * @param int $courseId ID Course.
+     * @return array|null Detail mandat penugasan atau null jika bukan mandat korporat.
+     */
+    public function getCorporateMandateForCourse($courseId)
+    {
+        try {
+            $sql = "
+                SELECT 
+                    ct.course_target_id,
+                    ct.course_id,
+                    ct.position_id,
+                    ct.golongan_id,
+                    ct.department_id,
+                    ct.assigned_by,
+                    ct.target_type,
+                    ct.target_status,
+                    ct.created_at,
+                    admin_emp.fullname AS admin_name,
+                    admin_emp.npk AS admin_npk,
+                    p.position_name,
+                    g.golongan_name,
+                    d.department_name,
+                    c.title AS course_title,
+                    c.description AS course_description
+                FROM DX_LMS_M_Course_Targets ct
+                INNER JOIN DX_LMS_M_Courses c ON ct.course_id = c.course_id
+                LEFT JOIN DX_LMS_M_Employees admin_emp ON ct.assigned_by = admin_emp.employee_id
+                LEFT JOIN DX_LMS_M_Positions p ON ct.position_id = p.position_id
+                LEFT JOIN DX_LMS_M_Golongan g ON ct.golongan_id = g.golongan_id
+                LEFT JOIN DX_LMS_M_Departments d ON ct.department_id = d.department_id
+                WHERE ct.course_id = ? AND ct.target_type = 'Corporate_Mandate'
+            ";
+            return dbQueryOne($sql, [$courseId]);
+        } catch (\Throwable $e) {
+            error_log("DX_LMS_M_Courses::getCorporateMandateForCourse Error: " . $e->getMessage());
             return null;
         }
     }
@@ -374,6 +417,7 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             $isUpdate = false;
             $courseId = (int) ($data['course_id'] ?? 0);
             $courseCode = '';
+            $existingMandate = null;
 
             if ($courseId > 0) {
                 $existing = dbQueryOne("SELECT course_id, course_code, created_by, course_status FROM DX_LMS_M_Courses WHERE course_id = ?", [$courseId]);
@@ -384,6 +428,9 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
                 if ((int) $existing['created_by'] !== (int) $teacherEmployeeId) {
                     throw new Exception("Akses Ditolak: Anda tidak memiliki hak akses untuk mengubah course ini.");
                 }
+
+                // Cek apakah course ini merupakan Mandat Korporat dari Admin
+                $existingMandate = dbQueryOne("SELECT * FROM DX_LMS_M_Course_Targets WHERE course_id = ? AND target_type = 'Corporate_Mandate'", [$courseId]);
 
                 $courseCode = $existing['course_code'];
                 $isUpdate = true;
@@ -397,14 +444,14 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
 
                 // Bersihkan sesi lama jika wizard mengirimkan struktur baru yang lengkap
                 if (!empty($data['sessions'])) {
-                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?))", [$courseId]);
-                    dbExecute("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?)", [$courseId]);
-                    dbExecute("DELETE FROM DX_LMS_M_Quizzes WHERE course_id = ?", [$courseId]);
-                    dbExecute("DELETE FROM DX_LMS_M_Course_Materials WHERE session_id IN (SELECT session_id FROM DX_LMS_M_Course_Sessions WHERE course_id = ?)", [$courseId]);
-                    dbExecute("DELETE FROM DX_LMS_M_Course_Sessions WHERE course_id = ?", [$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_M_Quiz_Choices WHERE question_id IN (SELECT question_id FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?))")->execute([$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_M_Quiz_Questions WHERE quiz_id IN (SELECT quiz_id FROM DX_LMS_M_Quizzes WHERE course_id = ?)")->execute([$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_M_Quizzes WHERE course_id = ?")->execute([$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_M_Course_Materials WHERE session_id IN (SELECT session_id FROM DX_LMS_M_Course_Sessions WHERE course_id = ?)")->execute([$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_M_Course_Sessions WHERE course_id = ?")->execute([$courseId]);
                 }
 
-                dbExecute("DELETE FROM DX_LMS_M_Course_Targets WHERE course_id = ?", [$courseId]);
+                $pdo->prepare("DELETE FROM DX_LMS_M_Course_Targets WHERE course_id = ?")->execute([$courseId]);
             } else {
                 // Generate Kode Course Unik
                 $prefix = 'CRS-' . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $title), 0, 3));
@@ -439,34 +486,46 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             }
 
             // 2. Simpan Target Audience / Rekomendasi Filter
-            $targetJabatan = trim($data['target_jabatan'] ?? '');
-            $targetGolongan = trim($data['target_golongan'] ?? '');
-            $targetDept = trim($data['target_departemen'] ?? '');
+            if ($existingMandate) {
+                // Pertahankan Mandat Korporat dari Admin
+                $posId = $existingMandate['position_id'];
+                $golId = $existingMandate['golongan_id'];
+                $deptId = $existingMandate['department_id'];
+                $targetType = 'Corporate_Mandate';
+                $assignedBy = (int) $existingMandate['assigned_by'];
+            } else {
+                $targetJabatan = trim($data['target_jabatan'] ?? '');
+                $targetGolongan = trim($data['target_golongan'] ?? '');
+                $targetDept = trim($data['target_departemen'] ?? '');
 
-            $posId = null;
-            if (!empty($targetJabatan)) {
-                $posRow = dbQueryOne("SELECT position_id FROM DX_LMS_M_Positions WHERE LOWER(position_name) = LOWER(?)", [$targetJabatan]);
-                if ($posRow) $posId = (int) $posRow['position_id'];
-            }
+                $posId = null;
+                if (!empty($targetJabatan)) {
+                    $posRow = dbQueryOne("SELECT position_id FROM DX_LMS_M_Positions WHERE LOWER(position_name) = LOWER(?)", [$targetJabatan]);
+                    if ($posRow) $posId = (int) $posRow['position_id'];
+                }
 
-            $golId = null;
-            if (!empty($targetGolongan)) {
-                $golRow = dbQueryOne("SELECT golongan_id FROM DX_LMS_M_Golongan WHERE LOWER(golongan_name) = LOWER(?)", [$targetGolongan]);
-                if ($golRow) $golId = (int) $golRow['golongan_id'];
-            }
+                $golId = null;
+                if (!empty($targetGolongan)) {
+                    $golRow = dbQueryOne("SELECT golongan_id FROM DX_LMS_M_Golongan WHERE LOWER(golongan_name) = LOWER(?)", [$targetGolongan]);
+                    if ($golRow) $golId = (int) $golRow['golongan_id'];
+                }
 
-            $deptId = null;
-            if (!empty($targetDept)) {
-                $deptRow = dbQueryOne("SELECT department_id FROM DX_LMS_M_Departments WHERE LOWER(department_name) = LOWER(?)", [$targetDept]);
-                if ($deptRow) $deptId = (int) $deptRow['department_id'];
+                $deptId = null;
+                if (!empty($targetDept)) {
+                    $deptRow = dbQueryOne("SELECT department_id FROM DX_LMS_M_Departments WHERE LOWER(department_name) = LOWER(?)", [$targetDept]);
+                    if ($deptRow) $deptId = (int) $deptRow['department_id'];
+                }
+
+                $targetType = 'Target_Audience';
+                $assignedBy = $teacherEmployeeId;
             }
 
             $stmtTarget = $pdo->prepare("
                 INSERT INTO DX_LMS_M_Course_Targets 
                 (course_id, position_id, golongan_id, department_id, assigned_by, target_type, target_status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, 'Target_Audience', 'Active', GETDATE(), GETDATE())
+                VALUES (?, ?, ?, ?, ?, ?, 'Active', GETDATE(), GETDATE())
             ");
-            $stmtTarget->execute([$courseId, $posId, $golId, $deptId, $teacherEmployeeId]);
+            $stmtTarget->execute([$courseId, $posId, $golId, $deptId, $assignedBy, $targetType]);
 
             // 3. Simpan Sesi Kurikulum & Konten Modul
             $sessions = $data['sessions'] ?? [];
@@ -641,6 +700,11 @@ class DX_LMS_M_Courses extends DX_LMS_M_Model
             // 6. Simpan Peserta / Enrollments
             $participants = !empty($data['participants']) ? $data['participants'] : ($data['candidate_employee_ids'] ?? []);
             if (!empty($participants)) {
+                if ($isUpdate) {
+                    $pdo->prepare("DELETE FROM DX_LMS_T_Course_Enrollments WHERE course_id = ?")->execute([$courseId]);
+                    $pdo->prepare("DELETE FROM DX_LMS_T_Course_Histories WHERE course_id = ?")->execute([$courseId]);
+                }
+
                 $stmtEnroll = $pdo->prepare("
                     INSERT INTO DX_LMS_T_Course_Enrollments 
                     (employee_id, course_id, enrollment_status, enrolled_at, created_at, updated_at)

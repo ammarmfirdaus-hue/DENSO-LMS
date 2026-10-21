@@ -28,7 +28,7 @@
     <main class="dls-main flex-1 overflow-y-auto space-y-stack-md pb-[88px] pt-[88px] px-container-margin">
         <!-- Header & Filters Section -->
         <section class="space-y-stack-sm">
-            <h1 class="font-headline-md text-headline-md text-on-surface">My Course</h1>
+            <h1 class="font-headline-md text-headline-md text-on-surface">Course Saya</h1>
             <p class="font-body-md text-body-md text-on-surface-variant">Pilih dan temukan course yang sesuai untuk pengembangan Anda.</p>
             <!-- Search Bar -->
             <div class="relative pt-2">

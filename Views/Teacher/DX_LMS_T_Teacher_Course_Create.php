@@ -293,8 +293,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <p class="font-body-sm text-on-surface-variant mt-0.5">Susun sesi pembelajaran, unggah materi SOP/PDF, dan konfigurasi soal evaluasi kuis.</p>
                             </div>
                         </div>
-                        <button type="button" onclick="addSessionBlock()" class="px-4 py-2.5 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary rounded-xl font-label-md font-bold flex items-center gap-2 transition-all shadow-sm">
-                            <span class="material-symbols-outlined text-[20px]">add_circle</span> Tambah Sesi
+                        <button type="button" onclick="addSessionBlock()" class="px-4 py-2.5 bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400 rounded-xl font-label-md font-bold flex items-center gap-2 transition-all shadow-2xs active:scale-95">
+                            <span class="material-symbols-outlined text-[20px] text-slate-500">add_circle</span> Tambah Sesi
                         </button>
                     </div>
                     
@@ -303,14 +303,8 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                         $renderSessions = !empty($existing_sessions) ? $existing_sessions : [
                             [
                                 'session_id' => 0,
-                                'session_title' => 'Sesi 1: Dasar Materi',
-                                'materials' => [
-                                    [
-                                        'material_title' => 'Materi Pengantar Kompetensi',
-                                        'material_type' => 'document',
-                                        'material_description' => 'Silakan pelajari materi pengantar berikut sebelum melanjutkan ke kuis.',
-                                    ]
-                                ],
+                                'session_title' => 'Sesi 1: Modul Pembelajaran',
+                                'materials' => [],
                                 'quizzes' => []
                             ]
                         ];
@@ -334,7 +328,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             <div class="bg-surface border-b border-surface-variant flex w-full overflow-hidden session-tabs">
                                 <button type="button" onclick="switchSessionTab(this, 'materi')" class="session-tab-btn flex-1 py-3 px-4 border-b-2 border-primary text-primary font-label-sm font-bold whitespace-nowrap text-center transition-colors flex items-center justify-center gap-2" data-tab="materi">
                                     <span class="material-symbols-outlined text-[18px]">menu_book</span>
-                                    <span>Materi Pembelajaran</span>
+                                    <span>Materi & Tes Pembelajaran</span>
                                 </button>
                                 <button type="button" onclick="switchSessionTab(this, 'quiz')" class="session-tab-btn flex-1 py-3 px-4 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-label-sm font-bold whitespace-nowrap text-center flex items-center justify-center gap-2" data-tab="quiz">
                                     <span class="material-symbols-outlined text-[18px]">quiz</span>
@@ -355,70 +349,120 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
                                         if ($isPreTest) {
                                             $badgeTitle = 'Pre-Test';
-                                            $badgeBg = 'bg-secondary-container/40 text-secondary';
-                                            $badgeText = 'text-secondary';
                                             $icon = 'quiz';
-                                            $kelolaClass = 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-white';
+                                            $modTypeAttr = 'pre_test';
                                             $kelolaOnClick = 'openAssessmentBuilder(this)';
                                         } elseif ($isPostTest) {
                                             $badgeTitle = 'Post-Test';
-                                            $badgeBg = 'bg-warning-container/40 text-warning-800 dark:text-warning';
-                                            $badgeText = 'text-warning-800 dark:text-warning';
                                             $icon = 'assignment_turned_in';
-                                            $kelolaClass = 'bg-warning/15 text-warning-800 dark:text-warning hover:bg-warning hover:text-white';
+                                            $modTypeAttr = 'post_test';
                                             $kelolaOnClick = 'openAssessmentBuilder(this)';
                                         } else {
                                             $badgeTitle = 'Materi';
-                                            $badgeBg = 'bg-primary-container text-white';
-                                            $badgeText = 'text-primary';
-                                            $icon = ($mType === 'video') ? 'play_circle' : (($mType === 'pdf') ? 'picture_as_pdf' : 'description');
-                                            $kelolaClass = 'bg-primary/10 text-primary hover:bg-primary hover:text-white';
+                                            $icon = ($mType === 'video') ? 'play_circle' : (($mType === 'pdf') ? 'picture_as_pdf' : 'menu_book');
+                                            $modTypeAttr = 'document';
                                             $kelolaOnClick = 'openMaterialBuilder(this)';
                                         }
                                     ?>
-                                    <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg <?= $badgeBg ?> flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined"><?= $icon ?></span>
+                                    <div class="module-block border border-slate-200/90 rounded-xl p-3 flex gap-3 items-center bg-white hover:border-slate-400/80 transition-all cursor-default shadow-2xs group" data-module-type="<?= e($modTypeAttr) ?>">
+                                        <!-- Reorder Drag Handle & Arrows -->
+                                        <div class="flex items-center gap-0.5 shrink-0 text-slate-400">
+                                            <button type="button" class="module-drag-handle cursor-grab active:cursor-grabbing p-1 rounded hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Geser untuk mengatur urutan modul">
+                                                <span class="material-symbols-outlined text-[20px]">drag_indicator</span>
+                                            </button>
+                                            <div class="flex flex-col -space-y-1">
+                                                <button type="button" onclick="moveModuleBlock(this, -1)" class="w-5 h-4 flex items-center justify-center hover:text-slate-700 hover:bg-slate-100 rounded transition-colors active:scale-90" title="Pindah ke atas">
+                                                    <span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+                                                </button>
+                                                <button type="button" onclick="moveModuleBlock(this, 1)" class="w-5 h-4 flex items-center justify-center hover:text-slate-700 hover:bg-slate-100 rounded transition-colors active:scale-90" title="Pindah ke bawah">
+                                                    <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        <!-- Uniform Icon Container (1 Warna Seragam) -->
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <span class="material-symbols-outlined module-type-icon text-[20px]"><?= $icon ?></span>
+                                        </div>
+
+                                        <!-- Title & Type Badge -->
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm <?= $badgeText ?> mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold"><?= $badgeTitle ?></p>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="font-label-sm module-type-badge inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-600 border border-slate-200/70">
+                                                    <?= $badgeTitle ?>
+                                                </span>
+                                            </div>
                                             <div class="relative flex items-center group/title max-w-lg">
-                                                <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-outline-variant/40 hover:border-primary focus:border-primary focus:bg-surface-container-low/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-on-surface text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-on-surface-variant/50" value="<?= e($mTitle) ?>" placeholder="Klik untuk isi judul <?= strtolower($badgeTitle) ?>..." title="Klik untuk mengubah judul modul">
-                                                <span class="material-symbols-outlined text-[15px] text-on-surface-variant/40 absolute right-1.5 pointer-events-none group-hover/title:text-primary transition-colors" title="Dapat diedit langsung">edit</span>
+                                                <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-slate-200/60 hover:border-slate-400 focus:border-slate-600 focus:bg-slate-50/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-slate-800 text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-slate-400" value="<?= e($mTitle) ?>" placeholder="Klik untuk isi judul <?= strtolower($badgeTitle) ?>..." title="Klik untuk mengubah judul modul">
+                                                <span class="material-symbols-outlined text-[15px] text-slate-400 absolute right-1.5 pointer-events-none group-hover/title:text-slate-700 transition-colors" title="Dapat diedit langsung">edit</span>
                                             </div>
                                         </div>
                                         <div class="mb-saved-state hidden" data-pages="<?= e($mDesc) ?>"></div>
                                         <div class="flex items-center gap-1.5 shrink-0">
-                                            <button type="button" onclick="<?= $kelolaOnClick ?>" class="flex items-center gap-1.5 px-3 py-1.5 <?= $kelolaClass ?> rounded-lg font-label-sm font-bold transition-all shadow-xs" title="Kelola <?= $badgeTitle ?>">
-                                                <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                            <button type="button" onclick="<?= $kelolaOnClick ?>" class="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 active:scale-95 rounded-lg font-label-sm font-semibold transition-all shadow-2xs" title="Kelola <?= $badgeTitle ?>">
+                                                <span class="material-symbols-outlined text-[16px] text-slate-500">tune</span>
+                                                <span>Kelola</span>
                                             </button>
-                                            <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container/20 hover:text-error transition-colors p-1.5 rounded-lg text-[20px]" title="Hapus Modul">delete</button>
+                                            <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg active:scale-95" title="Hapus Modul">
+                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            </button>
                                         </div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
                                 
                                 <!-- Empty State Hint -->
-                                <div class="materi-empty-hint <?= empty($sMats) ? 'flex' : 'hidden' ?> flex-col items-center justify-center py-6 text-center text-on-surface-variant">
-                                    <span class="material-symbols-outlined text-[48px] text-surface-variant mb-2">auto_awesome_mosaic</span>
-                                    <p class="font-bold font-title-md text-on-surface">Belum ada modul</p>
-                                    <p class="font-body-sm max-w-sm mt-1">Tambahkan pre-test, materi, atau post-test di bawah ini untuk menyusun sesi pembelajaran.</p>
+                                <div class="materi-empty-hint <?= empty($sMats) ? 'flex' : 'hidden' ?> flex-col items-center justify-center py-7 px-4 text-center bg-slate-50/70 border border-dashed border-slate-200 rounded-xl my-2">
+                                    <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-600 border border-slate-200/80 flex items-center justify-center mb-2 shadow-2xs">
+                                        <span class="material-symbols-outlined text-[22px]">auto_awesome_mosaic</span>
+                                    </div>
+                                    <p class="font-bold font-title-sm text-slate-800">Sesi Masih Kosong</p>
+                                    <p class="font-body-xs text-slate-500 max-w-sm mt-0.5">Pilih modul pertama untuk sesi ini dari opsi di bawah (Pre-Test, Materi, atau Post-Test):</p>
                                 </div>
 
                                 <!-- Action Toolbar -->
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-dashed border-outline-variant">
-                                    <button type="button" onclick="appendModuleBlock(this, 'Pre-Test', 'quiz', 'secondary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-secondary/5 hover:border-secondary transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary group-hover:scale-110 transition-transform">quiz</span>
-                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-secondary">Pre-Test</span>
-                                    </button>
-                                    <button type="button" onclick="appendModuleBlock(this, 'Materi', 'description', 'primary')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-primary/5 hover:border-primary transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:scale-110 transition-transform">description</span>
-                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-primary">Materi</span>
-                                    </button>
-                                    <button type="button" onclick="appendModuleBlock(this, 'Post-Test', 'assignment_turned_in', 'warning')" class="flex flex-col items-center justify-center gap-1.5 p-3 border border-outline-variant rounded-lg hover:bg-warning/10 hover:border-warning transition-all group">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-warning group-hover:scale-110 transition-transform">assignment_turned_in</span>
-                                        <span class="font-label-sm font-bold text-on-surface group-hover:text-warning">Post-Test</span>
-                                    </button>
+                                <div class="mt-3 pt-4 border-t border-dashed border-slate-200">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <p class="font-label-sm font-semibold text-slate-600 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[16px] text-slate-400">add_circle_outline</span>
+                                            <span>Tambah Komponen Sesi</span>
+                                        </p>
+                                        <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Bebas urutan & dapat digeser</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <button type="button" onclick="appendModuleBlock(this, 'Pre-Test', 'quiz')" class="flex items-center gap-3 p-3 bg-white border border-slate-200/90 rounded-xl hover:border-slate-400 hover:bg-slate-50/80 transition-all text-left group shadow-2xs active:scale-98">
+                                            <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:bg-slate-200/70 group-hover:text-slate-900 transition-colors">
+                                                <span class="material-symbols-outlined text-[20px]">quiz</span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="font-title-sm font-bold text-slate-800 text-[13px] group-hover:text-slate-900 leading-snug">Pre-Test</p>
+                                                <p class="font-body-xs text-slate-500 text-[11px] truncate">Tes awal pemahaman</p>
+                                            </div>
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-700 transition-colors shrink-0">add</span>
+                                        </button>
+
+                                        <button type="button" onclick="appendModuleBlock(this, 'Materi', 'menu_book')" class="flex items-center gap-3 p-3 bg-white border border-slate-200/90 rounded-xl hover:border-slate-400 hover:bg-slate-50/80 transition-all text-left group shadow-2xs active:scale-98">
+                                            <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:bg-slate-200/70 group-hover:text-slate-900 transition-colors">
+                                                <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="font-title-sm font-bold text-slate-800 text-[13px] group-hover:text-slate-900 leading-snug">Materi</p>
+                                                <p class="font-body-xs text-slate-500 text-[11px] truncate">Dokumen, video, teks</p>
+                                            </div>
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-700 transition-colors shrink-0">add</span>
+                                        </button>
+
+                                        <button type="button" onclick="appendModuleBlock(this, 'Post-Test', 'assignment_turned_in')" class="flex items-center gap-3 p-3 bg-white border border-slate-200/90 rounded-xl hover:border-slate-400 hover:bg-slate-50/80 transition-all text-left group shadow-2xs active:scale-98">
+                                            <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:bg-slate-200/70 group-hover:text-slate-900 transition-colors">
+                                                <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="font-title-sm font-bold text-slate-800 text-[13px] group-hover:text-slate-900 leading-snug">Post-Test</p>
+                                                <p class="font-body-xs text-slate-500 text-[11px] truncate">Evaluasi akhir sesi</p>
+                                            </div>
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-700 transition-colors shrink-0">add</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -437,29 +481,29 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                     }
                                     ?>
                                     <!-- Quiz Course -->
-                                    <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined">assignment</span>
+                                    <div class="quiz-module-block border border-slate-200/90 rounded-xl p-3 flex gap-3 items-center bg-white hover:border-slate-400 transition-colors cursor-default shadow-2xs group">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <span class="material-symbols-outlined text-[20px]">assignment</span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm text-primary mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold"><?= e($quizTitle) ?></p>
-                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface"><?= $quizCount ?></span> Pertanyaan</p>
+                                            <p class="font-label-sm text-slate-600 mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold"><?= e($quizTitle) ?></p>
+                                            <p class="font-body-sm text-slate-500"><span class="qz-question-count font-bold text-slate-800"><?= $quizCount ?></span> Pertanyaan</p>
                                         </div>
-                                        <button type="button" onclick="openQuizBuilder(this, 'quiz')" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-sm font-bold hover:bg-primary-600 transition-colors shadow-sm lg:opacity-0 group-hover:opacity-100 focus:opacity-100">
-                                            <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                        <button type="button" onclick="openQuizBuilder(this, 'quiz')" class="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 active:scale-95 rounded-lg font-label-sm font-semibold transition-all shadow-2xs">
+                                            <span class="material-symbols-outlined text-[16px] text-slate-500">tune</span> Kelola
                                         </button>
                                     </div>
                                     <!-- Final Assessment -->
-                                    <div class="quiz-module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group">
-                                        <div class="w-10 h-10 rounded-lg bg-error-container text-error flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined">verified</span>
+                                    <div class="quiz-module-block border border-slate-200/90 rounded-xl p-3 flex gap-3 items-center bg-white hover:border-slate-400 transition-colors cursor-default shadow-2xs group">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <span class="material-symbols-outlined text-[20px]">verified</span>
                                         </div>
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p class="font-label-sm text-error mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Final Assessment</p>
-                                            <p class="font-body-sm text-on-surface-variant"><span class="qz-question-count font-bold text-on-surface">0</span> Pertanyaan</p>
+                                            <p class="font-label-sm text-slate-600 mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">Final Assessment</p>
+                                            <p class="font-body-sm text-slate-500"><span class="qz-question-count font-bold text-slate-800">0</span> Pertanyaan</p>
                                         </div>
-                                        <button type="button" onclick="openQuizBuilder(this, 'final')" class="flex items-center gap-1.5 px-3 py-1.5 bg-error text-on-error rounded-lg font-label-sm font-bold hover:bg-error/80 transition-colors shadow-sm lg:opacity-0 group-hover:opacity-100 focus:opacity-100">
-                                            <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                                        <button type="button" onclick="openQuizBuilder(this, 'final')" class="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 active:scale-95 rounded-lg font-label-sm font-semibold transition-all shadow-2xs">
+                                            <span class="material-symbols-outlined text-[16px] text-slate-500">tune</span> Kelola
                                         </button>
                                     </div>
                                 </div>
@@ -477,26 +521,91 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     </div>
                 </section>
 
-                <!-- ====== STEP 3: TARGET AUDIENCE (RECOMMENDATION) ====== -->
+                <!-- ====== STEP 3: TARGET AUDIENCE (RECOMMENDATION / MANDATE) ====== -->
+                <?php
+                $isMandateActive = !empty($isCorporateMandate) && $isCorporateMandate;
+                if ($isMandateActive && !empty($mandateCandidates)) {
+                    $candidateList = $mandateCandidates;
+                } elseif (!empty($candidates)) {
+                    $candidateList = $candidates;
+                } else {
+                    $candidateList = [
+                        ['employee_id' => 1, 'name' => 'Budi Santoso', 'npk' => '12345', 'jabatan' => 'Operator', 'golongan' => 'I-1', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Assembling', 'active_courses_count' => 1],
+                        ['employee_id' => 6, 'name' => 'Citra Lestari', 'npk' => '11223', 'jabatan' => 'Supervisor', 'golongan' => 'III-1', 'departemen' => 'Quality', 'divisi' => 'QA', 'seksi' => 'Pemeriksaan', 'active_courses_count' => 0],
+                        ['employee_id' => 8, 'name' => 'Eko Prasetyo', 'npk' => '34567', 'jabatan' => 'Operator', 'golongan' => 'I-2', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Machining', 'active_courses_count' => 3],
+                    ];
+                }
+                ?>
                 <section id="wizard-step-panel-3" class="wizard-step-panel hidden bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-6 sm:p-8 shadow-sm">
                     <!-- Section Header -->
                     <div class="flex items-start gap-4 mb-6 pb-6 border-b border-outline-variant/60">
-                        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shrink-0 shadow-sm ring-4 ring-primary/5">
-                            <span class="material-symbols-outlined text-[26px]">groups</span>
+                        <div class="w-12 h-12 rounded-2xl <?= $isMandateActive ? 'bg-red-600' : 'bg-primary-container' ?> text-white flex items-center justify-center shrink-0 shadow-sm ring-4 <?= $isMandateActive ? 'ring-red-100' : 'ring-primary/5' ?>">
+                            <span class="material-symbols-outlined text-[26px]"><?= $isMandateActive ? 'verified_user' : 'groups' ?></span>
                         </div>
                         <div>
-                            <h3 class="font-headline-sm font-bold text-on-surface">Usulkan Peserta Course</h3>
-                            <p class="font-body-sm text-on-surface-variant mt-0.5">Filter dan rekomendasikan kandidat karyawan kepada Admin sesuai dengan scope departemen & jabatan Anda.</p>
+                            <h3 class="font-headline-sm font-bold text-on-surface">
+                                <?= $isMandateActive ? 'Daftar Peserta Mandat Penugasan Admin' : 'Usulkan Peserta Course' ?>
+                            </h3>
+                            <p class="font-body-sm text-on-surface-variant mt-0.5">
+                                <?= $isMandateActive 
+                                    ? 'Kandidat karyawan di bawah telah difilter otomatis oleh sistem sesuai mandat penugasan Admin LMS. Anda dapat mengecualikan peserta tertentu (uncheck) jika dirasa memiliki beban kursus tinggi.' 
+                                    : 'Filter dan rekomendasikan kandidat karyawan kepada Admin sesuai dengan scope departemen & jabatan Anda.' ?>
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Approval Workflow Guidance Notice -->
-                    <!-- <div class="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3 mb-6">
-                        <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
-                        <div class="font-body-sm text-on-surface-variant leading-relaxed">
-                            <span class="font-bold text-on-surface">Alur Persetujuan (Approval Workflow):</span> Rekomendasi peserta dari Pengajar (Teacher) akan diteruskan ke Admin untuk verifikasi akhir dan pendaftaran otomatis ke kelas (Enrollment).
+                    <?php if ($isMandateActive && !empty($mandateTarget)): ?>
+                        <!-- Enterprise Corporate Mandate Banner -->
+                        <div class="bg-red-50/70 border border-red-200 rounded-2xl p-5 mb-6 space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-200/60 pb-3">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold">
+                                        <span class="material-symbols-outlined text-[18px]">verified</span>
+                                    </span>
+                                    <div>
+                                        <h4 class="font-bold text-gray-900 text-sm">Mandat Korporat Resmi dari Admin</h4>
+                                        <p class="text-xs text-gray-500">Ditugaskan oleh <span class="font-semibold text-gray-800"><?= e($mandateTarget['admin_name'] ?? 'Admin LMS') ?></span></p>
+                                    </div>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 self-start sm:self-auto">
+                                    <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                                    Target Mandat Terkunci
+                                </span>
+                            </div>
+
+                            <!-- Target Criterias Display -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div class="p-2.5 bg-white rounded-xl border border-red-100 shadow-2xs">
+                                    <span class="text-gray-500 text-[11px] block">Departemen Target</span>
+                                    <span class="font-bold text-gray-900 mt-0.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[15px] text-red-600">domain</span>
+                                        <?= e(!empty($mandateTarget['department_name']) ? $mandateTarget['department_name'] : 'Seluruh Departemen') ?>
+                                    </span>
+                                </div>
+                                <div class="p-2.5 bg-white rounded-xl border border-red-100 shadow-2xs">
+                                    <span class="text-gray-500 text-[11px] block">Jabatan Target</span>
+                                    <span class="font-bold text-gray-900 mt-0.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[15px] text-red-600">badge</span>
+                                        <?= e(!empty($mandateTarget['position_name']) ? $mandateTarget['position_name'] : 'Seluruh Jabatan') ?>
+                                    </span>
+                                </div>
+                                <div class="p-2.5 bg-white rounded-xl border border-red-100 shadow-2xs">
+                                    <span class="text-gray-500 text-[11px] block">Golongan Target</span>
+                                    <span class="font-bold text-gray-900 mt-0.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[15px] text-red-600">military_tech</span>
+                                        <?= e(!empty($mandateTarget['golongan_name']) ? $mandateTarget['golongan_name'] : 'Seluruh Golongan') ?>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-white/90 rounded-xl border border-red-100 text-[11.5px] text-gray-700 flex items-start gap-2">
+                                <span class="material-symbols-outlined text-red-600 text-[16px] shrink-0 mt-0.5">info</span>
+                                <span>
+                                    <strong>Ketentuan Mandat:</strong> Kriteria di atas dikunci sesuai ketetapan Admin LMS. Seluruh kandidat di bawah terpilih otomatis (checked). Jika seorang karyawan dinilai sedang memiliki beban pelatihan aktif tinggi atau rotasi shift, hilangkan tanda centang (uncheck) untuk mengecualikannya.
+                                </span>
+                            </div>
                         </div>
-                    </div> -->
+                    <?php endif; ?>
 
                     <?php if (($course['status'] ?? '') === 'Submitted' || ($course['status'] ?? '') === 'Approved'): ?>
                         <!-- Readonly mode -->
@@ -505,60 +614,52 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 <span class="material-symbols-outlined text-[36px]">lock</span>
                             </div>
                             <p class="font-bold text-on-surface font-title-md">Mode Hanya-Baca</p>
-                            <p class="font-body-sm text-on-surface-variant mt-1">Anda telah submit 12 karyawan. Menunggu proses assign & approval oleh Admin.</p>
+                            <p class="font-body-sm text-on-surface-variant mt-1">Anda telah submit <?= count($candidateList) ?> karyawan. Menunggu proses assign & approval oleh Admin.</p>
                         </div>
                     <?php else: ?>
                         <!-- Interactive Filter Flow -->
                         <div class="space-y-6">
-                            <!-- Filter Builder -->
-                            <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 flex flex-col gap-4">
-                                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    <?php foreach ($filters as $type => $options): ?>
-                                        <div class="flex flex-col gap-1.5">
-                                            <label class="font-label-sm font-bold text-on-surface capitalize flex items-center gap-1.5">
-                                                <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
-                                                <?= ucfirst($type) ?>
-                                            </label>
-                                            <select id="filter-<?= strtolower(
-                                                $type,
-                                            ) ?>" class="w-full bg-surface border border-outline-variant rounded-xl p-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-sm font-body-sm text-on-surface shadow-sm transition-all">
-                                                <option value="">-- Semua <?= ucfirst($type) ?> --</option>
-                                                <?php foreach ($options as $opt): ?>
-                                                    <option value="<?= $opt ?>"><?= $opt ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </div>
-                                    <?php endforeach; ?>
+                            <?php if (!$isMandateActive): ?>
+                                <!-- Filter Builder (Hanya untuk Course Reguler Mandiri) -->
+                                <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/60 flex flex-col gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                        <?php foreach ($filters as $type => $options): ?>
+                                            <div class="flex flex-col gap-1.5">
+                                                <label class="font-label-sm font-bold text-on-surface capitalize flex items-center gap-1.5">
+                                                    <span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
+                                                    <?= ucfirst($type) ?>
+                                                </label>
+                                                <select id="filter-<?= strtolower($type) ?>" class="w-full bg-surface border border-outline-variant rounded-xl p-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-sm font-body-sm text-on-surface shadow-sm transition-all">
+                                                    <option value="">-- Semua <?= ucfirst($type) ?> --</option>
+                                                    <?php foreach ($options as $opt): ?>
+                                                        <option value="<?= $opt ?>"><?= $opt ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="border-outline-variant/40 mt-1">
+                                        <button type="button" onclick="applyCandidateFilter()" class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md font-bold shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-[18px]">search</span> Tampilkan Kandidat
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="border-outline-variant/40 mt-1">
-                                    <button type="button" onclick="applyCandidateFilter()" class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md font-bold shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-[18px]">search</span> Tampilkan Kandidat
-                                    </button>
-                                </div>
-                            </div>
+                            <?php endif; ?>
 
                             <!-- Candidate Grid View -->
                             <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
-                                <div class="bg-primary-container/30 px-5 py-3 border-b border-outline-variant flex flex-wrap items-center justify-between gap-2">
+                                <div class="<?= $isMandateActive ? 'bg-red-50/70 border-red-200' : 'bg-primary-container/30 border-outline-variant' ?> px-5 py-3 border-b flex flex-wrap items-center justify-between gap-2">
                                     <label class="flex items-center gap-2.5 font-label-sm font-bold text-on-surface cursor-pointer select-none">
                                         <input type="checkbox" id="select-all-candidates" onchange="toggleSelectAllCandidates(this)" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked>
-                                        <span id="emp-count-display">Pilih Semua (Kandidat Relevan Ditemukan)</span>
+                                        <span id="emp-count-display">Pilih Semua Peserta (<?= count($candidateList) ?> Kandidat)</span>
                                     </label>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
-                                        <span class="material-symbols-outlined text-[14px]">check_circle</span> Target Aktif
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold <?= $isMandateActive ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-primary/10 text-primary' ?>">
+                                        <span class="material-symbols-outlined text-[14px]"><?= $isMandateActive ? 'verified' : 'check_circle' ?></span>
+                                        <?= $isMandateActive ? 'Mandat Terfilter' : 'Target Aktif' ?>
                                     </span>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-body-sm max-h-[460px] overflow-y-auto" id="candidate-list-container">
                                     <?php
-                                    $candidateList = !empty($candidates) ? $candidates : [
-                                        ['employee_id' => 1, 'name' => 'Budi Santoso', 'npk' => '12345', 'jabatan' => 'Operator', 'golongan' => 'I-1', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Assembling'],
-                                        ['employee_id' => 6, 'name' => 'Citra Lestari', 'npk' => '11223', 'jabatan' => 'Supervisor', 'golongan' => 'III-1', 'departemen' => 'Quality', 'divisi' => 'QA', 'seksi' => 'Pemeriksaan'],
-                                        ['employee_id' => 2, 'name' => 'Ahmad Rizal', 'npk' => '67890', 'jabatan' => 'Leader', 'golongan' => 'II-2', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Assembling'],
-                                        ['employee_id' => 7, 'name' => 'Dian Sastro', 'npk' => '23456', 'jabatan' => 'Manager', 'golongan' => 'IV-1', 'departemen' => 'Engineering', 'divisi' => 'PE', 'seksi' => 'Desain'],
-                                        ['employee_id' => 8, 'name' => 'Eko Prasetyo', 'npk' => '34567', 'jabatan' => 'Operator', 'golongan' => 'I-2', 'departemen' => 'Manufacturing', 'divisi' => 'Produksi', 'seksi' => 'Machining'],
-                                        ['employee_id' => 9, 'name' => 'Fani Amelia', 'npk' => '45678', 'jabatan' => 'Staff', 'golongan' => 'II-1', 'departemen' => 'HR', 'divisi' => 'Personalia', 'seksi' => 'Rekrutmen'],
-                                        ['employee_id' => 10, 'name' => 'Gilang Ramadhan', 'npk' => '56789', 'jabatan' => 'Staff', 'golongan' => 'II-2', 'departemen' => 'Finance', 'divisi' => 'Akuntansi', 'seksi' => 'Pajak'],
-                                    ];
                                     foreach ($candidateList as $emp):
                                         $empName = $emp['fullname'] ?? ($emp['name'] ?? 'Karyawan');
                                         $empId = $emp['employee_id'] ?? 0;
@@ -568,8 +669,10 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                         $deptVal = strtolower($emp['department'] ?? ($emp['departemen'] ?? ''));
                                         $divVal = strtolower($emp['division'] ?? ($emp['divisi'] ?? ''));
                                         $seksiVal = strtolower($emp['section'] ?? ($emp['seksi'] ?? ''));
+                                        $loadCount = (int) ($emp['active_courses_count'] ?? 0);
+                                        $isHighLoad = $loadCount >= 2;
                                     ?>
-                                    <label class="emp-card flex items-center gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group"
+                                    <label class="emp-card flex items-start gap-3 p-4 rounded-xl border border-outline-variant/60 bg-surface hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer transition-all shadow-xs group"
                                            data-emp-id="<?= e($empId) ?>"
                                            data-npk="<?= e($emp['npk']) ?>"
                                            data-name="<?= e($empName) ?>"
@@ -578,26 +681,43 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                            data-departemen="<?= e($deptVal) ?>" 
                                            data-divisi="<?= e($divVal) ?>" 
                                            data-seksi="<?= e($seksiVal) ?>">
-                                        <input type="checkbox" onchange="updateCandidateCount()" class="candidate-check emp-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0" value="<?= e($empId) ?>" data-npk="<?= e($emp['npk']) ?>" data-name="<?= e($empName) ?>" checked>
-                                        <div class="w-10 h-10 rounded-xl bg-primary-container/60 text-primary font-bold flex items-center justify-center shrink-0">
+                                        <input type="checkbox" onchange="updateCandidateCount()" class="candidate-check emp-checkbox w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary shrink-0 mt-1" value="<?= e($empId) ?>" data-npk="<?= e($emp['npk']) ?>" data-name="<?= e($empName) ?>" checked>
+                                        <div class="w-10 h-10 rounded-xl <?= $isHighLoad ? 'bg-amber-100 text-amber-700' : 'bg-primary-container/60 text-primary' ?> font-bold flex items-center justify-center shrink-0">
                                             <?= e($initials) ?>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <p class="font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e($empName) ?></p>
+                                                <p class="emp-name-text font-title-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate max-w-[130px]"><?= e($empName) ?></p>
                                                 <span class="font-label-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium shrink-0">NPK: <?= e($emp['npk']) ?></span>
                                             </div>
                                             <p class="font-label-sm text-on-surface-variant text-[12px] mt-0.5 flex items-center gap-1.5 truncate">
                                                 <span class="material-symbols-outlined text-[14px]">work</span> <?= e($emp['jabatan']) ?> • <?= e($emp['department'] ?? ($emp['departemen'] ?? '')) ?>
                                             </p>
+                                            
+                                            <!-- Workload Indicator Badge -->
+                                            <div class="mt-2 flex items-center gap-1.5">
+                                                <?php if ($isHighLoad): ?>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                                        <span class="material-symbols-outlined text-[12px] text-amber-600">warning</span>
+                                                        Beban: <?= $loadCount ?> Course
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                                        <span class="material-symbols-outlined text-[12px] text-emerald-600">check_circle</span>
+                                                        <?= $loadCount ?> Course Aktif
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </label>
                                     <?php endforeach; ?>
                                 </div>
-                                <div class="bg-surface-container-low px-5 py-3 border-t border-outline-variant/60 flex items-center justify-between font-label-sm">
-                                    <span class="text-on-surface-variant text-[12px]">Kandidat akan diusulkan pada saat pengiriman course ke Admin</span>
+                                <div class="bg-surface-container-low px-5 py-3 border-t border-outline-variant/60 flex items-center justify-between font-label-sm flex-wrap gap-2">
+                                    <span class="text-on-surface-variant text-[12px]">
+                                        <?= $isMandateActive ? 'Peserta terpilih akan otomatis terdaftar setelah course disimpan.' : 'Kandidat akan diusulkan pada saat pengiriman course ke Admin.' ?>
+                                    </span>
                                     <span id="emp-count-bottom" class="font-bold text-primary flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num"><?= count($candidateList) ?></span> Karyawan Terpilih
+                                        <span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num"><?= count($candidateList) ?></span> dari <?= count($candidateList) ?> Peserta Terpilih
                                     </span>
                                 </div>
                             </div>
@@ -608,7 +728,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                                 const cards = document.querySelectorAll('.emp-card');
                                 cards.forEach(card => {
                                     if (card.style.display !== 'none') {
-                                        const cb = card.querySelector('.candidate-check');
+                                        const cb = card.querySelector('.candidate-check, .emp-checkbox');
                                         if (cb) cb.checked = isChecked;
                                     }
                                 });
@@ -616,17 +736,43 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                             }
 
                             function updateCandidateCount() {
-                                const allChecks = document.querySelectorAll('.emp-card .candidate-check:checked, .emp-card .emp-checkbox:checked');
-                                const count = allChecks.length;
+                                const allCards = document.querySelectorAll('.emp-card');
+                                let total = 0;
+                                let checked = 0;
+                                allCards.forEach(card => {
+                                    if (card.style.display !== 'none') {
+                                        total++;
+                                        const cb = card.querySelector('.candidate-check, .emp-checkbox');
+                                        if (cb && cb.checked) {
+                                            checked++;
+                                            card.classList.remove('opacity-50', 'bg-gray-100/90', 'border-dashed');
+                                            card.querySelector('.emp-name-text')?.classList.remove('line-through', 'text-gray-400');
+                                        } else {
+                                            card.classList.add('opacity-50', 'bg-gray-100/90', 'border-dashed');
+                                            card.querySelector('.emp-name-text')?.classList.add('line-through', 'text-gray-400');
+                                        }
+                                    }
+                                });
+                                const excluded = total - checked;
                                 const numEl = document.getElementById('emp-count-num');
-                                if (numEl) numEl.textContent = count;
+                                if (numEl) numEl.textContent = checked;
+                                
                                 const bottomEl = document.getElementById('emp-count-bottom');
                                 if (bottomEl) {
-                                    bottomEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num">${count}</span> Karyawan Terpilih`;
+                                    let excludedBadge = excluded > 0 
+                                        ? `<span class="ml-1.5 px-2 py-0.5 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-full">(${excluded} Dikecualikan)</span>` 
+                                        : '';
+                                    bottomEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">how_to_reg</span> <span id="emp-count-num">${checked}</span> dari ${total} Peserta Terpilih ${excludedBadge}`;
                                 }
+                                
+                                const displayEl = document.getElementById('emp-count-display');
+                                if (displayEl) {
+                                    displayEl.textContent = `Pilih Semua Peserta (${total} Kandidat)`;
+                                }
+
                                 const reviewCountEl = document.getElementById('review-candidates-count');
                                 if (reviewCountEl) {
-                                    reviewCountEl.textContent = `${count} Karyawan Terpilih`;
+                                    reviewCountEl.textContent = `${checked} dari ${total} Karyawan Terpilih`;
                                 }
                             }
 
@@ -1291,7 +1437,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
             sess.querySelectorAll('.materi-builder-list .module-block').forEach((mod, mIdx) => {
                 const modTitleInput = mod.querySelector('input[type="text"]');
                 const modTitle = modTitleInput ? (modTitleInput.value.trim() || ('Modul ' + (mIdx + 1))) : ('Modul ' + (mIdx + 1));
-                const typeLabel = mod.querySelector('.font-label-sm')?.textContent.trim().toLowerCase() || 'materi';
+                const typeLabel = mod.querySelector('.module-type-badge')?.textContent.trim().toLowerCase() || mod.querySelector('.font-label-sm')?.textContent.trim().toLowerCase() || 'materi';
                 
                 if (typeLabel.includes('pre-test') || typeLabel.includes('pre_test')) {
                     const abState = mod.querySelector('.ab-saved-state');
@@ -1321,7 +1467,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
                     });
                 } else {
                     let matType = 'document';
-                    const iconName = mod.querySelector('.material-symbols-outlined')?.textContent.trim() || '';
+                    const iconName = mod.querySelector('.module-type-icon')?.textContent.trim() || '';
                     if (iconName === 'play_circle') matType = 'video';
                     else if (iconName === 'picture_as_pdf') matType = 'pdf';
 
@@ -1538,6 +1684,9 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         
         // Re-evaluate empty state for the new clone
         checkEmptyHintList(list);
+        if (list) {
+            initModuleDragAndDrop(list);
+        }
 
         // Clear quiz tab content in cloned session
         const quizList = newSession.querySelector('.quiz-items-list');
@@ -1620,64 +1769,173 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
         if(!workspace) return;
         
         const list = workspace.querySelector('.materi-builder-list');
-        
-        let badgeBgClass = '', badgeTextClass = '', iconName = icon;
-        let kelolaBtnClass = '';
+        if(!list) return;
+
+        const lowerTitle = (title || '').toLowerCase();
+        const isPreTest = lowerTitle.includes('pre-test') || lowerTitle.includes('pre_test');
+        const isPostTest = lowerTitle.includes('post-test') || lowerTitle.includes('post_test');
+
+        let badgeTitle = title;
+        let iconName = icon || 'menu_book';
+        let moduleTypeAttr = 'document';
         let kelolaOnClick = 'openMaterialBuilder(this)';
-        let defaultPlaceholder = 'Isi judul modul baru...';
-        
-        if (colorContext === 'secondary' || title.toLowerCase().includes('pre-test')) {
-            badgeBgClass = 'bg-secondary-container/40 text-secondary';
-            badgeTextClass = 'text-secondary';
+        let defaultPlaceholder = 'Contoh: Modul Pembelajaran';
+
+        if (isPreTest) {
+            badgeTitle = 'Pre-Test';
             iconName = 'quiz';
-            kelolaBtnClass = 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-white';
+            moduleTypeAttr = 'pre_test';
             kelolaOnClick = 'openAssessmentBuilder(this)';
             defaultPlaceholder = 'Contoh: Pre-Test Pemahaman Awal';
-        } else if (colorContext === 'warning' || title.toLowerCase().includes('post-test')) {
-            badgeBgClass = 'bg-warning-container/40 text-warning-800 dark:text-warning';
-            badgeTextClass = 'text-warning-800 dark:text-warning';
+        } else if (isPostTest) {
+            badgeTitle = 'Post-Test';
             iconName = 'assignment_turned_in';
-            kelolaBtnClass = 'bg-warning/15 text-warning-800 dark:text-warning hover:bg-warning hover:text-white';
+            moduleTypeAttr = 'post_test';
             kelolaOnClick = 'openAssessmentBuilder(this)';
             defaultPlaceholder = 'Contoh: Post-Test Evaluasi Akhir Sesi';
         } else {
-            badgeBgClass = 'bg-primary-container text-white';
-            badgeTextClass = 'text-primary';
-            iconName = icon || 'description';
-            kelolaBtnClass = 'bg-primary/10 text-primary hover:bg-primary hover:text-white';
+            badgeTitle = 'Materi';
+            iconName = icon || 'menu_book';
+            moduleTypeAttr = 'document';
             kelolaOnClick = 'openMaterialBuilder(this)';
             defaultPlaceholder = 'Contoh: SOP Standar Operasional Kerja';
         }
 
         const template = `
-            <div class="module-block border border-outline-variant rounded-xl p-3 flex gap-3 items-center bg-surface hover:border-primary transition-colors cursor-default shadow-sm group animate-fade-in-down">
-                <div class="w-10 h-10 rounded-lg ${badgeBgClass} flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined">${iconName}</span>
-                </div>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <p class="font-label-sm ${badgeTextClass} mb-0.5 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">${title}</p>
-                    <div class="relative flex items-center group/title max-w-lg">
-                        <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-outline-variant/40 hover:border-primary focus:border-primary focus:bg-surface-container-low/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-on-surface text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-on-surface-variant/50" value="" placeholder="${defaultPlaceholder}" title="Klik untuk mengubah judul modul">
-                        <span class="material-symbols-outlined text-[15px] text-on-surface-variant/40 absolute right-1.5 pointer-events-none group-hover/title:text-primary transition-colors" title="Dapat diedit langsung">edit</span>
+            <div class="module-block border border-slate-200/90 rounded-xl p-3 flex gap-3 items-center bg-white hover:border-slate-400/80 transition-all cursor-default shadow-2xs group animate-fade-in-down" data-module-type="${moduleTypeAttr}">
+                <!-- Reorder Drag Handle & Arrows -->
+                <div class="flex items-center gap-0.5 shrink-0 text-slate-400">
+                    <button type="button" class="module-drag-handle cursor-grab active:cursor-grabbing p-1 rounded hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Geser untuk mengatur urutan modul">
+                        <span class="material-symbols-outlined text-[20px]">drag_indicator</span>
+                    </button>
+                    <div class="flex flex-col -space-y-1">
+                        <button type="button" onclick="moveModuleBlock(this, -1)" class="w-5 h-4 flex items-center justify-center hover:text-slate-700 hover:bg-slate-100 rounded transition-colors active:scale-90" title="Pindah ke atas">
+                            <span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+                        </button>
+                        <button type="button" onclick="moveModuleBlock(this, 1)" class="w-5 h-4 flex items-center justify-center hover:text-slate-700 hover:bg-slate-100 rounded transition-colors active:scale-90" title="Pindah ke bawah">
+                            <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+                        </button>
                     </div>
                 </div>
+
+                <!-- Uniform Icon Container (1 Warna Seragam) -->
+                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                    <span class="material-symbols-outlined module-type-icon text-[20px]">${iconName}</span>
+                </div>
+
+                <!-- Title & Type Badge -->
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-label-sm module-type-badge inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-600 border border-slate-200/70">
+                            ${badgeTitle}
+                        </span>
+                    </div>
+                    <div class="relative flex items-center group/title max-w-lg">
+                        <input type="text" onkeydown="handleModuleTitleEnter(event, this)" onblur="handleModuleTitleEnter(null, this, true)" class="w-full bg-transparent border-b border-slate-200/60 hover:border-slate-400 focus:border-slate-600 focus:bg-slate-50/50 rounded-sm px-1.5 py-0.5 outline-none font-title-sm font-bold text-slate-800 text-[13px] sm:text-[14px] transition-all pr-7 cursor-text placeholder:font-normal placeholder:text-slate-400" value="" placeholder="${defaultPlaceholder}" title="Klik untuk mengubah judul modul">
+                        <span class="material-symbols-outlined text-[15px] text-slate-400 absolute right-1.5 pointer-events-none group-hover/title:text-slate-700 transition-colors" title="Dapat diedit langsung">edit</span>
+                    </div>
+                </div>
+
+                <div class="mb-saved-state hidden" data-pages=""></div>
+
+                <!-- Action Buttons: Kelola (idle vs hover) & Delete -->
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <button type="button" onclick="${kelolaOnClick}" class="flex items-center gap-1.5 px-3 py-1.5 ${kelolaBtnClass} rounded-lg font-label-sm font-bold transition-all shadow-xs" title="Kelola ${title}">
-                        <span class="material-symbols-outlined text-[16px]">edit</span> Kelola
+                    <button type="button" onclick="${kelolaOnClick}" class="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-400 active:scale-95 rounded-lg font-label-sm font-semibold transition-all shadow-2xs" title="Kelola ${badgeTitle}">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500">tune</span>
+                        <span>Kelola</span>
                     </button>
-                    <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="material-symbols-outlined text-on-surface-variant hover:bg-error-container/20 hover:text-error transition-colors p-1.5 rounded-lg text-[20px]" title="Hapus Modul">delete</button>
+                    <button type="button" onclick="const list = this.closest('.materi-builder-list'); this.closest('.module-block').remove(); checkEmptyHintList(list);" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg active:scale-95" title="Hapus Modul">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
                 </div>
             </div>
         `;
         
         list.insertAdjacentHTML('beforeend', template);
         checkEmptyHintList(list);
+        initModuleDragAndDrop(list);
         
         // Auto focus new input
         const inputs = list.querySelectorAll('input[type="text"]');
         if(inputs.length > 0) {
             inputs[inputs.length - 1].focus();
         }
+    }
+
+    function moveModuleBlock(btn, direction) {
+        const block = btn.closest('.module-block');
+        if (!block) return;
+        const list = block.closest('.materi-builder-list');
+        if (!list) return;
+
+        if (direction === -1 && block.previousElementSibling && block.previousElementSibling.classList.contains('module-block')) {
+            list.insertBefore(block, block.previousElementSibling);
+            highlightMovedBlock(block);
+        } else if (direction === 1 && block.nextElementSibling && block.nextElementSibling.classList.contains('module-block')) {
+            list.insertBefore(block.nextElementSibling, block);
+            highlightMovedBlock(block);
+        }
+    }
+
+    function highlightMovedBlock(block) {
+        block.classList.add('ring-2', 'ring-slate-300', 'bg-slate-50/90');
+        setTimeout(() => {
+            block.classList.remove('ring-2', 'ring-slate-300', 'bg-slate-50/90');
+        }, 350);
+    }
+
+    function initModuleDragAndDrop(target) {
+        const lists = target ? [target] : document.querySelectorAll('.materi-builder-list');
+        lists.forEach(list => {
+            if (!list || list.dataset.dndActive) return;
+            list.dataset.dndActive = 'true';
+
+            let draggedItem = null;
+
+            list.addEventListener('mousedown', (e) => {
+                const block = e.target.closest('.module-block');
+                if (!block) return;
+                if (e.target.closest('.module-drag-handle')) {
+                    block.setAttribute('draggable', 'true');
+                } else {
+                    block.setAttribute('draggable', 'false');
+                }
+            });
+
+            list.addEventListener('dragstart', (e) => {
+                const block = e.target.closest('.module-block');
+                if (!block || block.getAttribute('draggable') !== 'true') {
+                    e.preventDefault();
+                    return;
+                }
+                draggedItem = block;
+                block.classList.add('opacity-40', 'scale-[0.99]', 'border-slate-400');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
+            });
+
+            list.addEventListener('dragend', (e) => {
+                const block = e.target.closest('.module-block');
+                if (block) {
+                    block.classList.remove('opacity-40', 'scale-[0.99]', 'border-slate-400');
+                    block.removeAttribute('draggable');
+                }
+                draggedItem = null;
+            });
+
+            list.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (!draggedItem) return;
+
+                const targetBlock = e.target.closest('.module-block');
+                if (targetBlock && targetBlock !== draggedItem && targetBlock.parentNode === list) {
+                    const rect = targetBlock.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    list.insertBefore(draggedItem, next ? targetBlock.nextSibling : targetBlock);
+                }
+            });
+        });
     }
 
     function checkEmptyHintList(list) {
@@ -3069,6 +3327,7 @@ $step = isset($_GET['step']) ? (int) $_GET['step'] : 1;
 
         // Initial state execution
         updateTagChipsState();
+        initModuleDragAndDrop();
     });
     </script>
 

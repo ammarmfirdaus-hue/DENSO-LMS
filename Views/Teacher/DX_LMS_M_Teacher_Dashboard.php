@@ -132,21 +132,41 @@
                             <?php foreach ($pending_actions as $act): ?>
                                 <div class="relative pl-6">
                                     <!-- Timeline Dot -->
-                                    <div class="absolute -left-[5px] top-1.5 w-[8px] h-[8px] rounded-full border-2 border-white <?= ($act['type'] ?? '') === 'rejected' ? 'bg-rose-500 ring-4 ring-rose-100' : 'bg-secondary ring-4 ring-secondary/20' ?> shadow-2xs z-10"></div>
+                                    <?php 
+                                    $isMandate = ($act['type'] ?? '') === 'corporate_mandate';
+                                    $isRejected = ($act['type'] ?? '') === 'rejected';
+                                    $dotClass = $isMandate ? 'bg-red-600 ring-4 ring-red-100' : ($isRejected ? 'bg-rose-500 ring-4 ring-rose-100' : 'bg-secondary ring-4 ring-secondary/20');
+                                    $iconBoxClass = $isMandate ? 'bg-red-50 text-red-700 border border-red-200/80' : ($isRejected ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-surface-container text-on-surface-variant border border-outline-variant/30');
+                                    ?>
+                                    <div class="absolute -left-[5px] top-1.5 w-[8px] h-[8px] rounded-full border-2 border-white <?= $dotClass ?> shadow-2xs z-10"></div>
                                     
                                     <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-lg shrink-0 <?= ($act['type'] ?? '') === 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-surface-container text-on-surface-variant border border-outline-variant/30' ?> flex items-center justify-center shadow-2xs mt-0.5">
+                                        <div class="w-8 h-8 rounded-lg shrink-0 <?= $iconBoxClass ?> flex items-center justify-center shadow-2xs mt-0.5">
                                             <span class="material-symbols-outlined text-[16px]"><?= e($act['icon'] ?? 'edit_note') ?></span>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-start justify-between gap-2">
-                                                <p class="font-label-md font-bold text-on-surface truncate leading-tight"><?= e($act['title']) ?></p>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <p class="font-label-md font-bold text-on-surface leading-tight"><?= e($act['title']) ?></p>
+                                                    <?php if ($isMandate): ?>
+                                                        <span class="text-[9px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 uppercase tracking-wider">Mandat Admin</span>
+                                                    <?php endif; ?>
+                                                </div>
                                                 <?php if (!empty($act['time_ago'])): ?>
                                                 <span class="text-[10px] font-semibold text-outline shrink-0 uppercase tracking-wider"><?= e($act['time_ago']) ?></span>
                                                 <?php endif; ?>
                                             </div>
 
-                                            <?php if (!empty($act['raw_note'])): ?>
+                                            <?php if ($isMandate): ?>
+                                            <!-- Mandat Korporat Box -->
+                                            <div class="mt-2 p-2.5 bg-red-50/60 border-l-2 border-red-600 rounded-r-lg">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-red-800 mb-0.5 flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[13px] text-red-600">verified</span>
+                                                    Instruksi Mandat (<?= e($act['admin_name'] ?? 'Admin LMS') ?>):
+                                                </p>
+                                                <p class="text-[12px] font-medium text-gray-800 leading-snug"><?= e($act['message']) ?></p>
+                                            </div>
+                                            <?php elseif (!empty($act['raw_note'])): ?>
                                             <!-- Catatan Admin Box with soft comfortable contrast -->
                                             <div class="mt-2 p-2.5 bg-surface-container-low/70 border-l-2 border-rose-400 rounded-r-lg">
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-rose-800/80 mb-0.5 flex items-center gap-1">
@@ -159,11 +179,11 @@
                                             <p class="text-[12px] text-on-surface-variant leading-snug mt-1"><?= e($act['message']) ?></p>
                                             <?php endif; ?>
 
-                                            <!-- Single Direct CTA Button (No confusing Lihat Detail) -->
+                                            <!-- Single Direct CTA Button -->
                                             <div class="mt-3">
-                                                <a href="<?= e($act['edit_link'] ?? $act['link'] ?? '#') ?>" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#930007] hover:bg-[#780005] text-white font-label-sm font-semibold rounded-lg transition-all shadow-xs text-[11.5px] group">
-                                                    <span class="material-symbols-outlined text-[14px] group-hover:rotate-12 transition-transform">edit</span>
-                                                    <span><?= ($act['type'] ?? '') === 'rejected' ? 'Perbaiki Course Sekarang' : 'Lanjutkan Edit Course' ?></span>
+                                                <a href="<?= e($act['edit_link'] ?? $act['link'] ?? '#') ?>" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 <?= $isMandate ? 'bg-red-600 hover:bg-red-700' : 'bg-[#930007] hover:bg-[#780005]' ?> text-white font-label-sm font-semibold rounded-lg transition-all shadow-xs text-[11.5px] group">
+                                                    <span class="material-symbols-outlined text-[14px] group-hover:rotate-12 transition-transform"><?= $isMandate ? 'rocket_launch' : 'edit' ?></span>
+                                                    <span><?= e($act['cta_text'] ?? ($isRejected ? 'Perbaiki Course Sekarang' : 'Lanjutkan Edit Course')) ?></span>
                                                     <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
                                                 </a>
                                             </div>
@@ -296,47 +316,18 @@
                     <?php else: ?>
                     <?php foreach ($dashboardCourses as $course): ?>
                     <?php
-                    $rawStat = $course['status'] ?? 'Draft';
-                    $displayStat = match (strtolower($rawStat)) {
-                        'running', 'active' => 'In Progress',
-                        'approved' => 'Approved',
-                        'submitted' => 'Pending Review',
-                        'rejected' => 'Rejected',
-                        'completed' => 'Completed',
-                        'archived' => 'Archived',
-                        default => 'Draft',
-                    };
+                    $displayStat = getCourseDisplayStatus($course['status'] ?? 'Private', $course['raw_updated_at'] ?? null);
+                    $badgeInfo = getCourseStatusBadgeInfo($displayStat);
+                    $actionInfo = getCourseActionInfo($displayStat, $course['id']);
 
-                    $badgeCls = match ($displayStat) {
-                        'In Progress' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                        'Approved' => 'text-teal-700 bg-teal-50 border-teal-200',
-                        'Pending Review' => 'text-amber-700 bg-amber-50 border-amber-200',
-                        'Rejected' => 'text-red-700 bg-red-50 border-red-200',
-                        'Completed' => 'text-blue-700 bg-blue-50 border-blue-200',
-                        default => 'text-gray-700 bg-gray-50 border-gray-300 shadow-sm',
-                    };
-
-                    $progressBarHex = match ($displayStat) {
-                        'In Progress' => '#10B981',
-                        'Approved' => '#0D9488',
-                        'Completed' => '#3B82F6',
-                        'Pending Review' => '#F59E0B',
-                        'Rejected' => '#EF4444',
-                        default => '#9CA3AF',
-                    };
-                    $progressTextColor = match ($displayStat) {
-                        'In Progress' => 'text-emerald-600',
-                        'Approved' => 'text-teal-600',
-                        'Completed' => 'text-blue-600',
-                        'Pending Review' => 'text-amber-600',
-                        'Rejected' => 'text-red-600',
-                        default => 'text-on-surface-variant',
-                    };
+                    $badgeCls = $badgeInfo['badgeCls'];
+                    $progressBarHex = $badgeInfo['progressBarHex'];
+                    $progressTextColor = $badgeInfo['progressTextColor'];
 
                     $progress = (int) ($course['progress'] ?? 0);
 
                     $contextLine = match ($displayStat) {
-                        'Draft' => 'Belum diajukan ke admin',
+                        'Private' => 'Belum diajukan ke admin',
                         'Pending Review' => 'Menunggu review admin',
                         'Rejected' => !empty($course['rejection_note']) ? 'Catatan: "' . e(mb_strimwidth($course['rejection_note'], 0, 36, '...')) . '"' : 'Perlu revisi segera',
                         'Completed' => 'Course telah selesai',
@@ -344,30 +335,9 @@
                         default => 'Terakhir diperbarui: ' . e($course['updated_at'] ?? 'Baru saja'),
                     };
 
-                    $ctaText = match ($displayStat) {
-                        'Draft' => 'Edit Course',
-                        'Pending Review', 'Approved' => 'Lihat Detail',
-                        'Rejected' => 'Perbaiki Course',
-                        'In Progress' => 'Kelola Penilaian',
-                        'Completed' => 'Lihat Detail',
-                        default => 'Detail',
-                    };
-
-                    $ctaHref = match ($displayStat) {
-                        'Draft', 'Rejected' => '?route=/teacher/course/create&course_id=' . e((string) $course['id']),
-                        'In Progress' => '?route=/teacher/grade&course_id=' . e((string) $course['id']),
-                        default => '?route=/teacher/course/detail&course_id=' . e((string) $course['id']),
-                    };
-
-                    $ctaCls = match ($displayStat) {
-                        'Draft' => 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400',
-                        'Pending Review' => 'text-amber-700 border-amber-300 hover:bg-amber-50 hover:border-amber-400',
-                        'Approved' => 'text-teal-700 border-teal-300 hover:bg-teal-50 hover:border-teal-400',
-                        'Rejected' => 'text-red-700 border-red-300 hover:bg-red-50 hover:border-red-400',
-                        'In Progress' => 'text-emerald-700 border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400',
-                        'Completed' => 'text-blue-700 border-blue-300 hover:bg-blue-50 hover:border-blue-400',
-                        default => 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400',
-                    };
+                    $ctaText = $actionInfo['text'];
+                    $ctaHref = $actionInfo['href'];
+                    $ctaCls = $actionInfo['cls'];
                     ?>
                     <div class="course-card flex flex-col h-full bg-white rounded-xl border border-outline-variant/60 overflow-hidden hover:border-outline-variant hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all duration-300">
                         

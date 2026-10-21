@@ -286,4 +286,118 @@ class DX_LMS_M_Employees extends DX_LMS_M_Model
             ];
         }
     }
+
+    /**
+     * Mendapatkan Daftar Pengajar Aktif (Role Teacher).
+     *
+     * @return array
+     */
+    public function getTeachers(): array
+    {
+        try {
+            $sql = "SELECT employee_id, npk, fullname, email, jabatan, golongan, department, teacher_type 
+                    FROM {$this->table} 
+                    WHERE role = 'teacher' AND status = 'Active' 
+                    ORDER BY fullname ASC";
+            $rows = dbQuery($sql);
+            if (!empty($rows)) {
+                return $rows;
+            }
+        } catch (\Throwable $e) {
+            error_log("DX_LMS_M_Employees::getTeachers Error: " . $e->getMessage());
+        }
+
+        return [
+            ['employee_id' => 2, 'npk' => '67890', 'fullname' => 'Ahmad Rizal', 'email' => 'ahmad.rizal@perusahaan.co.id', 'jabatan' => 'Leader', 'golongan' => 'II-2', 'department' => 'People Development (HR & GA)', 'teacher_type' => 'TRE'],
+            ['employee_id' => 3, 'npk' => '67891', 'fullname' => 'Maya Safitri', 'email' => 'maya.safitri@perusahaan.co.id', 'jabatan' => 'Staff', 'golongan' => 'II-1', 'department' => 'Quality Assurance', 'teacher_type' => 'Associate'],
+        ];
+    }
+
+    /**
+     * Mendapatkan Daftar Kandidat Peserta yang Sesuai dengan Kriteria Mandat Penugasan Admin.
+     * Menggabungkan informasi beban belajar (active courses workload).
+     *
+     * @param int|null $departmentId ID Departemen target (opsional)
+     * @param int|null $positionId ID Jabatan target (opsional)
+     * @param int|null $golonganId ID Golongan target (opsional)
+     * @return array Daftar kandidat peserta beserta hitungan course aktif mereka.
+     */
+    public function getMandatedCandidates($departmentId = null, $positionId = null, $golonganId = null): array
+    {
+        try {
+            $whereParts = ["e.status = 'Active' AND e.role = 'student'"];
+            $params = [];
+
+            if (!empty($departmentId)) {
+                $deptRow = dbQueryOne("SELECT department_name FROM DX_LMS_M_Departments WHERE department_id = ?", [$departmentId]);
+                if ($deptRow) {
+                    $deptName = $deptRow['department_name'];
+                    // Pencocokan fleksibel (misal Manufacturing vs Manufacturing Line A)
+                    $cleanDept = preg_replace('/\s+Line\s+[A-Za-z0-9]+/i', '', $deptName);
+                    $whereParts[] = "(e.department = ? OR e.department LIKE ? OR e.department LIKE ?)";
+                    $params[] = $deptName;
+                    $params[] = '%' . $cleanDept . '%';
+                    $params[] = '%' . $deptName . '%';
+                }
+            }
+
+            if (!empty($positionId)) {
+                $posRow = dbQueryOne("SELECT position_name FROM DX_LMS_M_Positions WHERE position_id = ?", [$positionId]);
+                if ($posRow) {
+                    $whereParts[] = "LOWER(e.jabatan) = LOWER(?)";
+                    $params[] = $posRow['position_name'];
+                }
+            }
+
+            if (!empty($golonganId)) {
+                $golRow = dbQueryOne("SELECT golongan_name, golongan_level FROM DX_LMS_M_Golongan WHERE golongan_id = ?", [$golonganId]);
+                if ($golRow) {
+                    $level = (string) $golRow['golongan_level'];
+                    $whereParts[] = "(e.golongan = ? OR e.golongan LIKE ?)";
+                    $params[] = $golRow['golongan_name'];
+                    $params[] = "%" . $level . "%";
+                }
+            }
+
+            $whereSql = implode(' AND ', $whereParts);
+
+            $sql = "
+                SELECT 
+                    e.employee_id,
+                    e.npk,
+                    e.fullname,
+                    e.fullname AS name,
+                    e.jabatan,
+                    e.golongan,
+                    e.department,
+                    e.department AS departemen,
+                    e.division,
+                    e.division AS divisi,
+                    e.section,
+                    e.section AS seksi,
+                    (
+                        SELECT COUNT(DISTINCT en.course_id)
+                        FROM DX_LMS_T_Course_Enrollments en
+                        INNER JOIN DX_LMS_M_Courses c ON en.course_id = c.course_id
+                        WHERE en.employee_id = e.employee_id 
+                          AND LOWER(en.enrollment_status) IN ('enrolled', 'in_progress', 'active')
+                          AND LOWER(c.course_status) IN ('active', 'published', 'running')
+                    ) AS active_courses_count
+                FROM {$this->table} e
+                WHERE {$whereSql}
+                ORDER BY active_courses_count DESC, e.fullname ASC
+            ";
+
+            $rows = dbQuery($sql, $params);
+            if (!empty($rows)) {
+                return $rows;
+            }
+        } catch (\Throwable $e) {
+            error_log("DX_LMS_M_Employees::getMandatedCandidates Error: " . $e->getMessage());
+        }
+
+        // Fallback jika tidak ada kriteria khusus atau query kosong
+        return $this->getActiveEmployees();
+    }
 }
+

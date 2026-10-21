@@ -95,6 +95,7 @@ $router->add('/admin/course', 'DX_LMS_M_Admin_Course@index');
 $router->add('/admin/role', 'DX_LMS_M_Admin_Role@index');
 $router->add('/admin/role/update', 'DX_LMS_M_Admin_Role@update');
 $router->add('/admin/assignment', 'DX_LMS_M_Admin_Assignment@index');
+$router->add('/admin/assignment/store', 'DX_LMS_M_Admin_Assignment@store');
 $router->add('/admin/monitoring', 'DX_LMS_M_Admin_Monitoring@index');
 $router->add('/admin/score', 'DX_LMS_M_Admin_Score@index');
 $router->add('/admin/activity', 'DX_LMS_M_Admin_Activity@index');
