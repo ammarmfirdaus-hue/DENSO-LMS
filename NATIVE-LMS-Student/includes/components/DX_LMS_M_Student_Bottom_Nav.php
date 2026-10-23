@@ -49,10 +49,10 @@ $tabs = [
 ?>
 <nav class="fixed bottom-0 left-0 w-full z-50 flex items-stretch px-0 h-[76px] shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:h-screen lg:flex-col lg:justify-start lg:w-[240px] lg:top-0 lg:left-0 lg:rounded-none lg:border-r border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-4 lg:pt-8 lg:gap-2 transition-all duration-300" id="bottomNavBar">
     
-    <!-- Logo placeholder for Desktop only -->
+    <!-- Brand untuk sidebar desktop -->
     <div class="hidden lg:flex items-center space-x-2 mb-8 px-4 w-full">
-        <span class="material-symbols-outlined text-primary text-[32px]">business</span>
-        <span class="font-bold text-2xl tracking-tight text-primary">LMS</span>
+        <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo.png', ENT_QUOTES, 'UTF-8') ?>" alt="Logo DENSO" class="w-9 h-9 object-contain">
+        <span class="font-bold text-xl tracking-tight text-primary">DENSO</span>
     </div>
 
     <?php foreach ($tabs as $tab): ?>

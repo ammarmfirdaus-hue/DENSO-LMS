@@ -18,10 +18,25 @@
 
 $page_title = $page_title ?? 'LMS - Learning Management System';
 $base_path = $base_path ?? '';
+$icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Learning Management System">
+<meta name="description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
+<meta name="application-name" content="DENSO LMS">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DENSO LMS">
+<meta property="og:title" content="<?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
+<meta property="og:image" content="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="<?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="twitter:description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
+<meta name="twitter:image" content="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
+<link rel="icon" type="image/png" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
+<link rel="shortcut icon" type="image/png" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
+<link rel="apple-touch-icon" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
 <title><?= htmlspecialchars($page_title) ?></title>
 
 <!-- =====================================================
