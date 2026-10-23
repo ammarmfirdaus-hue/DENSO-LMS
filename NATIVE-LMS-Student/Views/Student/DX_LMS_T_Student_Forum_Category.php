@@ -20,9 +20,7 @@ $pageTitle = 'Forum - ' . e($course['title']); ?>
             padding-top: env(safe-area-inset-top, 44px);
         }
 
-        body {
-            min-height: max(884px, 100dvh);
-        }
+
 
         .animate-fade-in-up {
             animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;

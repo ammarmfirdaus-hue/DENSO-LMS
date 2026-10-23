@@ -1,10 +1,34 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
-let token = null;
+const TOKEN_KEY = 'dls_admin_teacher_access_token';
+
+function readStoredToken() {
+  try {
+    return window.sessionStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+let token = readStoredToken();
 
 export const authToken = {
   get: () => token,
-  set: value => { token = value; },
-  clear: () => { token = null; }
+  set: value => {
+    token = value;
+    try {
+      window.sessionStorage.setItem(TOKEN_KEY, value);
+    } catch {
+      // Keep the in-memory session if browser storage is unavailable.
+    }
+  },
+  clear: () => {
+    token = null;
+    try {
+      window.sessionStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // The in-memory token is still cleared when browser storage is unavailable.
+    }
+  }
 };
 
 export async function api(path, options = {}) {

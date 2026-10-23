@@ -4,6 +4,8 @@ Node.js + Express REST API backed by Microsoft SQL Server. Local API port: **300
 
 ## Setup
 
+On Windows, run `install.bat` from this folder to install Node.js dependencies and create `.env` with a fresh random JWT secret if it does not exist. Configure SQL Server credentials in `.env` before starting the API.
+
 1. Install Node.js 20+ and SQL Server 2019+ with the SQL Server driver enabled.
 2. Create a database login with access only to `DX_LMS_AdminTeacher`; avoid using `sa`.
 3. Run `../database/admin&teacher.sql` in SQL Server Management Studio. This is the shared workspace schema file.

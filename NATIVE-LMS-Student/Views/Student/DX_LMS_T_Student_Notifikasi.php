@@ -59,9 +59,7 @@ $typeStyles = [
             padding-top: env(safe-area-inset-top, 44px);
         }
 
-        body {
-            min-height: max(884px, 100dvh);
-        }
+
 
         .scrollbar-hide::-webkit-scrollbar {
             display: none;

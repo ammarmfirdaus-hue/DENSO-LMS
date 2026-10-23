@@ -24,7 +24,6 @@ $active_tab = 'profil'; ?>
         }
 
         body {
-            min-height: max(884px, 100dvh);
             background-color: #fcfcfc;
         }
     </style>

@@ -23,7 +23,9 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         }
         $npk = trim((string) ($_POST['npk'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
-        if ($npk === '' || strlen($npk) > 50 || $password === '' || strlen($password) > 200) {
+        // Bcrypt rejects NUL bytes; reject them before either password_hash() or
+        // password_verify() can receive attacker-controlled input.
+        if ($npk === '' || strlen($npk) > 50 || $password === '' || strlen($password) > 200 || str_contains($password, "\0")) {
             header('Location: /?route=/login&error=invalid', true, 303);
             exit;
         }
@@ -43,7 +45,9 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         $statement->execute(['npk' => $npk]);
         $account = $statement->fetch();
         static $dummyHash = null;
-        $dummyHash ??= password_hash(random_bytes(32), PASSWORD_DEFAULT);
+        // Use printable random input because PASSWORD_DEFAULT (bcrypt on older
+        // PHP versions) cannot hash arbitrary binary strings containing NUL.
+        $dummyHash ??= password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
         if (!password_verify($password, $account['password_hash'] ?? $dummyHash)) {
             $window = strtotime(($rateState['window_started_at'] ?? gmdate('Y-m-d H:i:s')) . ' UTC');
             $attempts = ($window < time() - 900) ? 1 : ((int) ($rateState['attempts'] ?? 0) + 1);
@@ -61,6 +65,7 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         $_SESSION['student_id'] = (int) $account['student_id'];
         $_SESSION['student_npk'] = $account['npk'];
         $_SESSION['student_name'] = $account['fullname'];
+        $_SESSION['role'] = 'student';
         $_SESSION['user'] = ['npk' => $account['npk'], 'name' => $account['fullname'], 'role' => 'student'];
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header('Location: /?route=/student', true, 303);

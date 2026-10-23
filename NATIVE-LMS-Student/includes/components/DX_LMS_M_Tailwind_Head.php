@@ -20,7 +20,7 @@ $page_title = $page_title ?? 'LMS - Learning Management System';
 $base_path = $base_path ?? '';
 ?>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Learning Management System">
 <title><?= htmlspecialchars($page_title) ?></title>
 
@@ -35,35 +35,35 @@ $base_path = $base_path ?? '';
 
 <!-- =====================================================
      FONT FACE DECLARATIONS
-     Menggunakan font-display: block untuk MENCEGAH FOUT
+     Font swap menjaga teks tetap terbaca sebelum font lokal selesai dimuat
      ===================================================== -->
 <style>
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
-        font-display: block; /* Mencegah FOUT dengan menahan teks hingga font dimuat */
+        font-display: swap;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Regular.ttf') format('truetype');
     }
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 500;
-        font-display: block;
+        font-display: swap;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Medium.ttf') format('truetype');
     }
     @font-face {
         font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
-        font-display: block;
+        font-display: swap;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_Inter_Bold.ttf') format('truetype');
     }
     @font-face {
         font-family: 'Material Symbols Outlined';
         font-style: normal;
         font-weight: 400;
-        font-display: block;
+        font-display: swap;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_MaterialSymbolsOutlined.ttf') format('truetype');
     }
 </style>
@@ -75,10 +75,8 @@ $base_path = $base_path ?? '';
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Tokens.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Layout.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Components.css">
-<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Tokens.css">
-<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Layout.css">
-<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Components.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Tailwind_Output.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Responsive_Redesign.css">
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_Api.js" defer></script>
 
 <!-- =====================================================

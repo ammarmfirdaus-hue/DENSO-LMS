@@ -10,6 +10,16 @@ Workspace ini berisi tiga runtime terpisah. Jalankan setiap proyek dari folderny
 
 ## Menjalankan proyek
 
+### Memasang environment di Windows
+
+Jalankan [`install-all.bat`](install-all.bat) dari folder utama untuk memasang dependency ketiga proyek, atau jalankan installer di folder proyek yang ingin disiapkan saja:
+
+- `NATIVE-LMS-Student\install.bat`: memeriksa PHP 8.1+ dan `pdo_mysql`, memasang dependency Tailwind, lalu membangun CSS.
+- `Backend-LMS-Admin-Teacher\install.bat`: memeriksa Node.js 20+, memasang dependency API, dan membuat `.env` dengan JWT secret acak jika `.env` belum ada.
+- `Frontend-LMS-Admin-Teacher\install.bat`: memeriksa Node.js 20+, memasang dependency React/Vite, dan membuat `.env` jika belum ada.
+
+Installer mempertahankan `.env` yang sudah ada. Setelah selesai, sesuaikan kredensial database dan alamat API di setiap `.env`, lalu pasang skema database di bawah ini. Proyek Native PHP saat ini tidak memiliki `composer.json`, jadi tidak memerlukan Composer.
+
 ### Setup Database Mysql&MSSQL
 
 Database Student dan Admin/Teacher terpisah. Jalankan masing-masing file SQL berikut satu kali menggunakan akun database yang memiliki izin membuat database dan tabel:

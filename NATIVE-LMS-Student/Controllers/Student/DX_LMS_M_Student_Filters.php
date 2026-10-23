@@ -24,18 +24,6 @@ class DX_LMS_M_Student_Filters extends DX_LMS_M_Controller
             exit();
         }
 
-        $allCategories = [
-            'Soft Skill',
-            'Hard Skill',
-            'Leadership',
-            'Technical',
-            'Safety',
-            'Quality',
-            'IT',
-            'Management',
-            'Engineering',
-        ];
-
         $allCourses = DX_LMS_M_Student_Data::getCourses();
         $activeCourses = array_values(
             array_filter($allCourses, function ($c) {
@@ -43,10 +31,19 @@ class DX_LMS_M_Student_Filters extends DX_LMS_M_Controller
             }),
         );
 
+        // Filter labels must come from the same tags used by each course card.
+        $allCategories = [];
+        foreach ($activeCourses as $course) {
+            foreach ($course['filters'] ?? [] as $filter) {
+                $allCategories[$filter] = $filter;
+            }
+        }
+        natcasesort($allCategories);
+
         $data = [
             'active_tab' => 'course',
             'base_path' => '',
-            'categories' => $allCategories,
+            'categories' => array_values($allCategories),
             'courses' => $activeCourses,
         ];
 

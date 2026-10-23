@@ -8,6 +8,8 @@ PHP Native student portal with a same-origin, read-only GET JSON API. This proje
 - MySQL 8.0+
 - Local port: `8082`
 
+On Windows, run `install.bat` from this folder to check PHP 8.1+/`pdo_mysql` and Node.js 20+, install the Tailwind dependencies, and build the CSS. It creates `.env` from `.env.example` only when `.env` does not exist. This project currently has no `composer.json`, so Composer is not required.
+
 From this directory, configure the environment values documented in `.env.example`, create the database, then run:
 
 ```powershell

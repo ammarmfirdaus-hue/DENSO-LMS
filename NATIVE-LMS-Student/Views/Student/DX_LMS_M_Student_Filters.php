@@ -16,28 +16,35 @@
     include 'includes/components/DX_LMS_M_Header.php';
     ?>
 
-    <main class="dls-main flex flex-col h-full pt-[72px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300">
+    <main class="dls-main filter-page flex flex-col pt-[72px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300" data-course-filter-page>
         <section class="flex-none pt-4">
-            <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menampilkan course yang spesifik.</p>
+            <div class="filter-page-intro">
+                <div>
+                    <p class="filter-eyebrow">KATALOG PEMBELAJARAN</p>
+                    <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Temukan course yang tepat</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menyaring course. Semua course ditampilkan secara otomatis.</p>
+                </div>
+                <a class="filter-back-link" href="?route=/student/courses"><span class="material-symbols-outlined">arrow_back</span><span>Kembali ke Course</span></a>
+            </div>
 
-            <div class="flex justify-between items-center mb-3">
+            <div class="filter-toolbar flex justify-between items-center mb-3">
                 <span class="font-label-md text-label-md text-on-surface-variant font-medium"><span id="active-count">0</span> Filter Aktif</span>
                 <button id="reset-btn" class="font-label-md text-label-md text-primary font-bold hidden transition-opacity active:opacity-50">Reset Semua</button>
             </div>
 
             <!-- Filter Chips -->
-            <div class="flex flex-wrap gap-2 max-h-[160px] overflow-y-auto hide-scrollbar pb-2 relative">
-                <button type="button" class="filter-chip px-5 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-lg whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="Semua">Semua</button>
+            <div class="filter-chip-list flex flex-wrap gap-2 pb-2 relative" role="group" aria-label="Filter kategori course">
+                <button type="button" class="filter-chip px-5 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-lg whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="Semua" aria-pressed="true">Semua</button>
                 <?php foreach ($categories as $cat): ?>
                 <button type="button" class="filter-chip px-5 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-lg whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="<?= e(
                     $cat,
-                ) ?>"><?= e($cat) ?></button>
+                ) ?>" aria-pressed="false"><?= e($cat) ?></button>
                 <?php endforeach; ?>
             </div>
 
             <!-- Sorting & Results Summary -->
-            <div class="flex justify-between items-center mt-4 border-b border-outline-variant pb-3 mb-2">
-                <span class="font-headline-sm text-headline-sm font-bold text-on-surface"><span id="result-count">0</span> Hasil</span>
+            <div class="filter-results-toolbar flex justify-between items-center mt-4 border-b border-outline-variant pb-3 mb-2">
+                <div><h2 class="font-headline-sm text-headline-sm font-bold text-on-surface"><span id="result-count"><?= count($courses) ?></span> Course</h2><p class="filter-results-caption">Course yang tersedia untuk Anda</p></div>
                 <select id="sort-select" class="bg-surface border border-outline-variant text-on-surface text-label-md rounded-lg px-2 py-1 focus:outline-none focus:border-primary">
                     <option value="relevance">Relevansi</option>
                     <option value="newest">Terbaru</option>
@@ -47,8 +54,34 @@
         </section>
 
         <!-- Hasil Course dinamis -->
-        <section id="course-results" class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2 hide-scrollbar content-start pb-4">
-            <!-- JS akan me-render course card di sini -->
+        <section id="course-results" class="filter-course-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2 content-start pb-4" aria-live="polite" aria-label="Daftar course">
+            <?php foreach ($courses as $course): ?>
+            <?php
+                $filterIcons = [
+                    'build' => 'from-orange-400 to-orange-600', 'health_and_safety' => 'from-emerald-400 to-green-600',
+                    'cleaning_services' => 'from-teal-400 to-cyan-600', 'precision_manufacturing' => 'from-blue-400 to-indigo-600',
+                    'trending_up' => 'from-violet-400 to-purple-600', 'verified' => 'from-sky-400 to-indigo-600',
+                    'forum' => 'from-pink-400 to-rose-600', 'groups' => 'from-amber-400 to-yellow-600',
+                    'gavel' => 'from-red-400 to-rose-700', 'eco' => 'from-lime-400 to-green-600',
+                ];
+                $courseIcon = $course['thumbnail_icon'] ?? 'school';
+                $courseGradient = $filterIcons[$courseIcon] ?? 'from-blue-500 to-indigo-600';
+            ?>
+            <article class="filter-course-card course-card" data-filters="<?= e(json_encode($course['filters'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP)) ?>" data-course-status="<?= e($course['status']) ?>" data-progress="<?= (int) $course['progress'] ?>">
+                <a class="filter-course-media bg-gradient-to-br <?= $courseGradient ?>" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>" aria-label="Buka course <?= e($course['title']) ?>">
+                    <span class="filter-course-icon material-symbols-outlined"><?= e($courseIcon) ?></span>
+                    <?php if ($course['status'] !== 'selesai'): ?><span class="filter-course-required">Wajib</span><?php endif; ?>
+                </a>
+                <div class="filter-course-body">
+                    <div class="filter-course-meta"><span><?= (int) $course['modules_count'] ?> Modul</span><span class="filter-course-status"><?= $course['status'] === 'sedang_dipelajari' ? 'Sedang dipelajari' : 'Belum dimulai' ?></span></div>
+                    <h3 class="filter-course-title"><?= e($course['title']) ?></h3>
+                    <p class="filter-course-description"><?= e($course['description']) ?></p>
+                    <div class="filter-course-tags"><?php foreach ($course['filters'] ?? [] as $filter): ?><span><?= e($filter) ?></span><?php endforeach; ?></div>
+                    <div class="filter-course-progress"><div><span><?= $course['status'] === 'sedang_dipelajari' ? 'Progress belajar' : 'Progress' ?></span><strong><?= (int) $course['progress'] ?>%</strong></div><span class="filter-progress-track"><span style="width: <?= max(0, min(100, (int) $course['progress'])) ?>%"></span></span></div>
+                    <a class="filter-course-action" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>"><?= $course['status'] === 'sedang_dipelajari' ? 'Lanjutkan belajar' : 'Mulai course' ?><span class="material-symbols-outlined">arrow_forward</span></a>
+                </div>
+            </article>
+            <?php endforeach; ?>
         </section>
 
         <!-- Pagination Controls -->
@@ -72,17 +105,8 @@
         }
 
         const coursesData = <?= json_encode($courses, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        // Filter page opens on the complete catalog; only an explicit URL filter narrows it.
         let activeFilters = [];
-
-        /** Membaca pengaturan riwayat sesi agar status tetap terjaga antar halaman. */
-        try {
-            const stored = sessionStorage.getItem('studentFilters');
-            if (stored) {
-                activeFilters = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error("Gagal membaca filter dari session:", e);
-        }
 
         function saveFilters() {
             sessionStorage.setItem('studentFilters', JSON.stringify(activeFilters));
@@ -277,6 +301,7 @@
 
                 chips.forEach(chip => {
                     const f = chip.dataset.filter;
+                    chip.setAttribute('aria-pressed', String(f === 'Semua' ? activeFilters.length === 0 : activeFilters.includes(f)));
                     if (f === 'Semua') {
                         if (activeFilters.length === 0) {
                             chip.classList.remove('bg-surface', 'text-on-surface-variant', 'border-outline-variant');

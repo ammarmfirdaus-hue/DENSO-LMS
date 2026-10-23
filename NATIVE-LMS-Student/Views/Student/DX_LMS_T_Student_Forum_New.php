@@ -14,15 +14,11 @@
         .pt-safe {
             padding-top: env(safe-area-inset-top, 44px);
         }
-
-        body {
-            min-height: max(884px, 100dvh);
-        }
     </style>
 </head>
 
 <body class="dls-app-shell bg-background text-on-background antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
-    
+
     <!-- TopAppBar Shared Component -->
     <?php
     $header_title = 'Mulai Topik Baru';
@@ -83,7 +79,7 @@
                             <p class="font-label-sm text-label-sm text-on-surface-variant/70">Maksimal ukuran file: 5MB (JPG, PNG, PDF)</p>
                         </div>
                     </div>
-                    
+
                     <!-- Action Buttons -->
                     <div class="flex flex-col-reverse sm:flex-row sm:space-x-4 sm:justify-end pt-4 border-t border-outline-variant mt-8 gap-y-4 sm:gap-y-0">
                         <a href="?route=/student/course/detail&tab=forum" class="px-6 py-3 border border-outline-variant rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors text-center flex-1 sm:flex-none">

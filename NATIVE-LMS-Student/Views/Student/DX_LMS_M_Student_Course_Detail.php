@@ -20,9 +20,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             padding-top: env(safe-area-inset-top, 44px);
         }
 
-        body {
-            min-height: max(884px, 100dvh);
-        }
+
 
         .animate-fade-in-up {
             animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1351,14 +1349,14 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         // Save scroll position saat klik tab
         document.addEventListener('DOMContentLoaded', function() {
             var tabLinks = document.querySelectorAll('nav a[href*="tab="]');
-            
+
             tabLinks.forEach(function(link) {
                 link.addEventListener('click', function() {
                     sessionStorage.setItem('courseDetailScrollPos', window.scrollY.toString());
                 });
             });
         });
-        
+
         function toggleAccordion(id) {
             const body = document.getElementById(id);
             const chevron = document.getElementById(id + '-chevron');

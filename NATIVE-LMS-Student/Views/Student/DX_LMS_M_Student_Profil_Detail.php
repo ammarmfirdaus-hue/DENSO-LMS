@@ -67,7 +67,6 @@ if (!function_exists('formatMonthYear')) {
         }
 
         body {
-            min-height: max(884px, 100dvh);
             font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
         }
 

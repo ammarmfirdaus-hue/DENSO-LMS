@@ -20,9 +20,7 @@ include 'includes/components/DX_LMS_M_Tailwind_Head.php';
         padding-top: env(safe-area-inset-top, 44px);
     }
 
-    body {
-        min-height: max(884px, 100dvh);
-    }
+
 
     /* Animations */
     .fade-in {

@@ -59,7 +59,10 @@
       text('[data-api-active-courses]', `${stats.active_courses} Course Aktif`);
       text('[data-api-completed-courses]', stats.completed_courses);
       text('[data-api-total-courses]', stats.total_courses);
-      renderCourses(document.querySelector('[data-api-course-list]'), courses);
+      const courseList = document.querySelector('[data-api-course-list]');
+      // Keep the complete PHP-rendered cards (filters, status, links and progress).
+      // The API card renderer is only a fallback for pages without server markup.
+      if (courseList && courseList.childElementCount === 0) renderCourses(courseList, courses);
     } catch (error) {
       const status = document.querySelector('[data-api-status]');
       if (status) { status.textContent = error.message; status.hidden = false; }

@@ -210,6 +210,7 @@ $base_path = '';
 
             const form = document.getElementById('loginForm');
             const inputs = form.querySelectorAll('input[required]');
+            const submitButton = document.getElementById('btnLogin');
 
             inputs.forEach(input => {
                 input.addEventListener('blur', function() {
@@ -226,6 +227,24 @@ $base_path = '';
                     this.classList.remove('border-error');
                     this.classList.add('border-outline-variant');
                 });
+            });
+
+            form.addEventListener('submit', function(event) {
+                if (!form.reportValidity()) {
+                    event.preventDefault();
+                    return;
+                }
+                submitButton.disabled = true;
+                submitButton.setAttribute('aria-busy', 'true');
+                submitButton.textContent = 'Memproses...';
+            });
+
+            window.addEventListener('pageshow', function() {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.removeAttribute('aria-busy');
+                    submitButton.textContent = 'Masuk';
+                }
             });
         });
     </script>

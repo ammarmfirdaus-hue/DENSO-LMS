@@ -28,10 +28,6 @@ $userRole = 'Student';
         .pt-safe {
             padding-top: env(safe-area-inset-top, 44px);
         }
-
-        body {
-            min-height: max(884px, 100dvh);
-        }
     </style>
 </head>
 

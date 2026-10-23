@@ -18,9 +18,7 @@
             padding-top: env(safe-area-inset-top, 0px);
         }
 
-        body {
-            min-height: max(884px, 100dvh);
-        }
+
 
         /* Custom scrollbar for content (only for desktop to avoid gaps on mobile) */
         @media (min-width: 1024px) {

@@ -1,23 +1,149 @@
 import { useState } from 'react';
 
 export default function LoginPage({ onLogin }) {
-  const [npk, setNpk] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
-  async function submit(event) { event.preventDefault(); setError(''); setBusy(true); try { await onLogin(npk, password); } catch (e) { setError(e.message); } finally { setBusy(false); } }
-  return <main className="grid min-h-screen bg-white lg:grid-cols-2">
-    <section className="relative hidden overflow-hidden bg-[#f4efee] lg:block">
-      <img src="/design-reference/dashboard_teacher_integrated_role_switcher/screen.png" alt="Tampilan LMS Denso" className="absolute inset-0 h-full w-full object-cover object-top opacity-75" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#240a0b]/80 via-transparent to-[#240a0b]/10" />
-      <div className="absolute bottom-14 left-14 max-w-lg text-white"><p className="mb-3 text-sm font-semibold uppercase tracking-[.3em]">DENSO Learning System</p><h1 className="text-4xl font-bold leading-tight">Kelola pembelajaran. Kembangkan potensi.</h1><p className="mt-4 text-white/80">Satu ruang untuk pengajar dan administrator membangun pengalaman belajar yang lebih baik.</p></div>
-    </section>
-    <section className="flex items-center justify-center px-6 py-12"><div className="w-full max-w-md">
-      <div className="mb-10 flex items-center gap-3"><div className="grid size-12 place-items-center rounded-2xl bg-primary text-xl font-bold text-white">D</div><div><p className="text-xl font-bold">DENSO LMS</p><p className="text-sm text-muted">Portal Teacher & Admin</p></div></div>
-      <h2 className="text-3xl font-bold">Masuk ke akun Anda</h2><p className="mt-2 text-muted">Gunakan akun internal yang telah didaftarkan.</p>
-      <form className="mt-8 space-y-5" onSubmit={submit}>
-        <label className="block text-sm font-semibold">NPK<input required autoComplete="username" value={npk} onChange={e => setNpk(e.target.value)} className="mt-2 h-12 w-full rounded-xl border border-outline bg-white px-4 font-normal outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15" placeholder="Masukkan NPK" /></label>
-        <label className="block text-sm font-semibold">Kata sandi<input required type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="mt-2 h-12 w-full rounded-xl border border-outline bg-white px-4 font-normal outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15" placeholder="Masukkan kata sandi" /></label>
-        {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <button disabled={busy} className="h-12 w-full rounded-xl bg-primary font-semibold text-white shadow-md shadow-primary/20 transition hover:bg-primary-container disabled:opacity-60">{busy ? 'Memeriksa…' : 'Masuk'}</button>
-      </form><p className="mt-8 text-center text-xs text-muted">Akses hanya untuk akun dengan role teacher atau admin.</p>
-    </div></section>
-  </main>;
+  const [npk, setNpk] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    setError('');
+    setBusy(true);
+    try {
+      await onLogin(npk, password);
+    } catch (loginError) {
+      setError(loginError.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="flex min-h-dvh w-full flex-col bg-surface antialiased lg:flex-row">
+      <section className="relative hidden min-h-dvh flex-1 overflow-hidden bg-[#0b0e14] lg:flex">
+        <div
+          className="absolute inset-0 bg-cover bg-left bg-no-repeat"
+          style={{ backgroundImage: "url('/assets/img/login/DX_LMS_M_Login.png')" }}
+          role="img"
+          aria-label="Karyawan DENSO menggunakan tablet di area produksi"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14]/95 from-[20%] via-[#0b0e14]/70 to-[#0b0e14]/10" />
+
+        <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col justify-end p-8 pb-10 md:p-12 lg:mx-0 lg:ml-auto lg:p-16 lg:px-20 lg:pb-12 xl:ml-0">
+          <div className="mb-6 mt-auto">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#d42a2a] to-[#a01a1a] shadow-[0_0_25px_rgba(212,42,42,0.5)]">
+                <span className="material-symbol text-[28px] text-white" aria-hidden="true">school</span>
+              </div>
+              <h1 className="text-2xl font-bold leading-tight tracking-tight text-white lg:text-3xl">
+                Learning Management System
+              </h1>
+            </div>
+            <p className="mb-10 max-w-[460px] text-justify text-sm leading-relaxed text-gray-200 lg:text-[15px]">
+              Platform pembelajaran digital terintegrasi untuk meningkatkan kompetensi, produktivitas, dan standar kualitas operasional secara berkelanjutan.
+            </p>
+
+            <div className="flex max-w-[460px] divide-x divide-white/20">
+              <div className="flex flex-1 flex-col items-center pr-4 text-center lg:items-start lg:text-left">
+                <span className="material-symbol mb-2 text-[28px] text-primary-container drop-shadow-md" aria-hidden="true">menu_book</span>
+                <span className="text-[11px] font-semibold text-white/90 lg:text-xs">Learning<br />Path</span>
+              </div>
+              <div className="flex flex-1 flex-col items-center px-4 text-center lg:items-start lg:text-left">
+                <span className="material-symbol mb-2 text-[28px] text-primary-container drop-shadow-md" aria-hidden="true">assignment_turned_in</span>
+                <span className="text-[11px] font-semibold text-white/90 lg:text-xs">Assessment</span>
+              </div>
+              <div className="flex flex-1 flex-col items-center px-4 text-center lg:items-start lg:text-left">
+                <span className="material-symbol mb-2 text-[28px] text-primary-container drop-shadow-md" aria-hidden="true">insights</span>
+                <span className="text-[11px] font-semibold text-white/90 lg:text-xs">Progress<br />Tracking</span>
+              </div>
+              <div className="flex flex-1 flex-col items-center pl-4 text-center lg:items-start lg:text-left">
+                <span className="material-symbol mb-2 text-[28px] text-primary-container drop-shadow-md" aria-hidden="true">workspace_premium</span>
+                <span className="text-[11px] font-semibold text-white/90 lg:text-xs">Certification</span>
+              </div>
+            </div>
+          </div>
+
+          <footer>
+            <div className="mb-4 h-px w-12 bg-white/30" />
+            <p className="text-[11px] font-medium text-gray-300 lg:text-xs">© Learning Management System</p>
+          </footer>
+        </div>
+      </section>
+
+      <section className="flex min-h-dvh w-full flex-1 flex-col items-center justify-center bg-surface p-8 py-16 lg:py-8">
+        <div className="mb-8 text-center lg:mb-8">
+          <div className="text-[40px] font-bold leading-none tracking-[-0.03em] text-primary-container">LMS</div>
+          <div className="mt-1 text-[11px] font-medium tracking-[0.15em] text-muted">LEARNING MANAGEMENT SYSTEM</div>
+        </div>
+
+        <div className="mb-8 w-full max-w-sm text-center">
+          <h2 className="text-[22px] font-bold leading-7 tracking-tight text-on-surface">Selamat datang!</h2>
+          <p className="mt-1 text-sm text-muted">Masuk dengan akun karyawan Anda</p>
+        </div>
+
+        <form className="w-full max-w-sm space-y-4" onSubmit={submit}>
+          {error && (
+            <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+              <span className="material-symbol text-xl" aria-hidden="true">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <label className="relative block w-full">
+            <span className="sr-only">NPK atau Email</span>
+            <span className="material-symbol absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-muted" aria-hidden="true">person</span>
+            <input
+              required
+              autoComplete="username"
+              value={npk}
+              onChange={event => setNpk(event.target.value)}
+              className="h-[52px] w-full rounded-lg border border-outline bg-white pl-12 pr-4 text-base text-on-surface outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/15"
+              placeholder="NPK atau Email"
+            />
+          </label>
+
+          <label className="relative block w-full">
+            <span className="sr-only">Password</span>
+            <span className="material-symbol absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-muted" aria-hidden="true">lock</span>
+            <input
+              required
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={event => setPassword(event.target.value)}
+              className="h-[52px] w-full rounded-lg border border-outline bg-white pl-12 pr-12 text-base text-on-surface outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/15"
+              placeholder="Password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-on-surface/60 transition hover:bg-surface-container"
+              onClick={() => setShowPassword(value => !value)}
+              aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+              aria-pressed={showPassword}
+            >
+              <span className="material-symbol text-xl" aria-hidden="true">{showPassword ? 'visibility' : 'visibility_off'}</span>
+            </button>
+          </label>
+
+          <div className="text-right">
+            <a href="#" onClick={event => event.preventDefault()} className="text-sm font-medium text-secondary hover:underline">Lupa password?</a>
+          </div>
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="h-11 w-full rounded-full bg-secondary text-sm font-medium text-white shadow-[0_4px_12px_rgba(67,85,185,0.2)] transition hover:bg-[#293ca0] active:scale-95 disabled:cursor-wait disabled:opacity-60"
+          >
+            {busy ? 'Memeriksa…' : 'Masuk'}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted">Belum punya akun? <a href="#" onClick={event => event.preventDefault()} className="font-medium text-secondary hover:underline">Hubungi Admin</a></p>
+        </div>
+      </section>
+    </main>
+  );
 }

@@ -49,9 +49,7 @@ if ($isHistoryMode) {
             padding-top: env(safe-area-inset-top, 44px);
         }
 
-        body {
-            min-height: max(884px, 100dvh);
-        }
+
 
         .radio-custom:checked+div {
             border-color: #2563EB;

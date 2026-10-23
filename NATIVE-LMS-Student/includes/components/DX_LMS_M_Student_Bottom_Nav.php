@@ -65,7 +65,7 @@ $tabs = [
     <a href="<?= $tab['href'] ?>" 
        class="flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>" 
        id="nav-<?= $tab['id'] ?>"
-       aria-label="<?= $tab['label'] ?>">
+       aria-label="<?= $tab['label'] ?>"<?= $is_active ? ' aria-current="page"' : '' ?>>
         
         <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3"
               style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;"
