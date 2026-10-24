@@ -177,12 +177,12 @@ export default function ReviewerPortalPage() {
       const embed = youtubeEmbed(item.content);
       return embed ? <div className="aspect-video overflow-hidden rounded-2xl bg-black"><iframe title={item.title} src={embed} className="size-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div> : <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Tautan video tidak dapat ditampilkan.</p>;
     }
-    if (!fileUrl) return item.content ? <a className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white" href={item.content} target="_blank" rel="noreferrer"><span className="material-symbol" aria-hidden="true">open_in_new</span>Buka materi</a> : <div className="grid min-h-48 place-items-center rounded-2xl bg-surface-low text-sm text-muted">Memuat materi…</div>;
+    if (!fileUrl) return item.content ? <a className="inline-flex min-h-10 items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white" href={item.content} target="_blank" rel="noreferrer">Buka materi</a> : <div className="grid min-h-48 place-items-center rounded-lg bg-surface-low text-sm text-muted">Memuat materi…</div>;
     if (type === 'image') return <img src={fileUrl} alt={item.title} className="mx-auto max-h-[60vh] max-w-full rounded-2xl object-contain" />;
     if (type === 'video') return <video src={fileUrl} controls className="max-h-[60vh] w-full rounded-2xl bg-black" />;
     if (type === 'audio') return <audio src={fileUrl} controls className="w-full" />;
     if (type === 'pdf') return <iframe title={item.title} src={fileUrl} className="h-[65vh] w-full rounded-2xl border border-outline" />;
-    return <div className="rounded-2xl bg-surface-low p-5"><p className="text-sm text-muted">Pratinjau browser tidak tersedia untuk format ini.</p><a className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white" href={fileUrl} download={item.original_file_name || item.title}><span className="material-symbol" aria-hidden="true">download</span>Unduh {item.original_file_name || 'dokumen'}</a></div>;
+    return <div className="rounded-lg bg-surface-low p-5"><p className="text-sm text-muted">Pratinjau browser tidak tersedia untuk format ini.</p><a className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white" href={fileUrl} download={item.original_file_name || item.title}>Unduh {item.original_file_name || 'dokumen'}</a></div>;
   }
 
   const filteredItems = useMemo(() => items.filter(item =>
@@ -199,98 +199,86 @@ export default function ReviewerPortalPage() {
   const listOrder = selected ? 'order-2 lg:order-1' : 'order-1 lg:order-1';
   const detailOrder = selected ? 'order-1 lg:order-2' : 'order-2 lg:order-2';
 
-  return <main className="min-h-dvh bg-[#f4f6f8] px-3 py-4 sm:px-6 sm:py-7 lg:px-8">
-    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6">
-      <header className="rounded-2xl border border-slate-700/60 bg-[#1e252d] px-5 py-6 text-white shadow-sm sm:px-8 sm:py-7">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-4">
-            <img src="/assets/img/icon/denso-vector-logo.png" alt="DENSO" className="size-12 shrink-0 rounded-xl bg-white p-1.5 object-contain sm:size-14 border border-white/20" />
+  return <main className="min-h-dvh bg-[#f4f6f8] px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="mx-auto max-w-[1320px] space-y-4">
+      <header className="border-b border-outline/60 pb-4 sm:pb-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src="/assets/img/icon/denso-vector-logo.png" alt="DENSO" className="size-10 shrink-0 object-contain" />
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">DENSO Learning Management System</p>
-              <h1 className="mt-1 text-2xl font-bold sm:text-3xl text-white">Portal Reviewer</h1>
-              <p className="mt-1 truncate text-sm text-slate-300">{reviewer?.name || 'Sesi review terbatas'} <span className="px-1 text-slate-500">·</span> Tautan aman aktif selama 2 jam</p>
+              <p className="text-xs font-medium text-muted">DENSO LMS <span className="px-1 text-outline">/</span> Portal reviewer</p>
+              <h1 className="mt-1 text-xl font-semibold text-on-surface sm:text-2xl">Review materi</h1>
+              <p className="mt-1 truncate text-sm text-muted">{reviewer?.name || 'Sesi review terbatas'} <span className="px-1 text-outline">·</span> Periksa materi sebelum diterbitkan</p>
             </div>
           </div>
-          <button type="button" onClick={endSession} className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 sm:self-center cursor-pointer"><span className="material-symbol text-base" aria-hidden="true">logout</span>Akhiri Sesi</button>
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:max-w-xl">
-          <SummaryCard value={pendingCount} label="Perlu ditinjau" icon="rate_review" />
-          <SummaryCard value={decidedCount} label="Sudah diputuskan" icon="task_alt" />
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+            <span className="inline-flex items-center gap-2 text-xs text-muted"><span className="size-2 rounded-full bg-emerald-600" aria-hidden="true" />Sesi aktif · 2 jam</span>
+            <button type="button" onClick={endSession} className="inline-flex min-h-9 items-center justify-center rounded-lg border border-outline/60 bg-white px-3 py-2 text-sm font-medium text-secondary transition hover:bg-surface-low cursor-pointer">Akhiri sesi</button>
+          </div>
         </div>
       </header>
 
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
+        <span><strong className="font-semibold text-on-surface">{pendingCount}</strong> perlu ditinjau</span>
+        <span><strong className="font-semibold text-on-surface">{decidedCount}</strong> sudah diputuskan</span>
+      </div>
+
       {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800">{error}</p>}
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(300px,.85fr)_minmax(0,1.65fr)]">
-        <section className={`${listOrder} min-w-0 overflow-hidden rounded-2xl border border-outline/50 bg-white shadow-sm`}>
-          <div className="border-b border-outline/50 p-4 sm:p-5">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(320px,360px)_minmax(0,1fr)] xl:gap-5">
+        <section className={`${listOrder} min-w-0 overflow-hidden rounded-lg border border-outline/60 bg-white`}>
+          <div className="border-b border-outline/50 bg-white p-4">
             <div className="flex items-start justify-between gap-3">
-              <div><p className="text-xs font-bold uppercase tracking-[.14em] text-primary">Tugas review</p><h2 className="mt-1 text-lg font-bold">Materi yang ditugaskan</h2></div>
-              <span className="rounded-full bg-surface-low px-3 py-1.5 text-xs font-bold text-secondary">{filteredItems.length}</span>
+              <div><p className="text-xs font-medium text-muted">Antrean review</p><h2 className="mt-1 text-lg font-bold text-on-surface">Materi ditugaskan <span className="ml-1 text-sm font-medium text-muted">({filteredItems.length})</span></h2></div>
             </div>
-            <label className="relative mt-4 block"><span className="sr-only">Cari materi</span><span className="material-symbol absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true">search</span><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Cari judul atau course…" className="h-11 w-full rounded-xl border border-outline/60 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" /></label>
-            <label className="mt-2 block"><span className="sr-only">Filter status materi</span><select value={status} onChange={event => setStatus(event.target.value)} className="h-11 w-full rounded-xl border border-outline/60 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"><option value="pending_review">Perlu ditinjau</option><option value="all">Semua materi</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label>
+            <label className="relative mt-4 block"><span className="sr-only">Cari materi</span><span className="material-symbol absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted" aria-hidden="true">search</span><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Cari judul atau course…" className="h-10 w-full rounded-lg border border-outline/60 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" /></label>
+            <label className="mt-2 block"><span className="sr-only">Filter status materi</span><select value={status} onChange={event => setStatus(event.target.value)} className="h-10 w-full rounded-lg border border-outline/60 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"><option value="pending_review">Perlu ditinjau</option><option value="all">Semua materi</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label>
           </div>
-          <div className="max-h-[62vh] divide-y divide-outline/40 overflow-y-auto sm:max-h-[70vh]">
-            {reviewerPage.pagedItems.map(item => <button type="button" key={item.submission_id} onClick={() => selectItem(item)} aria-pressed={selected?.submission_id === item.submission_id} className={`block w-full p-4 text-left transition hover:bg-surface-low/70 focus-visible:outline-primary ${selected?.submission_id === item.submission_id ? 'bg-red-50/80 ring-1 ring-inset ring-primary/20' : ''}`}>
+          <div className="divide-y divide-outline/40">
+            {reviewerPage.pagedItems.map(item => <button type="button" key={item.submission_id} onClick={() => selectItem(item)} aria-pressed={selected?.submission_id === item.submission_id} className={`block w-full border-l-[3px] p-4 text-left transition hover:bg-surface-low/50 focus-visible:outline-primary ${selected?.submission_id === item.submission_id ? 'border-primary bg-red-50/50' : 'border-transparent bg-white'}`}>
               <span className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-low text-primary"><span className="material-symbol" aria-hidden="true">{item.material_type === 'video' ? 'play_circle' : item.material_type === 'text' ? 'article' : 'description'}</span></span>
+                <span className="material-symbol mt-0.5 text-lg text-muted" aria-hidden="true">{item.material_type === 'video' ? 'play_circle' : item.material_type === 'text' ? 'article' : 'description'}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block break-words font-bold text-on-surface">{item.title}</span>
                   <span className="mt-1 block text-sm leading-5 text-muted">{item.course_title} <span className="px-1">·</span> {item.session_title}</span>
-                  <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${item.status === 'pending_review' ? 'bg-blue-50 text-blue-800' : item.status === 'approved' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`}>{statusLabel[item.status] || item.status}</span>
+                  <span className={`mt-2 inline-flex rounded-md px-2 py-1 text-[11px] font-semibold ${item.status === 'pending_review' ? 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200' : item.status === 'approved' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200'}`}>{statusLabel[item.status] || item.status}</span>
                 </span>
               </span>
             </button>)}
             {!reviewerPage.pagedItems.length && <div className="p-7 text-center">
-              <span className="material-symbol mx-auto grid size-12 place-items-center rounded-2xl bg-surface-low text-2xl text-muted" aria-hidden="true">{loading ? 'hourglass_top' : 'task_alt'}</span>
-              <p className="mt-3 text-sm font-semibold">{loading ? 'Memuat daftar materi…' : items.length ? 'Tidak ada materi yang cocok.' : 'Belum ada materi yang ditugaskan.'}</p>
+              <p className="text-sm font-semibold">{loading ? 'Memuat daftar materi…' : items.length ? 'Tidak ada materi yang cocok.' : 'Belum ada materi yang ditugaskan.'}</p>
               <p className="mt-1 text-xs leading-5 text-muted">Materi yang dikirim admin akan muncul di daftar ini.</p>
             </div>}
           </div>
           <Pagination {...reviewerPage} onPageChange={reviewerPage.setPage} onPageSizeChange={reviewerPage.setPageSize} pageSizes={[8, 16, 32]} />
         </section>
 
-        <section className={`${detailOrder} min-w-0 overflow-hidden rounded-2xl border border-outline/50 bg-white shadow-sm`}>
+        <section className={`${detailOrder} min-w-0 overflow-hidden rounded-lg border border-outline/60 bg-white`}>
           {selected ? <>
-            <div className="border-b border-outline/50 p-4 sm:p-6">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted"><span>{selected.course_title}</span><span aria-hidden="true">/</span><span>{selected.session_title}</span><span aria-hidden="true">/</span><span className="uppercase">{selected.material_type}</span></div>
-              <h2 className="mt-2 break-words text-xl font-bold sm:text-2xl">{selected.title}</h2>
+            <div className="border-b border-outline/50 bg-white p-4 sm:p-6">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted"><span>{selected.course_title}</span><span aria-hidden="true">/</span><span>{selected.session_title}</span><span aria-hidden="true">/</span><span className="rounded-full bg-surface-low px-2 py-1 uppercase text-secondary">{selected.material_type}</span></div>
+              <h2 className="mt-3 break-words text-xl font-bold tracking-tight text-on-surface sm:text-2xl">{selected.title}</h2>
               <p className="mt-2 text-sm text-muted">Diajukan oleh <span className="font-semibold text-secondary">{selected.submitter_name}</span></p>
             </div>
             <div className="p-4 sm:p-6">
-              <div className="mb-3 flex items-center gap-2"><span className="material-symbol text-primary" aria-hidden="true">visibility</span><h3 className="text-sm font-bold">Pratinjau materi</h3></div>
-              {renderPreview(selected)}
+              <div className="mb-3 flex items-center justify-between gap-3"><h3 className="flex items-center gap-2 text-sm font-bold text-on-surface"><span className="material-symbol text-base text-muted" aria-hidden="true">visibility</span>Pratinjau materi</h3><span className="text-[11px] font-semibold uppercase tracking-wide text-muted">{selected.material_type}</span></div>
+              <div className="rounded-2xl border border-outline/40 bg-surface p-3 sm:p-4">{renderPreview(selected)}</div>
               {selected.status === 'pending_review' ? <div className="mt-6 border-t border-outline/50 pt-5">
                 <label className="block text-sm font-bold">Catatan review <span className="font-normal text-muted">(wajib saat menolak)</span><textarea value={comment} onChange={event => setComment(event.target.value)} maxLength={2000} className="mt-2 min-h-28 w-full rounded-xl border border-outline/60 p-3 text-sm leading-6 outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-2 focus:ring-primary/15" placeholder="Tulis alasan penolakan atau saran perbaikan…" /></label>
                 <div className="mt-4 grid grid-cols-1 gap-2 sm:flex sm:justify-end">
-                  <button type="button" disabled={busy || comment.trim().length < 3} onClick={() => decide('rejected')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-bold text-red-800 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"><span className="material-symbol" aria-hidden="true">close</span>Tolak materi</button>
-                  <button type="button" disabled={busy} onClick={() => decide('approved')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-wait disabled:opacity-50"><span className="material-symbol" aria-hidden="true">check</span>Setujui materi</button>
+                  <button type="button" disabled={busy || comment.trim().length < 3} onClick={() => decide('rejected')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-outline/60 px-5 py-2.5 text-sm font-semibold text-secondary transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-40"><span className="material-symbol text-base" aria-hidden="true">close</span>Tolak materi</button>
+                  <button type="button" disabled={busy} onClick={() => decide('approved')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-50"><span className="material-symbol text-base" aria-hidden="true">check</span>Setujui materi</button>
                 </div>
               </div> : <div className="mt-6 rounded-xl bg-surface-low p-4 text-sm"><p className="font-bold">Keputusan: {statusLabel[selected.status] || selected.status}</p>{selected.reviewer_comment && <p className="mt-1 whitespace-pre-wrap leading-6 text-muted">{selected.reviewer_comment}</p>}</div>}
             </div>
-          </> : <div className="grid min-h-72 place-items-center p-8 text-center sm:min-h-[28rem]">
-            <div><span className="material-symbol mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-3xl text-primary" aria-hidden="true">fact_check</span><h2 className="mt-4 text-lg font-bold">Pilih materi untuk ditinjau</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">Buka salah satu materi yang ditugaskan. Setelah memeriksa isinya, Anda dapat menyetujui atau menolaknya.</p></div>
+          </> : <div className="grid min-h-56 place-items-center p-6 text-center sm:min-h-64">
+            <div><h2 className="text-base font-semibold text-on-surface">Pilih materi untuk ditinjau</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">Pilih materi dari antrean untuk memeriksa isi dan memberikan keputusan.</p></div>
           </div>}
         </section>
       </div>
       <p className="px-1 text-center text-xs leading-5 text-muted">Sesi ini hanya dapat melihat dan memberi keputusan pada materi yang ditugaskan kepada Anda.</p>
     </div>
   </main>;
-}
-
-function SummaryCard({ value, label, icon }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-700/80 bg-slate-800/80 p-3 sm:p-4">
-      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-slate-700/80 text-white">
-        <span className="material-symbol text-xl" aria-hidden="true">{icon}</span>
-      </span>
-      <div>
-        <p className="text-2xl font-bold leading-none text-white">{value}</p>
-        <p className="mt-1 text-xs text-slate-300">{label}</p>
-      </div>
-    </div>
-  );
 }
 
 function PortalMessage({ title, message, loading = false }) {

@@ -1,8 +1,9 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 
 export default function AppLayout({ user: initialUser, onLogout }) {
+  const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => {
     try {
@@ -12,6 +13,26 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     }
   });
   const [user, setUser] = useState(initialUser);
+
+  const pageTitle = pathname === '/'
+    ? 'Dashboard'
+    : pathname === '/courses'
+      ? 'Kelola Course'
+      : pathname.startsWith('/courses/')
+        ? 'Detail Course'
+        : pathname === '/materials'
+          ? 'Materi & Persetujuan'
+          : pathname === '/activity'
+            ? 'Aktivitas'
+            : pathname === '/grades'
+              ? 'Kelola Nilai'
+              : pathname === '/forum'
+                ? 'Forum Diskusi'
+                : pathname === '/reviewers'
+                  ? 'Kelola Reviewer'
+                  : pathname === '/users'
+                    ? 'Manajemen Pengguna'
+                    : 'Dashboard';
 
   function toggleDesktopSidebar() {
     setDesktopCollapsed(prev => {
@@ -59,8 +80,10 @@ export default function AppLayout({ user: initialUser, onLogout }) {
               <span className="material-symbol text-xl">{desktopCollapsed ? 'menu_open' : 'menu'}</span>
             </button>
 
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted hidden sm:block">
-              DENSO LMS <span className="mx-2 text-outline">/</span> Portal Pengelola &amp; Pengajar
+            <div className="flex min-w-0 items-center gap-2 text-xs font-semibold tracking-wide text-secondary sm:text-sm">
+              <span className="truncate font-bold text-on-surface">{pageTitle}</span>
+              <span className="hidden text-outline md:inline" aria-hidden="true">/</span>
+              <span className="hidden truncate text-muted md:inline">Portal Pengelola &amp; Pengajar</span>
             </div>
           </div>
 

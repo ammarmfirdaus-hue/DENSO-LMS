@@ -82,7 +82,7 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
     async function loadSessions() {
       try {
         setLoadingSessions(true);
-        const res = await api(`/courses/${selectedCourseId}`);
+        const res = await api(`/courses/${selectedCourseId}/detail`);
         if (active) {
           const sessList = res.sessions || [];
           setSessions(sessList);
@@ -114,7 +114,7 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         body: JSON.stringify({ title: newSessionTitle.trim() })
       });
       // reload sessions
-      const res = await api(`/courses/${selectedCourseId}`);
+      const res = await api(`/courses/${selectedCourseId}/detail`);
       const sessList = res.sessions || [];
       setSessions(sessList);
       const created = sessList.find(s => s.title === newSessionTitle.trim()) || sessList[sessList.length - 1];

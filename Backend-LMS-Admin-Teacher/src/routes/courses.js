@@ -16,6 +16,20 @@ const courseInput = z.object({ courseCode: z.string().trim().min(2).max(30), tit
   description: z.string().trim().max(4000).default(''), category: z.enum(['Wajib', 'Pilihan']).default('Wajib'),
   trainerNpk: z.string().trim().max(50).optional().default('') });
 
+router.get('/', async (req, res, next) => {
+  try {
+    const result = await pool.request()
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .input('isAdmin', sql.Bit, req.user.role === 'admin')
+      .query(`SELECT course_id,course_code,title,description,category,status,assigned_trainer_npk
+        FROM dbo.courses
+        WHERE status='active' AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)
+        ORDER BY title`);
+    const page = paginateCollection(req, result.recordset);
+    res.json({ courses: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
+  } catch (error) { next(error); }
+});
+
 router.post('/', allowRoles('admin', 'teacher'), async (req, res, next) => {
   const parsed = courseInput.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Periksa kode, judul, deskripsi, dan kategori course.' } });
