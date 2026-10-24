@@ -20,7 +20,7 @@ if (!['up', 'status'].includes(command) || !['all', 'admin', 'student'].includes
 
 function migrations(engine) {
   const folder = path.join(root, 'migrations', engine);
-  return fs.readdirSync(folder).filter(name => name.endsWith('.sql')).sort()
+  return fs.readdirSync(folder).filter(name => /^\d{3}_[a-z0-9_-]+\.sql$/i.test(name)).sort()
     .map(name => ({ name, sql: fs.readFileSync(path.join(folder, name), 'utf8') }));
 }
 
@@ -29,7 +29,22 @@ function sqlServerBatches(source) {
 }
 
 async function runAdmin() {
-  const { pool } = require(path.join(backend, 'src', 'config', 'database'));
+  const sql = localRequire('mssql');
+  const env = require(path.join(backend, 'src', 'config', 'env'));
+  const pool = new sql.ConnectionPool({
+    server: env.DB_SERVER,
+    port: env.DB_PORT,
+    database: env.DB_NAME,
+    user: process.env.MIGRATION_DB_USER || env.DB_USER,
+    password: process.env.MIGRATION_DB_PASSWORD ?? env.DB_PASSWORD,
+    options: {
+      encrypt: env.DB_ENCRYPT === 'true',
+      trustServerCertificate: env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+      enableArithAbort: true
+    },
+    connectionTimeout: 10000,
+    requestTimeout: 15000
+  });
   try {
     await pool.connect();
     await pool.request().query(`IF OBJECT_ID(N'dbo.schema_migrations',N'U') IS NULL
@@ -42,16 +57,16 @@ async function runAdmin() {
     }
     for (const file of files) {
       if (applied.has(file.name)) continue;
-      const tx = new (require(path.join(backend, 'node_modules', 'mssql')).Transaction)(pool);
+      const tx = new sql.Transaction(pool);
       await tx.begin();
       try {
         for (const batch of sqlServerBatches(file.sql)) await tx.request().batch(batch);
-        await tx.request().input('name', require(path.join(backend, 'node_modules', 'mssql')).NVarChar(255), file.name)
+        await tx.request().input('name', sql.NVarChar(255), file.name)
           .query('INSERT INTO dbo.schema_migrations(migration_name) VALUES(@name)');
         await tx.commit();
         console.log(`APPLIED  admin  ${file.name}`);
       } catch (error) {
-        await tx.rollback();
+        try { await tx.rollback(); } catch { /* Preserve the SQL error that caused the rollback. */ }
         throw new Error(`admin migration ${file.name} failed: ${error.message}`, { cause: error });
       }
     }
@@ -64,8 +79,8 @@ async function runStudent() {
     host: process.env.STUDENT_DB_HOST || '127.0.0.1',
     port: Number(process.env.STUDENT_DB_PORT || 3306),
     database: process.env.STUDENT_DB_NAME || 'dls_student',
-    user: process.env.STUDENT_DB_USER,
-    password: process.env.STUDENT_DB_PASSWORD,
+    user: process.env.MIGRATION_STUDENT_DB_USER || process.env.STUDENT_DB_USER,
+    password: process.env.MIGRATION_STUDENT_DB_PASSWORD ?? process.env.STUDENT_DB_PASSWORD,
     multipleStatements: true,
     timezone: 'Z'
   });

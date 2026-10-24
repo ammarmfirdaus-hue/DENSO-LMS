@@ -1,6 +1,3 @@
-USE DX_LMS_AdminTeacher;
-GO
-
 /* Add the reviewer account role without changing existing administrator/teacher accounts. */
 DECLARE @dropRoleChecks NVARCHAR(MAX) = N'';
 SELECT @dropRoleChecks += N'ALTER TABLE dbo.employee_accounts DROP CONSTRAINT ' + QUOTENAME(cc.name) + N';'

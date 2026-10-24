@@ -24,7 +24,7 @@ Installer mempertahankan `.env` yang sudah ada. Setelah selesai, sesuaikan krede
 
 ### Setup database dan migrations
 
-Admin/Teacher menggunakan SQL Server (`DX_LMS_AdminTeacher`), sedangkan Student menggunakan MySQL (`dls_student`). Atur koneksi kedua database pada `Backend-LMS-Admin-Teacher/.env`, lalu pastikan kedua database sudah dibuat dan akun punya izin membuat/mengubah tabel dan indeks. Jalankan migration CLI dari root repository:
+Admin/Teacher menggunakan SQL Server (`DX_LMS_AdminTeacher`), sedangkan Student menggunakan MySQL (`dls_student`). Atur koneksi kedua database pada `Backend-LMS-Admin-Teacher/.env` dan pastikan database sudah dibuat. Untuk memisahkan izin aplikasi dan DDL, migrasi dapat memakai akun khusus melalui `MIGRATION_DB_USER` / `MIGRATION_DB_PASSWORD` (SQL Server) serta `MIGRATION_STUDENT_DB_USER` / `MIGRATION_STUDENT_DB_PASSWORD` (MySQL). Panduan izin migrator ada di [`database/MIGRATIONS.md`](database/MIGRATIONS.md). Jalankan migration CLI dari root repository:
 
 ```powershell
 node database/migrate.js status all

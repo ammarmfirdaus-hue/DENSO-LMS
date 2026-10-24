@@ -7,7 +7,48 @@ The applications use two independent databases and SQL dialects:
 | Admin/Teacher API | Microsoft SQL Server | `Backend-LMS-Admin-Teacher/.env`: `DB_SERVER`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` |
 | Native Student | MySQL 8+ | `Backend-LMS-Admin-Teacher/.env`: `STUDENT_DB_HOST`, `STUDENT_DB_PORT`, `STUDENT_DB_NAME`, `STUDENT_DB_USER`, `STUDENT_DB_PASSWORD` |
 
-Set both databases and credentials in the backend `.env` before running the CLI. Each database must already exist, and its account needs permission to create/alter tables, indexes, and the `schema_migrations` tracking table. The student app `.env` must point to the same MySQL database. The CLI deliberately does not create databases or change credentials.
+Set both databases in the backend `.env` before running the CLI. Keep the runtime accounts (`DB_USER` and `STUDENT_DB_USER`) restricted to application access. The migrator accepts optional, separate DDL credentials: `MIGRATION_DB_USER` / `MIGRATION_DB_PASSWORD` for SQL Server and `MIGRATION_STUDENT_DB_USER` / `MIGRATION_STUDENT_DB_PASSWORD` for MySQL. If unset, it falls back to the matching app credentials, which must then have DDL rights. Databases must already exist; the CLI deliberately does not create databases or change credentials. The Student app `.env` must point to the same MySQL database.
+
+For SQL Server, create a dedicated login/user using an administrative SSMS session, then grant database-scoped migration rights. Replace the password before executing:
+
+```sql
+USE master;
+GO
+IF SUSER_ID(N'dls_lms_migrator') IS NULL
+  CREATE LOGIN dls_lms_migrator WITH PASSWORD = N'<STRONG_PASSWORD>', CHECK_POLICY = ON;
+GO
+USE DX_LMS_AdminTeacher;
+GO
+IF DATABASE_PRINCIPAL_ID(N'dls_lms_migrator') IS NULL
+  CREATE USER dls_lms_migrator FOR LOGIN dls_lms_migrator;
+GO
+GRANT CREATE TABLE TO dls_lms_migrator;
+GRANT ALTER ON SCHEMA::dbo TO dls_lms_migrator;
+GRANT REFERENCES ON SCHEMA::dbo TO dls_lms_migrator;
+GRANT SELECT ON SCHEMA::dbo TO dls_lms_migrator;
+IF OBJECT_ID(N'dbo.schema_migrations', N'U') IS NOT NULL
+  GRANT SELECT, INSERT ON dbo.schema_migrations TO dls_lms_migrator;
+GO
+```
+
+For MySQL, grant migration privileges to a dedicated account on only the Student database (replace host/password as appropriate):
+
+```sql
+CREATE USER IF NOT EXISTS 'dls_student_migrator'@'localhost' IDENTIFIED BY '<STRONG_PASSWORD>';
+GRANT CREATE, ALTER, INDEX, REFERENCES, SELECT, INSERT, UPDATE ON dls_student.* TO 'dls_student_migrator'@'localhost';
+```
+
+Put the migrator credentials in the backend `.env` under the optional names above, then retry `node database/migrate.js up admin` (or `student`). The existing API user can remain restricted to its application permissions. SQL Server migrations are transactional, so a failed SQL Server migration rolls back; MySQL DDL may be partially applied and should be inspected before retrying.
+
+If `schema_migrations` already exists and the CLI reports `SELECT permission was denied` for a table during constraint validation, grant read access to the migration account in SSMS as a database administrator. Keep the tracking table insert grant as well:
+
+```sql
+USE DX_LMS_AdminTeacher;
+GO
+GRANT SELECT ON SCHEMA::dbo TO dls_lms_migrator;
+GRANT INSERT ON dbo.schema_migrations TO dls_lms_migrator;
+GO
+```
 
 Run from the repository root:
 
