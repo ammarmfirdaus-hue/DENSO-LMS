@@ -41,3 +41,7 @@ The idempotent seeder adds three student accounts, four courses, sessions/materi
 - All private student pages and API resources require a student session.
 - No teacher/admin access or role switching is implemented here.
 - Some deep learning screens still contain migrated sample content; the dashboard/course GET endpoints read the new MySQL schema. Populate the database before relying on these views for real learning records.
+
+### Security tests
+
+Run `php tests/run.php` from this project directory. The split suites in `tests/test.secure.*.php` exercise SSO token validation, CSRF and session settings, controller path traversal, HTML output escaping, and hostile pagination input. They run without a database connection and use an isolated test-only SSO secret.

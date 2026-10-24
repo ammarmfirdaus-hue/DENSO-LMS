@@ -20,7 +20,11 @@ class DX_LMS_M_Router
      *
      * @var array
      */
-    private $moduleFolders = ['Auth', 'Student', 'Teacher', 'Admin'];
+    private $moduleFolders = [
+        'Auth', 'Student', 'Student/Dashboard', 'Student/Courses', 'Student/Learning',
+        'Student/Forum', 'Student/History', 'Student/Notifications', 'Student/Profile',
+        'Teacher', 'Admin',
+    ];
 
     /**
      * Menambahkan Rute (Route) Baru ke dalam Daftar Rute.
@@ -50,15 +54,21 @@ class DX_LMS_M_Router
      */
     private function findControllerFile($controller)
     {
+        // Controller names come from the route registry. Reject path syntax even
+        // if a future route is assembled from request data by mistake.
+        if (!is_string($controller) || !preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $controller)) {
+            return null;
+        }
+
         /** Memeriksa keberadaan berkas secara langsung di dalam direktori pengontrol. */
-        $directPath = 'Controllers/' . $controller . '.php';
+        $directPath = APP_ROOT . '/Controllers/' . $controller . '.php';
         if (file_exists($directPath)) {
             return $directPath;
         }
 
         /** Melakukan pencarian berkas di dalam subdirektori modul terkait. */
         foreach ($this->moduleFolders as $folder) {
-            $subPath = 'Controllers/' . $folder . '/' . $controller . '.php';
+            $subPath = APP_ROOT . '/Controllers/' . $folder . '/' . $controller . '.php';
             if (file_exists($subPath)) {
                 return $subPath;
             }

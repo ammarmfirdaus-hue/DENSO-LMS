@@ -38,25 +38,25 @@
 :root {
     /* --- Color Tokens (Material Design 3) --- */
     /* Primary */
-    --dls-primary: #b4000b;
-    --dls-primary-container: #e20613;
+    --dls-primary: #d71920;
+    --dls-primary-container: #b9141b;
     --dls-on-primary: #ffffff;
     --dls-on-primary-container: #fff3f2;
-    --dls-primary-fixed: #ffdad5;
-    --dls-primary-fixed-dim: #ffb4aa;
-    --dls-on-primary-fixed: #410001;
-    --dls-on-primary-fixed-variant: #930007;
-    --dls-inverse-primary: #ffb4aa;
+    --dls-primary-fixed: #ffdadb;
+    --dls-primary-fixed-dim: #ffb3b5;
+    --dls-on-primary-fixed: #410006;
+    --dls-on-primary-fixed-variant: #a40010;
+    --dls-inverse-primary: #ffb3b5;
 
     /* Secondary */
-    --dls-secondary: #4355b9;
-    --dls-secondary-container: #8596ff;
+    --dls-secondary: #333d47;
+    --dls-secondary-container: #e6e9ed;
     --dls-on-secondary: #ffffff;
-    --dls-on-secondary-container: #11278e;
-    --dls-secondary-fixed: #dee0ff;
-    --dls-secondary-fixed-dim: #bac3ff;
-    --dls-on-secondary-fixed: #00105c;
-    --dls-on-secondary-fixed-variant: #293ca0;
+    --dls-on-secondary-container: #1d252c;
+    --dls-secondary-fixed: #e0e4e9;
+    --dls-secondary-fixed-dim: #c4cad1;
+    --dls-on-secondary-fixed: #171d23;
+    --dls-on-secondary-fixed-variant: #46515c;
 
     /* Tertiary */
     --dls-tertiary: #00671a;
@@ -75,28 +75,28 @@
     --dls-on-error-container: #93000a;
 
     /* Surface */
-    --dls-surface: #fcf9f8;
-    --dls-surface-dim: #dcd9d9;
-    --dls-surface-bright: #fcf9f8;
+    --dls-surface: #f7f8fa;
+    --dls-surface-dim: #d5d9de;
+    --dls-surface-bright: #f7f8fa;
     --dls-surface-container-lowest: #ffffff;
-    --dls-surface-container-low: #f6f3f2;
-    --dls-surface-container: #f0eded;
-    --dls-surface-container-high: #eae7e7;
-    --dls-surface-container-highest: #e5e2e1;
-    --dls-surface-variant: #e5e2e1;
-    --dls-surface-tint: #c0000d;
+    --dls-surface-container-low: #f1f3f5;
+    --dls-surface-container: #e8ebef;
+    --dls-surface-container-high: #e1e5e9;
+    --dls-surface-container-highest: #d8dde2;
+    --dls-surface-variant: #e1e5e9;
+    --dls-surface-tint: #d71920;
 
     /* On Surface */
-    --dls-on-surface: #1b1c1c;
-    --dls-on-surface-variant: #5e3f3b;
-    --dls-on-background: #1b1c1c;
+    --dls-on-surface: #20252b;
+    --dls-on-surface-variant: #5b6470;
+    --dls-on-background: #20252b;
 
     /* Background */
-    --dls-background: #fcf9f8;
+    --dls-background: #f7f8fa;
 
     /* Outline */
-    --dls-outline: #936e69;
-    --dls-outline-variant: #e9bcb6;
+    --dls-outline: #737d88;
+    --dls-outline-variant: #d9dee4;
 
     /* Inverse */
     --dls-inverse-surface: #303030;

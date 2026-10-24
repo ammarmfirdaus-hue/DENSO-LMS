@@ -678,16 +678,16 @@ input::-ms-clear {
 .swal2-title {
     font-size: 18px !important;
     font-weight: 700 !important;
-    color: #1b1c1c !important;
+    color: var(--dls-on-surface) !important;
 }
 
 .swal2-html-container {
     font-size: 14px !important;
-    color: #5e3f3b !important;
+    color: var(--dls-on-surface-variant) !important;
 }
 
 .swal2-confirm {
-    background-color: #4355b9 !important;
+    background-color: var(--dls-primary) !important;
     border-radius: 9999px !important;
     font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;
@@ -698,8 +698,8 @@ input::-ms-clear {
 
 .swal2-cancel {
     background-color: transparent !important;
-    color: #1b1c1c !important;
-    border: 1px solid #e9bcb6 !important;
+    color: var(--dls-on-surface) !important;
+    border: 1px solid var(--dls-outline-variant) !important;
     border-radius: 9999px !important;
     font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;
@@ -708,7 +708,7 @@ input::-ms-clear {
 }
 
 .swal2-deny {
-    background-color: #e20613 !important;
+    background-color: var(--dls-primary-container) !important;
     border-radius: 9999px !important;
     font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;

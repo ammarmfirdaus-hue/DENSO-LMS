@@ -8,20 +8,223 @@
 
 @theme {
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #b4000b;
-  --color-primary-container: #e20613;
-  --color-secondary: #4355b9;
-  --color-secondary-container: #8596ff;
-  --color-tertiary: #00671a;
-  --color-surface: #fcf9f8;
-  --color-surface-low: #f6f3f2;
-  --color-surface-container: #f0eded;
-  --color-on-surface: #1b1c1c;
-  --color-muted: #5e3f3b;
-  --color-outline: #e9bcb6;
+  --color-primary: #d71920;
+  --color-primary-container: #b9141b;
+  --color-secondary: #333d47;
+  --color-secondary-container: #e6e9ed;
+  --color-tertiary: #26734d;
+  --color-surface: #f7f8fa;
+  --color-surface-low: #f0f2f5;
+  --color-surface-container: #e8ebef;
+  --color-on-surface: #20252b;
+  --color-muted: #68727d;
+  --color-outline: #d9dee4;
+}
+
+/* ============================================================
+   TEMA GELAP (DARK MODE) SISTEMIK
+   Berlaku secara detail pada seluruh halaman, kartu, tabel, dan form
+   ============================================================ */
+:root.dark, html.dark {
+  --color-surface: #0f172a;
+  --color-surface-low: #1e293b;
+  --color-surface-container: #334155;
+  --color-on-surface: #f1f5f9;
+  --color-secondary: #cbd5e1;
+  --color-secondary-container: #1e293b;
+  --color-muted: #94a3b8;
+  --color-outline: #334155;
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark aside,
+html.dark header,
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  color: #f1f5f9;
+}
+
+html.dark .bg-surface-low,
+html.dark .bg-surface-low\/50,
+html.dark .bg-surface-low\/70,
+html.dark .bg-surface-low\/40,
+html.dark .bg-surface-low\/30 {
+  background-color: #0f172a !important;
+}
+
+html.dark .border-outline,
+html.dark .border-outline\/30,
+html.dark .border-outline\/40,
+html.dark .border-outline\/50,
+html.dark .border-outline\/60,
+html.dark .border-outline\/70 {
+  border-color: #334155 !important;
+}
+
+html.dark .text-secondary,
+html.dark .text-on-surface {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-muted {
+  color: #94a3b8 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+html.dark table thead {
+  background-color: #0f172a !important;
+}
+
+html.dark tr:hover {
+  background-color: rgba(51, 65, 85, 0.4) !important;
+}
+
+html.dark .swal2-popup {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .swal2-title {
+  color: #f1f5f9 !important;
+}
+
+html.dark .swal2-html-container {
+  color: #94a3b8 !important;
+}
+
+html.dark .swal2-cancel {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+html.dark .swal2-cancel:hover {
+  background-color: #334155 !important;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--color-surface); color: var(--color-on-surface); font-family: Inter, sans-serif; }
+body { margin: 0; background: var(--color-surface); color: var(--color-on-surface); font-family: Inter, sans-serif; transition: background-color 0.2s ease, color 0.2s ease; }
 button, input { font: inherit; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary) 38%, transparent); outline-offset: 2px; }
+::selection { background: #f8dadd; color: #401014; }
 .material-symbol { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 22px; line-height: 1; display: inline-block; white-space: nowrap; }
+
+
+/* ============================================================
+   SweetAlert2 DLS Theme Override - Admin & Teacher Portal
+   Membuat modal popup profesional, rapi, responsif, dan modern
+   ============================================================ */
+.swal2-container {
+  backdrop-filter: blur(5px);
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  z-index: 99999 !important;
+}
+
+.swal2-popup {
+  font-family: var(--font-sans) !important;
+  border-radius: 24px !important;
+  padding: 28px 24px 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--color-outline) !important;
+  background: #ffffff !important;
+  width: 92% !important;
+  max-width: 440px !important;
+}
+
+.swal2-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--color-on-surface) !important;
+  padding: 0 !important;
+  margin-top: 8px !important;
+  line-height: 1.35 !important;
+}
+
+.swal2-html-container {
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  color: var(--color-muted) !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+}
+
+.swal2-actions {
+  margin: 24px 0 0 !important;
+  gap: 10px !important;
+  width: 100% !important;
+  justify-content: flex-end !important;
+}
+
+.swal2-confirm {
+  background-color: var(--color-primary) !important;
+  border-radius: 12px !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  padding: 10px 20px !important;
+  box-shadow: 0 2px 8px rgba(215, 25, 32, 0.25) !important;
+  color: #ffffff !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+.swal2-confirm:hover {
+  filter: brightness(1.1) !important;
+  transform: translateY(-1px);
+}
+.swal2-confirm:active {
+  transform: scale(0.97);
+}
+
+.swal2-cancel {
+  background-color: #ffffff !important;
+  color: var(--color-secondary) !important;
+  border: 1px solid var(--color-outline) !important;
+  border-radius: 12px !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  padding: 10px 18px !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+.swal2-cancel:hover {
+  background-color: var(--color-surface-low) !important;
+}
+
+.swal2-icon {
+  margin: 0 auto 8px !important;
+  transform: scale(0.9);
+}
+
+.swal2-popup.swal2-toast {
+  border-radius: 14px !important;
+  padding: 12px 18px !important;
+  border: 1px solid var(--color-outline) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15) !important;
+  width: auto !important;
+  max-width: 360px !important;
+}
+.swal2-popup.swal2-toast .swal2-title {
+  font-size: 0.875rem !important;
+  margin: 0 !important;
+}
+

@@ -9,6 +9,7 @@ On Windows, run `install.bat` from this folder to install Node.js dependencies a
 1. Install Node.js 20+ and SQL Server 2019+ with the SQL Server driver enabled.
 2. Create a database login with access only to `DX_LMS_AdminTeacher`; avoid using `sa`.
 3. Run `../database/admin&teacher.sql` in SQL Server Management Studio. This is the shared workspace schema file.
+   Then run `../database/material-workflow.sql` to enable reviewer accounts and the approval queue.
 4. Copy `.env.example` to `.env`, configure the connection, and set a random JWT secret of at least 32 bytes. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
 5. Run `npm install`, then provision the initial staff account through environment variables `SEED_NPK`, `SEED_NAME`, `SEED_EMAIL`, `SEED_PASSWORD`, `SEED_ROLE` and `npm run db:seed`. The seeder hashes passwords with bcrypt cost 12; it does not include default credentials.
 6. Run `npm run dev` for local development or `npm start` for the API process.
@@ -37,10 +38,22 @@ The idempotent seeder adds two staff accounts, three courses with sessions/mater
 
 Protected requests use `Authorization: Bearer <token>`. JWT verification pins HS256 and checks issuer, audience, expiry, and role. The React app holds the token in memory instead of localStorage; a page reload requires signing in again. CORS allows only `FRONTEND_ORIGIN`; JSON request bodies have a 32 KB limit; SQL values are parameterized; secrets are excluded from API error responses.
 
+Run `npm test` for the isolated security suites in `tests/`. They cover SSO/JWT validation, role authorization, hostile pagination parameters, spoofed uploads, and error-response redaction. The tests use test-only credentials and temporary files; they do not connect to or mutate the application database.
+
 ## Student database synchronization
 
-The optional sync process copies course metadata from SQL Server into the PHP student's MySQL database, then copies learner enrollment/progress summaries back into `student_progress_snapshots` for teacher/admin review. It is disabled by default. To enable it, create a dedicated, least-privilege MySQL account, apply `../database/student.sql`, set `STUDENT_SYNC_ENABLED=true` and `STUDENT_DB_*` in this project's private `.env`, and restart the API. The default interval is one minute. It is a periodic snapshot sync, not a real-time transaction, forum, or quiz-grade feed; monitor the server log for sync errors.
+The optional sync process copies course, session, and published material data from SQL Server into the PHP student's MySQL database, then copies learner enrollment/progress summaries back into `student_progress_snapshots` for teacher/admin review. It is disabled by default. To enable it, create a dedicated, least-privilege MySQL account, apply `../database/student.sql` (or run `../database/student-material-sync-migration.sql` against an existing database), set `STUDENT_SYNC_ENABLED=true` and `STUDENT_DB_*` in this project's private `.env`, and restart the API. Set `STUDENT_PUBLIC_API_URL` to the API URL the student browser can reach; published files are served from that API. Sync runs once a minute by default, so a newly published item can take up to one interval to appear.
+
+## Material approval and reviewer portal
+
+1. Create reviewer and trainer accounts from **Pengguna** as an Admin. Give each account a unique NPK, work email, and password. Assign each course to its trainer in **Course & Materi**; trainers then see and upload only courses they own or have been assigned. Reviewer decisions are only available through the secure email link.
+2. Set `MATERIAL_UPLOAD_DIR` (defaults to `uploads/materials` under this backend), `MATERIAL_MAX_UPLOAD_BYTES`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` in the backend `.env`. Use a real reachable URL for `REVIEW_PORTAL_URL` (for local-only use it can be `http://127.0.0.1:5173`). Do not commit SMTP credentials.
+3. Trainer adds text, a YouTube URL, HTTPS link, or a local PDF/image/Office/audio/video file under a course session. The upload stays in the backend's local `uploads/materials` directory and enters **Menunggu admin**.
+4. Admin chooses an active reviewer and sends the invitation. The email contains a random, one-use link that expires after 48 hours. Opening it creates a two-hour reviewer session and displays that reviewer's assigned material list. The reviewer can preview supported material and approve or reject with a comment.
+5. Admin can publish only approved materials. The next student sync copies the published course session and item into MySQL; the student course page displays its text, YouTube video, PDF, image, office document, audio, or link.
+
+Allowed local files are PDF, common Office/ODF documents, MP4/WebM/MOV/OGV, MP3/WAV/OGG/M4A, and PNG/JPG/GIF/WebP. The default upload limit is 250 MB; tune it to available disk and PHP/browser constraints. Back up `uploads/materials` along with SQL Server. Rejected or unpublished material is never returned by the student file endpoint.
 
 ## Scope
 
-The migrated API supports login, dashboard counts, course/session/material authoring, activity listing, student progress snapshots, forum moderation, and admin staff accounts. Quiz scoring, binary material uploads, token refresh/revocation, and live grade sync are not implemented. Course material file paths must point to a separately secured storage service; never serve arbitrary filesystem paths from this API.
+The migrated API supports login, dashboard counts, course/session authoring, material submission/review/publication, activity listing, student progress snapshots, forum moderation, and admin staff/reviewer accounts. Quiz scoring, token refresh/revocation, and live grade sync are not implemented.

@@ -17,7 +17,11 @@ class DX_LMS_M_Controller
      *
      * @var array
      */
-    private $moduleFolders = ['Auth', 'Student', 'Teacher', 'Admin'];
+    private $moduleFolders = [
+        'Auth', 'Student', 'Student/Dashboard', 'Student/Courses', 'Student/Learning',
+        'Student/Forum', 'Student/History', 'Student/Notifications', 'Student/Profile',
+        'Teacher', 'Admin',
+    ];
 
     /**
      * Memuat dan Merender File Tampilan (View).
@@ -39,7 +43,7 @@ class DX_LMS_M_Controller
     protected function view($view, $data = [])
     {
         /** Mengekstrak susunan data (array) menjadi variabel terpisah untuk kemudahan akses. */
-        extract($data);
+        extract($data, EXTR_SKIP);
 
         $viewFile = $this->findViewFile($view);
         if ($viewFile) {
@@ -62,14 +66,18 @@ class DX_LMS_M_Controller
     private function findViewFile($view)
     {
         /** Melakukan pencarian berkas langsung di dalam direktori Views. */
-        $directPath = 'Views/' . $view . '.php';
+        if (!is_string($view) || !preg_match('/^[A-Za-z0-9_-]+$/D', $view)) {
+            return null;
+        }
+
+        $directPath = APP_ROOT . '/Views/' . $view . '.php';
         if (file_exists($directPath)) {
             return $directPath;
         }
 
         /** Melakukan pencarian berkas di dalam subdirektori modul terkait. */
         foreach ($this->moduleFolders as $folder) {
-            $subPath = 'Views/' . $folder . '/' . $view . '.php';
+            $subPath = APP_ROOT . '/Views/' . $folder . '/' . $view . '.php';
             if (file_exists($subPath)) {
                 return $subPath;
             }
@@ -91,7 +99,11 @@ class DX_LMS_M_Controller
      */
     protected function model($model)
     {
-        $modelFile = 'Models/' . $model . '.php';
+        if (!is_string($model) || !preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $model)) {
+            throw new InvalidArgumentException('Nama model tidak valid.');
+        }
+
+        $modelFile = APP_ROOT . '/Models/' . $model . '.php';
         if (file_exists($modelFile)) {
             require_once $modelFile;
             if (class_exists($model)) {

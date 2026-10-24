@@ -1,39 +1,58 @@
 <?php
 /**
- * Komponen Bilah Atas Aplikasi (Top App Bar) — DLS.
- *
- * Menyajikan header navigasi atas yang sesuai dengan desain referensi Student.
- * Tata letak: [Ikon Bisnis] --- [Judul LMS] --- [Lonceng Notifikasi].
- *
- * Variabel yang Diterima:
- *   $base_path       - string : Jalur relatif menuju direktori root (misal: '' atau '../').
- *   $show_back       - bool   : (opsional) Tampilkan tombol kembali, bukan ikon bisnis.
- *   $header_title    - string : (opsional) Judul kustom (bawaan: 'LMS').
- *   $back_url        - string : (opsional) URL tujuan tombol kembali.
- *   $notif_count     - int    : (opsional) Jumlah badge notifikasi.
+ * Header komponen bersama — Student Portal DENSO Learning.
+ * Redesign: bersih, tanpa teks "LMS", layout full-width, konsisten di mobile & desktop.
  */
-
-$show_back = $show_back ?? false;
-$header_title = $header_title ?? 'LMS';
-$notif_count = $notif_count ?? 0;
-$base_path = $base_path ?? '';
+$show_back    = (bool)   ($show_back    ?? false);
+$header_title = (string) ($header_title ?? 'Beranda');
+$notif_count  = max(0, (int) ($notif_count ?? 0));
+$base_path    = (string) ($base_path    ?? '');
+$back_url     = (string) ($back_url     ?? '?route=/student');
+$headerTitleEscaped = htmlspecialchars($header_title, ENT_QUOTES, 'UTF-8');
+$backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
 ?>
-<header class="bg-surface dark:bg-on-background fixed top-0 w-full z-40 border-b border-outline-variant dark:border-outline pt-safe lg:w-[calc(100%-240px)] lg:ml-[240px] transition-all duration-300" id="topAppBar">
-    <div class="flex justify-end items-center w-full px-container-margin h-14">
-        <!-- Left Action -->
-        <?php if ($show_back): ?>
-        
+<header class="dls-app-header" id="topAppBar" role="banner">
+    <div class="dls-app-header-inner">
+
+        <!-- LEFT: back button + title OR page title -->
+        <div class="dls-header-context">
+            <button type="button"
+                    class="dls-desktop-sidebar-toggle"
+                    id="dlsDesktopSidebarToggle"
+                    onclick="window.toggleStudentSidebar()"
+                    aria-label="Kecilkan sidebar"
+                    title="Kecilkan sidebar">
+                <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+            </button>
+            <?php if ($show_back): ?>
+                <a class="dls-header-back" href="<?= $backUrlEscaped ?>" aria-label="Kembali">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                </a>
+            <?php endif; ?>
+            <div class="dls-header-title-group">
+                <span class="dls-header-title"><?= $headerTitleEscaped ?></span>
+            </div>
+        </div>
+
+        <!-- CENTER brand (mobile only, when no back button) -->
+        <?php if (!$show_back): ?>
+        <a class="dls-mobile-brand" href="?route=/student" aria-label="DENSO Learning — Beranda">
+            <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo.png', ENT_QUOTES, 'UTF-8') ?>"
+                 alt="DENSO" width="28" height="28">
+            <span>DENSO Learning</span>
+        </a>
         <?php endif; ?>
 
-
-        <!-- Right Action: Notification Bell -->
-        <a href="<?= $base_path ?>?route=/student/notifikasi" class="ml-auto shrink-0 text-primary dark:text-primary-fixed transition-all duration-200 active:scale-95 hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full flex items-center justify-center relative" aria-label="Notifikasi">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+        <!-- RIGHT: notification bell -->
+        <a href="?route=/student/notifikasi"
+           class="dls-header-notifications"
+           aria-label="Notifikasi<?= $notif_count > 0 ? ', ' . $notif_count . ' belum dibaca' : '' ?>"
+           title="Notifikasi">
+            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
             <?php if ($notif_count > 0): ?>
-            <span class="notification-dot absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 min-w-[18px] h-[18px] bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-surface dark:border-on-background">
-                <?= $notif_count > 99 ? '99+' : $notif_count ?>
-            </span>
+                <span class="dls-notification-count notification-dot" aria-hidden="true"><?= $notif_count > 99 ? '99+' : $notif_count ?></span>
             <?php endif; ?>
         </a>
+
     </div>
 </header>

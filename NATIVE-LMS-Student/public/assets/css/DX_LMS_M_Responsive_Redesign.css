@@ -79,7 +79,18 @@ main pre, main code { max-width: 100%; overflow-x: auto; }
 .dls-main [class*="grid-cols-"], .dls-main-sub [class*="grid-cols-"] { min-width: 0; }
 #bottomNavBar .material-symbols-outlined { font-size: 22px; }
 @media (min-width: 1024px) {
-    #topAppBar { width: calc(100% - 240px); margin-left: 240px; }
+    #topAppBar,
+    #topAppBar.dls-app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 240px !important;
+        right: 0 !important;
+        width: calc(100% - 240px) !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
     #bottomNavBar {
         width: 240px;
         height: 100dvh;
@@ -459,7 +470,9 @@ main section, main article { scroll-margin-top: 88px; }
 #loginForm [aria-busy="true"] { cursor: progress; }
 @media (hover: hover) {
     #bottomNavBar a:hover { transform: translateY(-1px); }
-    #topAppBar a:hover, #topAppBar button:hover { transform: translateY(-1px); }
+    #topAppBar a:not(.dls-mobile-brand):hover,
+    #topAppBar button:hover { transform: translateY(-1px); }
+    #topAppBar a.dls-mobile-brand:hover { transform: translate(-50%, -50%) !important; opacity: 0.85; }
 }
 @media (max-width: 767px) {
     body:not(.dls-app-shell) { min-height: 100dvh; }
@@ -483,3 +496,550 @@ main section, main article { scroll-margin-top: 88px; }
 @media (prefers-reduced-motion: reduce) {
     button, a, input, select, textarea, summary, .course-card { transition-duration: .01ms !important; }
 }
+
+/* Unified DENSO student portal system */
+:root {
+    --dls-primary: #d71920;
+    --dls-primary-container: #b9161e;
+    --dls-secondary: #174a70;
+    --dls-surface: #f4f6f9;
+    --dls-surface-container-low: #eef2f6;
+    --dls-surface-container-lowest: #fff;
+    --dls-on-surface: #182433;
+    --dls-on-surface-variant: #647284;
+    --dls-outline-variant: #dfe5ec;
+    --dls-radius-lg: 16px;
+    --dls-radius-xl: 20px;
+    --dls-container-margin: clamp(16px, 3vw, 34px);
+}
+
+html { background: #f4f6f9; }
+body.dls-app-shell {
+    min-height: 100dvh;
+    overflow-x: clip;
+    background: #f4f6f9;
+    color: #182433;
+    font-family: var(--dls-font-family);
+    -webkit-font-smoothing: antialiased;
+}
+
+#topAppBar.dls-app-header {
+    position: fixed;
+    z-index: 45;
+    inset: 0 0 auto;
+    height: calc(68px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+    border-bottom: 1px solid rgba(220, 227, 235, .88);
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 4px 18px rgba(24, 36, 51, .045);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+.dls-app-header-inner {
+    display: flex;
+    width: 100%;
+    height: 68px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-inline: var(--dls-container-margin);
+}
+.dls-header-context { display: flex; min-width: 0; align-items: center; gap: 12px; }
+.dls-header-brand, .dls-header-back, .dls-header-notifications {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #e7ebf0;
+    border-radius: 14px;
+    background: #fff;
+    color: #174a70;
+    text-decoration: none;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.dls-header-brand img { width: 32px; height: 32px; object-fit: contain; }
+.dls-header-back .material-symbols-outlined,
+.dls-header-notifications .material-symbols-outlined { font-size: 21px; }
+.dls-header-title-group { display: flex; min-width: 0; flex-direction: column; gap: 1px; }
+.dls-header-eyebrow { color: #8793a1; font-size: 9px; font-weight: 750; letter-spacing: .15em; line-height: 1.2; }
+.dls-header-title { overflow: hidden; color: #1d2938; font-size: 15px; font-weight: 700; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.dls-header-notifications { position: relative; border-radius: 50%; color: #26364a; }
+.dls-notification-count {
+    position: absolute;
+    top: -4px;
+    right: -5px;
+    display: grid;
+    min-width: 19px;
+    height: 19px;
+    place-items: center;
+    padding-inline: 4px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #d71920;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+#bottomNavBar {
+    position: fixed;
+    z-index: 50;
+    inset: auto 0 0;
+    display: flex;
+    height: calc(72px + env(safe-area-inset-bottom));
+    align-items: stretch;
+    gap: 4px;
+    padding: 7px 12px calc(7px + env(safe-area-inset-bottom));
+    border: 1px solid #e4e9ef;
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 -8px 28px rgba(29, 43, 59, .09);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+#bottomNavBar > .dls-nav-brand, #bottomNavBar > .dls-nav-section-label { display: none; }
+#bottomNavBar a {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 52px;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 13px;
+    background: transparent;
+    color: #728092;
+    text-decoration: none;
+}
+#bottomNavBar a .material-symbols-outlined { margin: 0; font-size: 21px; }
+#bottomNavBar a span:last-child { overflow: hidden; max-width: 100%; font-size: 10px; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+#bottomNavBar a[aria-current="page"] { background: #fff0f1; color: #bd1720; }
+#bottomNavBar a[aria-current="page"]::before { display: none; }
+#bottomNavBar a[aria-current="page"] .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+.dls-main, .dls-main-sub {
+    width: 100%;
+    max-width: 1680px;
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding: calc(68px + env(safe-area-inset-top) + 24px) var(--dls-container-margin) calc(88px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+}
+.dls-main > *, .dls-main-sub > * { min-width: 0; }
+.dls-main :is(h1, h2, h3), .dls-main-sub :is(h1, h2, h3) { color: #182433; letter-spacing: -.035em; }
+.dls-main h1, .dls-main-sub h1 { font-size: clamp(24px, 3vw, 34px); line-height: 1.16; text-wrap: balance; }
+.dls-main h2, .dls-main-sub h2 { font-size: clamp(18px, 2vw, 22px); line-height: 1.3; }
+.dls-main p, .dls-main-sub p { text-wrap: pretty; }
+.dls-section-kicker { margin: 0; color: #bd1720 !important; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.dls-feature-note {
+    margin: 0;
+    padding: 13px 15px;
+    border: 1px solid #dce6ef;
+    border-radius: 13px;
+    background: #f3f7fb;
+    color: #526579;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.login-help-note { margin: 0; color: #66758a; font-size: 12px; text-align: right; }
+.dls-course-link { color: #fff !important; text-decoration: none; }
+.dls-course-link:hover { background: #b9161e !important; color: #fff !important; }
+.dls-welcome-hero {
+    position: relative;
+    display: flex;
+    min-height: 166px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 9px;
+    overflow: hidden;
+    padding: clamp(21px, 3vw, 34px);
+    border: 1px solid #e6eaf0;
+    border-radius: 22px;
+    background: radial-gradient(circle at 93% 2%, rgba(215, 25, 32, .09), transparent 28%), linear-gradient(115deg, #fff 0%, #fff 58%, #f8fafc 100%);
+    box-shadow: 0 12px 32px rgba(24, 36, 51, .055);
+}
+.dls-welcome-hero::after { position: absolute; right: 26px; bottom: -44px; width: 124px; height: 124px; border: 1px solid rgba(215,25,32,.12); border-radius: 50%; content: ""; pointer-events: none; }
+.dls-welcome-hero h1, .dls-welcome-hero p { position: relative; z-index: 1; margin: 0; }
+.dls-stat-card {
+    min-width: 0;
+    min-height: 114px;
+    border: 1px solid #e5eaf0 !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    box-shadow: 0 8px 24px rgba(24, 36, 51, .045) !important;
+}
+.dls-stat-card-featured { position: relative; overflow: hidden; }
+.dls-stat-card-featured::after { position: absolute; top: -34px; right: -20px; width: 100px; height: 100px; border: 1px solid rgba(23,74,112,.1); border-radius: 50%; content: ""; pointer-events: none; }
+
+main :is(.dls-card, .course-card, [class*="bg-surface-container-lowest"][class*="rounded"], [class*="bg-white"][class*="rounded"]) {
+    border-color: #e4e9ef;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px rgba(24, 36, 51, .05);
+}
+main .course-card { overflow: hidden; background: #fff; }
+main .course-card > div:first-child { min-height: 150px; }
+main .course-card :is(h2, h3) { line-height: 1.35; }
+main :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    min-height: 44px;
+    border-color: #dce3ea;
+    border-radius: 12px;
+    background-color: #fff;
+    color: #182433;
+}
+main textarea { min-height: 120px; resize: vertical; }
+main :is(input, select, textarea):focus-visible { border-color: #174a70; outline: 0; box-shadow: 0 0 0 4px rgba(23,74,112,.11); }
+main :is(button, [role="button"]) { min-height: 42px; border-radius: 12px; font-weight: 650; }
+main button:disabled { cursor: not-allowed; opacity: .58; }
+main table { overflow: hidden; border: 1px solid #e4e9ef; border-radius: 14px; background: #fff; }
+main table thead { background: #f4f6f9; }
+main table th { padding-block: 13px; color: #5d6b7b; font-size: 11px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+main table td { padding-block: 13px; border-top: 1px solid #edf0f4; color: #354355; }
+#paginationContainer { border-color: #e4e9ef; border-radius: 15px; background: #fff; box-shadow: 0 6px 20px rgba(24,36,51,.04); }
+
+/* Sign-in follows the same compact, high-contrast design. */
+body:not(.dls-app-shell) > div:has(#loginForm) { background: #f5f7fa; }
+body:not(.dls-app-shell) #loginForm input { border-color: #dce3ea; box-shadow: 0 3px 10px rgba(24,36,51,.035); }
+body:not(.dls-app-shell) #loginForm input:focus { border-color: #174a70; box-shadow: 0 0 0 4px rgba(23,74,112,.12); }
+body:not(.dls-app-shell) #loginForm button[type="submit"] { background: #d71920; box-shadow: 0 10px 22px rgba(215,25,32,.18); }
+body:not(.dls-app-shell) .login-logo img { width: 76px; height: 76px; border-radius: 20px; }
+body:not(.dls-app-shell) .login-logo-subtitle { color: #748194; font-size: 10px; font-weight: 750; letter-spacing: .16em; }
+
+@media (min-width: 1024px) {
+    #topAppBar,
+    #topAppBar.dls-app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 240px !important;
+        right: 0 !important;
+        width: calc(100% - 240px) !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+    .dls-app-header-inner {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        padding-inline: clamp(24px, 4vw, 56px) !important;
+    }
+    #bottomNavBar {
+        inset: 0 auto 0 0;
+        width: 240px;
+        height: 100dvh;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 7px;
+        padding: 28px 16px 22px;
+        border: 0;
+        border-right: 1px solid #e4e9ef;
+        border-radius: 0;
+        background: #fff;
+        box-shadow: 8px 0 30px rgba(24,36,51,.035);
+    }
+    #bottomNavBar > .dls-nav-brand { display: flex; min-height: 55px; align-items: center; gap: 11px; margin-bottom: 28px; padding: 0 12px; }
+    .dls-nav-brand img { width: 40px; height: 40px; object-fit: contain; }
+    .dls-nav-brand-copy { display: flex; flex-direction: column; gap: 2px; }
+    .dls-nav-brand-copy strong { color: #182433; font-size: 17px; letter-spacing: -.04em; }
+    .dls-nav-brand-copy small { color: #8390a0; font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+    #bottomNavBar > .dls-nav-section-label { display: block; margin: 0 12px 5px; color: #8b97a5; font-size: 9px; font-weight: 800; letter-spacing: .16em; }
+    #bottomNavBar a { flex: 0 0 48px; flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 13px; border-radius: 12px; font-size: 13px; }
+    #bottomNavBar a .material-symbols-outlined { font-size: 20px; }
+    #bottomNavBar a span:last-child { max-width: unset; font-size: 13px; }
+    #bottomNavBar a[aria-current="page"] { background: #fff0f1; color: #ba1720; }
+    .dls-main, .dls-main-sub {
+        width: calc(100% - 240px);
+        max-width: 1680px;
+        min-height: 100dvh;
+        margin: 0 0 0 240px;
+        padding: calc(68px + 28px) clamp(28px, 4vw, 66px) 56px !important;
+    }
+}
+@media (max-width: 640px) {
+    .dls-app-header-inner { height: 62px; padding-inline: 15px; }
+    #topAppBar.dls-app-header { height: calc(62px + env(safe-area-inset-top)); }
+    .dls-header-brand, .dls-header-back, .dls-header-notifications { width: 40px; height: 40px; border-radius: 13px; }
+    .dls-header-title { font-size: 14px; }
+    .dls-main, .dls-main-sub { padding: calc(62px + env(safe-area-inset-top) + 17px) 16px calc(84px + env(safe-area-inset-bottom)) !important; }
+    .dls-welcome-hero { min-height: 150px; padding: 19px; border-radius: 19px; }
+    .dls-stat-card { min-height: 100px; padding: 14px !important; }
+    #bottomNavBar { padding-inline: 7px; gap: 1px; }
+    #bottomNavBar a { border-radius: 12px; }
+    #bottomNavBar a span:last-child { font-size: 9px; }
+    main table { display: block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #topAppBar *, #bottomNavBar *, main * { scroll-behavior: auto; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* Mobile: center the DENSO brand, hide title. Desktop: show title, hide brand. */
+.dls-app-header-inner { position: relative; }
+.dls-header-context { display: flex; min-width: 0; flex: 1; align-items: center; gap: 12px; }
+.dls-mobile-brand {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 112px);
+    color: #182433;
+    text-decoration: none;
+    transform: translate(-50%, -50%);
+}
+.dls-mobile-brand img { width: 28px; height: 28px; flex: 0 0 auto; object-fit: contain; }
+.dls-mobile-brand span { overflow: hidden; font-size: 14px; font-weight: 800; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 1023px) {
+    .dls-header-context { flex: 0 0 auto; }
+    .dls-header-title-group { display: none; }
+}
+@media (min-width: 1024px) {
+    .dls-mobile-brand { display: none !important; }
+    .dls-header-context { flex: 1; }
+    .dls-header-title-group { display: flex; }
+}
+
+/* Quiz screens use the full desktop canvas so hiding navigation leaves no rail. */
+@media (min-width: 1024px) {
+    body.dls-course-quiz #bottomNavBar,
+    body.dls-fullscreen-quiz #bottomNavBar { display: none !important; }
+    body.dls-course-quiz #topAppBar {
+        inset: 0 0 auto 0 !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    body.dls-course-quiz main.dls-main {
+        width: 100% !important;
+        max-width: none;
+        margin: 0 !important;
+    }
+    body.dls-fullscreen-quiz { padding-bottom: 0 !important; }
+    body.dls-fullscreen-quiz .dls-quiz-topbar { width: 100% !important; margin-left: 0 !important; }
+    body.dls-fullscreen-quiz main.dls-quiz-main {
+        width: 100% !important;
+        max-width: none;
+        margin: 0 !important;
+        padding: 24px clamp(24px, 4vw, 64px) 48px !important;
+    }
+}
+@media (max-width: 1023px) {
+    body.dls-fullscreen-quiz main.dls-quiz-main { padding: 20px 16px 32px !important; }
+}
+
+/* ==========================================================================
+   SweetAlert2 Enhanced Professional DLS Popups & Responsiveness
+   ========================================================================== */
+.swal2-container {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    background: rgba(15, 23, 42, 0.55) !important;
+    padding: 1rem !important;
+    z-index: 99999 !important;
+}
+
+.swal2-popup.dls-swal-popup,
+.swal2-popup {
+    border-radius: 24px !important;
+    padding: 28px 24px 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    max-width: 480px !important;
+    width: 100% !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.swal2-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    line-height: 1.35 !important;
+    padding: 0 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.swal2-html-container {
+    font-size: 0.875rem !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    margin: 0.5rem 0 1.25rem 0 !important;
+    word-break: break-word !important;
+}
+
+.swal2-actions {
+    margin-top: 1.25rem !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+}
+
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+    border-radius: 12px !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    padding: 10px 20px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+.swal2-confirm {
+    background-color: #d71920 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(215, 25, 32, 0.3) !important;
+}
+
+.swal2-confirm:hover {
+    background-color: #b9151b !important;
+    box-shadow: 0 4px 14px rgba(215, 25, 32, 0.45) !important;
+    transform: translateY(-1px) !important;
+}
+
+.swal2-cancel {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.swal2-cancel:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.swal2-input, .swal2-textarea {
+    border-radius: 12px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-size: 0.875rem !important;
+    padding: 10px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.swal2-input:focus, .swal2-textarea:focus {
+    border-color: #d71920 !important;
+    box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.15) !important;
+    outline: none !important;
+}
+
+/* ==========================================================================
+   Dark Theme for Native Student Portal & SweetAlert2
+   ========================================================================== */
+html.dark, :root.dark {
+    --dls-surface: #0f172a;
+    --dls-surface-container-low: #1e293b;
+    --dls-surface-container-lowest: #0b1120;
+    --dls-on-surface: #f8fafc;
+    --dls-on-surface-variant: #94a3b8;
+    --dls-outline-variant: #334155;
+    --dls-outline: #475569;
+    color-scheme: dark;
+}
+
+html.dark body.dls-app-shell,
+html.dark body.bg-surface,
+html.dark body.bg-background,
+html.dark body {
+    background-color: #0b1120 !important;
+    color: #f8fafc !important;
+}
+
+html.dark #topAppBar {
+    background: rgba(15, 23, 42, 0.94) !important;
+    border-color: #1e293b !important;
+    box-shadow: 0 3px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark #bottomNavBar {
+    background: rgba(15, 23, 42, 0.96) !important;
+    border-color: #1e293b !important;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark #bottomNavBar .dls-nav-brand strong,
+html.dark #bottomNavBar .dls-nav-brand small {
+    color: #f8fafc !important;
+}
+
+html.dark #bottomNavBar .dls-nav-section-label {
+    color: #64748b !important;
+}
+
+html.dark main h1, html.dark main h2, html.dark main h3, html.dark main h4 {
+    color: #f8fafc !important;
+}
+
+html.dark .bg-surface,
+html.dark .dls-menu-card,
+html.dark .bg-white,
+html.dark [class*="bg-surface-container"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark .text-on-surface {
+    color: #f8fafc !important;
+}
+
+html.dark .text-on-surface-variant {
+    color: #94a3b8 !important;
+}
+
+html.dark .border-outline-variant,
+html.dark .border-outline-variant\/30,
+html.dark [class*="border-outline"] {
+    border-color: #334155 !important;
+}
+
+html.dark input:not([type=checkbox]):not([type=radio]),
+html.dark select,
+html.dark textarea {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark .swal2-popup.dls-swal-popup,
+html.dark .swal2-popup {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .swal2-title {
+    color: #f8fafc !important;
+}
+
+html.dark .swal2-html-container {
+    color: #94a3b8 !important;
+}
+
+html.dark .swal2-cancel {
+    background-color: #334155 !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+
+html.dark .swal2-cancel:hover {
+    background-color: #475569 !important;
+}
+
+html.dark .swal2-input,
+html.dark .swal2-textarea {
+    background-color: #0f172a !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+}
+

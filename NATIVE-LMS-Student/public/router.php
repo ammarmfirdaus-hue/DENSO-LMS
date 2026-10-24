@@ -5,6 +5,15 @@ if (str_starts_with($path, '/api/')) {
     require dirname(__DIR__) . '/api/index.php';
     return true;
 }
-$file = __DIR__ . $path;
-if ($path !== '/' && is_file($file)) return false;
+$publicRoot = realpath(__DIR__);
+$decodedPath = rawurldecode($path);
+$file = realpath(__DIR__ . DIRECTORY_SEPARATOR . ltrim($decodedPath, '/\\'));
+if ($path !== '/' && $publicRoot !== false && $file !== false
+    && str_starts_with($file, $publicRoot . DIRECTORY_SEPARATOR)
+    && is_file($file)
+    && !preg_match('~(^|[\\/])\.[^\\/]+~', $decodedPath)) {
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: same-origin');
+    return false;
+}
 require dirname(__DIR__) . '/index.php';

@@ -29,7 +29,7 @@
     courses.forEach(course => {
       const card = document.createElement('article');
       card.className = 'course-card flex flex-col rounded-xl border border-surface-variant bg-surface-container-lowest p-5 shadow-sm';
-      card.dataset.filters = '[]';
+      card.dataset.filters = JSON.stringify([course.category || '']);
       const badge = document.createElement('span');
       badge.className = 'w-fit rounded-full bg-secondary-container px-3 py-1 text-xs font-semibold text-on-secondary-container';
       badge.textContent = course.category;
@@ -44,8 +44,19 @@
       description.textContent = course.description || 'Materi pembelajaran tersedia di dalam course.';
       const progress = document.createElement('p');
       progress.className = 'mt-4 text-sm font-semibold text-tertiary';
-      progress.textContent = `${Number(course.progress)}% selesai`;
-      card.append(badge, title, code, description, progress);
+      const percentage = Math.max(0, Math.min(100, Number(course.progress) || 0));
+      progress.textContent = `${percentage}% selesai`;
+      const progressTrack = document.createElement('div');
+      progressTrack.className = 'dls-progress';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'dls-progress-bar dls-progress-bar-primary';
+      progressBar.style.width = `${percentage}%`;
+      progressTrack.append(progressBar);
+      const action = document.createElement('a');
+      action.className = 'dls-course-link mt-4 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary';
+      action.href = `/?route=/student/course/detail&id=${encodeURIComponent(course.course_code)}`;
+      action.textContent = 'Buka course';
+      card.append(badge, title, code, description, progress, progressTrack, action);
       target.append(card);
     });
   }

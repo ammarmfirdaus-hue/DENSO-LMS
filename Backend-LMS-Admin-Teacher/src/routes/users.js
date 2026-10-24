@@ -3,19 +3,21 @@ const bcrypt = require('bcryptjs');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const { authenticate, allowRoles } = require('../middleware/auth');
+const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin'));
 router.get('/', async (_req, res, next) => {
   try {
     const result = await pool.request().query(`SELECT employee_npk,fullname,email,role,status,created_at FROM dbo.employee_accounts ORDER BY fullname`);
-    res.json({ users: result.recordset });
+    const page = paginateCollection(_req, result.recordset);
+    res.json({ users: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });
 
 router.post('/', async (req, res, next) => {
   const parsed = z.object({ npk: z.string().trim().min(1).max(50), fullname: z.string().trim().min(2).max(150),
-    email: z.string().trim().email().max(254), password: z.string().min(12).max(200), role: z.enum(['admin','teacher']) }).safeParse(req.body);
+    email: z.string().trim().email().max(254), password: z.string().min(12).max(200), role: z.enum(['admin','teacher','reviewer']) }).safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Data akun tidak valid; kata sandi minimal 12 karakter.' } });
   try {
     const data = parsed.data;

@@ -12,7 +12,7 @@ Workspace ini berisi tiga runtime terpisah. Jalankan setiap proyek dari folderny
 
 ### Memasang environment di Windows
 
-Jalankan [`install-all.bat`](install-all.bat) dari folder utama untuk memasang dependency ketiga proyek, atau jalankan installer di folder proyek yang ingin disiapkan saja:
+Jalankan [`install-runtime-all.bat`](install-runtime-all.bat) dari folder utama untuk memasang dependency ketiga proyek, atau jalankan installer di folder proyek yang ingin disiapkan saja:
 
 - `NATIVE-LMS-Student\install.bat`: memeriksa PHP 8.1+ dan `pdo_mysql`, memasang dependency Tailwind, lalu membangun CSS.
 - `Backend-LMS-Admin-Teacher\install.bat`: memeriksa Node.js 20+, memasang dependency API, dan membuat `.env` dengan JWT secret acak jika `.env` belum ada.
@@ -107,16 +107,34 @@ USE dls_student;
 SHOW TABLES;
 ```
 
-Sesudah kedua database, skema, dan `.env` siap, jalankan `Start-All-Server-DataDummy.bat` untuk mengisi data demo sekaligus memulai runtime. Gunakan hanya pada database pengembangan.
+Sesudah kedua database, skema, dan `.env` siap, jalankan `Start-All-DataDummy.bat` untuk mengisi data demo sekaligus memulai runtime. Gunakan hanya pada database pengembangan.
 
 
 ### Menjalankan ketiga runtime (Windows)
 
-Untuk mengisi kedua database dengan data dummy lalu menjalankan server, gunakan [`Start-All-Server-DataDummy.bat`](Start-All-Server-DataDummy.bat). Launcher meminta satu password demo untuk akun dummy Admin/Teacher dan Student.
+Untuk mengisi kedua database dengan data dummy lalu menjalankan server, gunakan [`Start-All-DataDummy.bat`](Start-All-DataDummy.bat). Launcher meminta satu password demo untuk akun dummy Admin/Teacher dan Student.
+
+## Struktur proyek
+
+- **Backend Admin/Teacher** menggunakan pemisahan `src/config`, `src/middleware`, `src/routes`, dan `src/services`; tiap domain API dikelompokkan menurut tanggung jawabnya.
+- **Frontend Admin/Teacher** memakai `src/features/<fitur>` untuk auth, dashboard, courses, materials, activity, grades, forum, users, dan reviewer. API, layout, komponen umum, dan style disimpan terpisah.
+- **Native Student** mengelompokkan controller dan view ke `Dashboard`, `Courses`, `Learning`, `Forum`, `History`, `Notifications`, dan `Profile`. URL halaman tetap sama.
+
+Tema lintas aplikasi menggunakan merah DENSO untuk aksi utama, charcoal untuk navigasi dan teks, serta latar netral untuk konten.
+
+Dokumentasi fitur, aktor, arsitektur data, keamanan, struktur folder, dan hasil tes tersedia di [Panduan Fitur dan Teknis](docs/PROJECT-GUIDE.md). Diagram use case dapat diedit di [Draw.io](docs/diagrams/DENSO-LMS-Use-Case.drawio).
 
 ## Pemisahan data
 
 Database Teacher/Admin dan Student memang dipisahkan. Sinkronisasi opsional di backend dapat mengirim metadata course dari SQL Server ke MySQL dan mengembalikan ringkasan enrollment/progress ke SQL Server. Fitur ini nonaktif secara default dan memerlukan akun MySQL khusus dengan hak akses minimum. Sinkronisasi berjalan berkala, bukan real-time. Post forum dan nilai kuis belum disinkronkan.
+
+## SSO Admin/Teacher dan Student
+
+Login Admin/Teacher dan Native Student memakai backend Admin/Teacher sebagai penyedia sesi bersama. Backend memeriksa akun karyawan di SQL Server dan, jika diaktifkan, akun Student di MySQL. Pastikan NPK atau email dan kata sandi yang sama dipakai saat masuk dari kedua aplikasi.
+
+Untuk development, aktifkan `STUDENT_AUTH_ENABLED=true` dan isi koneksi `STUDENT_DB_*` pada `Backend-LMS-Admin-Teacher/.env`. Salin nilai `JWT_SECRET` backend yang sama ke `SSO_JWT_SECRET` pada `NATIVE-LMS-Student/.env`; jangan masukkan rahasia ini ke file frontend atau commit ke Git. URL native lokal disetel melalui `STUDENT_APP_URL` dan `VITE_STUDENT_APP_URL`.
+
+Backend menerbitkan cookie SSO `HttpOnly`, `SameSite=Lax`, dan berlaku 8 jam. Semua app production harus memakai HTTPS di bawah hostname/domain induk yang sama; setel `SSO_COOKIE_DOMAIN` dan samakan nilainya di konfigurasi backend dan native (contoh `.example.com`). Untuk production gunakan password DB khusus berhak minimum, sertifikat TLS SQL Server yang valid, dan URL HTTPS pada `APP_URL`, `SSO_API_URL`, `SSO_FRONTEND_URL`, `FRONTEND_ORIGIN`, serta `STUDENT_APP_URL`. Tombol keluar menghapus cookie bersama; halaman Native memeriksa sesi SSO itu pada setiap request terlindungi.
 
 ## Data database dummy
 

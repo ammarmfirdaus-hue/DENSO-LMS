@@ -1,8 +1,0 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/client';
-
-export default function GradesPage() {
-  const [rows, setRows] = useState([]); const [error, setError] = useState('');
-  useEffect(() => { api('/grades').then(result => setRows(result.grades)).catch(e => setError(e.message)); }, []);
-  return <div><p className="text-sm font-semibold text-primary">PEMBELAJARAN</p><h1 className="mt-2 text-3xl font-bold">Kelola Nilai</h1><p className="mt-2 text-muted">Progres tersinkron dari basis data student.</p>{error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}<div className="mt-7 overflow-hidden rounded-2xl border border-outline/50 bg-white"><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="bg-surface-low text-muted"><tr><th className="px-5 py-4">NPK</th><th className="px-5 py-4">Course</th><th className="px-5 py-4">Progres</th><th className="px-5 py-4">Status</th><th className="px-5 py-4">Diperbarui</th></tr></thead><tbody className="divide-y divide-outline/40">{rows.map((row,i) => <tr key={`${row.student_npk}-${row.course_code}-${i}`}><td className="px-5 py-4 font-semibold">{row.student_npk}</td><td className="px-5 py-4">{row.course_title || row.course_code}</td><td className="px-5 py-4">{row.progress}%</td><td className="px-5 py-4 capitalize">{row.enrollment_status}</td><td className="px-5 py-4">{new Date(row.synced_at).toLocaleString('id-ID')}</td></tr>)}</tbody></table></div>{!rows.length && <p className="p-8 text-center text-muted">Belum ada data progres tersinkron. Periksa konfigurasi sinkronisasi student.</p>}</div></div>;
-}

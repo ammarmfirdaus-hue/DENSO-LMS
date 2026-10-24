@@ -1,6 +1,7 @@
 const express = require('express');
 const { sql, pool } = require('../config/database');
 const { authenticate, allowRoles } = require('../middleware/auth');
+const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin','teacher'));
@@ -15,8 +16,9 @@ router.get('/', async (req, res, next) => {
     const result = await request.query(`SELECT TOP 500 p.student_npk,p.course_code,c.title AS course_title,
       p.progress,p.enrollment_status,p.source_updated_at,p.synced_at
       FROM dbo.student_progress_snapshots p LEFT JOIN dbo.courses c ON c.course_code=p.course_code
-      WHERE 1=1 AND (@isAdmin=1 OR c.created_by=@teacher) ${filter} ORDER BY p.source_updated_at DESC`);
-    res.json({ grades: result.recordset, source: 'student-mysql-sync' });
+      WHERE 1=1 AND (@isAdmin=1 OR c.created_by=@teacher OR c.assigned_trainer_npk=@teacher) ${filter} ORDER BY p.source_updated_at DESC`);
+    const page = paginateCollection(req, result.recordset);
+    res.json({ grades: page.data, source: 'student-mysql-sync', ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });
 

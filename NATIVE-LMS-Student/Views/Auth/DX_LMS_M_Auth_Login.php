@@ -40,20 +40,11 @@ $base_path = '';
             margin-bottom: 32px;
         }
 
-        .login-logo-text {
-            font-family: 'Inter', sans-serif;
-            font-size: 40px;
-            font-weight: 700;
-            color: #e20613;
-            letter-spacing: -0.03em;
-            line-height: 1;
-        }
-
         .login-logo-subtitle {
             font-family: 'Inter', sans-serif;
             font-size: 11px;
             font-weight: 500;
-            color: #5e3f3b;
+            color: var(--dls-on-surface-variant);
             letter-spacing: 0.15em;
             margin-top: 4px;
         }
@@ -89,9 +80,7 @@ $base_path = '';
                     <!-- Title & Logo (Side by side) -->
                     <div class="flex items-center gap-4 mb-6">
                         <!-- Logo -->
-                        <div class="w-[56px] h-[56px] bg-gradient-to-br from-[#d42a2a] to-[#a01a1a] rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(212,42,42,0.5)] shrink-0">
-                            <span class="material-symbols-outlined text-[28px] text-white">school</span>
-                        </div>
+                        <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg"><img src="<?= e($base_path) ?>assets/img/icon/denso-vector-logo.png" alt="Logo DENSO" class="size-full object-contain"></div>
                         <!-- Title -->
                         <h2 class="text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight">
                             Learning Management System
@@ -106,19 +95,19 @@ $base_path = '';
                     <!-- Highlights Grid with Dividers -->
                     <div class="flex flex-row items-stretch max-w-[460px] gap-0 divide-x divide-white/20">
                         <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left pr-4">
-                            <span class="material-symbols-outlined text-[#e20613] text-[28px] mb-2 drop-shadow-md">menu_book</span>
+                            <span class="material-symbols-outlined text-primary-container text-[28px] mb-2 drop-shadow-md">menu_book</span>
                             <span class="text-[11px] lg:text-[12px] font-semibold text-white/90">Learning<br>Path</span>
                         </div>
                         <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left px-4">
-                            <span class="material-symbols-outlined text-[#e20613] text-[28px] mb-2 drop-shadow-md">assignment_turned_in</span>
+                            <span class="material-symbols-outlined text-primary-container text-[28px] mb-2 drop-shadow-md">assignment_turned_in</span>
                             <span class="text-[11px] lg:text-[12px] font-semibold text-white/90">Assessment</span>
                         </div>
                         <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left px-4">
-                            <span class="material-symbols-outlined text-[#e20613] text-[28px] mb-2 drop-shadow-md">insights</span>
+                            <span class="material-symbols-outlined text-primary-container text-[28px] mb-2 drop-shadow-md">insights</span>
                             <span class="text-[11px] lg:text-[12px] font-semibold text-white/90">Progress<br>Tracking</span>
                         </div>
                         <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left pl-4">
-                            <span class="material-symbols-outlined text-[#e20613] text-[28px] mb-2 drop-shadow-md">workspace_premium</span>
+                            <span class="material-symbols-outlined text-primary-container text-[28px] mb-2 drop-shadow-md">workspace_premium</span>
                             <span class="text-[11px] lg:text-[12px] font-semibold text-white/90">Certification</span>
                         </div>
                     </div>
@@ -136,14 +125,14 @@ $base_path = '';
         <div class="flex-1 w-full flex flex-col justify-center items-center p-8 bg-surface py-16 lg:py-8">
             <!-- Logo -->
             <div class="login-logo">
-                <div class="login-logo-text">LMS</div>
-                <div class="login-logo-subtitle">LEARNING MANAGEMENT SYSTEM</div>
+            <img src="<?= e($base_path) ?>assets/img/icon/denso-vector-logo.png" alt="Logo DENSO" class="mx-auto mb-3 size-20 rounded-2xl bg-white object-contain shadow-sm ring-1 ring-black/5">
+            <div class="login-logo-subtitle">LEARNING MANAGEMENT SYSTEM</div>
             </div>
 
             <!-- Heading -->
             <div class="text-center mb-8 w-full max-w-sm">
                 <h1 class="text-headline-md font-bold text-on-surface">Selamat datang!</h1>
-                <p class="text-body-md text-on-surface-variant mt-1">Masuk dengan akun karyawan Anda</p>
+                <p class="text-body-md text-on-surface-variant mt-1">Gunakan NPK atau email dan kata sandi akun DENSO Anda</p>
             </div>
 
             <!-- Login Form -->
@@ -152,39 +141,37 @@ $base_path = '';
                 <?php if (isset($_GET['error'])): ?>
                 <div class="flex items-center gap-2 p-3 rounded-xl bg-error-container/30 text-on-error-container">
                     <span class="material-symbols-outlined" style="font-size:20px;">error</span>
-                    <span class="text-label-md">NPK dan Password wajib diisi / Salah.</span>
+                    <span class="text-label-md"><?= ($_GET['error'] ?? '') === 'sso' ? 'Layanan masuk tunggal tidak tersedia. Coba lagi beberapa saat.' : 'NPK/email atau password salah.' ?></span>
                 </div>
                 <?php endif; ?>
 
                 <!-- NPK / Email Input -->
                 <div class="relative w-full">
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">person</span>
-                    <input type="text" class="w-full h-[52px] pl-12 pr-4 bg-surface-container-lowest border border-outline-variant rounded-lg font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-secondary focus:ring-2 focus:ring-secondary/15 outline-none transition-all" name="npk" id="inputNpk" placeholder="NPK atau Email" value="<?= htmlspecialchars($_POST['npk'] ?? '') ?>" autocomplete="username" required>
+                    <input type="text" class="w-full h-[52px] pl-12 pr-4 bg-surface-container-lowest border border-outline-variant rounded-xl font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all" name="npk" id="inputNpk" placeholder="NPK atau Email" value="<?= e((string) ($_POST['npk'] ?? '')) ?>" autocomplete="username" required>
                 </div>
 
                 <!-- Password Input -->
                 <div class="relative w-full">
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
-                    <input type="password" class="w-full h-[52px] pl-12 pr-12 bg-surface-container-lowest border border-outline-variant rounded-lg font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-secondary focus:ring-2 focus:ring-secondary/15 outline-none transition-all" name="password" id="inputPassword" placeholder="Password" value="" autocomplete="current-password" required>
-                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-on-surface-variant hover:bg-surface-container-low p-1 rounded-full transition-colors" id="togglePassword" aria-label="Tampilkan password">
+                    <input type="password" class="w-full h-[52px] pl-12 pr-12 bg-surface-container-lowest border border-outline-variant rounded-xl font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all" name="password" id="inputPassword" placeholder="Password" value="" autocomplete="current-password" required>
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-on-surface-variant hover:bg-surface-container-low p-1 rounded-full transition-colors" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
                         <span class="material-symbols-outlined" style="font-size:20px;">visibility_off</span>
                     </button>
                 </div>
 
                 <!-- Forgot Password Link -->
-                <div class="text-right">
-                    <a href="#" class="text-label-md text-secondary hover:underline">Lupa password?</a>
-                </div>
+                <p class="login-help-note">Perlu reset password? Hubungi Admin LMS.</p>
 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full h-11 bg-secondary text-on-secondary font-label-md rounded-full shadow-[0_4px_12px_rgba(67,85,185,0.2)] hover:bg-[#293ca0] active:scale-95 transition-all" id="btnLogin">
+                <button type="submit" class="w-full h-12 bg-primary text-on-primary font-label-md font-semibold rounded-xl shadow-[0_8px_20px_rgba(215,25,32,0.18)] hover:bg-primary-container active:scale-[0.99] transition-all" id="btnLogin">
                     Masuk
                 </button>
             </form>
 
             <!-- Footer -->
             <div class="mt-8 text-center">
-                <p class="text-body-md text-on-surface-variant">Belum punya akun? <a href="#" class="text-secondary font-medium hover:underline">Hubungi Admin</a></p>
+                <p class="text-body-md text-on-surface-variant">Belum punya akun? Hubungi Admin LMS untuk pembuatan akses.</p>
             </div>
         </div>
     </div>
@@ -201,9 +188,11 @@ $base_path = '';
                     if (passwordInput.type === 'password') {
                         passwordInput.type = 'text';
                         icon.textContent = 'visibility';
+                        toggleBtn.setAttribute('aria-pressed', 'true');
                     } else {
                         passwordInput.type = 'password';
                         icon.textContent = 'visibility_off';
+                        toggleBtn.setAttribute('aria-pressed', 'false');
                     }
                 });
             }

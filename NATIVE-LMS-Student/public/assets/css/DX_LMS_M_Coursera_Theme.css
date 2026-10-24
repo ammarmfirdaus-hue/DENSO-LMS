@@ -1,0 +1,1169 @@
+/* ==========================================================================
+   DX_LMS_M_Coursera_Theme.css
+   Coursera-style premium overhaul for DENSO Learning Student Portal.
+   Loaded LAST — highest specificity visual override layer.
+   Does NOT change layout/positioning (handled by DX_LMS_M_Responsive_Redesign.css).
+   ========================================================================== */
+
+/* ── Design Tokens ──────────────────────────────────────────────────────── */
+:root {
+    --crs-blue:        #0056d2;
+    --crs-red:         #c0392b;
+    --crs-green:       #1fa463;
+    --crs-surface:     #f5f7fa;
+    --crs-card:        #ffffff;
+    --crs-border:      #e3e8ef;
+    --crs-text:        #1a2635;
+    --crs-text-muted:  #5a6877;
+    --crs-r-sm:  8px;
+    --crs-r-md:  14px;
+    --crs-r-lg:  20px;
+    --crs-r-xl:  26px;
+    --crs-sh-xs: 0 1px 3px rgba(20,35,55,.07), 0 1px 2px rgba(20,35,55,.05);
+    --crs-sh-sm: 0 4px 14px rgba(20,35,55,.07);
+    --crs-sh-md: 0 8px 28px rgba(20,35,55,.10);
+    --crs-dur:   220ms;
+    --crs-ease:  cubic-bezier(.22,.61,.36,1);
+}
+
+html.dark {
+    --crs-surface:       #0d1520;
+    --crs-card:          #141e2d;
+    --crs-border:        #1e2f42;
+    --crs-text:          #eaf0fb;
+    --crs-text-muted:    #8da0b8;
+    --crs-sh-xs: 0 1px 3px rgba(0,0,0,.45);
+    --crs-sh-sm: 0 4px 14px rgba(0,0,0,.45);
+    --crs-sh-md: 0 8px 28px rgba(0,0,0,.55);
+    color-scheme: dark;
+}
+
+/* ============================================================
+   HEADER VISUAL OVERRIDES (Full-width Coursera clean bar)
+   ============================================================ */
+
+/* Header container — spans full width from right of sidebar to edge of screen */
+#topAppBar.dls-app-header,
+#topAppBar {
+    background: rgba(255, 255, 255, .97) !important;
+    border-bottom: 1px solid var(--crs-border) !important;
+    box-shadow: 0 1px 8px rgba(20, 35, 55, .05) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-sizing: border-box !important;
+    z-index: 45 !important;
+}
+html.dark #topAppBar.dls-app-header,
+html.dark #topAppBar {
+    background: rgba(13, 21, 32, .97) !important;
+    border-color: var(--crs-border) !important;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, .4) !important;
+}
+
+@media (min-width: 1024px) {
+    #topAppBar,
+    #topAppBar.dls-app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 240px !important;
+        right: 0 !important;
+        width: calc(100% - 240px) !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+@media (max-width: 1023px) {
+    #topAppBar,
+    #topAppBar.dls-app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* Header inner row — Spans 100% with space-between */
+.dls-app-header-inner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 68px !important;
+    box-sizing: border-box !important;
+    padding-inline: clamp(24px, 4vw, 56px) !important;
+    position: relative !important;
+}
+
+/* Left context (Title & Back button) */
+.dls-header-context {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+}
+.dls-header-title-group {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+}
+.dls-header-eyebrow { display: none !important; }
+.dls-header-title {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    letter-spacing: -.02em !important;
+    color: var(--crs-text) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+}
+html.dark .dls-header-title { color: var(--crs-text) !important; }
+
+/* ── Brand (center, mobile only) — Coursera style: logo + "DENSO Learning" ── */
+.dls-mobile-brand,
+#topAppBar a.dls-mobile-brand {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: var(--crs-text) !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    letter-spacing: -.03em !important;
+    max-width: calc(100% - 108px) !important;
+    transition: opacity var(--crs-dur) !important;
+}
+.dls-mobile-brand:hover,
+#topAppBar a.dls-mobile-brand:hover {
+    transform: translate(-50%, -50%) !important;
+    opacity: 0.8 !important;
+}
+.dls-mobile-brand img {
+    width: 28px !important;
+    height: 28px !important;
+    flex-shrink: 0 !important;
+    object-fit: contain !important;
+}
+.dls-mobile-brand span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    color: var(--crs-text) !important;
+}
+html.dark .dls-mobile-brand,
+html.dark .dls-mobile-brand span { color: var(--crs-text) !important; }
+
+@media (min-width: 1024px) {
+    .dls-mobile-brand { display: none !important; }
+}
+
+/* ── Back button ────────────────────────────────────────────────────────── */
+.dls-header-back {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    border: 1.5px solid var(--crs-border) !important;
+    background: #ffffff !important;
+    color: var(--crs-text) !important;
+    text-decoration: none !important;
+    transition: background var(--crs-dur), border-color var(--crs-dur), transform var(--crs-dur) !important;
+}
+.dls-header-back:hover {
+    background: var(--crs-surface) !important;
+    transform: translateY(-1px) !important;
+}
+html.dark .dls-header-back {
+    background: #172334 !important;
+    border-color: var(--crs-border) !important;
+    color: var(--crs-text) !important;
+}
+html.dark .dls-header-back:hover { background: #1e2f42 !important; }
+
+/* ── Notification bell — Coursera-style round icon button on far right ─── */
+.dls-header-notifications {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 50% !important;
+    border: 1px solid var(--crs-border) !important;
+    background: #ffffff !important;
+    color: var(--crs-text) !important;
+    position: relative !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 4px rgba(20, 35, 55, .05) !important;
+    transition: background var(--crs-dur), transform var(--crs-dur), border-color var(--crs-dur), box-shadow var(--crs-dur) !important;
+}
+.dls-header-notifications:hover {
+    background: var(--crs-surface) !important;
+    border-color: rgba(215, 25, 32, .35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(215, 25, 32, .12) !important;
+}
+html.dark .dls-header-notifications {
+    background: #172334 !important;
+    border-color: var(--crs-border) !important;
+    color: var(--crs-text) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .3) !important;
+}
+html.dark .dls-header-notifications:hover {
+    background: #1e2f42 !important;
+    border-color: rgba(215, 25, 32, .45) !important;
+}
+.dls-header-notifications .material-symbols-outlined {
+    font-size: 22px !important;
+    line-height: 1 !important;
+    color: var(--crs-text) !important;
+    display: block !important;
+}
+html.dark .dls-header-notifications .material-symbols-outlined {
+    color: var(--crs-text) !important;
+}
+.dls-notification-count {
+    position: absolute !important;
+    top: -3px !important;
+    right: -3px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 4px !important;
+    border-radius: 999px !important;
+    background: #d71920 !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 2px solid #ffffff !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 4px rgba(215, 25, 32, .35) !important;
+}
+html.dark .dls-notification-count {
+    border-color: #0d1520 !important;
+}
+
+/* ============================================================
+   SIDEBAR / BOTTOM NAV
+   ============================================================ */
+
+/* Desktop sidebar — clean white card */
+@media (min-width: 1024px) {
+    #bottomNavBar {
+        background: #fff !important;
+        border-right: 1px solid var(--crs-border) !important;
+        box-shadow: 2px 0 16px rgba(20,35,55,.04) !important;
+    }
+    html.dark #bottomNavBar {
+        background: var(--crs-card) !important;
+        border-color: var(--crs-border) !important;
+        box-shadow: 2px 0 16px rgba(0,0,0,.35) !important;
+    }
+    /* Active sidebar link: red left accent bar */
+    #bottomNavBar a[aria-current="page"] {
+        background: #fff0f1 !important;
+        color: var(--crs-red) !important;
+        box-shadow: inset 3px 0 0 var(--crs-red) !important;
+        border-radius: 10px !important;
+    }
+    html.dark #bottomNavBar a[aria-current="page"] {
+        background: rgba(192,57,43,.12) !important;
+        color: #f7827a !important;
+        box-shadow: inset 3px 0 0 #f7827a !important;
+    }
+    #bottomNavBar a:not([aria-current="page"]):hover {
+        background: #f5f7fa !important;
+        color: var(--crs-text) !important;
+    }
+    html.dark #bottomNavBar a:not([aria-current="page"]):hover {
+        background: #1a2b3e !important;
+        color: var(--crs-text) !important;
+    }
+    /* Sidebar brand text */
+    .dls-nav-brand-copy strong { color: var(--crs-text) !important; font-size: 16px !important; }
+    .dls-nav-brand-copy small  { color: var(--crs-text-muted) !important; font-size: 10px !important; }
+    /* Section label */
+    #bottomNavBar > .dls-nav-section-label {
+        color: #9baab8 !important;
+        font-size: 9px !important;
+        letter-spacing: .18em !important;
+    }
+    html.dark #bottomNavBar > .dls-nav-section-label { color: #57708a !important; }
+}
+
+/* Mobile bottom nav */
+@media (max-width: 1023px) {
+    #bottomNavBar {
+        background: rgba(255,255,255,.97) !important;
+        border-top: 1px solid var(--crs-border) !important;
+        border-radius: 18px 18px 0 0 !important;
+        box-shadow: 0 -4px 18px rgba(20,35,55,.08) !important;
+    }
+    html.dark #bottomNavBar {
+        background: rgba(13,21,32,.97) !important;
+        border-color: var(--crs-border) !important;
+    }
+    #bottomNavBar a { color: #8899ac !important; }
+    #bottomNavBar a[aria-current="page"] {
+        color: var(--crs-red) !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    /* Red top-dot for active tab */
+    #bottomNavBar a[aria-current="page"]::before {
+        display: block !important;
+        position: absolute;
+        top: 4px; left: 50%;
+        width: 24px; height: 3px;
+        border-radius: 999px;
+        background: var(--crs-red);
+        content: "";
+        transform: translateX(-50%);
+    }
+    html.dark #bottomNavBar a { color: #667a90 !important; }
+    html.dark #bottomNavBar a[aria-current="page"] { color: #f7827a !important; }
+    html.dark #bottomNavBar a[aria-current="page"]::before { background: #f7827a !important; }
+}
+
+/* ============================================================
+   WELCOME / HERO SECTION
+   ============================================================ */
+.dls-welcome-hero {
+    background: linear-gradient(120deg, #fff 0%, #f8fafc 60%, #fff5f5 100%) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: var(--crs-r-xl) !important;
+    box-shadow: var(--crs-sh-sm) !important;
+}
+html.dark .dls-welcome-hero {
+    background: linear-gradient(120deg, #141e2d 0%, #0f172a 60%, #1a1020 100%) !important;
+    border-color: var(--crs-border) !important;
+}
+.dls-section-kicker {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: .18em !important;
+    color: var(--crs-red) !important;
+}
+html.dark .dls-welcome-hero h1,
+html.dark .dls-welcome-hero p { color: var(--crs-text) !important; }
+
+/* ============================================================
+   STAT CARDS
+   ============================================================ */
+.dls-stat-card {
+    background: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: var(--crs-r-lg) !important;
+    box-shadow: var(--crs-sh-xs) !important;
+    transition: box-shadow var(--crs-dur), transform var(--crs-dur);
+}
+.dls-stat-card:hover {
+    box-shadow: var(--crs-sh-sm) !important;
+    transform: translateY(-2px);
+}
+html.dark .dls-stat-card { background: var(--crs-card) !important; border-color: var(--crs-border) !important; }
+
+/* ============================================================
+   COURSE CARDS
+   ============================================================ */
+main .course-card,
+.filter-course-card,
+#course-results > .course-card {
+    background: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: var(--crs-r-lg) !important;
+    box-shadow: var(--crs-sh-xs) !important;
+    transition: box-shadow var(--crs-dur), transform var(--crs-dur), border-color var(--crs-dur);
+    overflow: hidden;
+}
+main .course-card:hover,
+.filter-course-card:hover,
+#course-results > .course-card:hover {
+    box-shadow: var(--crs-sh-md) !important;
+    transform: translateY(-4px);
+    border-color: #c5d1df !important;
+}
+html.dark main .course-card,
+html.dark .filter-course-card,
+html.dark #course-results > .course-card {
+    background: var(--crs-card) !important;
+    border-color: var(--crs-border) !important;
+}
+html.dark main .course-card:hover,
+html.dark #course-results > .course-card:hover { border-color: #2a3f58 !important; }
+
+main .course-card h3,
+#course-results > .course-card h3 {
+    color: var(--crs-text) !important;
+    font-weight: 700;
+    letter-spacing: -.025em;
+}
+html.dark main .course-card h3,
+html.dark #course-results > .course-card h3 { color: var(--crs-text) !important; }
+
+/* Progress bars — Coursera green */
+main .course-card .bg-surface-variant.rounded-full > div,
+#course-results > .course-card .bg-surface-variant.rounded-full > div,
+.filter-progress-track > span { background: var(--crs-green) !important; }
+
+/* ============================================================
+   SECTION / CARD CONTAINERS
+   ============================================================ */
+main section[class*="bg-surface-container-lowest"],
+main section[class*="bg-white"],
+main .dls-card,
+main [class*="rounded-2xl"][class*="bg-white"],
+main [class*="rounded-2xl"][class*="bg-surface-container"] {
+    background: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    box-shadow: var(--crs-sh-xs) !important;
+}
+html.dark main section[class*="bg-surface-container-lowest"],
+html.dark main section[class*="bg-white"],
+html.dark main .dls-card,
+html.dark main [class*="rounded-2xl"][class*="bg-white"],
+html.dark main [class*="rounded-2xl"][class*="bg-surface-container"] {
+    background: var(--crs-card) !important;
+    border-color: var(--crs-border) !important;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+main h1, main h2, main h3, main h4 { color: var(--crs-text) !important; }
+.text-on-surface { color: var(--crs-text) !important; }
+.text-on-surface-variant { color: var(--crs-text-muted) !important; }
+html.dark .text-on-surface { color: var(--crs-text) !important; }
+html.dark .text-on-surface-variant { color: var(--crs-text-muted) !important; }
+
+/* ============================================================
+   SEARCH PILL INPUT
+   ============================================================ */
+main input[type="search"],
+[data-student-courses] #searchInput,
+#dashboardCourseSearch {
+    border-radius: 999px !important;
+    border: 1.5px solid var(--crs-border) !important;
+    background: var(--crs-card) !important;
+    color: var(--crs-text) !important;
+    padding-left: 44px !important;
+    font-size: 14px;
+    transition: border-color var(--crs-dur), box-shadow var(--crs-dur);
+}
+main input[type="search"]:focus,
+[data-student-courses] #searchInput:focus,
+#dashboardCourseSearch:focus {
+    border-color: var(--crs-blue) !important;
+    box-shadow: 0 0 0 4px rgba(0,86,210,.10) !important;
+    outline: none !important;
+}
+html.dark main input[type="search"],
+html.dark #dashboardCourseSearch {
+    background: #0f1a26 !important;
+    border-color: var(--crs-border) !important;
+    color: var(--crs-text) !important;
+}
+
+/* ============================================================
+   FILTER CHIPS
+   ============================================================ */
+.filter-chip,
+[data-student-courses] #chip-container > a {
+    border-radius: 999px !important;
+    border: 1.5px solid var(--crs-border) !important;
+    background: var(--crs-card) !important;
+    color: var(--crs-text) !important;
+    font-weight: 600;
+    transition: all var(--crs-dur);
+}
+.filter-chip:hover {
+    border-color: var(--crs-red) !important;
+    color: var(--crs-red) !important;
+    transform: translateY(-1px);
+}
+.filter-chip[aria-pressed="true"] {
+    background: var(--crs-red) !important;
+    border-color: var(--crs-red) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(192,57,43,.22) !important;
+}
+html.dark .filter-chip { background: #1a2b3e !important; border-color: var(--crs-border) !important; color: var(--crs-text) !important; }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+main table {
+    background: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: var(--crs-r-md) !important;
+}
+main table thead { background: #f4f7fb !important; }
+html.dark main table { background: var(--crs-card) !important; border-color: var(--crs-border) !important; }
+html.dark main table thead { background: #1a2b3e !important; }
+html.dark main table td { border-color: var(--crs-border) !important; color: var(--crs-text-muted) !important; }
+html.dark main table tbody tr:hover { background: rgba(30,47,66,.55) !important; }
+
+/* ============================================================
+   PROFILE / SETTINGS INNER ROWS
+   ============================================================ */
+main [class*="bg-surface-container"][class*="\/30"],
+main [class*="bg-surface-container"][class*="\/20"] { background: #f8fafc !important; }
+html.dark main [class*="bg-surface-container"][class*="\/30"],
+html.dark main [class*="bg-surface-container"][class*="\/20"] { background: #1a2635 !important; }
+
+/* ============================================================
+   TOGGLE SWITCH (DARK MODE)
+   ============================================================ */
+html.dark .toggle-track:not(.active) { background-color: #334155 !important; }
+html.dark .toggle-thumb { background: #cbd5e1 !important; }
+
+/* ============================================================
+   FEATURE NOTE
+   ============================================================ */
+.dls-feature-note {
+    background: #f3f8ff !important;
+    border: 1px solid #d2e3fc !important;
+    color: #3d5a8a !important;
+    border-radius: var(--crs-r-md) !important;
+}
+html.dark .dls-feature-note {
+    background: #0d1a2e !important;
+    border-color: #1e3048 !important;
+    color: #8da0b8 !important;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+#paginationContainer {
+    background: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: var(--crs-r-md) !important;
+    box-shadow: var(--crs-sh-xs) !important;
+}
+html.dark #paginationContainer { background: var(--crs-card) !important; border-color: var(--crs-border) !important; }
+
+/* ============================================================
+   DARK MODE — GLOBAL UTILITY OVERRIDES
+   ============================================================ */
+html.dark body.dls-app-shell,
+html.dark body { background: var(--crs-surface) !important; color: var(--crs-text) !important; }
+html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #111c2d !important; }
+html.dark .bg-white { background-color: var(--crs-card) !important; }
+html.dark .border-slate-200, html.dark .border-slate-100 { border-color: var(--crs-border) !important; }
+html.dark .text-slate-800, html.dark .text-slate-900,
+html.dark .text-slate-700 { color: var(--crs-text) !important; }
+html.dark .text-slate-600, html.dark .text-slate-500,
+html.dark .text-slate-400 { color: var(--crs-text-muted) !important; }
+html.dark body.dls-app-shell.bg-slate-50 { background: var(--crs-surface) !important; }
+html.dark .bg-slate-900 { background-color: #080f1a !important; }
+html.dark .bg-slate-800 { background-color: #0d1a2e !important; }
+
+/* TinyMCE / learning content dark mode */
+html.dark .tinymce-content h1,
+html.dark .tinymce-content h2,
+html.dark .tinymce-content h3 { color: var(--crs-text) !important; }
+html.dark .tinymce-content p,
+html.dark .tinymce-content li { color: var(--crs-text-muted) !important; }
+html.dark .tinymce-content a { color: #7db4f5 !important; }
+html.dark .tinymce-content th { background: #1a2b3e !important; color: var(--crs-text) !important; }
+html.dark .tinymce-content td { border-color: var(--crs-border) !important; color: var(--crs-text-muted) !important; }
+html.dark .tinymce-content blockquote { border-color: var(--crs-red) !important; color: var(--crs-text-muted) !important; }
+html.dark .tinymce-content pre,
+html.dark .tinymce-content code { background: #0d1a2e !important; color: #a5c4f3 !important; }
+
+/* Login page dark */
+html.dark body:not(.dls-app-shell) { background: #0b1220 !important; }
+html.dark #loginForm input {
+    background: #111c2d !important;
+    border-color: var(--crs-border) !important;
+    color: var(--crs-text) !important;
+}
+html.dark #loginForm input:focus {
+    border-color: var(--crs-red) !important;
+    box-shadow: 0 0 0 4px rgba(192,57,43,.18) !important;
+}
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c8d3de; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #a8b8c8; }
+html.dark ::-webkit-scrollbar-thumb { background: #2a3f55; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #3a5570; }
+
+/* ============================================================
+   TEXT SELECTION & FOCUS
+   ============================================================ */
+::selection { background: #d6e9ff; color: var(--crs-text); }
+html.dark ::selection { background: #1a3a60; color: var(--crs-text); }
+
+/* ============================================================
+   MICRO-ANIMATIONS (fade-up per section)
+   ============================================================ */
+@keyframes crs-fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.dls-main > section,
+.dls-main > div,
+.dls-main-sub > section { animation: crs-fade-up .3s var(--crs-ease) both; }
+.dls-main > *:nth-child(2) { animation-delay: .04s; }
+.dls-main > *:nth-child(3) { animation-delay: .08s; }
+.dls-main > *:nth-child(4) { animation-delay: .12s; }
+.dls-main > *:nth-child(5) { animation-delay: .16s; }
+@media (prefers-reduced-motion: reduce) {
+    .dls-main > section, .dls-main > div, .dls-main-sub > section { animation: none !important; }
+}
+/* Desktop navigation toggle and persisted compact sidebar state. */
+.dls-desktop-sidebar-toggle {
+    display: none;
+}
+@media (min-width: 1024px) {
+    .dls-desktop-sidebar-toggle {
+        display: inline-grid;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid var(--crs-border);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--crs-text);
+        cursor: pointer;
+        transition: background var(--crs-dur), border-color var(--crs-dur);
+    }
+    .dls-desktop-sidebar-toggle:hover { background: var(--crs-surface); }
+    #topAppBar.dls-header-sidebar-mini,
+    #topAppBar.dls-app-header.dls-header-sidebar-mini {
+        left: 76px !important;
+        width: calc(100% - 76px) !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed {
+        width: 76px !important;
+        padding-inline: 10px !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed > .dls-nav-brand {
+        justify-content: center;
+        gap: 0;
+        padding-inline: 0;
+    }
+    #bottomNavBar.dls-sidebar-collapsed .dls-sidebar-text,
+    #bottomNavBar.dls-sidebar-collapsed a span:last-child,
+    #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button > div:nth-child(2),
+    #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button > span {
+        display: none !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed a {
+        justify-content: center !important;
+        padding-inline: 0 !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed a .material-symbols-outlined { margin: 0 !important; }
+    #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button {
+        justify-content: center;
+        padding-inline: 0;
+    }
+    #bottomNavBar.dls-sidebar-hover-expand {
+        z-index: 60;
+        width: 240px !important;
+        box-shadow: 12px 0 34px rgba(24, 36, 51, .14);
+    }
+    #bottomNavBar.dls-sidebar-hover-expand .dls-sidebar-text,
+    #bottomNavBar.dls-sidebar-hover-expand a span:last-child,
+    #bottomNavBar.dls-sidebar-hover-expand > div.hidden.lg\:block > button > div:nth-child(2),
+    #bottomNavBar.dls-sidebar-hover-expand > div.hidden.lg\:block > button > span {
+        display: initial !important;
+    }
+    #bottomNavBar.dls-sidebar-hover-expand .dls-nav-brand-copy { display: flex !important; }
+    #bottomNavBar.dls-sidebar-hover-expand > .dls-nav-section-label { display: block !important; }
+    #bottomNavBar.dls-sidebar-hover-expand #dlsSidebarCollapseBtn { display: flex !important; }
+    #bottomNavBar.dls-sidebar-hover-expand > .dls-nav-brand { justify-content: flex-start; gap: 11px; padding-inline: 12px; }
+    #bottomNavBar.dls-sidebar-hover-expand a { justify-content: flex-start !important; padding-inline: 13px !important; }
+    #bottomNavBar.dls-sidebar-hover-expand > div.hidden.lg\:block > button { justify-content: flex-start; padding-inline: 8px; }
+    .dls-main.dls-main-sidebar-mini,
+    .dls-main-sub.dls-main-sidebar-mini {
+        width: calc(100% - 76px) !important;
+        margin-left: 76px !important;
+    }
+}
+
+/* DENSO logo and wordmark belong to the mobile header only. */
+.dls-mobile-brand,
+#topAppBar a.dls-mobile-brand {
+    display: none !important;
+}
+@media (max-width: 767px) {
+    .dls-mobile-brand,
+    #topAppBar a.dls-mobile-brand {
+        display: flex !important;
+    }
+}
+
+/* Shared card treatment across student pages. */
+main .dls-stat-card,
+main [class*="-card"],
+main .dls-card,
+main section[class*="bg-surface-container-lowest"],
+main section[class*="bg-white"],
+main [class*="rounded-2xl"][class*="bg-white"],
+main [class*="rounded-2xl"][class*="bg-surface-container"] {
+    background-color: var(--crs-card) !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: 18px !important;
+    box-shadow: var(--crs-sh-xs) !important;
+    transition: border-color var(--crs-dur), box-shadow var(--crs-dur), transform var(--crs-dur);
+}
+
+html.dark main .dls-stat-card,
+html.dark main [class*="-card"],
+html.dark main .dls-card,
+html.dark main section[class*="bg-surface-container-lowest"],
+html.dark main section[class*="bg-white"],
+html.dark main [class*="rounded-2xl"][class*="bg-white"],
+html.dark main [class*="rounded-2xl"][class*="bg-surface-container"] {
+    background-color: var(--crs-card) !important;
+    border-color: var(--crs-border) !important;
+}
+
+main .course-card:hover,
+main .filter-course-card:hover,
+main .course-session-card:hover,
+main .history-session-card:hover,
+main .forum-thread-item:hover {
+    border-color: #c5d1df !important;
+    box-shadow: var(--crs-sh-sm) !important;
+    transform: translateY(-2px);
+}
+html.dark main .course-card:hover,
+html.dark main .filter-course-card:hover,
+html.dark main .course-session-card:hover,
+html.dark main .history-session-card:hover,
+html.dark main .forum-thread-item:hover {
+    border-color: #2a3f58 !important;
+}
+
+main [class*="-card"] :is(h2, h3, h4) {
+    color: var(--crs-text) !important;
+    letter-spacing: -.02em;
+}
+
+@media (max-width: 640px) {
+    main .dls-stat-card,
+    main [class*="-card"],
+    main .dls-card,
+    main section[class*="bg-surface-container-lowest"],
+    main section[class*="bg-white"],
+    main [class*="rounded-2xl"][class*="bg-white"],
+    main [class*="rounded-2xl"][class*="bg-surface-container"] {
+        border-radius: 15px !important;
+    }
+}
+
+/* Branded cover treatment for courses without an uploaded thumbnail. */
+main .course-card > .h-32 {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.16), transparent 31%),
+        radial-gradient(circle at 84% 18%, rgba(215,25,32,.38), transparent 30%),
+        linear-gradient(135deg, #12364f 0%, #174a70 54%, #0d293d 100%) !important;
+}
+
+main .course-card > .h-32::before {
+    position: absolute;
+    z-index: 0;
+    right: -34px;
+    bottom: -94px;
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+    box-shadow: 0 0 0 24px rgba(255,255,255,.035), 0 0 0 48px rgba(255,255,255,.025);
+    content: "";
+    pointer-events: none;
+}
+
+main .course-card > .h-32 > [id^="fallback-"],
+main .course-card > .h-32 > div:not(.absolute) {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+main .course-card > .h-32 > div:not(.absolute) > span.material-symbols-outlined {
+    display: grid;
+    width: 88px;
+    height: 88px;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.62);
+    border-radius: 26px;
+    background: linear-gradient(145deg, #d71920, #a81019);
+    box-shadow: 0 12px 28px rgba(5,20,34,.3), inset 0 1px 0 rgba(255,255,255,.24);
+    color: #fff !important;
+    font-size: 48px !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,.18);
+}
+
+main .course-card > .h-32 > img {
+    position: relative;
+    z-index: 0;
+}
+
+main .course-card > .h-32 > .bg-error,
+main .course-card > .h-32 > .bg-tertiary-container {
+    z-index: 2;
+}
+
+/* Course detail page: prominent branded hero, readable summary and tabs. */
+main .dls-course-hero {
+    height: clamp(320px, 34vw, 420px) !important;
+    min-height: 320px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 82% 18%, rgba(215,25,32,.4), transparent 28%),
+        linear-gradient(125deg, #102b40 0%, #174a70 58%, #0d293d 100%) !important;
+    box-shadow: 0 18px 44px rgba(14,42,64,.18);
+}
+
+main .dls-course-hero > img {
+    object-position: center 42%;
+}
+
+main .dls-course-hero-fallback {
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.13), transparent 28%),
+        radial-gradient(circle at 80% 16%, rgba(215,25,32,.4), transparent 32%),
+        linear-gradient(125deg, #102b40, #174a70 58%, #0d293d) !important;
+}
+
+main .dls-course-hero-fallback .material-symbols-outlined {
+    display: grid;
+    width: 124px;
+    height: 124px;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.58);
+    border-radius: 34px;
+    background: linear-gradient(145deg, #d71920, #a81019);
+    box-shadow: 0 18px 44px rgba(5,20,34,.3), inset 0 1px 0 rgba(255,255,255,.24);
+    color: #fff !important;
+    font-size: 70px !important;
+}
+
+main .dls-course-hero-overlay {
+    background: linear-gradient(90deg, rgba(8,25,40,.84) 0%, rgba(8,25,40,.5) 48%, rgba(8,25,40,.12) 100%) !important;
+}
+
+main .dls-course-hero > div:last-child {
+    padding: clamp(22px, 4vw, 48px) !important;
+}
+
+main .dls-course-hero h2 {
+    max-width: 900px;
+    margin-bottom: 20px !important;
+    color: #fff !important;
+    font-size: clamp(28px, 4vw, 48px) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.045em !important;
+    line-height: 1.08 !important;
+    text-shadow: 0 2px 16px rgba(0,0,0,.18) !important;
+}
+
+main .dls-course-hero > div:last-child > div {
+    max-width: 600px;
+}
+
+main .dls-course-hero > div:last-child > div > div:first-child {
+    color: rgba(255,255,255,.88) !important;
+}
+
+main .dls-course-hero > div:last-child > div > div:last-child {
+    height: 9px !important;
+    border: 1px solid rgba(255,255,255,.26);
+    background: rgba(255,255,255,.2) !important;
+}
+
+main .dls-course-hero > div:last-child > div > div:last-child > div {
+    background: linear-gradient(90deg, #f4b942, #f7d77a) !important;
+    box-shadow: 0 0 12px rgba(247,215,122,.38);
+}
+
+main .dls-course-summary {
+    z-index: 2;
+    margin-top: -22px;
+    padding: 24px 28px !important;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: 20px !important;
+    background: var(--crs-card) !important;
+    box-shadow: var(--crs-sh-sm) !important;
+}
+
+main .dls-course-summary h3 {
+    color: var(--crs-text) !important;
+    font-size: 15px !important;
+    font-weight: 750 !important;
+}
+
+main .dls-course-summary p {
+    max-width: 1000px;
+    color: var(--crs-text-muted) !important;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+main .dls-course-summary a {
+    border-radius: 999px !important;
+    background: #f1f6fb !important;
+    border-color: #dce6f0 !important;
+    color: #315b83 !important;
+    font-weight: 650;
+}
+main .dls-course-summary a:hover {
+    border-color: var(--crs-red) !important;
+    background: #fff0f1 !important;
+    color: var(--crs-red) !important;
+}
+html.dark main .dls-course-summary a {
+    background: #16283b !important;
+    border-color: var(--crs-border) !important;
+    color: #b9d5f5 !important;
+}
+html.dark main .dls-course-summary a:hover { background: #301b25 !important; color: #ffb5b8 !important; }
+
+main .dls-course-tabs {
+    top: 68px !important;
+    z-index: 30;
+    margin-top: 22px;
+    overflow: hidden;
+    border: 1px solid var(--crs-border) !important;
+    border-radius: 16px !important;
+    background: var(--crs-card) !important;
+    box-shadow: var(--crs-sh-xs) !important;
+}
+
+main .dls-course-tabs nav { gap: 6px; padding: 7px 10px; }
+main .dls-course-tabs nav > a {
+    min-width: 92px;
+    padding: 13px 16px !important;
+    border-radius: 11px;
+    color: var(--crs-text-muted) !important;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background var(--crs-dur), color var(--crs-dur);
+}
+main .dls-course-tabs nav > a:hover { background: #f2f6fa; color: #315b83 !important; }
+main .dls-course-tabs nav > a.text-secondary { background: #fff0f1; color: var(--crs-red) !important; }
+main .dls-course-tabs nav > a > div {
+    display: none;
+}
+html.dark main .dls-course-tabs nav > a:hover { background: #16283b; color: #d7e8fa !important; }
+html.dark main .dls-course-tabs nav > a.text-secondary { background: #301b25; color: #ffb5b8 !important; }
+
+main .course-session-card {
+    padding: 0 20px 18px !important;
+    border-radius: 18px !important;
+    background: var(--crs-card) !important;
+}
+main .course-session-card > .flex.justify-between.items-start {
+    margin: 0 -20px 14px !important;
+    padding: 17px 20px !important;
+    border-bottom: 1px solid var(--crs-border);
+    background: linear-gradient(100deg, #f1f6fb, #f8fafc) !important;
+}
+main .course-session-card > .flex.justify-between.items-start h3 { font-size: 17px !important; }
+html.dark main .course-session-card > .flex.justify-between.items-start {
+    background: linear-gradient(100deg, #16283b, #142131) !important;
+}
+
+@media (max-width: 640px) {
+    main .dls-course-hero {
+        height: 310px !important;
+        min-height: 310px;
+        border-radius: 19px;
+    }
+    main .dls-course-hero-fallback .material-symbols-outlined {
+        width: 92px;
+        height: 92px;
+        border-radius: 26px;
+        font-size: 54px !important;
+    }
+    main .dls-course-hero > div:last-child { padding: 22px 18px !important; }
+    main .dls-course-summary { margin-top: -16px; padding: 19px !important; border-radius: 16px !important; }
+    main .dls-course-tabs { margin-top: 16px; border-radius: 14px !important; }
+    main .dls-course-tabs nav { overflow-x: auto; }
+    main .dls-course-tabs nav > a { min-width: 76px; padding: 12px 9px !important; }
+    main .course-session-card { padding: 0 14px 14px !important; }
+    main .course-session-card > .flex.justify-between.items-start { margin: 0 -14px 12px !important; padding: 14px !important; }
+}
+
+/* Course list filter rail and responsive page rhythm. */
+main[data-student-courses] {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+main[data-student-courses] > .dls-course-list-heading {
+    min-width: 0;
+    padding: clamp(22px, 3vw, 34px) !important;
+    border: 1px solid var(--crs-border);
+    border-radius: 22px;
+    background: var(--crs-card);
+    box-shadow: var(--crs-sh-xs);
+}
+
+main[data-student-courses] > .dls-course-list-heading h1 {
+    margin: 0;
+    font-size: clamp(30px, 3.5vw, 42px) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.045em !important;
+}
+
+main[data-student-courses] > .dls-course-list-heading > p {
+    margin: 0;
+    color: var(--crs-text-muted) !important;
+    font-size: clamp(14px, 1.4vw, 17px);
+    line-height: 1.55;
+}
+
+main[data-student-courses] #chip-container {
+    display: flex;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 10px !important;
+    max-width: 100%;
+    margin-inline: -2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 2px 12px !important;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 12px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-color: #b9c8d7 transparent;
+    scrollbar-width: thin;
+}
+
+main[data-student-courses] #chip-container > * {
+    flex: 0 0 auto;
+    min-height: 42px;
+    scroll-snap-align: start;
+}
+
+main[data-student-courses] #chip-container > .filter-chip,
+main[data-student-courses] #chip-container > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 18px !important;
+    border-radius: 999px !important;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+main[data-student-courses] #chip-container::-webkit-scrollbar { height: 5px; }
+main[data-student-courses] #chip-container::-webkit-scrollbar-track { background: transparent; }
+main[data-student-courses] #chip-container::-webkit-scrollbar-thumb { border-radius: 999px; background: #b9c8d7; }
+
+main[data-student-courses] #course-results {
+    align-items: stretch;
+    gap: clamp(16px, 2vw, 26px) !important;
+}
+main[data-student-courses] #course-results > .course-card { min-width: 0; }
+
+/* Keep wide content usable on every student page. */
+.dls-main, .dls-main-sub { min-width: 0; }
+.dls-main > *, .dls-main-sub > *,
+.dls-main [class*="grid-cols-"] > *, .dls-main-sub [class*="grid-cols-"] > * { min-width: 0; }
+main :is(img, video, iframe) { max-width: 100%; }
+main pre, main .overflow-x-auto { overscroll-behavior-inline: contain; }
+
+@media (max-width: 767px) {
+    main[data-student-courses] { gap: 18px; }
+    main[data-student-courses] > .dls-course-list-heading {
+        padding: 20px 17px !important;
+        border-radius: 17px;
+    }
+    main[data-student-courses] #chip-container {
+        margin-inline: -4px;
+        padding-inline: 4px !important;
+        scrollbar-width: none;
+    }
+    main[data-student-courses] #chip-container::-webkit-scrollbar { display: none; }
+    main[data-student-courses] #chip-container > .filter-chip,
+    main[data-student-courses] #chip-container > a {
+        min-height: 40px;
+        padding-inline: 15px !important;
+        font-size: 12px;
+    }
+    main[data-student-courses] #course-results { gap: 15px !important; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .dls-main, .dls-main-sub {
+        padding-inline: clamp(20px, 4vw, 36px) !important;
+    }
+}
+
+/* Keep the detail hero compact and prevent its fallback icon from colliding with the title. */
+main .dls-course-hero {
+    height: clamp(280px, 24vw, 350px) !important;
+    min-height: 280px;
+}
+main .dls-course-hero h2 {
+    max-width: 760px;
+    font-size: clamp(30px, 3.2vw, 44px) !important;
+}
+main .dls-course-hero-fallback .material-symbols-outlined {
+    position: absolute;
+    top: 12%;
+    right: 9%;
+    display: block;
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: rgba(255,255,255,.2) !important;
+    font-size: clamp(130px, 13vw, 190px) !important;
+}
+
+@media (max-width: 640px) {
+    main .dls-course-hero {
+        height: 280px !important;
+        min-height: 280px;
+    }
+    main .dls-course-hero h2 { max-width: 100%; font-size: clamp(27px, 8vw, 36px) !important; }
+    main .dls-course-hero-fallback .material-symbols-outlined {
+        top: 9%;
+        right: 8%;
+        font-size: 112px !important;
+    }
+}
+

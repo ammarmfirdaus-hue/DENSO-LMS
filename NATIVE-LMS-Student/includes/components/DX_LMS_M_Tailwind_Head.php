@@ -24,7 +24,7 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
 <meta name="application-name" content="DENSO LMS">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#d71920">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DENSO LMS">
 <meta property="og:title" content="<?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?>">
@@ -92,7 +92,56 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Components.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Tailwind_Output.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Responsive_Redesign.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Coursera_Theme.css">
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_Api.js" defer></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_Helpers.js" defer></script>
+
+<!-- =====================================================
+     Dark Mode Early Initialization (Prevent FOUC) & DLS Theme Controller
+     ===================================================== -->
+<script>
+(function() {
+    'use strict';
+    try {
+        var savedTheme = localStorage.getItem('dls_theme') || localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    } catch(e) {}
+
+    window.DLS_Theme = {
+        get: function() {
+            return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        },
+        toggle: function() {
+            var next = this.get() === 'dark' ? 'light' : 'dark';
+            this.set(next);
+            return next;
+        },
+        set: function(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+            localStorage.setItem('dls_theme', theme);
+            localStorage.setItem('theme', theme);
+            window.dispatchEvent(new CustomEvent('dls_theme_change', { detail: { theme: theme } }));
+        }
+    };
+})();
+</script>
 
 <!-- =====================================================
      Non-blocking Initialization Scripts
@@ -122,3 +171,4 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
     }
 })();
 </script>
+
