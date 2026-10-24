@@ -20,8 +20,34 @@ if (!['up', 'status'].includes(command) || !['all', 'admin', 'student'].includes
 
 function migrations(engine) {
   const folder = path.join(root, 'migrations', engine);
-  return fs.readdirSync(folder).filter(name => /^\d{3}_[a-z0-9_-]+\.sql$/i.test(name)).sort()
-    .map(name => ({ name, sql: fs.readFileSync(path.join(folder, name), 'utf8') }));
+  return fs.readdirSync(folder).filter(name => /^\d{4}_\d{2}_\d{2}_\d{6}_[a-z0-9_-]+\.sql$/i.test(name)).sort()
+    .map(name => ({ name, sql: fs.readFileSync(path.join(folder, name), 'utf8').replace(/^\uFEFF/, '') }));
+}
+
+// Preserve the applied state of the earlier combined migrations after splitting them.
+const legacyMigrationNames = {
+  sqlserver: {
+    '001_initial_schema.sql': [1, 10],
+    '002_material_workflow.sql': [11, 13],
+    '003_forum_realtime.sql': [7, 10],
+    '004_notifications.sql': [14, 17]
+  },
+  mysql: {
+    '001_initial_schema.sql': [1, 8],
+    '002_student_sync_columns.sql': [9, 9]
+  }
+};
+
+function hasLegacyAlias(engine, migration, applied) {
+  const match = migration.name.match(/^\d{4}_\d{2}_\d{2}_(\d{6})_/);
+  if (!match) return false;
+  const sequence = Number(match[1]);
+  return Object.entries(legacyMigrationNames[engine]).some(([legacyName, [first, last]]) =>
+    sequence >= first && sequence <= last && applied.has(legacyName));
+}
+
+function wasApplied(engine, migration, applied) {
+  return applied.has(migration.name) || hasLegacyAlias(engine, migration, applied);
 }
 
 function sqlServerBatches(source) {
@@ -52,11 +78,18 @@ async function runAdmin() {
     const applied = new Set((await pool.request().query('SELECT migration_name FROM dbo.schema_migrations')).recordset.map(row => row.migration_name));
     const files = migrations('sqlserver');
     if (command === 'status') {
-      for (const file of files) console.log(`${applied.has(file.name) ? 'DONE' : 'PENDING'}  admin  ${file.name}`);
+      for (const file of files) console.log(`${wasApplied('sqlserver', file, applied) ? 'DONE' : 'PENDING'}  admin  ${file.name}`);
       return;
     }
     for (const file of files) {
       if (applied.has(file.name)) continue;
+      if (hasLegacyAlias('sqlserver', file, applied)) {
+        await pool.request().input('name', sql.NVarChar(255), file.name)
+          .query('INSERT INTO dbo.schema_migrations(migration_name) VALUES(@name)');
+        applied.add(file.name);
+        console.log(`BASELINED  admin  ${file.name}`);
+        continue;
+      }
       const tx = new sql.Transaction(pool);
       await tx.begin();
       try {
@@ -93,11 +126,17 @@ async function runStudent() {
     const applied = new Set(rows.map(row => row.migration_name));
     const files = migrations('mysql');
     if (command === 'status') {
-      for (const file of files) console.log(`${applied.has(file.name) ? 'DONE' : 'PENDING'}  student  ${file.name}`);
+      for (const file of files) console.log(`${wasApplied('mysql', file, applied) ? 'DONE' : 'PENDING'}  student  ${file.name}`);
       return;
     }
     for (const file of files) {
       if (applied.has(file.name)) continue;
+      if (hasLegacyAlias('mysql', file, applied)) {
+        await connection.query('INSERT INTO schema_migrations(migration_name) VALUES(?)', [file.name]);
+        applied.add(file.name);
+        console.log(`BASELINED  student  ${file.name}`);
+        continue;
+      }
       try {
         await connection.query(file.sql);
         await connection.query('INSERT INTO schema_migrations(migration_name) VALUES(?)', [file.name]);

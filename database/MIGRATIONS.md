@@ -86,6 +86,12 @@ The migration set is based on the tables actually queried by the two current app
 
 The Student feature code currently reads quiz/assessment and notification data from the Admin/Teacher API or renders them from existing session/course data; this repo's Student MySQL queries do not reference separate quiz, forum, or notification tables. Add a new versioned migration when a feature starts persisting those entities locally.
 
-## Migration order
+## File structure and migration order
 
-SQL Server runs `001_initial_schema`, `002_material_workflow`, `003_forum_realtime`, and `004_notifications` in filename order. MySQL currently runs `001_initial_schema`. Keep each new migration additive and uniquely numbered; don't edit a migration that has already been applied in a shared environment.
+Migrations use Laravel-style sortable names: `YYYY_MM_DD_HHMMSS_action_table.sql`. SQL Server files are under `database/migrations/sqlserver`; MySQL files are under `database/migrations/mysql`. Each table has its own `create_<table>_table` file, and schema changes use `add_...` files. The numeric suffix keeps files written at the same timestamp in deterministic dependency order. The runner only loads files matching this timestamped pattern.
+
+The current Admin/Teacher order is employee accounts; courses; sessions; course materials; activity logs; progress snapshots; forum threads, replies, likes, and session settings; reviewer/trainer fields; material submissions and review links; notifications, reads, email outbox, and delivery indexes. Foreign-key parents are created before their dependent tables.
+
+The current Student order is student accounts; courses; enrollments; sessions; materials; material progress; activity logs; login rate limits; then compatibility for catalog-sync source IDs and material types.
+
+Earlier combined SQL migrations were moved intact to `database/migrations/legacy` for reference. The runner maps their recorded filenames to the new per-table files, so an already migrated database does not execute the split schema a second time. Files under `legacy` are not executed. Keep adding timestamped files in dependency order; never edit an applied migration in a shared environment.
