@@ -10,6 +10,8 @@
     "test": "node --test",
     "test:security": "node --test tests/security/*.test.js",
     "test:features": "node --test tests/features/*.test.js",
+    "db:migrate": "node ../database/migrate.js up admin",
+    "db:migrate:status": "node ../database/migrate.js status admin",
     "db:seed": "node scripts/seed-admin.js",
     "db:seed:demo": "node scripts/seed-demo.js"
   },

@@ -22,21 +22,18 @@ Jalankan [`install-runtime-all.bat`](install-runtime-all.bat) dari folder utama 
 
 Installer mempertahankan `.env` yang sudah ada. Setelah selesai, sesuaikan kredensial database dan alamat API di setiap `.env`, lalu pasang skema database di bawah ini. Proyek Native PHP saat ini tidak memiliki `composer.json`, jadi tidak memerlukan Composer.
 
-### Setup Database Mysql&MSSQL
+### Setup database dan migrations
 
-Database Student dan Admin/Teacher terpisah. Jalankan masing-masing file SQL berikut satu kali menggunakan akun database yang memiliki izin membuat database dan tabel:
+Admin/Teacher menggunakan SQL Server (`DX_LMS_AdminTeacher`), sedangkan Student menggunakan MySQL (`dls_student`). Atur koneksi kedua database pada `Backend-LMS-Admin-Teacher/.env`, lalu pastikan kedua database sudah dibuat dan akun punya izin membuat/mengubah tabel dan indeks. Jalankan migration CLI dari root repository:
 
-| Database | File SQL | Database yang dibuat |
-|---|---|---|
-| MySQL Student | [`database/student.sql`](database/student.sql) | `dls_student` |
-| MySQL sinkronisasi (database Student lama saja) | [`database/student-material-sync-migration.sql`](database/student-material-sync-migration.sql) | Menambahkan ID sumber unik dan tipe materi terbaru |
-| SQL Server Admin/Teacher | [`database/admin&teacher.sql`](<database/admin&teacher.sql>) | `DX_LMS_AdminTeacher` |
-| SQL Server profil reviewer | [`database/reviewer-profile-migration.sql`](database/reviewer-profile-migration.sql) | Memperluas schema Admin/Teacher |
-| SQL Server workflow reviewer | [`database/material-workflow.sql`](database/material-workflow.sql) | Memperluas schema Admin/Teacher |
-| SQL Server forum realtime | [`database/Forum_Realtime_Migration.sql`](database/Forum_Realtime_Migration.sql) | Memperluas schema Admin/Teacher |
-| SQL Server notifikasi dan email | [`database/Notifications_Migration.sql`](database/Notifications_Migration.sql) | Memperluas schema Admin/Teacher |
+```powershell
+node database/migrate.js status all
+node database/migrate.js up all
+```
 
-Jalankan migration SQL Server setelah schema dasar, dengan urutan profil reviewer, workflow reviewer, forum realtime, lalu notifikasi. Gunakan database `DX_LMS_AdminTeacher` yang sama. `student-material-sync-migration.sql` hanya diperlukan untuk database Student yang dibuat sebelum kolom sinkronisasi tersedia; database baru dari `student.sql` sudah memuatnya.
+Gunakan `admin` atau `student` sebagai argumen terakhir untuk menjalankan satu target. CLI mencatat file yang sudah dijalankan di tabel `schema_migrations` pada masing-masing database dan melewati versi yang telah tercatat. Untuk opsi, urutan, dan inventaris tabel/kolom fitur, lihat [`database/MIGRATIONS.md`](database/MIGRATIONS.md). CLI tidak membuat database dan tidak mengubah kredensial. Pastikan `.env` Student menunjuk ke database MySQL yang sama.
+
+File SQL tunggal seperti `database/student.sql` dan `database/admin&teacher.sql` tetap tersedia sebagai skema referensi/instalasi manual lama. Untuk instalasi baru maupun peningkatan skema terkelola, gunakan migration CLI di atas; jangan jalankan file lama dan migration untuk database yang sama tanpa memahami perubahan yang diduplikasi.
 
 `DX_LMS_W_Forum_Migration.php` adalah script forum legacy sekaligus seeder, bukan migration untuk forum LMS aktif. Script itu menghapus tabel like legacy dan dapat menambahkan akun demo berkredensial tetap, jadi jangan jalankan pada database aktif. `DX_LMS_W_DDL.sql` adalah script reset schema legacy, bukan migration.
 
