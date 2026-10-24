@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
 const TOKEN_KEY = 'dls_admin_teacher_access_token';
 let token = null;
 try { window.sessionStorage.removeItem(TOKEN_KEY); } catch { /* Cookie SSO works without browser storage. */ }

@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { mockResponse } = require('./helpers/security-test-helpers');
-const { errorHandler } = require('../src/middleware/errors');
+const { mockResponse } = require('../helpers/security-test-helpers');
+const { errorHandler } = require('../../src/middleware/errors');
 
 test('unexpected server errors do not disclose stack traces or database details', () => {
   const secretMessage = 'SQL password=do-not-disclose; stack trace at private/path.js';

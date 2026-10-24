@@ -1,12 +1,13 @@
 const rateLimit = require('express-rate-limit');
 
-function buildLimiter({ windowMs, limit, message, keyGenerator }) {
+function buildLimiter({ windowMs, limit, message, keyGenerator, skip }) {
   return rateLimit({
     windowMs,
     limit,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     ...(keyGenerator ? { keyGenerator } : {}),
+    ...(skip ? { skip } : {}),
     handler: (_req, res, _next, options) => res.status(options.statusCode).json({
       error: { code: 'RATE_LIMITED', message },
       retryAfter: Math.max(1, Math.ceil(options.windowMs / 1000))
@@ -32,4 +33,11 @@ const uploadLimiter = buildLimiter({
   message: 'Batas upload tercapai. Coba kembali beberapa saat lagi.'
 });
 
-module.exports = { buildLimiter, apiLimiter, writeLimiter, uploadLimiter };
+const forumUploadLimiter = buildLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: 'Batas lampiran forum tercapai. Coba kembali beberapa saat lagi.',
+  skip: req => !req.is('multipart/form-data')
+});
+
+module.exports = { buildLimiter, apiLimiter, writeLimiter, uploadLimiter, forumUploadLimiter };

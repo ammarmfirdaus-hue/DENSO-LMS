@@ -1,9 +1,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const jwt = require('jsonwebtoken');
-const { invokeMiddleware } = require('./helpers/security-test-helpers');
-const env = require('../src/config/env');
-const { authenticate } = require('../src/middleware/auth');
+const { invokeMiddleware } = require('../helpers/security-test-helpers');
+const env = require('../../src/config/env');
+const { authenticate } = require('../../src/middleware/auth');
 
 function bearer(token) {
   return { get: name => name.toLowerCase() === 'authorization' ? `Bearer ${token}` : '' };

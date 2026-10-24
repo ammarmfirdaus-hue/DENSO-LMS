@@ -3,8 +3,8 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
-require('./helpers/security-test-helpers');
-const { hasExpectedFileSignature, uploadDirectory } = require('../src/middleware/material-upload');
+require('../helpers/security-test-helpers');
+const { hasExpectedFileSignature, uploadDirectory } = require('../../src/middleware/material-upload');
 
 async function withTempFile(t, name, content) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'dls-security-'));

@@ -1,60 +1,39 @@
-<!DOCTYPE html>
+<?php
+$pageTitle = 'Mulai Diskusi - LMS';
+$backUrl = $categoryUrl;
+?>
+<!doctype html>
 <html lang="id">
-
 <head>
-    <?php
-    $page_title = 'Mulai Topik Baru - LMS';
-    include APP_ROOT . '/includes/components/DX_LMS_M_Tailwind_Head.php';
-    ?>
-    <style>
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        .pt-safe {
-            padding-top: env(safe-area-inset-top, 44px);
-        }
-    </style>
+    <?php $page_title = $pageTitle; include APP_ROOT . '/includes/components/DX_LMS_M_Tailwind_Head.php'; ?>
+    <script>window.DLS_FORUM_API_BASE = <?= json_encode(SSO_API_URL, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
+    <script src="assets/js/DX_LMS_M_Forum_Client.js" defer></script>
 </head>
-
-<body class="dls-app-shell bg-background text-on-background antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
-
-    <!-- TopAppBar Shared Component -->
-    <?php
-    $header_title = 'Mulai Topik Baru';
-    $show_back = true;
-    $back_url = '?route=/student/course/detail&tab=forum';
-    include APP_ROOT . '/includes/components/DX_LMS_M_Header.php';
-    ?>
-
-    <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 flex flex-col min-w-0 pb-16 lg:pb-0 lg:ml-[240px] pt-[72px] px-container-margin w-full">
-        <div class="max-w-3xl mx-auto w-full py-stack-lg">
-            <!-- Form Container -->
-            <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] p-6 space-y-6">
-                <!-- Context Hint -->
-                <div class="bg-surface-container-low rounded-lg p-4 flex items-start space-x-3">
-                    <span class="material-symbols-outlined text-secondary">info</span>
-                    <p class="font-body-md text-body-md text-on-surface-variant pt-0.5">
-                        Forum diskusi akan menjadi ruang untuk berbagi pertanyaan dan masukan terkait materi kursus.
-                    </p>
-                </div>
-
-                <div class="dls-feature-note" role="status">Fitur forum belum terhubung ke basis data siswa. Pembuatan topik, balasan, dan lampiran belum tersedia.</div>
+<body class="dls-app-shell min-h-screen bg-surface text-on-surface antialiased">
+    <?php $header_title = 'Mulai Diskusi'; $show_back = true; $back_url = $backUrl; include APP_ROOT . '/includes/components/DX_LMS_M_Header.php'; ?>
+    <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
+        <div class="mx-auto min-w-0 max-w-2xl">
+            <p class="break-words text-sm text-on-surface-variant"><?= e($course['title']) ?> <span class="px-1">/</span> <?= e($session['title']) ?></p>
+            <h1 class="mt-2 text-2xl font-bold">Mulai diskusi</h1>
+            <p class="mt-1 text-sm text-on-surface-variant">Ajukan pertanyaan atau bagikan pengalaman yang relevan dengan sesi ini.</p>
+            <div data-forum-view="new" data-course-code="<?= e((string) $courseId) ?>" data-session-code="<?= e((string) $sessionId) ?>" data-category-url="<?= e($categoryUrl) ?>" data-read-only="false" class="mt-5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 sm:p-6">
+                <p data-forum-message hidden class="mb-4"></p>
+                <form data-forum-new-form>
+                    <label class="block text-sm font-semibold" for="forum-title">Judul diskusi</label>
+                    <input id="forum-title" name="title" type="text" required minlength="3" maxlength="200" class="mt-2 h-11 w-full min-w-0 rounded-lg border border-outline-variant/50 bg-surface px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" placeholder="Contoh: Cara menerapkan standar 5S di area kerja">
+                    <label class="mt-4 block text-sm font-semibold" for="forum-body">Isi diskusi</label>
+                    <textarea id="forum-body" name="body" required maxlength="2000" rows="6" class="mt-2 w-full min-w-0 resize-y rounded-lg border border-outline-variant/50 bg-surface px-3 py-2.5 text-sm leading-6 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" placeholder="Jelaskan pertanyaan atau pengalaman Anda..."></textarea>
+                    <label class="mt-4 block text-sm font-medium text-on-surface-variant">Lampiran gambar (maks. 5 MB setelah kompresi; GIF animasi tetap asli)
+                        <input name="image" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="mt-2 block max-w-full text-sm">
+                    </label>
+                    <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <a href="<?= e($categoryUrl) ?>" class="inline-flex min-h-11 items-center justify-center rounded-lg border border-outline-variant/50 px-4 text-sm font-semibold text-on-surface-variant sm:min-w-28">Batal</a>
+                        <button type="submit" class="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:opacity-90 sm:min-w-40">Kirim diskusi</button>
+                    </div>
+                </form>
             </div>
         </div>
     </main>
-
-    <!-- Bottom Navigation Shared Component -->
-    <?php
-    $active_tab = 'course';
-    include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php';
-    ?>
-
-    <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
-    <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
-    <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
-
+    <?php $active_tab = 'course'; include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
 </body>
-
 </html>

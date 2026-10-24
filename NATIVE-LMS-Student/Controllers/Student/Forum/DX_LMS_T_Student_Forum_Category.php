@@ -31,6 +31,10 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
             header('Location: ?route=' . ($isRiwayat ? '/student/riwayat' : '/student/courses'));
             exit();
         }
+        if ($categoryType !== 'materi') {
+            header('Location: ?route=/student/course/detail&id=' . urlencode($courseId) . '&tab=forum', true, 303);
+            exit();
+        }
 
         /** Mengambil rincian informasi kursus. */
         $course = DX_LMS_M_Student_Data::getCourseById($courseId);
@@ -67,7 +71,9 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
             }
 
             $categoryTitle = $sessionData['title'];
-            $isLocked = $sessionData['status'] !== 'selesai' && !$isRiwayat;
+            // Posting access is controlled by the Admin/Teacher session forum switch.
+            // Course completion should not silently override that moderation setting.
+            $isLocked = false;
 
             $forumsMateri = $course['forums']['materi'] ?? [];
             $forumData = $forumsMateri[$sessionId] ?? ['has_created_thread' => false, 'threads' => []];

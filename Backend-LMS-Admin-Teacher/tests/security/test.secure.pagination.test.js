@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { invokeMiddleware } = require('./helpers/security-test-helpers');
-const { paginationMiddleware, paginateCollection, MAX_PAGE_SIZE } = require('../src/middleware/pagination');
+const { invokeMiddleware } = require('../helpers/security-test-helpers');
+const { paginationMiddleware, paginateCollection, MAX_PAGE_SIZE } = require('../../src/middleware/pagination');
 
 test('rejects hostile and oversized pagination query values', async t => {
   const attacks = [

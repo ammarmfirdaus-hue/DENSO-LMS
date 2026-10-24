@@ -19,6 +19,7 @@ const MENU_GROUPS = [
     links: [
       { to: '/activity', icon: 'monitoring', label: 'Aktivitas' },
       { to: '/forum', icon: 'forum', label: 'Forum Diskusi' },
+      { to: '/notifications', icon: 'notifications', label: 'Notifikasi' },
     ]
   },
   {

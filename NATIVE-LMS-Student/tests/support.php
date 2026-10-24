@@ -1,11 +1,21 @@
 <?php
 declare(strict_types=1);
 
-$GLOBALS['nativeSecurityTests'] = [];
+$GLOBALS['nativeTests'] = [];
+
+function registerNativeTest(string $suite, string $name, callable $test): void
+{
+    $GLOBALS['nativeTests'][] = [$suite, $name, $test];
+}
 
 function securityTest(string $name, callable $test): void
 {
-    $GLOBALS['nativeSecurityTests'][] = [$name, $test];
+    registerNativeTest('security', $name, $test);
+}
+
+function featureTest(string $name, callable $test): void
+{
+    registerNativeTest('features', $name, $test);
 }
 
 function assertSameValue(mixed $expected, mixed $actual, string $message = ''): void

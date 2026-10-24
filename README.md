@@ -8,6 +8,8 @@ Workspace ini berisi tiga runtime terpisah. Jalankan setiap proyek dari folderny
 | `Frontend-LMS-Admin-Teacher` | React, Vite, Tailwind CSS | `http://127.0.0.1:5173` | Mengakses API Node.js |
 | `NATIVE-LMS-Student` | PHP Native, Tailwind CSS, GET JSON API | `http://127.0.0.1:8082` | MySQL (`dls_student`) |
 
+Katalog fitur, hasil audit, perintah test, dan cakupan yang sudah diuji tersedia di [`docs/FEATURES-AND-QA.md`](docs/FEATURES-AND-QA.md). Flowchart terpisah untuk tiap alur ada di [`docs/diagrams`](docs/diagrams/).
+
 ## Menjalankan proyek
 
 ### Memasang environment di Windows
@@ -27,7 +29,16 @@ Database Student dan Admin/Teacher terpisah. Jalankan masing-masing file SQL ber
 | Database | File SQL | Database yang dibuat |
 |---|---|---|
 | MySQL Student | [`database/student.sql`](database/student.sql) | `dls_student` |
+| MySQL sinkronisasi (database Student lama saja) | [`database/student-material-sync-migration.sql`](database/student-material-sync-migration.sql) | Menambahkan ID sumber unik dan tipe materi terbaru |
 | SQL Server Admin/Teacher | [`database/admin&teacher.sql`](<database/admin&teacher.sql>) | `DX_LMS_AdminTeacher` |
+| SQL Server profil reviewer | [`database/reviewer-profile-migration.sql`](database/reviewer-profile-migration.sql) | Memperluas schema Admin/Teacher |
+| SQL Server workflow reviewer | [`database/material-workflow.sql`](database/material-workflow.sql) | Memperluas schema Admin/Teacher |
+| SQL Server forum realtime | [`database/Forum_Realtime_Migration.sql`](database/Forum_Realtime_Migration.sql) | Memperluas schema Admin/Teacher |
+| SQL Server notifikasi dan email | [`database/Notifications_Migration.sql`](database/Notifications_Migration.sql) | Memperluas schema Admin/Teacher |
+
+Jalankan migration SQL Server setelah schema dasar, dengan urutan profil reviewer, workflow reviewer, forum realtime, lalu notifikasi. Gunakan database `DX_LMS_AdminTeacher` yang sama. `student-material-sync-migration.sql` hanya diperlukan untuk database Student yang dibuat sebelum kolom sinkronisasi tersedia; database baru dari `student.sql` sudah memuatnya.
+
+`DX_LMS_W_Forum_Migration.php` adalah script forum legacy sekaligus seeder, bukan migration untuk forum LMS aktif. Script itu menghapus tabel like legacy dan dapat menambahkan akun demo berkredensial tetap, jadi jangan jalankan pada database aktif. `DX_LMS_W_DDL.sql` adalah script reset schema legacy, bukan migration.
 
 #### 1. Pasang skema MySQL Student
 

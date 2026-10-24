@@ -581,6 +581,25 @@ body.dls-app-shell {
     font-size: 9px;
     font-weight: 800;
 }
+.dls-notification-count[hidden],
+.dls-bottom-notification-count[hidden] { display: none !important; }
+.dls-bottom-notification-count {
+    position: absolute;
+    top: 2px;
+    left: calc(50% + 7px);
+    display: grid;
+    min-width: 17px;
+    height: 17px;
+    place-items: center;
+    padding-inline: 3px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #d71920;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1;
+}
 
 #bottomNavBar {
     position: fixed;
@@ -712,6 +731,7 @@ body:not(.dls-app-shell) .login-logo img { width: 76px; height: 76px; border-rad
 body:not(.dls-app-shell) .login-logo-subtitle { color: #748194; font-size: 10px; font-weight: 750; letter-spacing: .16em; }
 
 @media (min-width: 1024px) {
+    .dls-bottom-notification-count { top: 9px; right: 12px; left: auto; }
     #topAppBar,
     #topAppBar.dls-app-header {
         position: fixed !important;

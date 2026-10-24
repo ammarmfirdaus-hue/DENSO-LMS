@@ -25,6 +25,7 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <meta name="description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
 <meta name="application-name" content="DENSO LMS">
 <meta name="theme-color" content="#d71920">
+<meta name="dls-api-base" content="<?= htmlspecialchars(SSO_API_URL, ENT_QUOTES, 'UTF-8') ?>">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DENSO LMS">
 <meta property="og:title" content="<?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?>">
@@ -96,6 +97,7 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_Api.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Helpers.js" defer></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_Notifications_Badge.js" defer></script>
 
 <!-- =====================================================
      Dark Mode Early Initialization (Prevent FOUC) & DLS Theme Controller
@@ -154,9 +156,6 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (!document.cookie.includes('user_timezone')) {
             document.cookie = "user_timezone=" + tz + "; path=/; max-age=31536000";
-        }
-        if (localStorage.getItem('hasUnreadNotifications') === 'false') {
-            document.documentElement.classList.add('hide-notifications');
         }
     }
     

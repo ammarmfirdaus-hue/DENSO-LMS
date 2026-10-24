@@ -1064,9 +1064,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                 <?php foreach ($course['sessions'] as $session):
 
                     $sessId = $session['id'];
-                    $forumData = $forumsMateri[$sessId] ?? ['threads' => []];
-                    $threadCount = count($forumData['threads']);
-                    $isLocked = $session['status'] !== 'selesai';
+                    // Posting access is controlled by the Admin/Teacher per-session forum setting.
+                    $threadCount = 0;
+                    $isLocked = false;
                     ?>
                 <a href="<?= $isLocked
                     ? '#'
@@ -1096,7 +1096,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                             <p class="font-body-sm text-on-surface-variant mb-3 line-clamp-2">Diskusi materi dan tugas terkait sesi ini.</p>
 
                             <div class="flex items-center gap-2 font-label-sm text-on-surface-variant">
-                                <span class="bg-surface-variant/50 px-2 py-0.5 rounded text-xs font-semibold"><?= $threadCount ?> Diskusi</span>
+                                <span class="bg-surface-variant/50 px-2 py-0.5 rounded text-xs font-semibold">Forum sesi</span>
                             </div>
                         </div>
 
@@ -1111,48 +1111,10 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                 endforeach; ?>
                 <?php endif; ?>
 
-                <!-- Quiz Forum -->
-                <?php
-                $qLocked = $quizStatus !== 'selesai';
-                $qThreads = $forumQuiz['threads'] ?? [];
-                $qThreadCount = count($qThreads);
-                ?>
-                <a href="<?= $qLocked
-                    ? '#'
-                    : '?route=/student/forum/category&course_id=' .
-                        urlencode($course['id']) .
-                        '&category_type=quiz' ?>" class="block bg-surface rounded-2xl border border-outline-variant/40 p-5 group relative overflow-hidden <?= $qLocked
-    ? 'opacity-70 cursor-not-allowed'
-    : 'hover:border-error/50 hover:shadow-md transition-all duration-300' ?>">
-
-                    <?php if (!$qLocked): ?>
-                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error/0 group-hover:bg-error transition-colors duration-300 rounded-l-2xl"></div>
-                    <?php endif; ?>
-
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h4 class="font-label-lg font-bold text-on-surface mb-1 <?= !$qLocked
-                                ? 'group-hover:text-error transition-colors'
-                                : '' ?> flex items-center gap-2">
-                                <span class="material-symbols-outlined <?= $qLocked
-                                    ? 'text-on-surface-variant'
-                                    : 'text-error' ?> text-[20px]">quiz</span>
-                                Forum Quiz
-                            </h4>
-                            <p class="font-body-sm text-on-surface-variant mb-3 line-clamp-2">Pembahasan dan pertanyaan seputar quiz course.</p>
-
-                            <div class="flex items-center gap-2 font-label-sm text-on-surface-variant">
-                                <span class="bg-surface-variant/50 px-2 py-0.5 rounded text-xs font-semibold"><?= $qThreadCount ?> Diskusi</span>
-                            </div>
-                        </div>
-
-                        <div class="shrink-0 w-10 h-10 rounded-full <?= $qLocked
-                            ? 'bg-surface-variant/30 text-on-surface-variant'
-                            : 'bg-error-container/50 text-error group-hover:bg-error group-hover:text-on-error' ?> flex items-center justify-center transition-colors">
-                            <span class="material-symbols-outlined"><?= $qLocked ? 'lock' : 'arrow_forward' ?></span>
-                        </div>
-                    </div>
-                </a>
+                <div class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5">
+                    <h4 class="font-label-lg font-bold text-on-surface">Diskusi per sesi</h4>
+                    <p class="mt-2 font-body-sm leading-6 text-on-surface-variant">Setiap ruang diskusi mengikuti sesi course dan dapat dibuka atau ditutup oleh Admin atau Teacher.</p>
+                </div>
             </div>
         </div>
 

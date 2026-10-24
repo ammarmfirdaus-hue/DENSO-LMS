@@ -4,29 +4,10 @@ const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const { authenticate, allowRoles } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
+const { reviewerSchema, reviewerUpdateSchema } = require('../services/reviewer-rules');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin'));
-
-const reviewerSchema = z.object({
-  npk: z.string().trim().min(1).max(50),
-  fullname: z.string().trim().min(2).max(150),
-  email: z.string().trim().email().max(254).transform(val => val.toLowerCase()),
-  password: z.string().min(12, 'Kata sandi minimal 12 karakter.').max(200),
-  department: z.string().trim().max(100).optional().default(''),
-  position: z.string().trim().max(100).optional().default(''),
-  phoneNumber: z.string().trim().max(30).optional().default('')
-});
-
-const reviewerUpdateSchema = z.object({
-  fullname: z.string().trim().min(2).max(150),
-  email: z.string().trim().email().max(254).transform(val => val.toLowerCase()),
-  department: z.string().trim().max(100).optional().default(''),
-  position: z.string().trim().max(100).optional().default(''),
-  phoneNumber: z.string().trim().max(30).optional().default(''),
-  status: z.enum(['active', 'inactive']).default('active'),
-  password: z.string().min(12, 'Kata sandi baru minimal 12 karakter.').max(200).optional().or(z.literal(''))
-});
 
 /**
  * GET /api/v1/reviewers

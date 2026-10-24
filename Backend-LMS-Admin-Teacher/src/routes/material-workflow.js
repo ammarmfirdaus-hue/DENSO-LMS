@@ -13,6 +13,7 @@ const { paginateCollection } = require('../middleware/pagination');
 const { sendReviewInvitation } = require('../services/review-mail');
 const { syncStudentNow, deleteStudentMaterial } = require('../services/student-sync');
 const { studentHasCourseAccess } = require('../services/student-auth');
+const { getSubmissionEditDecision } = require('../services/material-workflow-rules');
 
 const router = express.Router();
 const materialTypes = ['text', 'video', 'pdf', 'image', 'link', 'audio', 'document'];
@@ -265,47 +266,23 @@ router.put('/submissions/:id', authenticate, allowRoles('admin', 'teacher'), upl
       return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Materi tidak ditemukan.' } });
     }
 
-    // Role-based state machine guards:
-    // 1. Teacher cannot edit while pending_admin or pending_review
-    if (req.user.role === 'teacher') {
-      if (existing.submitted_by !== req.user.sub) {
-        cleanFile(req.file);
-        return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Hanya pengaju materi yang dapat mengubah pengajuan ini.' } });
-      }
-      if (existing.status === 'pending_admin') {
-        cleanFile(req.file);
-        return res.status(403).json({
-          error: { code: 'CANNOT_EDIT_PENDING_APPROVAL', message: 'Materi sedang menunggu persetujuan Admin dan tidak dapat diedit saat ini.' }
-        });
-      }
-      if (existing.status === 'pending_review') {
-        cleanFile(req.file);
-        return res.status(403).json({
-          error: { code: 'CANNOT_EDIT_IN_REVIEW', message: 'Materi sedang direview oleh Reviewer dan terkunci.' }
-        });
-      }
-      if (existing.status === 'approved' || existing.status === 'published') {
-        cleanFile(req.file);
-        return res.status(403).json({
-          error: { code: 'CANNOT_EDIT_FINAL', message: 'Materi yang sudah disetujui atau dipublikasikan tidak dapat diedit.' }
-        });
-      }
-      // Allowed: status === 'rejected'
-    } else if (req.user.role === 'admin') {
-      // 2. Admin cannot edit while pending_review
-      if (existing.status === 'pending_review') {
-        cleanFile(req.file);
-        return res.status(403).json({
-          error: { code: 'CANNOT_EDIT_IN_REVIEW', message: 'Materi sudah dikirim ke Reviewer dan tidak dapat diedit sebelum ada keputusan dari Reviewer.' }
-        });
-      }
-      if (existing.status === 'approved' || existing.status === 'published') {
-        cleanFile(req.file);
-        return res.status(403).json({
-          error: { code: 'CANNOT_EDIT_FINAL', message: 'Materi yang sudah disetujui atau dipublikasikan tidak dapat diedit.' }
-        });
-      }
-      // Allowed: status === 'pending_admin' OR status === 'rejected'
+    const editDecision = getSubmissionEditDecision({
+      userRole: req.user.role,
+      isSubmitter: existing.submitted_by === req.user.sub,
+      status: existing.status
+    });
+    if (!editDecision.allowed) {
+      const messages = {
+        FORBIDDEN: 'Hanya pengaju materi yang dapat mengubah pengajuan ini.',
+        CANNOT_EDIT_PENDING_APPROVAL: 'Materi sedang menunggu persetujuan Admin dan tidak dapat diedit saat ini.',
+        CANNOT_EDIT_IN_REVIEW: req.user.role === 'admin'
+          ? 'Materi sudah dikirim ke Reviewer dan tidak dapat diedit sebelum ada keputusan dari Reviewer.'
+          : 'Materi sedang direview oleh Reviewer dan terkunci.',
+        CANNOT_EDIT_FINAL: 'Materi yang sudah disetujui atau dipublikasikan tidak dapat diedit.',
+        INVALID_STATUS: 'Status pengajuan tidak dapat diedit.'
+      };
+      cleanFile(req.file);
+      return res.status(403).json({ error: { code: editDecision.code, message: messages[editDecision.code] } });
     }
 
     let newFilePath = existing.file_path;

@@ -98,9 +98,20 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
     public function logout(): void
     {
         startAppSession();
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verifyCsrf()) {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            // Opening the logout URL directly should offer a CSRF-protected
+            // confirmation form; a GET request must never end the session.
+            $this->view('DX_LMS_M_Auth_Logout_Confirm', ['csrf_token' => csrfToken()]);
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Allow: GET, POST');
+            http_response_code(405);
+            exit('Metode permintaan tidak didukung.');
+        }
+        if (!verifyCsrf()) {
             http_response_code(403);
-            exit('Permintaan tidak valid.');
+            exit('Sesi formulir tidak valid atau kedaluwarsa. Muat ulang halaman lalu coba kembali.');
         }
         $_SESSION = [];
         clearSsoBrowserCookie();

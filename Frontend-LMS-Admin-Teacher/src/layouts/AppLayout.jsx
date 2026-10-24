@@ -1,5 +1,6 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
 
 export default function AppLayout({ user: initialUser, onLogout }) {
@@ -13,6 +14,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     }
   });
   const [user, setUser] = useState(initialUser);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const pageTitle = pathname === '/'
     ? 'Dashboard'
@@ -28,6 +30,8 @@ export default function AppLayout({ user: initialUser, onLogout }) {
               ? 'Kelola Nilai'
               : pathname === '/forum'
                 ? 'Forum Diskusi'
+                : pathname === '/notifications'
+                  ? 'Notifikasi'
                 : pathname === '/reviewers'
                   ? 'Kelola Reviewer'
                   : pathname === '/users'
@@ -43,6 +47,30 @@ export default function AppLayout({ user: initialUser, onLogout }) {
       return next;
     });
   }
+
+  useEffect(() => {
+    let mounted = true;
+    const refreshCount = async () => {
+      try {
+        const result = await api('/notifications/unread-count');
+        if (mounted) setNotificationCount(Number(result.unreadCount || 0));
+      } catch { if (mounted) setNotificationCount(0); }
+    };
+    const syncNotifications = () => {
+      refreshCount();
+      window.dispatchEvent(new Event('dls_notifications_changed'));
+    };
+    refreshCount();
+    const events = new EventSource(`${API_BASE}/notifications/events`, { withCredentials: true });
+    events.addEventListener('ready', refreshCount);
+    events.addEventListener('notification', syncNotifications);
+    window.addEventListener('focus', refreshCount);
+    return () => {
+      mounted = false;
+      events.close();
+      window.removeEventListener('focus', refreshCount);
+    };
+  }, [user?.role, user?.npk]);
 
   return (
     <div className="min-h-screen bg-surface dark:bg-[#0f172a] text-on-surface transition-colors duration-200">
@@ -91,14 +119,15 @@ export default function AppLayout({ user: initialUser, onLogout }) {
             <span className="hidden text-xs font-medium text-muted md:block">
               Selamat datang, <strong className="text-secondary dark:text-slate-100">{user?.name}</strong>
             </span>
-            <button
-              type="button"
-              aria-label="Notifikasi"
-              className="relative rounded-full p-2 text-secondary hover:bg-surface-low cursor-pointer"
+            <Link
+              to="/notifications"
+              aria-label={`Notifikasi${notificationCount ? `, ${notificationCount} belum dibaca` : ''}`}
+              title="Notifikasi"
+              className="relative rounded-full border border-outline/50 p-2 text-secondary hover:bg-surface-low"
             >
               <span className="material-symbol">notifications</span>
-              <i className="absolute right-2 top-2 size-2 rounded-full bg-primary" />
-            </button>
+              {notificationCount > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-600 px-1 text-[10px] font-bold leading-none text-white dark:border-slate-800">{notificationCount > 99 ? '99+' : notificationCount}</span>}
+            </Link>
           </div>
         </header>
         <main className="mx-auto max-w-7xl p-4 md:p-8">

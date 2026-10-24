@@ -19,8 +19,8 @@ class DX_LMS_T_Student_Notifikasi extends DX_LMS_M_Controller
     {
         startAppSession();
 
-        /** Mengambil daftar pemberitahuan (notifikasi) dari basis data utama. */
-        $notifications = DX_LMS_M_Student_Data::getNotifications();
+        // Notification records are loaded from the shared authenticated API client.
+        $notifications = [];
         $stats = DX_LMS_M_Student_Data::getStats();
 
         $data = [

@@ -47,6 +47,9 @@ $tabs = [
     ],
 ];
 ?>
+<form id="studentNavLogoutForm" class="hidden" method="POST" action="?route=/auth/logout" aria-hidden="true">
+    <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
+</form>
 <nav class="fixed bottom-0 left-0 w-full z-50 flex items-stretch px-0 h-[76px] shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:h-screen lg:flex-col lg:justify-start lg:top-0 lg:left-0 lg:rounded-none lg:border-r border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-4 lg:pt-8 lg:gap-2 transition-all duration-300" id="bottomNavBar">
 
     <!-- Brand untuk sidebar desktop -->
@@ -79,8 +82,8 @@ $tabs = [
         
         <span class="font-label-sm text-label-sm lg:text-body-md"><?= $tab['label'] ?></span>
 
-        <?php if ($tab['id'] === 'notifikasi' && isset($notif_count) && $notif_count > 0 && !$is_active): ?>
-        <span class="notification-dot absolute top-1 right-4 lg:top-3 lg:right-3 w-2 h-2 bg-error rounded-full"></span>
+        <?php if ($tab['id'] === 'notifikasi'): ?>
+        <span data-notification-count class="dls-bottom-notification-count" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
         <?php endif; ?>
     </a>
     <?php endforeach; ?>
@@ -231,6 +234,17 @@ window.updateThemeUI = function(theme) {
     if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
 };
 
+window.submitStudentLogout = function() {
+    // Profile has its own form; other pages use the shared navigation form.
+    var form = document.getElementById('logoutForm') || document.getElementById('studentNavLogoutForm');
+    if (!form) {
+        console.error('Form logout aman tidak tersedia pada halaman ini.');
+        return;
+    }
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.submit();
+};
+
 window.confirmStudentLogout = function() {
     if (window.DLS && window.DLS.confirm) {
         window.DLS.confirm({
@@ -240,11 +254,7 @@ window.confirmStudentLogout = function() {
             cancelText: 'Tetap di Sini',
             danger: true
         }).then(function(confirmed) {
-            if (confirmed) {
-                var form = document.getElementById('logoutForm');
-                if (form) form.submit();
-                else window.location.href = '?route=/auth/logout';
-            }
+            if (confirmed) window.submitStudentLogout();
         });
     } else if (typeof Swal !== 'undefined') {
         Swal.fire({
@@ -256,16 +266,10 @@ window.confirmStudentLogout = function() {
             cancelButtonText: 'Batal',
             confirmButtonColor: '#dc2626'
         }).then(function(r) {
-            if (r.isConfirmed) {
-                var form = document.getElementById('logoutForm');
-                if (form) form.submit();
-                else window.location.href = '?route=/auth/logout';
-            }
+            if (r.isConfirmed) window.submitStudentLogout();
         });
     } else {
-        if (confirm('Apakah Anda yakin ingin keluar?')) {
-            window.location.href = '?route=/auth/logout';
-        }
+        if (confirm('Apakah Anda yakin ingin keluar?')) window.submitStudentLogout();
     }
 };
 

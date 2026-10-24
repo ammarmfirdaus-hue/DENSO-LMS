@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { invokeMiddleware } = require('./helpers/security-test-helpers');
-const { allowRoles } = require('../src/middleware/auth');
+const { invokeMiddleware } = require('../helpers/security-test-helpers');
+const { allowRoles } = require('../../src/middleware/auth');
 
 test('allows only the explicitly permitted role', () => {
   const { res, nextCalled } = invokeMiddleware(allowRoles('admin', 'reviewer'), { user: { role: 'reviewer' } });

@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "test": "node --test",
+    "test:security": "node --test tests/security/*.test.js",
+    "test:features": "node --test tests/features/*.test.js",
+    "test:browser": "node --test tests/features/browser-pages.test.js",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

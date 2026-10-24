@@ -4,16 +4,18 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from
 import { api, authToken } from './api/client';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './features/auth/LoginPage';
-import DashboardPage from './features/dashboard/DashboardPage';
-import CoursesPage from './features/courses/CoursesPage';
-import MaterialsPage from './features/materials/MaterialsPage';
-import CourseDetailPage from './features/courses/CourseDetailPage';
-import ActivityPage from './features/activity/ActivityPage';
-import GradesPage from './features/grades/GradesPage';
-import ForumPage from './features/forum/ForumPage';
-import UsersPage from './features/users/UsersPage';
-import ReviewersPage from './features/reviewers/ReviewersPage';
+const DashboardPage = React.lazy(() => import('./features/dashboard/DashboardPage'));
+const CoursesPage = React.lazy(() => import('./features/courses/CoursesPage'));
+const MaterialsPage = React.lazy(() => import('./features/materials/MaterialsPage'));
+const CourseDetailPage = React.lazy(() => import('./features/courses/CourseDetailPage'));
+const ActivityPage = React.lazy(() => import('./features/activity/ActivityPage'));
+const GradesPage = React.lazy(() => import('./features/grades/GradesPage'));
+const ForumPage = React.lazy(() => import('./features/forum/ForumPage'));
+const NotificationsPage = React.lazy(() => import('./features/notifications/NotificationsPage'));
+const UsersPage = React.lazy(() => import('./features/users/UsersPage'));
+const ReviewersPage = React.lazy(() => import('./features/reviewers/ReviewersPage'));
 import ReviewerPortalPage from './features/reviewer/ReviewerPortalPage';
+import { canAccessAdminManagement } from './utils/access-control';
 import './styles/index.css';
 
 function Application() {
@@ -74,7 +76,7 @@ function Application() {
   }
   if (!authReady) return <main className="grid min-h-dvh place-items-center bg-surface text-sm text-muted">Memeriksa sesi...</main>;
   if (!session) return <Routes><Route path="/login" element={<LoginPage onLogin={login} />} /><Route path="*" element={<Navigate to="/login" replace />} /></Routes>;
-  return <Routes><Route element={<AppLayout user={session} onLogout={logout} />}><Route index element={<DashboardPage />} /><Route path="courses" element={<CoursesPage />} /><Route path="courses/:id" element={<CourseDetailPage />} /><Route path="materials" element={<MaterialsPage />} /><Route path="activity" element={<ActivityPage />} /><Route path="grades" element={<GradesPage />} /><Route path="forum" element={<ForumPage />} /><Route path="reviewers" element={session.role === 'admin' ? <ReviewersPage /> : <Navigate to="/" replace />} /><Route path="users" element={session.role === 'admin' ? <UsersPage /> : <Navigate to="/" replace />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes>;
+  return <React.Suspense fallback={<main className="grid min-h-dvh place-items-center bg-surface text-sm text-muted">Memuat halaman...</main>}><Routes><Route element={<AppLayout user={session} onLogout={logout} />}><Route index element={<DashboardPage />} /><Route path="courses" element={<CoursesPage />} /><Route path="courses/:id" element={<CourseDetailPage />} /><Route path="materials" element={<MaterialsPage />} /><Route path="activity" element={<ActivityPage />} /><Route path="grades" element={<GradesPage />} /><Route path="forum" element={<ForumPage />} /><Route path="notifications" element={<NotificationsPage />} /><Route path="reviewers" element={canAccessAdminManagement(session.role) ? <ReviewersPage /> : <Navigate to="/" replace />} /><Route path="users" element={canAccessAdminManagement(session.role) ? <UsersPage /> : <Navigate to="/" replace />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></React.Suspense>;
 }
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><Application /></BrowserRouter></React.StrictMode>);

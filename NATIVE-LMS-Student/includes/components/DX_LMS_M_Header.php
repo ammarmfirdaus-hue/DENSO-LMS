@@ -49,9 +49,7 @@ $backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
            aria-label="Notifikasi<?= $notif_count > 0 ? ', ' . $notif_count . ' belum dibaca' : '' ?>"
            title="Notifikasi">
             <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-            <?php if ($notif_count > 0): ?>
-                <span class="dls-notification-count notification-dot" aria-hidden="true"><?= $notif_count > 99 ? '99+' : $notif_count ?></span>
-            <?php endif; ?>
+            <span data-notification-count class="dls-notification-count" aria-hidden="true"<?= $notif_count > 0 ? '' : ' hidden' ?>><?= $notif_count > 99 ? '99+' : $notif_count ?></span>
         </a>
 
     </div>
