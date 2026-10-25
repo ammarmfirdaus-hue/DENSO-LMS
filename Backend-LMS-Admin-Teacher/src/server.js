@@ -16,6 +16,7 @@ const materialWorkflowRoutes = require('./routes/material-workflow');
 const jobRoutes = require('./routes/jobs');
 const quizRoutes = require('./routes/quizzes');
 const enrollmentRoutes = require('./routes/enrollments');
+const settingsRoutes = require('./routes/settings');
 const { notFound, errorHandler } = require('./middleware/errors');
 const { apiLimiter, writeLimiter } = require('./middleware/rate-limit');
 const { paginationMiddleware } = require('./middleware/pagination');
@@ -25,6 +26,7 @@ const { startNotificationMailWorker } = require('./services/notification-mail');
 const { registerJobHandler, startAdminJobWorker } = require('./services/admin-jobs');
 const { registerUserJobHandler } = require('./services/user-job-handler');
 const { registerRecordDeleteJobHandler } = require('./services/record-delete-job-handler');
+const { loadSystemSettings } = require('./services/system-settings');
 const { closeQuizStore } = require('./services/quiz-store');
 
 const app = express();
@@ -61,6 +63,7 @@ app.use('/api/v1/material-workflow', materialWorkflowRoutes);
 app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/v1/quizzes', quizRoutes);
 app.use('/api/v1/enrollments', enrollmentRoutes);
+app.use('/api/v1/settings', settingsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
@@ -71,6 +74,7 @@ async function start() {
 
   try {
     await pool.connect();
+    await loadSystemSettings();
   } catch (error) {
     console.error('Database connection failed. Check server configuration.');
     if (env.NODE_ENV !== 'production') console.error(error.message);

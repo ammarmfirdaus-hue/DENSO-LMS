@@ -21,6 +21,10 @@ Run the migration command from the repository root if the relative path does not
 
 Open `http://127.0.0.1:8082`. The same-origin, GET-only JSON endpoints are `GET /api/index.php?resource=me`, `GET /api/index.php?resource=dashboard`, and `GET /api/index.php?resource=courses`. They require the authenticated Student session. The nilai page reads the authenticated Student's MySQL enrollment directly through PHP/PDO; forum and notification clients call the backend API separately. The PHP portal keeps its page and JSON API same-origin.
 
+### Backend API address
+
+The Native Student app reads its active Backend API URL from the Admin-managed `dbo.lms_system_settings` value exposed by `GET /api/v1/settings/runtime-config`. Configure that URL from **Manajemen â†’ Atur API** in the Admin/Teacher portal. `SSO_API_URL` in this project's `.env` is only the bootstrap address used to retrieve that setting and the fallback if the backend cannot be reached; it is not the preferred active URL. Student database credentials remain in `.env`. The resolved non-secret URL is cached for up to 60 seconds in the system temporary directory.
+
 ### Install as an app (PWA)
 
 The Student portal can be installed from a supported browser. Use HTTPS in deployments; localhost is allowed for development. Chrome/Edge show the install prompt from the portal, while iPhone/iPad users can use **Bagikan → Tambahkan ke Layar Utama**. The service worker caches static assets and a small offline page; private PHP pages and API responses are not cached.

@@ -49,9 +49,13 @@ export default function Pagination({ page, pageSize, total, pageCount, onPageCha
       <label className="flex items-center gap-2">Baris per halaman<select aria-label="Baris per halaman" value={pageSize} onChange={event => onPageSizeChange(Number(event.target.value))} className="h-9 rounded-lg border border-outline/50 bg-white px-2 text-sm text-on-surface">{pageSizes.map(size => <option key={size} value={size}>{size}</option>)}</select></label>
     </div>
     <div className="flex items-center gap-1" role="group" aria-label="Pilih halaman">
-      <button type="button" aria-label="Halaman sebelumnya" disabled={page <= 1} onClick={() => onPageChange(page - 1)} className="grid size-9 place-items-center rounded-lg border border-outline/50 text-sm disabled:cursor-not-allowed disabled:opacity-40">‹</button>
+      <button type="button" aria-label="Halaman sebelumnya" disabled={page <= 1} onClick={() => onPageChange(page - 1)} className="grid size-9 place-items-center rounded-lg border border-outline/50 text-secondary transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-40" title="Halaman sebelumnya">
+        <svg aria-hidden="true" className="block size-4" viewBox="0 0 24 24" fill="none"><path d="m15 18-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
       {pages.map(value => <button key={value} type="button" aria-current={value === page ? 'page' : undefined} onClick={() => onPageChange(value)} className={`min-w-9 rounded-lg border px-2 py-2 text-xs font-semibold ${value === page ? 'border-primary bg-primary text-white' : 'border-outline/50 bg-white text-on-surface hover:bg-surface-low'}`}>{value}</button>)}
-      <button type="button" aria-label="Halaman berikutnya" disabled={page >= pageCount} onClick={() => onPageChange(page + 1)} className="grid size-9 place-items-center rounded-lg border border-outline/50 text-sm disabled:cursor-not-allowed disabled:opacity-40">›</button>
+      <button type="button" aria-label="Halaman berikutnya" disabled={page >= pageCount} onClick={() => onPageChange(page + 1)} className="grid size-9 place-items-center rounded-lg border border-outline/50 text-secondary transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-40" title="Halaman berikutnya">
+        <svg aria-hidden="true" className="block size-4" viewBox="0 0 24 24" fill="none"><path d="m9 18 6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
     </div>
   </nav>;
 }

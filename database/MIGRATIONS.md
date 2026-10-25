@@ -73,6 +73,7 @@ The migration set is based on the tables actually queried by the two current app
 - `forum_threads`, `forum_replies`, `forum_likes`, `forum_session_settings`: real-time discussion, attachments, visibility, likes, and per-session write state.
 - `lms_notifications`, `lms_notification_reads`, `lms_notification_email_outbox`: role-targeted and student-specific notifications, per-recipient read state, and retryable email delivery.
 - `lms_admin_jobs`, `lms_admin_job_events`: persistent Admin/Teacher bulk queues, ordered per-item results, stop/resume state, and refresh-safe progress. Job payloads are AES-GCM encrypted with a key derived from `JWT_SECRET`; completed jobs clear their payload.
+- `lms_system_settings`: Admin-managed shared API URL for the Admin/Teacher portal and Native PHP Student, with editor identity and update timestamp. Student reads it through the public runtime-config endpoint; it stores no Student database credentials.
 - `schema_migrations`: applied migration versions for this database.
 
 ### Student MySQL
@@ -93,7 +94,7 @@ Course quiz definitions and attempts are persisted in the Student MySQL database
 
 Migrations use Laravel-style sortable names: `YYYY_MM_DD_HHMMSS_action_table.sql`. SQL Server files are under `database/migrations/sqlserver`; MySQL files are under `database/migrations/mysql`. Each table has its own `create_<table>_table` file, and schema changes use `add_...` files. The numeric suffix keeps files written at the same timestamp in deterministic dependency order. The runner only loads files matching this timestamped pattern.
 
-The current Admin/Teacher order is employee accounts; courses; sessions; course materials; activity logs; progress snapshots; forum threads, replies, likes, and session settings; reviewer/trainer fields; material submissions and review links; notifications, reads, email outbox, delivery indexes; grade fields and student-targeted notifications; persistent job and job-event tables; then the synchronized student quiz score field. Foreign-key parents are created before their dependent tables.
+The current Admin/Teacher order is employee accounts; courses; sessions; course materials; activity logs; progress snapshots; forum threads, replies, likes, and session settings; reviewer/trainer fields; material submissions and review links; notifications, reads, email outbox, delivery indexes; grade fields and student-targeted notifications; persistent job and job-event tables; synchronized student quiz score field; then Admin/Teacher API settings. Foreign-key parents are created before their dependent tables.
 
 The current Student order is student accounts; courses; enrollments; sessions; materials; material progress; activity logs; login rate limits; compatibility for catalog-sync source IDs and material types; course grade fields; quiz score on enrollments; course quizzes; ordered quiz questions; unique student quiz attempts; the course material active marker; the account type for Student/teacher-shadow identities; then course enrollment requests. The last migration depends on `student_accounts` and `courses` and must run before using course-access approvals.
 

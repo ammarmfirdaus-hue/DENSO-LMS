@@ -1,11 +1,31 @@
 const configuredApiBase = (import.meta.env?.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const localApiBase = /^http:\/\/(?:127\.0\.0\.1|localhost):3001\/api\/v1$/i;
+const API_BASE_KEY = 'dls_admin_api_base_url';
+const defaultApiBase = import.meta.env?.DEV && (!configuredApiBase || localApiBase.test(configuredApiBase))
+  ? '/api/v1'
+  : (configuredApiBase || '/api/v1');
+let API_BASE = defaultApiBase;
+try { API_BASE = localStorage.getItem(API_BASE_KEY) || defaultApiBase; } catch { /* Browser storage may be disabled. */ }
 
 // Route local UI traffic through Vite so browser requests stay same-origin and
 // do not depend on CORS or whether the page was opened via localhost/127.0.0.1.
-export const API_BASE = import.meta.env?.DEV && (!configuredApiBase || localApiBase.test(configuredApiBase))
-  ? '/api/v1'
-  : (configuredApiBase || '/api/v1');
+export { API_BASE };
+
+export function storeApiBaseUrl(value) {
+  const normalized = String(value || '').replace(/\/+$/, '');
+  API_BASE = normalized;
+  try { localStorage.setItem(API_BASE_KEY, normalized); } catch { /* The backend keeps the canonical value. */ }
+}
+
+export async function initializeApiBase() {
+  try {
+    const response = await fetch(`${API_BASE}/settings/runtime-config`, { credentials: 'include', signal: AbortSignal.timeout(3500) });
+    if (!response.ok) return API_BASE;
+    const config = await response.json();
+    if (typeof config.apiBaseUrl === 'string' && config.apiBaseUrl) storeApiBaseUrl(config.apiBaseUrl);
+  } catch { /* Keep Vite/env or the last saved browser fallback when API is offline. */ }
+  return API_BASE;
+}
 
 const TOKEN_KEY = 'dls_admin_teacher_access_token';
 let token = null;

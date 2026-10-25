@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { api, authToken } from './api/client';
+import { api, authToken, initializeApiBase } from './api/client';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './features/auth/LoginPage';
 const DashboardPage = React.lazy(() => import('./features/dashboard/DashboardPage'));
@@ -16,6 +16,7 @@ const NotificationsPage = React.lazy(() => import('./features/notifications/Noti
 const UsersPage = React.lazy(() => import('./features/users/UsersPage'));
 const ReviewersPage = React.lazy(() => import('./features/reviewers/ReviewersPage'));
 const EnrollmentsPage = React.lazy(() => import('./features/enrollments/EnrollmentsPage'));
+const ApiSettingsPage = React.lazy(() => import('./features/settings/ApiSettingsPage'));
 import ReviewerPortalPage from './features/reviewer/ReviewerPortalPage';
 import { canAccessAdminManagement, canManageUsers } from './utils/access-control';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
@@ -42,6 +43,7 @@ function Application() {
 
     async function restoreSession() {
       try {
+        await initializeApiBase();
         const result = await api('/auth/me');
         if (result.user.role === 'student') {
           authToken.clear();
@@ -65,6 +67,7 @@ function Application() {
   }, [isReviewerRoute]);
 
   async function login(npk, password) {
+    await initializeApiBase();
     const result = await api('/auth/login', { method: 'POST', body: JSON.stringify({ npk, password }) });
     if (result.user.role === 'student') {
       authToken.clear();
@@ -83,7 +86,7 @@ function Application() {
   }
   if (!authReady) return <main className="grid min-h-dvh place-items-center bg-surface text-sm text-muted">Memeriksa sesi...</main>;
   if (!session) return <Routes><Route path="/login" element={<LoginPage onLogin={login} />} /><Route path="*" element={<Navigate to="/login" replace />} /></Routes>;
-  return <React.Suspense fallback={<main className="grid min-h-dvh place-items-center bg-surface text-sm text-muted">Memuat halaman...</main>}><Routes><Route element={<AppLayout user={session} onLogout={logout} />}><Route index element={<DashboardPage />} /><Route path="courses" element={<CoursesPage />} /><Route path="courses/:id" element={<CourseDetailPage />} /><Route path="materials" element={<MaterialsPage />} /><Route path="quizzes" element={<QuizzesPage />} /><Route path="activity" element={<ActivityPage />} /><Route path="grades" element={<GradesPage />} /><Route path="forum" element={<ForumPage />} /><Route path="notifications" element={<NotificationsPage />} /><Route path="enrollments" element={<EnrollmentsPage />} /><Route path="reviewers" element={canAccessAdminManagement(session.role) ? <ReviewersPage /> : <Navigate to="/" replace />} /><Route path="users" element={canManageUsers(session.role) ? <UsersPage /> : <Navigate to="/" replace />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></React.Suspense>;
+  return <React.Suspense fallback={<main className="grid min-h-dvh place-items-center bg-surface text-sm text-muted">Memuat halaman...</main>}><Routes><Route element={<AppLayout user={session} onLogout={logout} />}><Route index element={<DashboardPage />} /><Route path="courses" element={<CoursesPage />} /><Route path="courses/:id" element={<CourseDetailPage />} /><Route path="materials" element={<MaterialsPage />} /><Route path="quizzes" element={<QuizzesPage />} /><Route path="activity" element={<ActivityPage />} /><Route path="grades" element={<GradesPage />} /><Route path="forum" element={<ForumPage />} /><Route path="notifications" element={<NotificationsPage />} /><Route path="enrollments" element={<EnrollmentsPage />} /><Route path="reviewers" element={canAccessAdminManagement(session.role) ? <ReviewersPage /> : <Navigate to="/" replace />} /><Route path="users" element={canManageUsers(session.role) ? <UsersPage /> : <Navigate to="/" replace />} /><Route path="settings/api" element={session.role === 'admin' ? <ApiSettingsPage /> : <Navigate to="/" replace />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></React.Suspense>;
 }
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><Application /></BrowserRouter><PwaInstallPrompt /></React.StrictMode>);

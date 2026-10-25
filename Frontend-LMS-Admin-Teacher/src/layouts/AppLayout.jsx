@@ -48,7 +48,9 @@ export default function AppLayout({ user: initialUser, onLogout }) {
                     ? 'Kelola Pengguna'
                     : pathname === '/enrollments'
                       ? 'Persetujuan Course'
-                    : 'Dashboard';
+                      : pathname === '/settings/api'
+                        ? 'Atur API'
+                        : 'Dashboard';
 
   async function enterStudentMode() {
     try {

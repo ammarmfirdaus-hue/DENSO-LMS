@@ -28,6 +28,7 @@ const MENU_GROUPS = [
       { to: '/reviewers', icon: 'verified_user', label: 'Kelola Reviewer', adminOnly: true },
       { to: '/users', icon: 'groups', label: 'Kelola Pengguna' },
       { to: '/enrollments', icon: 'how_to_reg', label: 'Persetujuan Course' },
+      { to: '/settings/api', icon: 'settings_ethernet', label: 'Atur API', adminOnly: true },
     ]
   },
   {

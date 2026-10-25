@@ -22,6 +22,72 @@ function envValue(string $key, ?string $default = null): ?string
     return $value === false ? $default : $value;
 }
 
+/**
+ * Read the API URL selected by an Admin from the backend's public bootstrap
+ * endpoint. SSO_API_URL in the Student .env is only used to discover that
+ * setting (and as a fallback while the backend is unreachable).
+ */
+function resolveConfiguredApiUrl(string $bootstrapUrl): string
+{
+    $normalize = static function (string $value): ?string {
+        $value = trim($value);
+        $parts = parse_url($value);
+        if (!is_array($parts)
+            || !in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)
+            || empty($parts['host'])
+            || isset($parts['user']) || isset($parts['pass'])
+            || isset($parts['query']) || isset($parts['fragment'])) {
+            return null;
+        }
+        $path = rtrim((string) ($parts['path'] ?? ''), '/');
+        $base = $parts['scheme'] . '://' . $parts['host'];
+        if (isset($parts['port'])) $base .= ':' . $parts['port'];
+        $base .= $path;
+        return str_ends_with($path, '/api/v1') ? $base : $base . '/api/v1';
+    };
+
+    $fallback = $normalize($bootstrapUrl) ?? 'http://127.0.0.1:3001/api/v1';
+    $cacheFile = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR
+        . 'dls_student_api_' . hash('sha256', APP_ROOT) . '.json';
+    $cached = null;
+    if (is_file($cacheFile)) {
+        $cacheData = json_decode((string) @file_get_contents($cacheFile), true);
+        if (is_array($cacheData) && isset($cacheData['url'], $cacheData['savedAt'])) {
+            $cacheAge = time() - (int) $cacheData['savedAt'];
+            $cached = $normalize((string) $cacheData['url']);
+            if ($cached !== null && $cacheAge >= 0 && $cacheAge < 60) return $cached;
+            if ($cacheAge < 0 || $cacheAge >= 86400) $cached = null;
+        }
+    }
+
+    $bootstrap = rtrim($fallback, '/');
+    $bootstrap = preg_replace('~/api/v1$~', '', $bootstrap) ?: $bootstrap;
+    $context = stream_context_create(['http' => [
+        'method' => 'GET',
+        'timeout' => 2.0,
+        'ignore_errors' => true,
+        'header' => "Accept: application/json\r\n",
+    ], 'ssl' => [
+        'verify_peer' => true,
+        'verify_peer_name' => true,
+    ]]);
+    $response = @file_get_contents($bootstrap . '/api/v1/settings/runtime-config', false, $context);
+    if (is_string($response)) {
+        $config = json_decode($response, true);
+        $configured = is_array($config) && is_string($config['apiBaseUrl'] ?? null)
+            ? $normalize($config['apiBaseUrl']) : null;
+        if ($configured !== null) {
+            $cacheData = json_encode(['url' => $configured, 'savedAt' => time()], JSON_UNESCAPED_SLASHES);
+            if ($cacheData !== false && @file_put_contents($cacheFile, $cacheData, LOCK_EX) !== false) {
+                @chmod($cacheFile, 0600);
+            }
+            return $configured;
+        }
+    }
+
+    return $cached ?? $fallback;
+}
+
 if (!defined('APP_ROOT')) define('APP_ROOT', dirname(__DIR__));
 define('APP_ENV', envValue('APP_ENV', 'development'));
 define('APP_URL', envValue('APP_URL', 'http://127.0.0.1:8082'));
@@ -31,7 +97,7 @@ define('DB_NAME', envValue('DB_NAME', 'dls_student'));
 define('DB_USER', envValue('DB_USER', 'dls_student_app'));
 define('DB_PASSWORD', envValue('DB_PASSWORD', ''));
 define('SESSION_NAME', envValue('SESSION_NAME', 'DLS_STUDENT'));
-define('SSO_API_URL', rtrim((string) envValue('SSO_API_URL', 'http://127.0.0.1:3001/api/v1'), '/'));
+define('SSO_API_URL', resolveConfiguredApiUrl(rtrim((string) envValue('SSO_API_URL', 'http://127.0.0.1:3001/api/v1'), '/')));
 define('SSO_JWT_SECRET', (string) envValue('SSO_JWT_SECRET', ''));
 define('SSO_JWT_ISSUER', (string) envValue('SSO_JWT_ISSUER', 'dls-admin-teacher-api'));
 define('SSO_JWT_AUDIENCE', (string) envValue('SSO_JWT_AUDIENCE', 'dls-admin-teacher-web'));

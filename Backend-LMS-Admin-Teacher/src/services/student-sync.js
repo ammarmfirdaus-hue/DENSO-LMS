@@ -1,13 +1,16 @@
 const mysql = require('mysql2/promise');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
+const { getApiBaseUrl } = require('./system-settings');
 
 let studentPool;
 let running = false;
 let inFlight = false;
+let lastSyncAt = null;
+let lastSyncError = null;
 
 async function syncOnce() {
-  if (!running || env.STUDENT_SYNC_ENABLED !== 'true') return;
+  if (!studentPool) return;
   const mssqlCourses = await pool.request().query(`SELECT course_code,title,description,category,status,updated_at FROM dbo.courses`);
   const mysqlConn = await studentPool.getConnection();
   try {
@@ -59,7 +62,7 @@ async function syncOnce() {
     for (const row of currentMaterials) {
       const courseId = courseIds.get(row.course_code);
       const studentSessionId = sessionIds.get(String(row.source_session_id));
-      const publicApiUrl = env.STUDENT_PUBLIC_API_URL.replace(/\/+$/, '');
+      const publicApiUrl = (getApiBaseUrl() || env.STUDENT_PUBLIC_API_URL).replace(/\/+$/, '');
       const fileUrl = row.file_path ? `${publicApiUrl}/material-workflow/published/${row.source_material_id}/file` : null;
       await mysqlConn.execute(`INSERT INTO course_materials(source_material_id,session_id,title,material_type,content,file_path,sort_order,is_active)
         VALUES(?,?,?,?,?,?,?,1) ON DUPLICATE KEY UPDATE session_id=VALUES(session_id),title=VALUES(title),material_type=VALUES(material_type),
@@ -103,8 +106,8 @@ async function syncOnce() {
  * @returns {Promise<() => Promise<void>>} Fungsi shutdown untuk menghentikan timer dan menutup pool.
  */
 async function startStudentSync() {
-  if (env.STUDENT_SYNC_ENABLED !== 'true') return () => {};
-  if (!env.STUDENT_DB_PASSWORD) throw new Error('STUDENT_DB_PASSWORD is required when student sync is enabled.');
+  // In local development, MySQL installations sometimes use a dedicated
+  // passwordless account. Production rejects this in config/env.js.
   studentPool = mysql.createPool({ host: env.STUDENT_DB_HOST, port: env.STUDENT_DB_PORT, database: env.STUDENT_DB_NAME,
     user: env.STUDENT_DB_USER, password: env.STUDENT_DB_PASSWORD, connectionLimit: 4, charset: 'utf8mb4', decimalNumbers: true, timezone: 'Z' });
   try {
@@ -114,19 +117,20 @@ async function startStudentSync() {
     studentPool = undefined;
     throw error;
   }
-  running = true;
+  running = env.STUDENT_SYNC_ENABLED === 'true';
   const syncNow = async () => {
     if (!running || inFlight) return false;
     inFlight = true;
-    try { await syncOnce(); return true; }
+    try { await syncOnce(); lastSyncAt = new Date().toISOString(); lastSyncError = null; return true; }
+    catch (error) { lastSyncError = error.message; throw error; }
     finally { inFlight = false; }
   };
   const tick = async () => {
     try { await syncNow(); }
     catch (error) { console.error('Student database sync failed:', error.message); }
   };
-  await tick();
-  const timer = setInterval(tick, env.STUDENT_SYNC_INTERVAL_MS);
+  if (running) await tick();
+  const timer = running ? setInterval(tick, env.STUDENT_SYNC_INTERVAL_MS) : null;
   return async () => {
     running = false;
     clearInterval(timer);
@@ -141,15 +145,19 @@ async function startStudentSync() {
  * @returns {Promise<boolean>} True jika sinkronisasi berhasil dijalankan, false jika dinonaktifkan/sedang berjalan.
  */
 async function syncStudentNow() {
-  if (!running || env.STUDENT_SYNC_ENABLED !== 'true' || inFlight) return false;
+  if (!studentPool || inFlight) return false;
   inFlight = true;
-  try { await syncOnce(); return true; }
+  try { await syncOnce(); lastSyncAt = new Date().toISOString(); lastSyncError = null; return true; }
+  catch (error) { lastSyncError = error.message; throw error; }
   finally { inFlight = false; }
+}
+
+function getStudentSyncStatus() {
+  return { connected: Boolean(studentPool), running, inFlight, lastSyncAt, lastSyncError };
 }
 
 /** Push one edited grade to Student immediately, even when periodic catalog sync is off. */
 async function syncStudentGradeNow(studentNpk, courseCode) {
-  if (!env.STUDENT_DB_PASSWORD) return false;
   let connection;
   try {
     connection = await mysql.createConnection({
@@ -192,4 +200,4 @@ async function deleteStudentMaterial(sourceMaterialId) {
   }
 }
 
-module.exports = { startStudentSync, syncStudentNow, syncStudentGradeNow, deleteStudentMaterial };
+module.exports = { startStudentSync, syncStudentNow, syncStudentGradeNow, deleteStudentMaterial, getStudentSyncStatus };
