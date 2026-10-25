@@ -14,6 +14,14 @@ if ($path !== '/' && $publicRoot !== false && $file !== false
     && !preg_match('~(^|[\\/])\.[^\\/]+~', $decodedPath)) {
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: same-origin');
+    if ($decodedPath === '/manifest.webmanifest') {
+        header('Content-Type: application/manifest+json; charset=utf-8');
+        header('Cache-Control: no-cache');
+    } elseif ($decodedPath === '/sw.js') {
+        header('Content-Type: application/javascript; charset=utf-8');
+        header('Cache-Control: no-cache');
+        header('Service-Worker-Allowed: /');
+    }
     return false;
 }
 require dirname(__DIR__) . '/index.php';

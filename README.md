@@ -8,7 +8,7 @@ Workspace ini berisi tiga runtime terpisah. Jalankan setiap proyek dari folderny
 | `Frontend-LMS-Admin-Teacher` | React, Vite, Tailwind CSS | `http://127.0.0.1:5173` | Mengakses API Node.js |
 | `NATIVE-LMS-Student` | PHP Native, Tailwind CSS, GET JSON API | `http://127.0.0.1:8082` | MySQL (`dls_student`) |
 
-Katalog fitur, hasil audit, perintah test, dan cakupan yang sudah diuji tersedia di [`docs/FEATURES-AND-QA.md`](docs/FEATURES-AND-QA.md). Flowchart terpisah untuk tiap alur ada di [`docs/diagrams`](docs/diagrams/).
+Katalog fitur, hasil audit, perintah test, dan cakupan yang sudah diuji tersedia di [`docs/FEATURES-AND-QA.md`](docs/FEATURES-AND-QA.md). Panduan instalasi PWA, cache/offline, dan deployment ada di [`docs/PWA-AND-DEPLOYMENT.md`](docs/PWA-AND-DEPLOYMENT.md). Flowchart yang dapat diedit ada di [`docs/diagrams`](docs/diagrams/), termasuk [alur PWA](docs/diagrams/14-pwa-install-offline.drawio) dan [arsitektur runtime](docs/diagrams/15-pwa-system-architecture.drawio).
 
 ## Menjalankan proyek
 
@@ -130,11 +130,11 @@ Untuk mengisi kedua database dengan data dummy lalu menjalankan server, gunakan 
 
 Tema lintas aplikasi menggunakan merah DENSO untuk aksi utama, charcoal untuk navigasi dan teks, serta latar netral untuk konten.
 
-Dokumentasi fitur, aktor, arsitektur data, keamanan, struktur folder, dan hasil tes tersedia di [Panduan Fitur dan Teknis](docs/PROJECT-GUIDE.md). Diagram use case dapat diedit di [Draw.io](docs/diagrams/DENSO-LMS-Use-Case.drawio).
+Audit cakupan source, data, batas implementasi, dan hasil verifikasi tersedia di [Audit Implementasi](docs/IMPLEMENTATION-AUDIT.md), [Katalog Fitur dan QA](docs/FEATURES-AND-QA.md), serta [Panduan Fitur dan Teknis](docs/PROJECT-GUIDE.md). Diagram use case dan flow dapat diedit di [Draw.io](docs/diagrams/).
 
 ## Pemisahan data
 
-Database Teacher/Admin dan Student memang dipisahkan. Sinkronisasi opsional di backend dapat mengirim metadata course dari SQL Server ke MySQL dan mengembalikan ringkasan enrollment/progress ke SQL Server. Fitur ini nonaktif secara default dan memerlukan akun MySQL khusus dengan hak akses minimum. Sinkronisasi berjalan berkala, bukan real-time. Post forum dan nilai kuis belum disinkronkan.
+Database Admin/Teacher dan Student memang dipisahkan. Sinkronisasi opsional mengirim course/sesi/materi terbit dari SQL Server ke MySQL dan mengambil enrollment/progres Student sebagai snapshot ke SQL Server; nilai resmi juga disalin ke enrollment MySQL. Ini bukan transaksi atomik lintas database. Forum dan notifikasi menggunakan backend SQL Server secara langsung, sedangkan hasil quiz belum dipersist sebagai nilai produksi.
 
 ## SSO Admin/Teacher dan Student
 
@@ -150,4 +150,4 @@ Setiap aplikasi memiliki seeder data dummy yang aman dijalankan berulang kali. L
 
 ## Catatan migrasi
 
-Workspace React Teacher/Admin mencakup login, ringkasan dashboard, pengelolaan course/sesi/materi, aktivitas, progress pelajar tersinkron, moderasi forum, dan pengelolaan akun Admin. Workspace Student mempertahankan halaman dan styling yang ada; ringkasan dashboard/course memakai MySQL API, sementara sebagian halaman pembelajaran, kuis, notifikasi, dan forum masih berisi data contoh. README setiap proyek menjelaskan endpoint yang tersedia dan batas implementasinya.
+Workspace Admin/Teacher mencakup kelola pengguna lintas role (Admin; Student saja untuk Teacher), reviewer, nilai dan ekspor `.xlsx`, notifikasi/email, forum, workflow materi, serta job akun dengan progress SSE dan stop/resume. Student memiliki halaman nilai sendiri, forum/notifikasi backend, katalog dan progres MySQL; quiz/assessment serta beberapa halaman profil masih demo. API course saat ini belum menyediakan edit/hapus umum course atau sesi. Lihat [audit detail dan gap](docs/IMPLEMENTATION-AUDIT.md) untuk cakupan yang tepat.

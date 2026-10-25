@@ -24,7 +24,7 @@
     const headers = new Headers(options.headers || {});
     headers.set('Accept', 'application/json');
     if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
-    const response = await fetch(`${apiBase}${path}`, { ...options, headers, credentials: 'include' });
+    const response = await window.dlsFetch(`${apiBase}${path}`, { ...options, headers, credentials: 'include' });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result?.error?.message || 'Permintaan forum gagal.');
     return result;

@@ -44,6 +44,15 @@ $backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
         <?php endif; ?>
 
         <!-- RIGHT: notification bell -->
+        <?php if (($_SESSION['sso_mode'] ?? '') === 'teacher_student'): ?>
+        <form method="post" action="?route=/auth/teacher-mode" class="dls-teacher-mode-return-form">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+            <button type="submit" class="dls-header-teacher-mode" aria-label="Kembali ke Portal Teacher" title="Kembali ke Portal Teacher">
+                <span class="material-symbols-outlined" aria-hidden="true">switch_access_shortcut</span>
+                <span class="dls-teacher-mode-return-label">Portal Teacher</span>
+            </button>
+        </form>
+        <?php endif; ?>
         <a href="?route=/student/notifikasi"
            class="dls-header-notifications"
            aria-label="Notifikasi<?= $notif_count > 0 ? ', ' . $notif_count . ' belum dibaca' : '' ?>"

@@ -15,6 +15,7 @@ export default function ReviewersPage() {
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [emailTarget, setEmailTarget] = useState(null);
 
   async function load() {
     try {
@@ -28,6 +29,11 @@ export default function ReviewersPage() {
 
   useEffect(() => {
     load();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('dls_job_settled', load);
+    return () => window.removeEventListener('dls_job_settled', load);
   }, []);
 
   const filteredReviewers = useMemo(() => {
@@ -116,6 +122,92 @@ export default function ReviewersPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handleDelete(reviewer) {
+    const confirmed = await showAlert.confirm({
+      title: 'Nonaktifkan Reviewer?',
+      text: `Akun ${reviewer.fullname} tidak dapat digunakan lagi. Riwayat review tetap disimpan.`,
+      confirmText: 'Ya, Nonaktifkan',
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (!confirmed) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const res = await api(`/reviewers/${encodeURIComponent(reviewer.employee_npk)}`, { method: 'DELETE' });
+      setNotice(res.message || 'Akun reviewer dinonaktifkan.');
+      await load();
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Menghapus Reviewer', err.message);
+    } finally { setBusy(false); }
+  }
+
+  async function handleHardDelete(reviewer) {
+    const confirmed = await showAlert.confirm({
+      title: 'Hapus Reviewer Permanen?',
+      text: `Akun ${reviewer.fullname} akan dihapus jika tidak memiliki riwayat terkait. Jika ada riwayat, akun otomatis dinonaktifkan. Materi yang masih menunggu review tetap harus diselesaikan atau dialihkan terlebih dahulu.`,
+      confirmText: 'Hapus / Nonaktifkan', cancelText: 'Batal', danger: true
+    });
+    if (!confirmed) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await api('/jobs/users', {
+        method: 'POST',
+        body: JSON.stringify({ items: [{
+          action: 'delete', npk: reviewer.employee_npk, role: 'reviewer',
+          label: `${reviewer.fullname} (${reviewer.employee_npk})`
+        }] })
+      });
+      showAlert.success('Penghapusan Masuk Antrean', `Penghapusan reviewer ${reviewer.fullname} diproses melalui antrean.`);
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Menghapus Reviewer', err.message);
+    } finally { setBusy(false); }
+  }
+
+  async function handleReactivate(reviewer) {
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const res = await api(`/reviewers/${encodeURIComponent(reviewer.employee_npk)}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          fullname: reviewer.fullname, email: reviewer.email,
+          department: reviewer.department || '', position: reviewer.position || '',
+          phoneNumber: reviewer.phone_number || '', status: 'active', password: ''
+        })
+      });
+      setNotice(res.message || 'Akun reviewer diaktifkan kembali.');
+      await load();
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Mengaktifkan Reviewer', err.message);
+    } finally { setBusy(false); }
+  }
+
+  async function handleSendEmail(event) {
+    event.preventDefault();
+    if (!emailTarget) return;
+    const password = new FormData(event.currentTarget).get('password');
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await api('/jobs/users', {
+        method: 'POST',
+        body: JSON.stringify({ items: [{
+          action: 'email', npk: emailTarget.employee_npk,
+          fullname: emailTarget.fullname, email: emailTarget.email,
+          role: 'reviewer', status: emailTarget.status,
+          password,
+          label: `${emailTarget.fullname} (${emailTarget.employee_npk})`
+        }] })
+      });
+      setEmailTarget(null);
+      showAlert.success('Email Masuk Antrean', `NPK dan kata sandi baru akan dikirim ke ${emailTarget.email}. Kata sandi akun reviewer akan diganti.`);
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Mengirim Email', err.message);
+    } finally { setBusy(false); }
   }
 
 
@@ -273,16 +365,21 @@ export default function ReviewersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-right">
+                    <td className="px-4 py-4 text-right"><div className="flex justify-end gap-2">
                       <button
                         type="button"
+                        disabled={busy}
                         onClick={() => { setEditTarget(reviewer); setError(''); setNotice(''); }}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-outline/60 px-3 py-1.5 text-xs font-bold text-secondary transition hover:bg-surface-low hover:text-primary"
                       >
                         <span className="material-symbol text-base" aria-hidden="true">edit</span>
                         Edit
                       </button>
-                    </td>
+                      {reviewer.status === 'active' && <button type="button" disabled={busy || Number(reviewer.active_reviews) > 0} title={Number(reviewer.active_reviews) > 0 ? 'Selesaikan atau alihkan tugas review aktif terlebih dahulu.' : 'Nonaktifkan akses reviewer'} onClick={() => handleDelete(reviewer)} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"><span className="material-symbol" aria-hidden="true">person_off</span>Nonaktifkan</button>}
+                      {reviewer.status !== 'active' && <button type="button" disabled={busy} onClick={() => handleReactivate(reviewer)} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">check_circle</span>Aktifkan</button>}
+                      {reviewer.status === 'active' && <button type="button" disabled={busy || !reviewer.email} onClick={() => setEmailTarget(reviewer)} className="inline-flex items-center gap-1.5 rounded-lg border border-outline/60 bg-white px-3 py-1.5 text-xs font-bold text-secondary transition hover:bg-surface-low disabled:opacity-50"><span className="material-symbol" aria-hidden="true">mail</span>Email</button>}
+                      <button type="button" disabled={busy || Number(reviewer.active_reviews) > 0} title={Number(reviewer.active_reviews) > 0 ? 'Reviewer masih memiliki tugas review aktif.' : 'Hapus akun secara permanen jika tidak memiliki riwayat terkait.'} onClick={() => handleHardDelete(reviewer)} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete</span>Hapus</button>
+                    </div></td>
                   </tr>
                 ))}
               </tbody>
@@ -315,9 +412,10 @@ export default function ReviewersPage() {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
+                aria-label="Tutup dialog"
                 className="grid size-8 place-items-center rounded-lg text-muted hover:bg-surface-low"
               >
-                ✕
+                <span className="material-symbol text-lg" aria-hidden="true">close</span>
               </button>
             </div>
 
@@ -435,9 +533,10 @@ export default function ReviewersPage() {
               <button
                 type="button"
                 onClick={() => setEditTarget(null)}
+                aria-label="Tutup dialog"
                 className="grid size-8 place-items-center rounded-lg text-muted hover:bg-surface-low"
               >
-                ✕
+                <span className="material-symbol text-lg" aria-hidden="true">close</span>
               </button>
             </div>
 
@@ -553,6 +652,22 @@ export default function ReviewersPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+      {emailTarget && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <form onSubmit={handleSendEmail} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="reviewer-email-title">
+            <div>
+              <h2 id="reviewer-email-title" className="text-xl font-bold">Kirim Data Akun Reviewer</h2>
+              <p className="mt-1 text-sm text-muted">{emailTarget.fullname} · NPK: {emailTarget.employee_npk}</p>
+            </div>
+            <p className="rounded-xl border border-outline/60 bg-surface-low p-4 text-sm leading-6 text-secondary">Email dikirim ke <strong>{emailTarget.email}</strong> beserta NPK dan kata sandi yang dapat langsung digunakan. Kata sandi lama tersimpan sebagai hash, jadi kata sandi baru di bawah ini akan menggantikannya.</p>
+            <label className="block text-sm font-semibold text-secondary">Kata sandi baru<input required type="password" name="password" minLength="12" maxLength="200" autoComplete="new-password" placeholder="Minimal 12 karakter" className="mt-1.5 h-10 w-full rounded-lg border border-outline px-3 text-sm outline-none focus:border-primary"/></label>
+            <div className="flex justify-end gap-2">
+              <button type="button" disabled={busy} onClick={() => setEmailTarget(null)} className="rounded-lg border border-outline px-4 py-2 text-sm font-semibold">Batal</button>
+              <button type="submit" disabled={busy} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{busy ? 'Memproses...' : 'Ganti & Kirim Email'}</button>
+            </div>
+          </form>
         </div>
       )}
     </div>

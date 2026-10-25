@@ -12,6 +12,7 @@ function studentRouteCatalog(): array
         '/student/courses' => 'DX_LMS_M_Student_Course@index',
         '/student/courses/filters' => 'DX_LMS_M_Student_Filters@index',
         '/student/riwayat' => 'DX_LMS_T_Student_Riwayat@index',
+        '/student/nilai' => 'DX_LMS_T_Student_Nilai@index',
         '/student/notifikasi' => 'DX_LMS_T_Student_Notifikasi@index',
         '/student/profil' => 'DX_LMS_M_Student_Profil@index',
         '/student/profil/detail' => 'DX_LMS_M_Student_Profil@detail',

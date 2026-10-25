@@ -52,14 +52,11 @@ if (parsed.data.NODE_ENV === 'production') {
   if (new URL(parsed.data.FRONTEND_ORIGIN).protocol !== 'https:') productionErrors.push('FRONTEND_ORIGIN (HTTPS)');
   if (new URL(parsed.data.REVIEW_PORTAL_URL).protocol !== 'https:') productionErrors.push('REVIEW_PORTAL_URL (HTTPS)');
   if (new URL(parsed.data.STUDENT_APP_URL).protocol !== 'https:') productionErrors.push('STUDENT_APP_URL (HTTPS)');
-  if (parsed.data.STUDENT_AUTH_ENABLED === 'true' && parsed.data.STUDENT_DB_PASSWORD.length < 20) {
-    productionErrors.push('STUDENT_DB_PASSWORD (minimal 20 karakter saat student auth aktif)');
+  if (parsed.data.STUDENT_DB_PASSWORD.length < 20) {
+    productionErrors.push('STUDENT_DB_PASSWORD (minimal 20 karakter untuk koneksi database Student)');
   }
   if (parsed.data.SSO_COOKIE_DOMAIN && !/^\.?[A-Za-z0-9.-]+$/.test(parsed.data.SSO_COOKIE_DOMAIN)) {
     productionErrors.push('SSO_COOKIE_DOMAIN (hostname yang valid)');
-  }
-  if (parsed.data.STUDENT_SYNC_ENABLED === 'true' && parsed.data.STUDENT_DB_PASSWORD.length < 20) {
-    productionErrors.push('STUDENT_DB_PASSWORD (minimal 20 karakter saat sync aktif)');
   }
   if (productionErrors.length) {
     console.error(`Production configuration is insecure or incomplete: ${productionErrors.join(', ')}`);

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api } from '../../api/client';
+import { api, API_BASE } from '../../api/client';
 import { compressForumImage } from '../../utils/compress-forum-image';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
 const fieldClass = 'h-10 w-full rounded-lg border border-outline/60 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 const messageClass = 'w-full resize-y rounded-lg border border-outline/60 bg-white p-3 text-sm leading-6 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 
@@ -204,7 +203,7 @@ export default function ForumPage() {
           <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-6 text-secondary">{thread.body}</p>
           {thread.attachment_path && <img crossOrigin="use-credentials" src={`${API_BASE}${thread.attachment_path}`} alt="Lampiran diskusi" loading="lazy" className="mt-3 max-h-96 w-full max-w-2xl rounded-lg border border-outline/40 object-contain" />}
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-outline/30 pt-3 text-sm">
-            <button type="button" onClick={() => toggleLike('thread', thread.thread_id)} className={`min-h-9 rounded-md px-2 ${thread.liked_by_me ? 'font-semibold text-primary' : 'text-muted hover:bg-surface-low hover:text-primary'}`}>♥ {thread.likes_count || 0} suka</button>
+            <button type="button" onClick={() => toggleLike('thread', thread.thread_id)} className={`min-h-9 rounded-md px-2 ${thread.liked_by_me ? 'font-semibold text-primary' : 'text-muted hover:bg-surface-low hover:text-primary'}`}><span className="material-symbol mr-1 align-middle text-base" aria-hidden="true">favorite</span> {thread.likes_count || 0} suka</button>
             <button type="button" onClick={() => {
               const next = expanded === thread.thread_id ? null : thread.thread_id;
               setExpanded(next);
@@ -216,7 +215,7 @@ export default function ForumPage() {
               <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"><strong className="break-words text-sm">{reply.author_name}</strong><RoleBadge role={reply.author_role} /><time className="text-xs text-muted">{formatDate(reply.created_at)}</time></div>
               <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-secondary">{reply.body}</p>
               {reply.attachment_path && <img crossOrigin="use-credentials" src={`${API_BASE}${reply.attachment_path}`} alt="Lampiran balasan" loading="lazy" className="mt-2 max-h-80 w-full max-w-xl rounded-lg border border-outline/40 object-contain" />}
-              <button type="button" onClick={() => toggleLike('reply', reply.reply_id, thread.thread_id)} className={`mt-2 min-h-9 rounded-md px-2 text-xs ${reply.liked_by_me ? 'font-semibold text-primary' : 'text-muted hover:bg-surface-low hover:text-primary'}`}>♥ {reply.likes_count || 0} suka</button>
+              <button type="button" onClick={() => toggleLike('reply', reply.reply_id, thread.thread_id)} className={`mt-2 min-h-9 rounded-md px-2 text-xs ${reply.liked_by_me ? 'font-semibold text-primary' : 'text-muted hover:bg-surface-low hover:text-primary'}`}><span className="material-symbol mr-1 align-middle text-base" aria-hidden="true">favorite</span> {reply.likes_count || 0} suka</button>
             </div>)}
             {selectedSession.is_open && thread.status === 'visible' ? <form onSubmit={event => replyToThread(event, thread.thread_id)} className="mt-3 border-t border-outline/30 pt-3">
               <textarea name="body" required maxLength="2000" rows="2" placeholder="Tulis balasan..." className={messageClass} />

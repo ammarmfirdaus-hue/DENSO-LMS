@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
-import { api } from '../../api/client';
+import { api, API_BASE, fetchApi } from '../../api/client';
 import ListFilterBar from '../../components/ListFilterBar';
 import Pagination, { usePagination } from '../../components/Pagination';
 import EditMaterialModal from '../materials/EditMaterialModal';
@@ -8,7 +8,6 @@ import SubmitMaterialForm from '../materials/SubmitMaterialForm';
 import FinalMaterialDetailModal from '../materials/FinalMaterialDetailModal';
 import showAlert from '../../utils/alert';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
 const label = {
   pending_admin: 'Menunggu admin',
   pending_review: 'Menunggu reviewer',
@@ -130,7 +129,7 @@ export default function CourseDetailPage() {
 
   async function openSubmissionFile(submissionId) {
     try {
-      const response = await fetch(`${API_BASE}/material-workflow/submissions/${submissionId}/file`, { credentials: 'include' });
+      const response = await fetchApi(`/material-workflow/submissions/${submissionId}/file`, { credentials: 'include', timeoutMs: 60000 });
       if (!response.ok) throw new Error('File tidak dapat dibuka.');
       const url = URL.createObjectURL(await response.blob());
       window.open(url, '_blank', 'noopener');
@@ -214,13 +213,13 @@ export default function CourseDetailPage() {
   }
 
 
-  if (error && !detail) return <div><Link to="/courses" className="text-sm font-semibold text-primary">← Kembali ke daftar course</Link><p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-red-700">{error}</p></div>;
+  if (error && !detail) return <div><Link to="/courses" className="inline-flex items-center gap-1 text-sm font-semibold text-primary"><span className="material-symbol text-base" aria-hidden="true">arrow_back</span>Kembali ke daftar course</Link><p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-red-700">{error}</p></div>;
   if (!detail) return <div className="grid min-h-64 place-items-center text-sm text-muted">Memuat detail course…</div>;
   const { course, sessions } = detail;
 
   return (
     <div className="mx-auto max-w-6xl">
-      <Link to="/courses" className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary"><span aria-hidden="true">←</span> Semua course</Link>
+      <Link to="/courses" className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary"><span className="material-symbol text-base" aria-hidden="true">arrow_back</span> Semua course</Link>
       {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
       {notice && <p role="status" className="mt-4 rounded-xl bg-green-50 p-4 text-green-800">{notice}</p>}
 
@@ -242,9 +241,9 @@ export default function CourseDetailPage() {
       </section>
 
       <section className="mt-5 grid gap-3 sm:grid-cols-3">
-        <Metric title="Sesi belajar" value={sessions.length} icon="▤"/>
-        <Metric title="Materi terbit" value={publishedCount} icon="▶"/>
-        <Metric title="Dalam alur persetujuan" value={pendingCount} icon="◷"/>
+        <Metric title="Sesi belajar" value={sessions.length} icon="event_note"/>
+        <Metric title="Materi terbit" value={publishedCount} icon="menu_book"/>
+        <Metric title="Dalam alur persetujuan" value={pendingCount} icon="pending_actions"/>
       </section>
 
       <section className="mt-8">
@@ -332,7 +331,7 @@ export default function CourseDetailPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-outline/60 bg-white p-10 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-xl text-primary">▤</div>
+            <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><span className="material-symbol text-2xl" aria-hidden="true">event_note</span></div>
             <h3 className="mt-3 font-bold">{sessions.length ? 'Tidak ada sesi atau materi yang cocok' : 'Belum ada sesi'}</h3>
             <p className="mt-1 text-sm text-muted">{sessions.length ? 'Ubah kata pencarian untuk melihat sesi lainnya.' : 'Tambahkan sesi pertama agar trainer dapat mulai mengajukan materi.'}</p>
           </div>
@@ -377,7 +376,7 @@ export default function CourseDetailPage() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-outline/40 pb-3">
               <h3 className="text-base font-bold text-red-700">Tolak Materi & Minta Perbaikan</h3>
-              <button type="button" onClick={() => setRejectingSubmission(null)} className="text-muted hover:text-secondary">✕</button>
+              <button type="button" onClick={() => setRejectingSubmission(null)} aria-label="Tutup dialog" className="grid size-8 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-low hover:text-secondary"><span className="material-symbol text-lg" aria-hidden="true">close</span></button>
             </div>
             <p className="mt-2 text-xs text-muted">
               Materi &ldquo;<span className="font-semibold text-secondary">{rejectingSubmission.title}</span>&rdquo; akan dikembalikan ke trainer untuk perbaikan.
@@ -419,7 +418,7 @@ export default function CourseDetailPage() {
 function Metric({ title, value, icon }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-outline/40 bg-white p-4">
-      <span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-xl text-primary">{icon}</span>
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><span className="material-symbol text-xl" aria-hidden="true">{icon}</span></span>
       <div><p className="text-2xl font-bold leading-none">{value}</p><p className="mt-1 text-xs text-muted">{title}</p></div>
     </div>
   );
@@ -428,17 +427,18 @@ function Metric({ title, value, icon }) {
 function MaterialRow({ material, onDetail, onDelete, canDelete }) {
   const video = material.material_type === 'video' ? youtubeEmbed(material.content) : null;
   const url = material.fileUrl ? `${API_BASE}${material.fileUrl}` : (material.material_type === 'link' ? material.content : '');
+  const materialIcon = ({ text: 'article', pdf: 'picture_as_pdf', video: 'play_circle', image: 'image', document: 'description', audio: 'audiotrack', link: 'link' })[material.material_type] || 'article';
   return (
     <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex items-start gap-3 min-w-0 flex-1">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-low text-lg">
-          {material.material_type === 'pdf' ? '▧' : material.material_type === 'video' ? '▷' : material.material_type === 'image' ? '▣' : '≡'}
+          <span className="material-symbol text-xl text-secondary" aria-hidden="true">{materialIcon}</span>
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-semibold">{material.title}</p>
             <span className="rounded-full bg-surface-low px-2 py-0.5 text-[11px] font-semibold text-muted">{material.material_type}</span>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">✓ Terbit (Final)</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"><span className="material-symbol text-sm" aria-hidden="true">check_circle</span>Terbit (Final)</span>
           </div>
           {material.material_type === 'text' && material.content && (
             <div
@@ -472,7 +472,7 @@ function MaterialRow({ material, onDetail, onDelete, canDelete }) {
             rel="noreferrer"
             className="rounded-lg border border-outline/50 px-3 py-1.5 text-xs font-semibold text-secondary hover:bg-surface-low"
           >
-            Buka ↗
+            <span className="inline-flex items-center gap-1">Buka<span className="material-symbol text-sm" aria-hidden="true">open_in_new</span></span>
           </a>
         )}
 
@@ -542,12 +542,12 @@ function SubmissionRow({ item, currentUser, isAdmin, busy, onFile, onSendReview,
         {/* Lock note */}
         {!isAdmin && item.status === 'pending_admin' && (
           <p className="mt-1.5 text-xs font-semibold text-amber-800">
-            🔒 Terkunci: Menunggu persetujuan Admin sebelum materi dapat diedit kembali.
+            <span className="material-symbol mr-1 align-middle text-sm" aria-hidden="true">lock</span>Terkunci: Menunggu persetujuan Admin sebelum materi dapat diedit kembali.
           </p>
         )}
         {item.status === 'pending_review' && (
           <p className="mt-1.5 text-xs font-semibold text-blue-800">
-            🔒 Terkunci: Sedang ditinjau Reviewer.
+            <span className="material-symbol mr-1 align-middle text-sm" aria-hidden="true">lock</span>Terkunci: Sedang ditinjau Reviewer.
           </p>
         )}
       </div>

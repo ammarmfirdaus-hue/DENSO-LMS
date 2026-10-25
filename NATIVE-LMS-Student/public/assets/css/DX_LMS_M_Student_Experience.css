@@ -1,0 +1,414 @@
+/* DENSO Student Portal: warm, editorial learning UI with a quiet red accent. */
+:root {
+    --student-red: #c91f2a;
+    --student-red-deep: #a91822;
+    --student-red-soft: #fff0f0;
+    --student-ink: #172b3c;
+    --student-muted: #687887;
+    --student-paper: #f6f7f7;
+    --student-card: #fff;
+    --student-line: #e4e9ed;
+    --student-green: #27815d;
+    --student-focus: rgba(201, 31, 42, .2);
+    --student-shadow: 0 5px 18px rgba(24, 42, 58, .055);
+    --student-shadow-hover: 0 10px 26px rgba(24, 42, 58, .10);
+    --crs-blue: #c91f2a;
+    --crs-red: #c91f2a;
+    --crs-green: #27815d;
+    --crs-surface: #f6f7f7;
+    --crs-card: #fff;
+    --crs-border: #e4e9ed;
+    --crs-text: #172b3c;
+    --crs-text-muted: #687887;
+    --crs-r-sm: 9px;
+    --crs-r-md: 15px;
+    --crs-r-lg: 19px;
+    --crs-sh-xs: 0 2px 7px rgba(24,42,58,.045);
+    --crs-sh-sm: 0 8px 22px rgba(24,42,58,.08);
+    --crs-sh-md: 0 12px 30px rgba(24,42,58,.10);
+}
+
+html.dark {
+    --student-red: #ed5961;
+    --student-red-deep: #fa767d;
+    --student-red-soft: #321f25;
+    --student-ink: #edf2f5;
+    --student-muted: #a8b5c0;
+    --student-paper: #101820;
+    --student-card: #18232d;
+    --student-line: #2a3945;
+    --student-green: #6dc39a;
+    --student-focus: rgba(237, 89, 97, .25);
+    --student-shadow: 0 5px 18px rgba(0,0,0,.15);
+    --student-shadow-hover: 0 10px 26px rgba(0,0,0,.25);
+    --crs-surface: #101820;
+    --crs-card: #18232d;
+    --crs-border: #2a3945;
+    --crs-text: #edf2f5;
+    --crs-text-muted: #a8b5c0;
+    --crs-sh-xs: 0 2px 7px rgba(0,0,0,.18);
+    --crs-sh-sm: 0 8px 22px rgba(0,0,0,.22);
+    --crs-sh-md: 0 12px 30px rgba(0,0,0,.28);
+}
+
+html, body { background-color: var(--student-paper); }
+body.dls-app-shell { color: var(--student-ink) !important; }
+body.dls-app-shell main { color: var(--student-ink); }
+body.dls-app-shell main :is(h1,h2,h3,h4) { color: var(--student-ink) !important; letter-spacing: -.025em; }
+body.dls-app-shell main :is(p,li) { text-wrap: pretty; }
+.text-primary, .text-secondary { color: var(--student-red) !important; }
+.text-on-surface { color: var(--student-ink) !important; }
+.text-on-surface-variant, .text-muted { color: var(--student-muted) !important; }
+.bg-surface, .bg-slate-50 { background-color: var(--student-paper) !important; }
+.bg-surface-container-lowest, .bg-white { background-color: var(--student-card) !important; }
+.border-outline-variant, .border-surface-variant { border-color: var(--student-line) !important; }
+
+/* The shared top bar and navigation keep familiar placement and behavior. */
+#topAppBar, #topAppBar.dls-app-header {
+    background: var(--student-card) !important;
+    border-color: var(--student-line) !important;
+    box-shadow: 0 2px 12px rgba(24,42,58,.045) !important;
+    backdrop-filter: none !important;
+}
+.dls-app-header-inner { min-height: 66px !important; }
+.dls-header-title { color: var(--student-ink) !important; font-size: 15px !important; font-weight: 750 !important; }
+#topAppBar :is(.dls-header-back,.dls-header-notifications,.dls-desktop-sidebar-toggle) {
+    border-radius: 12px !important;
+    color: var(--student-ink) !important;
+}
+#topAppBar :is(.dls-header-back,.dls-header-notifications,.dls-desktop-sidebar-toggle):hover {
+    background: var(--student-red-soft) !important;
+    color: var(--student-red) !important;
+}
+#topAppBar .dls-header-notifications { border: 1px solid var(--student-line) !important; }
+#topAppBar .dls-notification-count { background: var(--student-red) !important; }
+#topAppBar a.dls-mobile-brand { color: var(--student-ink) !important; font-weight: 750 !important; }
+
+#bottomNavBar {
+    background: var(--student-card) !important;
+    border-color: var(--student-line) !important;
+    box-shadow: 0 -3px 14px rgba(24,42,58,.055) !important;
+}
+#bottomNavBar a { color: var(--student-muted) !important; transition: background-color .18s ease, color .18s ease; }
+#bottomNavBar a[aria-current="page"] {
+    background: var(--student-red-soft) !important;
+    color: var(--student-red) !important;
+    font-weight: 750 !important;
+}
+#bottomNavBar a[aria-current="page"] .material-symbols-outlined { color: var(--student-red) !important; }
+#bottomNavBar .dls-nav-brand { border-color: var(--student-line) !important; }
+#bottomNavBar .dls-nav-section-label { color: var(--student-muted) !important; letter-spacing: .11em !important; }
+.dls-mobile-profile-menu { position: absolute; right: 12px; bottom: calc(100% + 10px); z-index: 60; width: min(280px, calc(100vw - 24px)); }
+.dls-mobile-profile-menu[hidden] { display: none !important; }
+.dls-mobile-profile-unread {
+    display: inline-flex;
+    min-width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 6px;
+    border-radius: 999px;
+    background: var(--student-red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+.dls-mobile-profile-menu-item[aria-current="page"] { background: var(--student-red-soft) !important; color: var(--student-red) !important; }
+.dls-mobile-profile-menu-item:hover { background: var(--student-paper) !important; }
+@media (min-width: 1024px) {
+    #bottomNavBar { border-right: 1px solid var(--student-line) !important; box-shadow: 2px 0 12px rgba(24,42,58,.025) !important; }
+    #bottomNavBar a { border-radius: 11px !important; }
+    #bottomNavBar a:not([aria-current="page"]):hover { background: #f3f5f6 !important; color: var(--student-ink) !important; }
+    html.dark #bottomNavBar a:not([aria-current="page"]):hover { background: #202d38 !important; }
+    .dls-mobile-profile-trigger, .dls-mobile-profile-menu { display: none !important; }
+}
+@media (max-width: 1023px) {
+    #bottomNavBar .dls-mobile-nav-notifications { display: none !important; }
+    #bottomNavBar .dls-mobile-profile-trigger { display: flex !important; }
+    #bottomNavBar .dls-desktop-profile-link { display: none !important; }
+    .dls-mobile-profile-menu:not(.hidden) { display: flex !important; }
+}
+
+/* Clear page rhythm and a friendly greeting panel. */
+.dls-main, .dls-main-sub { background: transparent !important; }
+.dls-welcome-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(22px, 3.5vw, 36px) !important;
+    border: 1px solid var(--student-line) !important;
+    border-radius: 19px !important;
+    background: var(--student-card) !important;
+    box-shadow: var(--student-shadow) !important;
+}
+.dls-welcome-hero::after { display: none !important; }
+.dls-welcome-hero .dls-section-kicker {
+    margin-bottom: 9px !important;
+    color: var(--student-red) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: .12em !important;
+}
+.dls-welcome-hero h1 { max-width: 24ch; font-size: clamp(26px, 4vw, 38px) !important; line-height: 1.12 !important; }
+.dls-welcome-hero p:last-child { margin-top: 10px !important; color: var(--student-muted) !important; }
+.dls-stat-card {
+    min-height: 124px;
+    border: 1px solid var(--student-line) !important;
+    border-radius: 17px !important;
+    background: var(--student-card) !important;
+    box-shadow: var(--student-shadow) !important;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.dls-stat-card:hover { border-color: #d7a3a5 !important; box-shadow: var(--student-shadow-hover) !important; transform: translateY(-2px); }
+.dls-stat-card-featured { background: #fff8f7 !important; }
+html.dark .dls-stat-card-featured { background: #241f23 !important; }
+.dls-stat-card :is(.material-symbols-outlined) { color: var(--student-red) !important; }
+
+/* Course discovery and study cards. Use flat colors, clear progress, and calm motion. */
+main .course-card, main .filter-course-card, main .history-session-card, main .course-session-card {
+    overflow: hidden;
+    border: 1px solid var(--student-line) !important;
+    border-radius: 17px !important;
+    background: var(--student-card) !important;
+    box-shadow: var(--student-shadow) !important;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+main .course-card:hover, main .filter-course-card:hover, main .history-session-card:hover, main .course-session-card:hover {
+    border-color: #d6a1a3 !important;
+    box-shadow: var(--student-shadow-hover) !important;
+    transform: translateY(-3px);
+}
+main .course-card > .h-32 {
+    min-height: 132px;
+    background: #e9eef1 !important;
+}
+main .course-card > .h-32::before { display: none !important; }
+main .course-card > .h-32 > div:not(.absolute) { background: #e9eef1 !important; border: 0 !important; }
+main .course-card > .h-32 > div:not(.absolute) > span.material-symbols-outlined {
+    width: 68px !important;
+    height: 68px !important;
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: var(--student-red) !important;
+    box-shadow: 0 5px 12px rgba(169,24,34,.16) !important;
+    color: #fff !important;
+    font-size: 36px !important;
+}
+.filter-course-media {
+    background: #e9eef1 !important;
+    border-color: var(--student-line) !important;
+}
+.filter-course-media::after { display: none !important; }
+.filter-course-icon {
+    display: grid !important;
+    width: 68px !important;
+    height: 68px !important;
+    place-items: center;
+    border-radius: 20px !important;
+    background: var(--student-red) !important;
+    color: #fff !important;
+    font-size: 36px !important;
+}
+.filter-course-required { border-radius: 7px !important; background: var(--student-red) !important; }
+.filter-course-body { background: var(--student-card) !important; }
+.filter-course-title { color: var(--student-ink) !important; }
+.filter-course-tags span { border-radius: 6px !important; }
+.filter-course-progress strong { color: var(--student-green) !important; }
+main .course-card > .h-32 > .bg-error { border-radius: 7px !important; background: var(--student-red) !important; }
+main .course-card h3 { font-size: 17px !important; line-height: 1.35 !important; }
+main .course-card .bg-surface-variant.rounded-full,
+#course-results > .course-card .bg-surface-variant.rounded-full { height: 7px !important; background: #e8edef !important; }
+main .course-card .bg-surface-variant.rounded-full > div,
+#course-results > .course-card .bg-surface-variant.rounded-full > div,
+.filter-progress-track > span { background: var(--student-green) !important; }
+main .course-card button, #course-results > .course-card button, .filter-course-action {
+    min-height: 45px !important;
+    border: 1px solid var(--student-red) !important;
+    border-radius: 11px !important;
+    background: var(--student-red) !important;
+    color: white !important;
+    font-weight: 750 !important;
+    box-shadow: none !important;
+}
+main .course-card button:hover, #course-results > .course-card button:hover, .filter-course-action:hover {
+    background: var(--student-red-deep) !important;
+}
+.filter-chip, [data-student-courses] #chip-container > a, [data-student-courses] #chip-container > button {
+    min-height: 38px;
+    border: 1px solid var(--student-line) !important;
+    border-radius: 999px !important;
+    background: var(--student-card) !important;
+    color: var(--student-ink) !important;
+    font-weight: 650 !important;
+    box-shadow: none !important;
+}
+.filter-chip[aria-pressed="true"], [data-student-courses] #chip-container > button:first-child {
+    border-color: var(--student-red) !important;
+    background: var(--student-red) !important;
+    color: #fff !important;
+}
+.filter-chip:hover { border-color: var(--student-red) !important; color: var(--student-red) !important; transform: none !important; }
+
+/* Course detail: distinct cover, easy-to-scan tabs, lessons and summaries. */
+main .dls-course-hero {
+    border: 0 !important;
+    border-radius: 21px !important;
+    background: #20394c !important;
+    box-shadow: 0 8px 24px rgba(23,43,60,.14) !important;
+}
+main .dls-course-hero-fallback { background: #20394c !important; }
+main .dls-course-hero-fallback .material-symbols-outlined {
+    border: 0 !important;
+    border-radius: 22px !important;
+    background: var(--student-red) !important;
+    box-shadow: none !important;
+}
+main .dls-course-hero-overlay { background: rgba(16,35,50,.57) !important; }
+main .dls-course-summary { border: 1px solid var(--student-line) !important; border-radius: 17px !important; background: var(--student-card) !important; box-shadow: var(--student-shadow) !important; }
+main .dls-course-tabs nav { border: 1px solid var(--student-line) !important; border-radius: 13px !important; background: var(--student-card) !important; }
+main .dls-course-tabs nav > a { border-radius: 9px !important; color: var(--student-muted) !important; }
+main .dls-course-tabs nav > a:hover { background: #f5f6f7 !important; color: var(--student-ink) !important; }
+main .dls-course-tabs nav > a.text-secondary { background: var(--student-red-soft) !important; color: var(--student-red) !important; }
+main .dls-course-tabs nav > a.text-secondary > div { background: var(--student-red) !important; }
+
+/* Shared panels, quiz answers, forms, accordions, forum and history rows. */
+body.dls-app-shell main :is(section[class*="bg-surface-container-lowest"], section[class*="bg-white"], .dls-card, .dls-stat-card, .forum-thread-item, .history-session-card) {
+    border-color: var(--student-line) !important;
+    background-color: var(--student-card) !important;
+    box-shadow: var(--student-shadow) !important;
+}
+body.dls-app-shell main :is(input,select,textarea) {
+    border-color: var(--student-line) !important;
+    border-radius: 11px !important;
+    background-color: var(--student-card) !important;
+    color: var(--student-ink) !important;
+}
+body.dls-app-shell main :is(input,select,textarea):focus {
+    border-color: var(--student-red) !important;
+    box-shadow: 0 0 0 3px var(--student-focus) !important;
+    outline: 0 !important;
+}
+body.dls-app-shell main :is(button,[role="button"],a[role="tab"]):focus-visible {
+    outline: 3px solid var(--student-focus) !important;
+    outline-offset: 2px;
+}
+body.dls-app-shell main :is(button,a[role="button"]) { transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+main .radio-custom:checked + div { border-color: var(--student-red) !important; background: var(--student-red-soft) !important; }
+main .radio-custom:checked + div .radio-inner { background: var(--student-red) !important; }
+main table { overflow: hidden; border-color: var(--student-line) !important; border-radius: 14px !important; background: var(--student-card) !important; }
+main table thead { background: #f1f4f5 !important; }
+main table th { color: var(--student-ink) !important; font-weight: 750 !important; }
+main table td { color: var(--student-ink); }
+main table tbody tr:nth-child(even) { background: #fafbfb; }
+main table tbody tr:hover { background: #fff4f3 !important; }
+html.dark main table thead, html.dark main table tbody tr:nth-child(even) { background: #202c36 !important; }
+html.dark main table tbody tr:hover { background: #2a2930 !important; }
+
+/* Student grades table scrolls inside its own frame on narrow screens. */
+main .dls-grade-table-scroll {
+    max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #c6cdd2 transparent;
+}
+main .dls-grade-table-scroll:focus-visible { outline: 3px solid var(--student-red); outline-offset: 3px; }
+main .dls-grade-table-hint { display: none; }
+main .dls-grade-table {
+    min-width: 640px; width: 100%; table-layout: auto; border: 0 !important; border-radius: 0 !important;
+    overflow: visible !important; border-collapse: separate; border-spacing: 0;
+}
+main .dls-grade-table th, main .dls-grade-table td { vertical-align: middle; }
+main .dls-grade-table th:nth-child(1) { min-width: 220px; }
+main .dls-grade-table th:nth-child(2) { min-width: 150px; }
+main .dls-grade-table th:nth-child(3), main .dls-grade-table th:nth-child(4) { min-width: 120px; }
+main .dls-grade-table td:nth-child(3), main .dls-grade-table td:nth-child(4) { white-space: nowrap; }
+
+/* Access request page: centered reading width within the student app shell. */
+main[data-student-access-page] {
+    width: 100%; max-width: none; min-width: 0; margin: 0; box-sizing: border-box;
+    padding-top: clamp(88px, 11vh, 116px); overflow-x: clip;
+}
+main[data-student-access-page] .dls-access-layout { gap: clamp(14px, 2vw, 20px); }
+main[data-student-access-page] .dls-access-layout > a:first-child {
+    min-height: 42px; max-width: 100%; padding: 8px 12px 8px 8px; border-radius: 10px; text-decoration: none;
+}
+main[data-student-access-page] .dls-access-layout > a:first-child:hover { background: var(--student-red-soft); }
+main[data-student-access-page] article {
+    width: 100%; min-width: 0; border: 1px solid var(--student-line) !important; border-radius: 20px !important;
+    background: var(--student-card) !important; box-shadow: var(--student-shadow-hover) !important;
+}
+main[data-student-access-page] article > div:first-child { position: relative; overflow: hidden; min-width: 0; padding: clamp(20px,4vw,38px) !important; }
+main[data-student-access-page] article > div:first-child::before { position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--student-red); content: ""; }
+main[data-student-access-page] article > div:last-child { min-width: 0; padding: clamp(18px,3.5vw,34px) !important; }
+main[data-student-access-page] :is(p, strong, label, span) { overflow-wrap: anywhere; }
+main[data-student-access-page] .dls-access-status-badge { white-space: normal; }
+main[data-student-access-page] .dls-access-status-note { min-width: 0; overflow-wrap: anywhere; }
+main[data-student-access-page] h1 { max-width: 26ch; overflow-wrap: anywhere; font-size: clamp(1.65rem,4vw,2.2rem) !important; line-height: 1.18 !important; }
+main[data-student-access-page] .dls-access-note { display: block; min-height: 92px; max-width: 100%; box-sizing: border-box; }
+main[data-student-access-page] .dls-access-form-actions { flex-wrap: wrap; }
+main[data-student-access-page] #access-request-count { text-align: right; }
+main[data-student-access-page] .dls-course-access-submit {
+    min-height: 48px !important; border: 1px solid var(--student-red) !important; border-radius: 11px !important;
+    background: var(--student-red) !important; color: #fff !important; font-size: .9rem !important; font-weight: 750 !important;
+    line-height: 1.25 !important; text-align: center; box-shadow: none !important;
+}
+main[data-student-access-page] .dls-course-access-submit,
+main[data-student-access-page] .dls-course-access-submit :is(span,.material-symbols-outlined) { color: #fff !important; -webkit-text-fill-color: #fff !important; opacity: 1 !important; visibility: visible !important; }
+main[data-student-access-page] .dls-course-access-submit:hover { background: var(--student-red-deep) !important; }
+main img[alt*="profil"], main img[alt*="Profil"] { border-color: var(--student-line) !important; }
+main .bg-gradient-to-br { background: var(--student-red) !important; }
+
+@media (max-width: 640px) {
+    .dls-main, .dls-main-sub { padding-inline: 15px !important; }
+    main .dls-grade-table-hint {
+        display: flex; align-items: center; gap: 7px; margin: 0; padding: 10px 13px;
+        border-bottom: 1px solid var(--student-line); background: #fff8f7; color: var(--student-muted);
+        font-size: .75rem; line-height: 1.4;
+    }
+    main .dls-grade-table-hint .material-symbols-outlined { flex: 0 0 auto; color: var(--student-red); font-size: 18px; }
+    main .dls-grade-table { min-width: 640px; }
+    main .dls-grade-table th, main .dls-grade-table td { padding: 12px 14px !important; }
+    .dls-welcome-hero { padding: 21px !important; border-radius: 16px !important; }
+    .dls-stat-card { min-height: 100px; padding: 14px !important; border-radius: 14px !important; }
+    main .course-card, main .filter-course-card, main .history-session-card { border-radius: 14px !important; }
+    main[data-student-access-page] { gap: 14px !important; padding: 86px 15px calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
+    main[data-student-access-page] .dls-access-layout { gap: 12px; }
+    main[data-student-access-page] article { border-radius: 16px !important; }
+    main[data-student-access-page] article > div:first-child { padding: 21px 18px 20px 22px !important; }
+    main[data-student-access-page] article > div:last-child { padding: 18px !important; }
+    main[data-student-access-page] .dls-access-status-badge { align-items: flex-start; border-radius: 12px; line-height: 1.4; }
+    main[data-student-access-page] .dls-access-status-badge .material-symbols-outlined { flex: 0 0 auto; }
+    main[data-student-access-page] .dls-course-access-submit { width: 100%; }
+    main[data-student-access-page] #access-request-count { align-self: flex-end; }
+    #bottomNavBar { height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding-bottom: env(safe-area-inset-bottom, 0px) !important; }
+    #bottomNavBar > a { min-width: 0; padding-inline: 2px !important; }
+    #bottomNavBar > a span:last-child { font-size: 10px !important; }
+    #bottomNavBar > a .material-symbols-outlined { margin-bottom: 2px !important; font-size: 21px !important; }
+}
+
+@media (max-width: 360px) {
+    main[data-student-access-page] { padding-inline: 11px !important; }
+    main[data-student-access-page] article > div:first-child { padding-right: 14px !important; }
+    main[data-student-access-page] article > div:last-child { padding: 15px !important; }
+    main[data-student-access-page] .dls-access-status-note { padding: 12px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+html.dark .dls-welcome-hero,
+html.dark main .course-card,
+html.dark main .filter-course-card,
+html.dark main .history-session-card,
+html.dark main[data-student-access-page] article { background: var(--student-card) !important; }
+html.dark main[data-student-access-page] .dls-access-status-pending { border-color: #665225 !important; background: #302a1d !important; color: #f4e4b5 !important; }
+html.dark main[data-student-access-page] .dls-access-status-rejected { border-color: #68373b !important; background: #352427 !important; color: #f4d5d5 !important; }
+html.dark main[data-student-access-page] .dls-access-status-information { border-color: var(--student-line) !important; background: #202a33 !important; color: var(--student-muted) !important; }
+html.dark main .course-card > .h-32,
+html.dark main .course-card > .h-32 > div:not(.absolute) { background: #26323c !important; }
+html.dark main .filter-chip,
+html.dark [data-student-courses] #chip-container > a,
+html.dark [data-student-courses] #chip-container > button { background: var(--student-card) !important; color: var(--student-ink) !important; }
+html.dark main .filter-chip[aria-pressed="true"],
+html.dark [data-student-courses] #chip-container > button:first-child { background: var(--student-red) !important; color: #fff !important; }
+html.dark main .dls-grade-table-hint { border-color: var(--student-line); background: #302528; color: var(--student-muted); }
+html.dark main .dls-course-tabs nav > a:hover,
+html.dark main table tbody tr:nth-child(even) { background: #202c36 !important; }

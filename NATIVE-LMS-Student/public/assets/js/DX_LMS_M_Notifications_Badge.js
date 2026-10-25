@@ -17,7 +17,7 @@
 
   async function refresh(notify = true) {
     try {
-      const response = await fetch(`${apiBase}/notifications/unread-count`, {
+      const response = await window.dlsFetch(`${apiBase}/notifications/unread-count`, {
         credentials: 'include', headers: { Accept: 'application/json' }, cache: 'no-store'
       });
       if (!response.ok) return;

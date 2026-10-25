@@ -43,33 +43,56 @@ async function syncOnce() {
         m.material_type,m.content,m.file_path,m.sort_order AS material_sort
       FROM dbo.course_sessions s JOIN dbo.courses c ON c.course_id=s.course_id
       JOIN dbo.course_materials m ON m.session_id=s.session_id ORDER BY c.course_code,s.sort_order,s.session_id,m.sort_order,m.material_id`);
-    for (const row of publishedMaterials.recordset) {
+    const currentMaterials = publishedMaterials.recordset.filter(row =>
+      courseIds.has(row.course_code) && sessionIds.has(String(row.source_session_id)));
+    const currentSourceIds = new Set(currentMaterials.map(row => String(row.source_material_id)));
+    const [activeStudentMaterials] = await mysqlConn.query('SELECT source_material_id FROM course_materials WHERE source_material_id IS NOT NULL AND is_active=1');
+    const removedSourceIds = activeStudentMaterials
+      .map(row => String(row.source_material_id))
+      .filter(sourceId => !currentSourceIds.has(sourceId));
+    // Keep completion history, but archive source materials removed from the current catalog.
+    // Their material_progress rows must not keep a Student's quiz locked forever.
+    for (let offset = 0; offset < removedSourceIds.length; offset += 500) {
+      const batch = removedSourceIds.slice(offset, offset + 500);
+      await mysqlConn.execute(`UPDATE course_materials SET is_active=0 WHERE source_material_id IN (${batch.map(() => '?').join(',')})`, batch);
+    }
+    for (const row of currentMaterials) {
       const courseId = courseIds.get(row.course_code);
       const studentSessionId = sessionIds.get(String(row.source_session_id));
-      if (!courseId || !studentSessionId) continue;
       const publicApiUrl = env.STUDENT_PUBLIC_API_URL.replace(/\/+$/, '');
       const fileUrl = row.file_path ? `${publicApiUrl}/material-workflow/published/${row.source_material_id}/file` : null;
-      await mysqlConn.execute(`INSERT INTO course_materials(source_material_id,session_id,title,material_type,content,file_path,sort_order)
-        VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE session_id=VALUES(session_id),title=VALUES(title),material_type=VALUES(material_type),
-        content=VALUES(content),file_path=VALUES(file_path),sort_order=VALUES(sort_order)`,
+      await mysqlConn.execute(`INSERT INTO course_materials(source_material_id,session_id,title,material_type,content,file_path,sort_order,is_active)
+        VALUES(?,?,?,?,?,?,?,1) ON DUPLICATE KEY UPDATE session_id=VALUES(session_id),title=VALUES(title),material_type=VALUES(material_type),
+        content=VALUES(content),file_path=VALUES(file_path),sort_order=VALUES(sort_order),is_active=1`,
       [row.source_material_id, studentSessionId, row.material_title, row.material_type, row.content, fileUrl, row.material_sort]);
     }
     await mysqlConn.commit();
   } catch (error) { await mysqlConn.rollback(); throw error; }
   finally { mysqlConn.release(); }
 
-  const [rows] = await studentPool.execute(`SELECT s.npk AS student_npk,c.course_code,e.progress,e.enrollment_status,e.updated_at
+  const [rows] = await studentPool.execute(`SELECT s.npk AS student_npk,c.course_code,e.progress,e.enrollment_status,e.quiz_score,e.updated_at
     FROM course_enrollments e JOIN student_accounts s ON s.student_id=e.student_id
     JOIN courses c ON c.course_id=e.course_id`);
   for (const row of rows) {
     await pool.request().input('npk', sql.VarChar(50), row.student_npk).input('code', sql.VarChar(30), row.course_code)
       .input('progress', sql.TinyInt, row.progress).input('status', sql.VarChar(20), row.enrollment_status)
-      .input('updated', sql.DateTime2, row.updated_at)
+      .input('updated', sql.DateTime2, row.updated_at).input('quizScore', sql.Decimal(5, 2), row.quiz_score)
       .query(`MERGE dbo.student_progress_snapshots AS target
         USING (SELECT @npk AS student_npk,@code AS course_code) AS source
         ON target.student_npk=source.student_npk AND target.course_code=source.course_code
-        WHEN MATCHED AND target.source_updated_at<=@updated THEN UPDATE SET progress=@progress,enrollment_status=@status,source_updated_at=@updated,synced_at=SYSUTCDATETIME()
-        WHEN NOT MATCHED THEN INSERT(student_npk,course_code,progress,enrollment_status,source_updated_at) VALUES(@npk,@code,@progress,@status,@updated);`);
+        WHEN MATCHED AND target.source_updated_at<=@updated THEN UPDATE SET progress=@progress,enrollment_status=@status,quiz_score=@quizScore,source_updated_at=@updated,synced_at=SYSUTCDATETIME()
+        WHEN NOT MATCHED THEN INSERT(student_npk,course_code,progress,enrollment_status,quiz_score,source_updated_at) VALUES(@npk,@code,@progress,@status,@quizScore,@updated);`);
+  }
+
+  const courseGrades = await pool.request().query(`SELECT student_npk,course_code,score,grade_feedback,graded_at
+    FROM dbo.student_progress_snapshots`);
+  for (const grade of courseGrades.recordset) {
+    await studentPool.execute(`UPDATE course_enrollments e
+      JOIN student_accounts s ON s.student_id=e.student_id
+      JOIN courses c ON c.course_id=e.course_id
+      SET e.score=?,e.grade_feedback=?,e.graded_at=?
+      WHERE s.npk=? AND c.course_code=?`,
+    [grade.score, grade.grade_feedback, grade.graded_at, grade.student_npk, grade.course_code]);
   }
 }
 
@@ -124,6 +147,35 @@ async function syncStudentNow() {
   finally { inFlight = false; }
 }
 
+/** Push one edited grade to Student immediately, even when periodic catalog sync is off. */
+async function syncStudentGradeNow(studentNpk, courseCode) {
+  if (!env.STUDENT_DB_PASSWORD) return false;
+  let connection;
+  try {
+    connection = await mysql.createConnection({
+      host: env.STUDENT_DB_HOST, port: env.STUDENT_DB_PORT, database: env.STUDENT_DB_NAME,
+      user: env.STUDENT_DB_USER, password: env.STUDENT_DB_PASSWORD,
+      charset: 'utf8mb4', decimalNumbers: true, timezone: 'Z'
+    });
+    const [grades] = await pool.request()
+      .input('npk', sql.VarChar(50), studentNpk)
+      .input('code', sql.VarChar(30), courseCode)
+      .query(`SELECT score,grade_feedback,graded_at FROM dbo.student_progress_snapshots
+        WHERE student_npk=@npk AND course_code=@code`);
+    if (!grades.recordset.length) return false;
+    const grade = grades.recordset[0];
+    const [result] = await connection.execute(`UPDATE course_enrollments e
+      JOIN student_accounts s ON s.student_id=e.student_id
+      JOIN courses c ON c.course_id=e.course_id
+      SET e.score=?,e.grade_feedback=?,e.graded_at=?
+      WHERE s.npk=? AND c.course_code=?`,
+    [grade.score, grade.grade_feedback, grade.graded_at, studentNpk, courseCode]);
+    return result.affectedRows > 0;
+  } finally {
+    if (connection) await connection.end();
+  }
+}
+
 /**
  * Menghapus materi dari database MySQL student secara langsung saat materi dihapus dari LMS.
  * @param {number|string} sourceMaterialId ID material dari SQL Server
@@ -132,7 +184,7 @@ async function syncStudentNow() {
 async function deleteStudentMaterial(sourceMaterialId) {
   if (!studentPool || env.STUDENT_SYNC_ENABLED !== 'true') return false;
   try {
-    await studentPool.execute('DELETE FROM course_materials WHERE source_material_id = ?', [Number(sourceMaterialId)]);
+    await studentPool.execute('UPDATE course_materials SET is_active=0 WHERE source_material_id = ?', [Number(sourceMaterialId)]);
     return true;
   } catch (err) {
     console.error('Failed to delete student material from MySQL:', err.message);
@@ -140,4 +192,4 @@ async function deleteStudentMaterial(sourceMaterialId) {
   }
 }
 
-module.exports = { startStudentSync, syncStudentNow, deleteStudentMaterial };
+module.exports = { startStudentSync, syncStudentNow, syncStudentGradeNow, deleteStudentMaterial };

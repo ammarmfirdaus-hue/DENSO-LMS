@@ -90,7 +90,7 @@ test('live API pages return expected data and role boundaries', { skip: !enabled
     '/auth/me', '/dashboard/summary', '/dashboard/courses', '/dashboard/activity', '/courses', '/users',
     '/reviewers', '/grades', '/material-workflow/reviewers', '/material-workflow/trainers',
     '/material-workflow/submissions', '/material-workflow/published', '/forum/management/courses',
-    '/notifications', '/notifications/unread-count'
+    '/notifications', '/notifications/unread-count', '/jobs'
   ];
   for (const pathname of adminPaths) {
     await t.test(`Admin GET ${pathname}`, async () => {
@@ -102,11 +102,11 @@ test('live API pages return expected data and role boundaries', { skip: !enabled
     });
   }
 
-  for (const pathname of ['/dashboard/summary', '/courses', '/grades', '/material-workflow/submissions', '/material-workflow/published', '/forum/management/courses', '/notifications']) {
+  for (const pathname of ['/dashboard/summary', '/courses', '/grades', '/users', '/material-workflow/submissions', '/material-workflow/published', '/forum/management/courses', '/notifications']) {
     const result = await apiRequest(pathname, teacher);
     assert.equal(result.status, 200, `Teacher GET ${pathname}`);
   }
-  for (const pathname of ['/users', '/reviewers', '/material-workflow/reviewers', '/material-workflow/trainers']) {
+  for (const pathname of ['/reviewers', '/material-workflow/reviewers', '/material-workflow/trainers']) {
     const result = await apiRequest(pathname, teacher);
     assert.equal(result.status, 403, `Teacher must not access ${pathname}`);
   }

@@ -166,7 +166,7 @@ export default function EditMaterialModal({ submission, onClose, onSuccess }) {
                       : 'border border-outline/50 bg-white text-secondary hover:bg-surface-low'
                   }`}
                 >
-                  <span>▶</span> Link YouTube (HTTPS)
+                  <span className="material-symbol text-base" aria-hidden="true">smart_display</span> Link YouTube (HTTPS)
                 </button>
                 <button
                   type="button"
@@ -177,7 +177,7 @@ export default function EditMaterialModal({ submission, onClose, onSuccess }) {
                       : 'border border-outline/50 bg-white text-secondary hover:bg-surface-low'
                   }`}
                 >
-                  <span>📁</span> Unggah File Video (MP4)
+                  <span className="material-symbol text-base" aria-hidden="true">folder_open</span> Unggah File Video (MP4)
                 </button>
               </div>
             </div>

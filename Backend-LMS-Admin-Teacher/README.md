@@ -8,8 +8,7 @@ On Windows, run `install.bat` from this folder to install Node.js dependencies a
 
 1. Install Node.js 20+ and SQL Server 2019+ with the SQL Server driver enabled.
 2. Create a database login with access only to `DX_LMS_AdminTeacher`; avoid using `sa`.
-3. Run `../database/admin&teacher.sql` in SQL Server Management Studio. This is the shared workspace schema file.
-   Then run, in order, `../database/reviewer-profile-migration.sql`, `../database/material-workflow.sql`, `../database/Forum_Realtime_Migration.sql`, and `../database/Notifications_Migration.sql` against the same database.
+3. Create the empty databases, configure app and optional migrator credentials, then run `node database/migrate.js up all` from the repository root. Follow [`../database/MIGRATIONS.md`](../database/MIGRATIONS.md); do not apply the legacy combined DDL and managed migrations twice.
 4. Copy `.env.example` to `.env`, configure the connection, and set a random JWT secret of at least 32 bytes. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
 5. Run `npm install`, then provision the initial staff account through environment variables `SEED_NPK`, `SEED_NAME`, `SEED_EMAIL`, `SEED_PASSWORD`, `SEED_ROLE` and `npm run db:seed`. The seeder hashes passwords with bcrypt cost 12; it does not include default credentials.
 6. Run `npm run dev` for local development or `npm start` for the API process.
@@ -29,13 +28,17 @@ The idempotent seeder adds two staff accounts, three courses with sessions/mater
 
 ## API
 
+- `/api/v1/quizzes` - Admin/Teacher quiz authoring scoped to courses they manage; quiz definitions and single Student attempts use the configured Student MySQL database.
+
 - `GET /health` — process health only.
 - `POST /api/v1/auth/login` — `{ "npk": "...", "password": "..." }`; rate-limited, returns a short-lived token.
 - `GET /api/v1/auth/me` — authenticated account profile.
 - `GET /api/v1/dashboard/summary` and `/activity` — teacher/admin summary and activity.
 - `GET /api/v1/dashboard/courses`, `GET /api/v1/courses/:id/sessions` — course data.
-- `POST /api/v1/courses` — create a course.
-- `/api/v1/notifications` — role-scoped inbox, unread count, read actions, and Admin/Teacher notification composer. Notifications update over SSE; optional email is queued and retried by the backend worker.
+- `/api/v1/courses` — read/create courses and sessions; Admin-only trainer assignment. General course/session update/delete endpoints are not implemented.
+- `/api/v1/users`, `/api/v1/reviewers`, `/api/v1/jobs` — role-scoped account/reviewer management and persistent bulk jobs with SSE progress/stop/resume.
+- `/api/v1/grades` — staff grade/progress view, edit, Admin-only clear, Student notification, and optional email.
+- `/api/v1/forum` — Student/staff forum and session moderation; `/api/v1/notifications` — inbox, SSE, read state, and optional email outbox.
 
 Protected requests use the HttpOnly SSO cookie or `Authorization: Bearer <token>`. JWT verification pins HS256 and checks issuer, audience, and expiry. Forum access is checked against course assignments or student enrollment. CORS allows the Admin/Teacher and Student origins; forum writes require a trusted browser origin. Forum image uploads are limited to 5 MB and validated by file signature. Live forum updates use server-sent events; clients refresh the current session feed only when a forum event arrives.
 
@@ -43,7 +46,7 @@ Run `npm test` for the isolated security suites in `tests/`. They cover SSO/JWT 
 
 ## Student database synchronization
 
-The optional sync process copies course, session, and published material data from SQL Server into the PHP student's MySQL database, then copies learner enrollment/progress summaries back into `student_progress_snapshots` for teacher/admin review. It is disabled by default. To enable it, create a dedicated, least-privilege MySQL account, apply `../database/student.sql` (or run `../database/student-material-sync-migration.sql` against an existing database), set `STUDENT_SYNC_ENABLED=true` and `STUDENT_DB_*` in this project's private `.env`, and restart the API. Set `STUDENT_PUBLIC_API_URL` to the API URL the student browser can reach; published files are served from that API. Sync runs once a minute by default, so a newly published item can take up to one interval to appear.
+The optional sync process copies course, session, and published material data from SQL Server into the PHP Student MySQL database, then copies enrollment/progress and quiz-score snapshots back into `student_progress_snapshots`. It is disabled by default. Apply the Student migrations with `node database/migrate.js up student` from repository root, then set `STUDENT_SYNC_ENABLED=true` and `STUDENT_DB_*` in this project's private `.env` and restart the API. Set `STUDENT_PUBLIC_API_URL` to the API URL the Student browser can reach; published files are served from that API. Periodic sync runs once a minute by default. Staff grade updates also schedule a targeted MySQL update.
 
 For optional notification email to Student accounts, enable `STUDENT_AUTH_ENABLED=true` and configure `STUDENT_DB_*` for the active Student account database. Configure the SMTP settings described below. Email recipients are queued in SQL Server and delivered in small batches with bounded retries; web notifications remain available if email is not selected.
 
@@ -59,4 +62,4 @@ Allowed local files are PDF, common Office/ODF documents, MP4/WebM/MOV/OGV, MP3/
 
 ## Scope
 
-The migrated API supports login, dashboard counts, course/session authoring, material submission/review/publication, activity listing, student progress snapshots, forum moderation, and admin staff/reviewer accounts. Quiz scoring, token refresh/revocation, and live grade sync are not implemented.
+The API supports SSO, course/material workflow, account/reviewer administration, persistent user jobs, grade editing/export support, student notifications/email outbox, forum, quiz authoring, and optional Student sync. Published course quiz attempts and automatic quiz scores are persisted by Student MySQL. General course/session edit/delete and global token revocation are not implemented. Forum/notification SSE events use an in-process EventEmitter, so multi-instance deployments need shared pub/sub for cross-instance delivery. See [`../docs/IMPLEMENTATION-AUDIT.md`](../docs/IMPLEMENTATION-AUDIT.md).

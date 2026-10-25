@@ -353,9 +353,6 @@ class DX_LMS_M_Student_Data
                 'materials' => $materials,
             ];
 
-            $session['pre_test'] = self::generateTest($sessStatus === 'selesai' || $sessStatus === 'sedang_dipelajari');
-            $session['post_test'] = self::generateTest($sessStatus === 'selesai');
-
             $sessions[] = $session;
         }
 
@@ -530,55 +527,6 @@ class DX_LMS_M_Student_Data
         }
 
         return $materials;
-    }
-
-    private static function generateTest($isDone)
-    {
-        /** Menggunakan format Pilihan Ganda secara eksklusif untuk evaluasi awal dan akhir. */
-        $pgQuestionPool = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11];
-        shuffle($pgQuestionPool);
-        $questions = array_slice($pgQuestionPool, 0, 5); /** Memilih 5 soal Pilihan Ganda secara acak. */
-
-        if (!$isDone) {
-            return [
-                'status' => 'belum_dimulai',
-                'score' => 0,
-                'attempts' => 0,
-                'history' => [],
-                'questions' => $questions,
-            ];
-        }
-
-        $attempts = rand(1, 3);
-        $history = [];
-        $finalScore = 0;
-
-        for ($a = 1; $a <= $attempts; $a++) {
-            $score = $a === $attempts ? rand(75, 100) : rand(40, 70);
-
-            /** Memetakan jawaban sementara pengguna berdasarkan referensi bank soal. */
-            /** Menyediakan set data pengujian yang akan dievaluasi oleh sistem antarmuka. */
-            $userAnswers = [];
-            foreach ($questions as $qId) {
-                $userAnswers[$qId] = ['A', 'B', 'C', 'D'][rand(0, 3)];
-            }
-
-            $history[] = [
-                'attempt' => $a,
-                'date' => date('Y-m-d H:i:s', strtotime('-' . rand(1, 10) . ' days')),
-                'score' => $score,
-                'user_answers' => $userAnswers,
-            ];
-            $finalScore = max($finalScore, $score);
-        }
-
-        return [
-            'status' => 'selesai',
-            'score' => $finalScore,
-            'attempts' => $attempts,
-            'history' => $history,
-            'questions' => $questions,
-        ];
     }
 
     private static function generateFinalAssessment($isDone, $finalScore = null, $isLocked = false)

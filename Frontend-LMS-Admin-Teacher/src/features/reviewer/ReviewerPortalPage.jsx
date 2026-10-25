@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../../api/client';
+import { api, API_BASE, fetchApi } from '../../api/client';
 import Pagination, { usePagination } from '../../components/Pagination';
 import showAlert from '../../utils/alert';
 
 const REVIEW_TOKEN_KEY = 'dls_reviewer_portal_token';
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
 let consumeLinkKey = '';
 let consumeLinkPromise = null;
 
@@ -94,7 +93,7 @@ export default function ReviewerPortalPage() {
       if (requestId !== previewRequest.current) return;
       setSelected(submission);
       if (submission.fileUrl) {
-        const response = await fetch(`${API_BASE}${submission.fileUrl}`, { headers: { Authorization: `Bearer ${sessionToken}` } });
+        const response = await fetchApi(submission.fileUrl, { headers: { Authorization: `Bearer ${sessionToken}` }, timeoutMs: 60000 });
         if (!response.ok) throw new Error('Gagal memuat pratinjau file.');
         const objectUrl = URL.createObjectURL(await response.blob());
         if (requestId !== previewRequest.current) { URL.revokeObjectURL(objectUrl); return; }

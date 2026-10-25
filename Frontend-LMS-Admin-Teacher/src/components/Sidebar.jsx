@@ -6,12 +6,28 @@ import { getInitialTheme, toggleTheme } from '../utils/theme';
 
 const MENU_GROUPS = [
   {
-    title: 'Pembelajaran',
+    title: '',
+    standalone: true,
     links: [
       { to: '/', icon: 'grid_view', label: 'Dashboard' },
+    ]
+  },
+  {
+    title: 'Pembelajaran',
+    links: [
       { to: '/courses', icon: 'menu_book', label: 'Kelola Course' },
       { to: '/materials', icon: 'fact_check', label: 'Materi & Persetujuan' },
-      { to: '/grades', icon: 'grade', label: 'Kelola Nilai' },
+      { to: '/quizzes', icon: 'quiz', label: 'Kelola Quiz' },
+      { to: '/grades', icon: 'grade', label: 'Kelola Nilai', teacherOnly: true },
+    ]
+  },
+  {
+    title: 'Manajemen',
+    links: [
+      { to: '/grades', icon: 'grade', label: 'Kelola Nilai', adminOnly: true },
+      { to: '/reviewers', icon: 'verified_user', label: 'Kelola Reviewer', adminOnly: true },
+      { to: '/users', icon: 'groups', label: 'Kelola Pengguna' },
+      { to: '/enrollments', icon: 'how_to_reg', label: 'Persetujuan Course' },
     ]
   },
   {
@@ -20,14 +36,6 @@ const MENU_GROUPS = [
       { to: '/activity', icon: 'monitoring', label: 'Aktivitas' },
       { to: '/forum', icon: 'forum', label: 'Forum Diskusi' },
       { to: '/notifications', icon: 'notifications', label: 'Notifikasi' },
-    ]
-  },
-  {
-    title: 'Administrasi',
-    adminOnly: true,
-    links: [
-      { to: '/reviewers', icon: 'verified_user', label: 'Kelola Reviewer' },
-      { to: '/users', icon: 'groups', label: 'Manajemen Pengguna' },
     ]
   }
 ];
@@ -41,7 +49,9 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
   const dropupRef = useRef(null);
 
   // Desktop expanded state is true if NOT collapsed OR when hovered over collapsed sidebar
-  const isExpanded = !collapsed || isHovered;
+  // Mobile navigation should always use the full sidebar width, even when the
+  // user's desktop sidebar preference is collapsed.
+  const isExpanded = !collapsed || isHovered || open;
 
   // Close dropup when clicking outside
   useEffect(() => {
@@ -91,12 +101,14 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
         <button
           type="button"
           aria-label="Tutup menu"
+          data-dls-action-ignore="true"
           className="fixed inset-0 z-30 bg-black/50 lg:hidden cursor-pointer"
           onClick={onClose}
         />
       )}
 
       <aside
+        data-mobile-open={open ? 'true' : 'false'}
         onMouseEnter={() => {
           if (collapsed) setIsHovered(true);
         }}
@@ -164,15 +176,15 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
           {MENU_GROUPS.map(group => {
             if (group.adminOnly && !isAdmin) return null;
             return (
-              <div key={group.title} className="space-y-1">
-                {isExpanded ? (
+              <div key={group.title || 'dashboard'} className="space-y-1">
+                {!group.standalone && (isExpanded ? (
                   <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted/80 truncate">
                     {group.title}
                   </p>
                 ) : (
                   <div className="mx-2 my-2 border-t border-outline/40" title={group.title} />
-                )}
-                {group.links.map(link => (
+                ))}
+                {group.links.filter(link => (!link.teacherOnly || user?.role === 'teacher') && (!link.adminOnly || isAdmin)).map(link => (
                   <NavLink
                     key={link.to}
                     to={link.to}

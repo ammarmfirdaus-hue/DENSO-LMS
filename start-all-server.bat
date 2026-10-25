@@ -37,15 +37,60 @@ start "DLS Backend - API 3001" /D "%BACKEND%" cmd /k "npm run dev"
 start "DLS Frontend - React 5173" /D "%FRONTEND%" cmd /k "npm run dev"
 start "DLS Student - PHP 8082" /D "%STUDENT%" cmd /k "php -S 127.0.0.1:8082 -t public public/router.php"
 
+set "WAIT_ATTEMPTS=0"
+:wait_api_ready
+powershell.exe -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:3001/health' -TimeoutSec 2 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+if not errorlevel 1 goto :api_ready
+set /a WAIT_ATTEMPTS+=1
+if %WAIT_ATTEMPTS% GEQ 30 goto :api_not_ready
+timeout /t 2 /nobreak >nul
+goto :wait_api_ready
+
+:api_ready
+set "WAIT_ATTEMPTS=0"
+:wait_frontend_ready
+powershell.exe -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:5173/' -TimeoutSec 2 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+if not errorlevel 1 goto :frontend_ready
+set /a WAIT_ATTEMPTS+=1
+if %WAIT_ATTEMPTS% GEQ 30 goto :frontend_not_ready
+timeout /t 2 /nobreak >nul
+goto :wait_frontend_ready
+
+:frontend_ready
+set "WAIT_ATTEMPTS=0"
+:wait_student_ready
+powershell.exe -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8082/' -TimeoutSec 2 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+if not errorlevel 1 goto :student_ready
+set /a WAIT_ATTEMPTS+=1
+if %WAIT_ATTEMPTS% GEQ 30 goto :student_not_ready
+timeout /t 2 /nobreak >nul
+goto :wait_student_ready
+
+:student_ready
 start "" "http://127.0.0.1:5173"
 start "" "http://127.0.0.1:8082"
 echo.
-echo Semua runtime sudah diminta berjalan:
+echo Semua runtime sudah siap:
 echo   Admin/Teacher React : http://127.0.0.1:5173
 echo   Admin/Teacher API   : http://127.0.0.1:3001
 echo   Student PHP         : http://127.0.0.1:8082
 echo Tutup masing-masing terminal atau tekan Ctrl+C untuk menghentikan server.
 exit /b 0
+
+:api_not_ready
+echo Backend belum siap setelah 60 detik. Periksa jendela Backend, koneksi SQL Server, dan file Backend-LMS-Admin-Teacher\.env.
+pause
+exit /b 1
+
+:frontend_not_ready
+echo Frontend belum merespons setelah 60 detik. Periksa jendela Frontend dan dependency Vite.
+pause
+exit /b 1
+
+:student_not_ready
+echo Native Student belum merespons setelah 60 detik. Periksa jendela PHP, PDO MySQL, dan file NATIVE-LMS-Student\.env.
+pause
+exit /b 1
 
 :configure_env
 echo Konfigurasi .env baru dibuat atau masih berisi nilai contoh.

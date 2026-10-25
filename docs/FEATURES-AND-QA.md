@@ -1,24 +1,24 @@
 # Katalog Fitur dan Hasil Audit DENSO LMS
 
-Dokumen ini merangkum fitur yang ditemukan pada Admin/Teacher, backend API, dan Native Student, serta hasil pengujian lokal. Satu file `.drawio` disediakan untuk setiap alur utama di [`docs/diagrams`](diagrams/).
+Dokumen ini merangkum fitur yang ditemukan pada Admin/Teacher, backend API, dan Native Student. Setiap klaim dicocokkan dengan source; matriks detail dan gap ada di [IMPLEMENTATION-AUDIT.md](IMPLEMENTATION-AUDIT.md). Diagram `.drawio` editable ada di [`diagrams/`](diagrams/).
 
 ## Daftar fitur
 
 ### 1. Login, sesi, dan SSO
 
-Admin dan teacher masuk melalui portal web. API memeriksa kredensial, menerapkan pembatasan percobaan login, lalu menerbitkan token HS256 dengan issuer, audience, dan waktu kedaluwarsa. Sesi browser menggunakan cookie HttpOnly. Student yang masuk lewat SSO diarahkan ke aplikasi PHP; token diverifikasi sebelum sesi PHP dibuat. Permintaan perubahan pada aplikasi Student dilindungi token CSRF. Logout menghapus sesi/token aktif.
+Login memeriksa kredensial dan status akun, memakai limiter percobaan, lalu backend membuat cookie SSO HttpOnly berdurasi 8 jam. Frontend staff mengirim cookie itu pada request API; Native memvalidasi cookie dan membuka sesi PHP. Teacher dapat menukar sesi aktif ke mode belajar Student selama 30 menit; backend memastikan role/status Teacher, dan token mode ini kembali ditukar ke role Teacher setelah keluar. Token reviewer punya alur konsumsi terpisah. Request mutasi Student memakai CSRF. PWA tidak mengubah otorisasi atau menyimpan data portal saat offline.
 
 Flow: [`01-login-sso.drawio`](diagrams/01-login-sso.drawio)
 
 ### 2. Manajemen pengguna
 
-Admin dapat melihat, menambah, dan mengelola akun staff. Password disimpan dalam bentuk hash bcrypt. Halaman dan endpoint pengguna hanya boleh diakses admin; teacher diarahkan ke dashboard dan API mengembalikan 403.
+Admin mengelola akun semua role dan dapat mempromosikan akun Student menjadi Teacher dari Edit Pengguna. Promosi mempertahankan `student_id` dan riwayat enrollment; akun MySQL ditandai `teacher_shadow` sehingga tidak bisa masuk menggunakan login Student biasa. Teacher dibatasi ke pengelolaan Student. CSV import/export, aktivasi, hapus, dan email mempunyai aturan per role. Email kredensial adalah reset: Admin memasukkan sandi baru, worker mengganti hash bcrypt, lalu mengirim NPK dan sandi tersebut ke alamat akun. Sandi lama tidak dapat dibaca kembali dari hash. Bulk delete/nonaktif/email berjalan sebagai job persisten yang dapat dihentikan dan dilanjutkan; delete yang terhalang riwayat dapat fallback ke nonaktif.
 
 Flow: [`02-user-management.drawio`](diagrams/02-user-management.drawio)
 
 ### 3. Manajemen reviewer
 
-Admin mengelola akun reviewer dan statusnya. Reviewer menerima tautan review yang terikat ke submission. Token harus dikonsumsi melalui API sebelum akses reviewer diberikan; token yang tidak valid atau scope-nya keliru ditolak.
+Admin membuat/mengedit profil reviewer, mengaktifkan kembali/nonaktifkan, mengirim kredensial via antrean job, dan menghapus bila aman. Hapus memakai pemeriksaan pekerjaan aktif/relasi; riwayat dapat menyebabkan fallback nonaktif. Email mewajibkan sandi baru. Reviewer menerima tautan satu kali terikat submission; token yang salah, kedaluwarsa, atau scope-nya keliru ditolak.
 
 Flow: [`03-reviewer-management.drawio`](diagrams/03-reviewer-management.drawio)
 
@@ -30,7 +30,7 @@ Flow: [`04-dashboard-activity.drawio`](diagrams/04-dashboard-activity.drawio)
 
 ### 5. Course, sesi, dan materi course
 
-Admin/teacher melihat course, detail, sesi, dan materi. Admin dapat menetapkan trainer. Pengguna yang berwenang membuat course/sesi dan menambahkan materi pada sesi. Data course yang dipublikasikan dapat disinkronkan ke Student sesuai konfigurasi sinkronisasi; sinkronisasi berjalan terjadwal dan bukan transaksi real-time.
+Admin/teacher melihat course yang dimiliki/ditugaskan dan membuat course serta sesi; hanya Admin menetapkan trainer. API belum menyediakan edit/hapus umum course atau sesi. Materi harus melalui workflow persetujuan; katalog/materi terbit dikirim ke Student lewat konfigurasi sync.
 
 Flow: [`05-course-session.drawio`](diagrams/05-course-session.drawio)
 
@@ -48,33 +48,59 @@ Flow: [`07-reviewer-portal.drawio`](diagrams/07-reviewer-portal.drawio)
 
 ### 8. Belajar Student dan assessment
 
-Student mencari course, memakai filter, membuka detail course, membaca materi, menyimpan progres, dan mengerjakan kuis bila tersedia. Riwayat belajar menampilkan hasil yang tersimpan. Halaman kontekstual seperti detail, thread, lesson, dan quiz memerlukan ID yang valid; permintaan tanpa konteks diarahkan kembali ke halaman yang aman.
+Admin/Teacher mengelola satu quiz pilihan ganda per course pada `/quizzes`; course dibatasi sesuai kepemilikan atau penugasan. Quiz dapat disimpan sebagai draft atau diterbitkan. Student menandai setiap materi selesai; quiz hanya terbuka setelah semua materi course aktif selesai. Form menampilkan opsi jawaban tanpa kunci. Submit memeriksa kelengkapan di server dan constraint unik MySQL mencegah attempt kedua; nilai dihitung otomatis dan tetap tersedia setelah refresh. Hasil ada pada `/student/nilai` dan kolom Nilai Quiz di `/grades`. Quiz yang sudah memiliki attempt dinonaktifkan saat dihapus agar nilai/riwayat tetap utuh. Alur pre-test dan post-test sesi sudah dihapus dari katalog course, pembelajaran, riwayat, dan rute quiz.
 
 Flow: [`08-student-learning.drawio`](diagrams/08-student-learning.drawio)
 
 ### 9. Forum diskusi
 
-Admin/teacher mengatur sesi forum agar terbuka atau tertutup. Peserta membaca thread, mengirim post dan balasan, memberi like, serta menyertakan gambar. Gambar statis dikompres di browser menjadi WebP maksimal 1920 piksel dengan kualitas bertahap; GIF dan WebP animasi dipertahankan. Backend memeriksa signature berkas, tipe, ukuran, autentikasi, dan rate limit. Perubahan dikirim ke klien yang tersambung melalui SSE.
+Admin/teacher mengatur sesi forum agar terbuka atau tertutup. Student/staff membaca thread, mengirim post/balasan, memberi like, dan menyertakan gambar. Gambar statis dikompres di browser; GIF/WebP animasi dipertahankan. Backend memeriksa signature, tipe, ukuran, autentikasi, enrollment, dan rate limit. SSE memberi update ke klien pada proses backend yang sama; multi-instance belum memakai event broker bersama.
 
 Flow: [`09-forum-discussion.drawio`](diagrams/09-forum-discussion.drawio)
 
 ### 10. Pusat notifikasi dan email
 
-Admin dapat mengirim notifikasi ke Student maupun staff; teacher dibatasi mengirim kepada Student. Pengirim memilih kategori/prioritas, audiens, dan apakah email juga dikirim. Notifikasi web disimpan dan dihitung sebagai unread; SSE memperbarui badge. Pilihan email dimasukkan ke outbox dan alamat dinormalisasi, dideduplikasi, serta dibatasi sebelum pengiriman. Pengguna dapat menandai satu atau semua notifikasi sebagai dibaca.
+Admin dapat mengirim notifikasi ke audiens yang diizinkan; Teacher hanya Student. Inbox menyimpan unread/read per recipient dan SSE memperbarui klien. Email opsional masuk outbox backend dengan validasi, deduplikasi, batch, serta retry terbatas. Email SMTP eksternal tidak dibuktikan oleh test lokal.
 
 Flow: [`10-notifications-email.drawio`](diagrams/10-notifications-email.drawio)
 
 ### 11. Nilai, progres, dan riwayat
 
-Portal Admin/Teacher menampilkan data nilai, ringkasan progres, dan aktivitas yang tersedia di API. Student melihat progres course dan riwayat belajar/kuis. Sinkronisasi snapshot antar database mengikuti job terjadwal yang diaktifkan melalui konfigurasi; sinkronisasi bukan jalur real-time.
+Portal Admin/Teacher menampilkan progres/enrollment dan nilai per course. Admin/Teacher dapat mengedit score course 0–100/feedback; hanya Admin mengosongkan nilai course (progres tetap ada). Nilai quiz pilihan ganda dihitung dari jawaban dan ditampilkan terpisah dari nilai course. Filter aktif diekspor sebagai workbook `.xlsx`. Notifikasi per nilai dapat menuju inbox Student dan email outbox. Nilai course disinkronkan ke MySQL; nilai quiz berasal dari attempt MySQL dan disinkronkan ke snapshot SQL Server. Halaman nilai Student membaca data miliknya.
 
 Flow: [`11-grades-progress-history.drawio`](diagrams/11-grades-progress-history.drawio)
 
 ### 12. Profil dan bantuan Student
 
-Student dapat melihat ringkasan profil, detail karyawan, riwayat akses, pengaturan, dan bantuan. Halaman yang saat ini terdaftar adalah halaman baca/tampilan; dokumentasi ini tidak menyebut perubahan profil Student sebagai fitur simpan karena tidak ada aksi simpan profil Student yang ditemukan pada route catalog.
+Student dapat melihat ringkasan profil, detail karyawan, riwayat akses, pengaturan, dan bantuan. Beberapa data contoh; belum ada penyimpanan perubahan profil production.
 
 Flow: [`12-student-profile-support.drawio`](diagrams/12-student-profile-support.drawio)
+
+### 13. Operasi akun dalam antrean
+
+Impor, perubahan banyak akun, penghapusan/nonaktifkan, dan pengiriman email kredensial dapat dikirim sebagai job. Backend memvalidasi role dan cakupan akun, menyimpan status dan event item di SQL Server, lalu memproses item satu per satu. Pusat Antrean menampilkan snapshot awal dari API, menerima progres/item melalui SSE, dan memuat ulang daftar/event setelah halaman dibuka kembali. Job dapat dihentikan; item yang belum diproses tetap tertunda dan tersedia untuk dilanjutkan. Teacher dibatasi ke Student; email kredensial dan akun lintas role hanya dikelola Admin.
+
+Flow: [`13-account-jobs-progress.drawio`](diagrams/13-account-jobs-progress.drawio)
+
+### 14. Install dan mode offline PWA
+
+Manifest dan ikon membuat kedua portal dapat dipasang dari browser yang mendukungnya. Chrome/Edge memakai prompt native yang dibuka melalui modal portal; iPhone/iPad mendapat petunjuk **Bagikan → Tambahkan ke Layar Utama**. Service worker mengambil halaman dari jaringan dan menggunakan offline page jika navigasi gagal; aset statis memakai cache lokal. API, upload, HTML terautentikasi, email, SSE, serta mutasi job tidak disimpan atau dijalankan oleh service worker. Operasi antrean di backend tetap berjalan tanpa tab browser, tetapi progress UI perlu online untuk menerima SSE atau memuat ulang status.
+
+Flow: [`14-pwa-install-offline.drawio`](diagrams/14-pwa-install-offline.drawio) · Arsitektur: [`15-pwa-system-architecture.drawio`](diagrams/15-pwa-system-architecture.drawio)
+
+### 15. Pola interaksi lintas halaman
+
+Konfirmasi, error, dan notifikasi aksi memakai SweetAlert2. Dialog antrean mendukung minimize/hide, posisi yang dapat dipindah, dan layout responsif; saat halaman dimuat ulang, daftar/status/event job direkonstruksi dari backend. Portal staff menutup sidebar mobile melalui tombol/overlay dan membiarkan area konten memenuhi viewport. API client mengulang request baca yang aman ketika koneksi/gateway gagal sementara; request tulis tidak diulang otomatis untuk menghindari operasi ganda.
+
+### 16. Persetujuan akses course dan mode belajar Teacher
+
+Course aktif tampil di katalog, tetapi detail materi, file, quiz, forum, dan perubahan progres hanya tersedia jika `course_enrollments` sudah berstatus active/completed. Student dapat meminta akses; Teacher dapat merekomendasikan Student hanya untuk course yang dibuat atau ditugaskan kepadanya. Keduanya masuk ke `course_enrollment_requests`, sedangkan keputusan approve/reject dan alasan hanya dapat dikirim role Admin. Approve membuat atau mengaktifkan enrollment; reject menyimpan alasannya. Satu indeks unik mencegah lebih dari satu permintaan pending untuk kombinasi student-course. Keputusan Admin mengirim notifikasi Student terarah melalui SSE. Student dapat mengajukan kembali setelah penolakan.
+
+Teacher masuk ke mode belajar lewat pertukaran SSO yang memeriksa ulang akun SQL Server aktif dan role teacher. Backend membuat atau memakai ulang identitas `teacher_shadow` dengan NPK yang sama, tetapi tidak mengubah role di `employee_accounts`; login password Student menolak jenis akun shadow. Backend memeriksa status dan tipe akun terhadap MySQL pada setiap request Student, dan endpoint forum/file memeriksa tipe akun serta enrollment lagi. Mode belajar memakai gate enrollment yang sama, memiliki cookie SSO maksimum 30 menit, dan tombol kembali memeriksa ulang status Teacher. Promosi Student ke Teacher oleh Admin mengubah akun MySQL lama menjadi shadow sambil mempertahankan kunci riwayat course, kemudian membuat akun pegawai Teacher di SQL Server; token Student lama ditolak oleh Native dan API setelah perubahan akun.
+
+Flow: [`16-course-access-approval.drawio`](diagrams/16-course-access-approval.drawio)
+
+Catatan data: SQL Server dan MySQL tidak mendukung transaksi atomik lintas database pada jalur promosi. Handler memakai kompensasi untuk menghapus insert SQL Server bila konversi akun MySQL gagal; integrasi ini tetap perlu pemantauan operasional. Penonaktifan Teacher saat sedang berada di mode belajar menghentikan pertukaran sesi berikutnya; token mode yang sudah terbit berakhir paling lambat 30 menit.
 
 ## Struktur suite test
 
@@ -112,16 +138,15 @@ php tests/run.php all
 
 ## Hasil pengujian lokal
 
-Pengujian dijalankan pada 24 Oktober 2026 terhadap layanan development lokal.
+Run default pada 25 Oktober 2026:
 
-- Backend: 60 test lulus; 4 test smoke dilewati pada run default. Run smoke lokal tambahan lulus 53 test, termasuk API read, batas role, guard request mutasi, SSE, SSO PHP, dan 16 route Student tanpa 5xx. Smoke juga membuka form diskusi dari course dan sesi nyata, menguji status sesi, dan memastikan endpoint create menolak payload kosong sebelum menulis data.
-- Frontend: suite keamanan lulus 1 test dan suite fitur gambar lulus 4 test. Browser smoke Edge mencakup 10 halaman Admin/Teacher pada desktop dan viewport 390 px, serta 16 route Student melalui SSO pada viewport 390 px. Browser juga memeriksa form diskusi Student dengan course/sesi nyata dan memastikan tidak muncul exception JavaScript. Render halaman Admin/Teacher teramati sekitar 480–800 ms, dengan satu halaman detail mencapai sekitar 2,8 detik pada run terakhir.
-- Student PHP: 13 pemeriksaan lulus, terdiri dari 12 security dan 1 route-feature check.
-- Build frontend: berhasil. Pemecahan bundle per halaman menurunkan chunk awal dari sekitar 563 KB (153 KB gzip) menjadi 397 KB (118 KB gzip); halaman fitur dimuat sebagai chunk terpisah.
-- Live API lokal merespons halaman/route baca dalam ambang smoke 2 detik; pengukuran yang teramati umumnya beberapa sampai puluhan milidetik. Startup dingin service dapat lebih lambat.
+- Backend `npm test`: 72 lulus, 4 smoke dilewati karena membutuhkan service lokal; 0 gagal.
+- Frontend `npm test`: 9 lulus, 1 browser smoke dilewati karena perlu konfigurasi Edge; 0 gagal.
+- Student `php tests/run.php all`: 14 pemeriksaan lulus; PHP menampilkan warning akses session path Laragon, tetapi exit code sukses.
+- Frontend PWA production build berhasil; manifest, diagram XML dan tautan lokal tervalidasi.
 
 ## Catatan cakupan
 
-Smoke test menggunakan layanan dan database development lokal, JWT pengujian yang ditandatangani dengan konfigurasi lokal, request baca, serta koneksi SSE singkat. Suite tidak mengirim email eksternal dan tidak menjalankan create/update/delete ke data aplikasi aktif. Aturan validasi/otorisasi dan transisi workflow diuji lewat test fitur terisolasi. Pengiriman SMTP nyata, beban serentak, dan seluruh mutasi UI terhadap database belum diukur sebagai load test atau end-to-end produksi; lakukan pengujian tersebut pada staging dengan fixture khusus sebelum rilis.
+Smoke browser/API eksternal tidak dijalankan pada run default ini; SMTP nyata, deployment domain HTTPS, beban serentak, dan mutasi UI terhadap database aktif belum diuji sebagai end-to-end produksi.
 
 Migrasi SQL Server untuk workflow, forum, dan notifikasi harus diterapkan di lingkungan baru sebelum route terkait dipakai. File migrasi ada di `database/`; panduan setup Backend mencantumkan urutannya.

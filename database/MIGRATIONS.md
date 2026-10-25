@@ -68,30 +68,33 @@ The migration set is based on the tables actually queried by the two current app
 - `employee_accounts`: staff identity, credentials, admin/teacher/reviewer role, reviewer profile, active status, and timestamps.
 - `courses`: catalog, category/status, creator/updater, and assigned trainer.
 - `course_sessions`, `course_materials`: course structure and published learning content.
-- `activity_logs`, `student_progress_snapshots`: staff activity and synchronized student progress/grades.
+- `activity_logs`, `student_progress_snapshots`: staff activity and synchronized student progress, automatic quiz scores, editable course scores (0–100), feedback, grader, and grading time.
 - `material_submissions`, `material_review_links`: material submission, moderation state, reviewer assignment, hashed one-use review links, comments, and publication reference.
 - `forum_threads`, `forum_replies`, `forum_likes`, `forum_session_settings`: real-time discussion, attachments, visibility, likes, and per-session write state.
-- `lms_notifications`, `lms_notification_reads`, `lms_notification_email_outbox`: role-targeted notifications, per-recipient read state, and retryable email delivery.
+- `lms_notifications`, `lms_notification_reads`, `lms_notification_email_outbox`: role-targeted and student-specific notifications, per-recipient read state, and retryable email delivery.
+- `lms_admin_jobs`, `lms_admin_job_events`: persistent Admin/Teacher bulk queues, ordered per-item results, stop/resume state, and refresh-safe progress. Job payloads are AES-GCM encrypted with a key derived from `JWT_SECRET`; completed jobs clear their payload.
 - `schema_migrations`: applied migration versions for this database.
 
 ### Student MySQL
 
-- `student_accounts`: Student identity, credentials, profile fields, status, and timestamps.
-- `courses`, `course_enrollments`: synchronized catalog and per-student enrollment/progress/completion.
-- `course_sessions`, `course_materials`: synchronized course structure/content, including unique source IDs for safe upserts.
+- `student_accounts`: Student identity, credentials, profile fields, `account_type` (`student` or non-login `teacher_shadow`), status, and timestamps. Teacher study mode uses the shadow identity to preserve course history without changing the SQL Server employee role.
+- `courses`, `course_enrollments`: synchronized catalog and per-student enrollment/progress/completion, separate course and quiz scores, feedback, and grading time.
+- `course_enrollment_requests`: Student access requests and Teacher recommendations, Admin decision and reason, request history, and a unique generated key that prevents two pending requests for the same student-course pair.
+- `course_quizzes`, `course_quiz_questions`, `course_quiz_attempts`: one course quiz, ordered multiple-choice questions and options, and a unique single attempt per student/course.
+- `course_sessions`, `course_materials`: synchronized course structure/content, including unique source IDs and an active marker that archives removed source materials without erasing learning history.
 - `material_progress`: per-student material completion state.
 - `activity_logs`: Student activity history.
 - `login_rate_limits`: hashed-IP login throttling window and lock state.
 - `schema_migrations`: applied migration versions for this database.
 
-The Student feature code currently reads quiz/assessment and notification data from the Admin/Teacher API or renders them from existing session/course data; this repo's Student MySQL queries do not reference separate quiz, forum, or notification tables. Add a new versioned migration when a feature starts persisting those entities locally.
+Course quiz definitions and attempts are persisted in the Student MySQL database. Admin/Teacher create them through the Backend API; the Native Student portal unlocks them after all active course materials are marked complete. The old pre-test and post-test flows have been removed from the Student experience.
 
 ## File structure and migration order
 
 Migrations use Laravel-style sortable names: `YYYY_MM_DD_HHMMSS_action_table.sql`. SQL Server files are under `database/migrations/sqlserver`; MySQL files are under `database/migrations/mysql`. Each table has its own `create_<table>_table` file, and schema changes use `add_...` files. The numeric suffix keeps files written at the same timestamp in deterministic dependency order. The runner only loads files matching this timestamped pattern.
 
-The current Admin/Teacher order is employee accounts; courses; sessions; course materials; activity logs; progress snapshots; forum threads, replies, likes, and session settings; reviewer/trainer fields; material submissions and review links; notifications, reads, email outbox, and delivery indexes. Foreign-key parents are created before their dependent tables.
+The current Admin/Teacher order is employee accounts; courses; sessions; course materials; activity logs; progress snapshots; forum threads, replies, likes, and session settings; reviewer/trainer fields; material submissions and review links; notifications, reads, email outbox, delivery indexes; grade fields and student-targeted notifications; persistent job and job-event tables; then the synchronized student quiz score field. Foreign-key parents are created before their dependent tables.
 
-The current Student order is student accounts; courses; enrollments; sessions; materials; material progress; activity logs; login rate limits; then compatibility for catalog-sync source IDs and material types.
+The current Student order is student accounts; courses; enrollments; sessions; materials; material progress; activity logs; login rate limits; compatibility for catalog-sync source IDs and material types; course grade fields; quiz score on enrollments; course quizzes; ordered quiz questions; unique student quiz attempts; the course material active marker; the account type for Student/teacher-shadow identities; then course enrollment requests. The last migration depends on `student_accounts` and `courses` and must run before using course-access approvals.
 
 Earlier combined SQL migrations were moved intact to `database/migrations/legacy` for reference. The runner maps their recorded filenames to the new per-table files, so an already migrated database does not execute the split schema a second time. Files under `legacy` are not executed. Keep adding timestamped files in dependency order; never edit an applied migration in a shared environment.

@@ -162,7 +162,7 @@ $active_tab = 'profil'; ?>
                         [
                             'q' => 'Bagaimana cara mengerjakan quiz?',
                             'a' =>
-                                'Setelah menyelesaikan seluruh materi pada suatu sesi, tombol <strong>"Post-Test"</strong> akan muncul. Tekan tombol tersebut untuk memulai quiz. Baca setiap pertanyaan dengan seksama sebelum menjawab. Anda dapat melihat hasil setelah selesai.',
+                                'Selesaikan seluruh materi course untuk membuka Quiz Course. Jawab setiap pertanyaan dengan saksama. Quiz hanya dapat dikirim satu kali dan hasilnya tersedia di halaman Nilai.',
                             'cat' => 'quiz_&_assessment',
                         ],
                         [

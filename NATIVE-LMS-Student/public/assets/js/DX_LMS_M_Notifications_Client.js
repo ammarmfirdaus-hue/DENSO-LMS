@@ -23,7 +23,7 @@
     const headers = new Headers(options.headers || {});
     headers.set('Accept', 'application/json');
     if (options.body) headers.set('Content-Type', 'application/json');
-    const response = await fetch(`${apiBase}${path}`, { ...options, headers, credentials: 'include', cache: 'no-store' });
+    const response = await window.dlsFetch(`${apiBase}${path}`, { ...options, headers, credentials: 'include', cache: 'no-store' });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result?.error?.message || 'Notifikasi tidak dapat dimuat.');
     return result;

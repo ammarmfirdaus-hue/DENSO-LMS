@@ -13,12 +13,18 @@ const gradeRoutes = require('./routes/grades');
 const forumRoutes = require('./routes/forum');
 const notificationRoutes = require('./routes/notifications');
 const materialWorkflowRoutes = require('./routes/material-workflow');
+const jobRoutes = require('./routes/jobs');
+const quizRoutes = require('./routes/quizzes');
+const enrollmentRoutes = require('./routes/enrollments');
 const { notFound, errorHandler } = require('./middleware/errors');
 const { apiLimiter, writeLimiter } = require('./middleware/rate-limit');
 const { paginationMiddleware } = require('./middleware/pagination');
 const { startStudentSync } = require('./services/student-sync');
 const { closeStudentAuthPool } = require('./services/student-auth');
 const { startNotificationMailWorker } = require('./services/notification-mail');
+const { registerJobHandler, startAdminJobWorker } = require('./services/admin-jobs');
+const { registerUserJobHandler } = require('./services/user-job-handler');
+const { closeQuizStore } = require('./services/quiz-store');
 
 const app = express();
 app.disable('x-powered-by');
@@ -40,7 +46,7 @@ app.use(cors({
 }));
 app.use('/api/v1', apiLimiter, paginationMiddleware);
 app.use('/api/v1', (req, res, next) => req.method === 'GET' ? next() : writeLimiter(req, res, next));
-app.use(express.json({ limit: '32kb', strict: true }));
+app.use(express.json({ limit: '8mb', strict: true }));
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
@@ -51,12 +57,16 @@ app.use('/api/v1/grades', gradeRoutes);
 app.use('/api/v1/forum', forumRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/material-workflow', materialWorkflowRoutes);
+app.use('/api/v1/jobs', jobRoutes);
+app.use('/api/v1/quizzes', quizRoutes);
+app.use('/api/v1/enrollments', enrollmentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
 async function start() {
   let stopSync = async () => {};
   let stopNotificationMail = async () => {};
+  let stopAdminJobs = async () => {};
 
   try {
     await pool.connect();
@@ -68,6 +78,8 @@ async function start() {
   }
 
   stopNotificationMail = startNotificationMailWorker();
+  registerUserJobHandler(registerJobHandler);
+  stopAdminJobs = await startAdminJobWorker();
 
   // Student sync is an optional integration. A missing Student DB credential
   // must not prevent Admin/Teacher authentication and pages from loading.
@@ -82,8 +94,10 @@ async function start() {
   const stop = async () => {
     server.close();
     await stopSync();
+    await stopAdminJobs();
     await stopNotificationMail();
     await closeStudentAuthPool();
+    await closeQuizStore();
     await pool.close();
     process.exit(0);
   };

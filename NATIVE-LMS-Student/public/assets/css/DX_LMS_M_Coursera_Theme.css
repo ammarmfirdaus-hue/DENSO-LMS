@@ -234,7 +234,27 @@ html.dark .dls-header-notifications:hover {
     font-size: 22px !important;
     line-height: 1 !important;
     color: var(--crs-text) !important;
-    display: block !important;
+    display: inline-flex !important;
+    width: 1em;
+    height: 1em;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+.dls-teacher-mode-return-form { display: contents; }
+.dls-header-teacher-mode {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    min-height: 42px; padding: 0 12px; border: 1px solid rgba(215, 25, 32, .24);
+    border-radius: 12px; background: #fff; color: #b3131b; font: inherit;
+    font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
+}
+.dls-header-teacher-mode:hover { background: #fff5f5; border-color: rgba(215, 25, 32, .45); }
+.dls-header-teacher-mode .material-symbols-outlined { font-size: 20px; line-height: 1; }
+html.dark .dls-header-teacher-mode { background: #172334; border-color: var(--crs-border); color: #fff; }
+html.dark .dls-header-teacher-mode:hover { background: #1e2f42; }
+@media (max-width: 520px) {
+    .dls-header-teacher-mode { width: 40px; min-height: 40px; padding: 0; }
+    .dls-teacher-mode-return-label { display: none; }
 }
 html.dark .dls-header-notifications .material-symbols-outlined {
     color: var(--crs-text) !important;

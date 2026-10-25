@@ -181,7 +181,7 @@ CREATE TABLE DX_LMS_M_Quizzes (
     quiz_id         BIGINT IDENTITY(1,1) NOT NULL,
     course_id       BIGINT          NOT NULL,
     session_id      BIGINT          NULL,           -- NULL untuk final_assessment
-    quiz_type       VARCHAR(30)     NOT NULL,       -- pre_test, post_test, quiz, final_assessment
+    quiz_type       VARCHAR(30)     NOT NULL,       -- quiz, final_assessment
     title           NVARCHAR(255)   NOT NULL,
     passing_score   INT             NOT NULL DEFAULT 75,
     max_attempts    INT             NOT NULL DEFAULT 3,

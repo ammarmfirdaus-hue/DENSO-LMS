@@ -23,17 +23,23 @@ async function login(npk, password) {
   }
   const claims = { sub: user.employee_npk, role: user.role, name: user.fullname };
   if (user.role === 'student') claims.student_id = user.student_id;
-  const token = jwt.sign(claims, env.JWT_SECRET, {
-    algorithm: 'HS256', expiresIn: env.JWT_TTL, issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
-  });
+  const token = issueToken(claims, env.JWT_TTL);
   return { token, user: { npk: user.employee_npk, name: user.fullname, email: user.email, role: user.role } };
+}
+
+function issueToken(claims, expiresIn = env.JWT_TTL) {
+  return jwt.sign(claims, env.JWT_SECRET, {
+    algorithm: 'HS256', expiresIn, issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
+  });
 }
 
 function setSsoCookie(res, token) {
   const decoded = jwt.decode(token);
   const { iat: _iat, exp: _exp, aud: _aud, iss: _iss, ...claims } = decoded || {};
+  const teacherStudyMode = claims.mode === 'teacher_student' && claims.source_role === 'teacher';
+  const maxAge = teacherStudyMode ? 30 * 60 * 1000 : 8 * 60 * 60 * 1000;
   const sessionToken = jwt.sign(claims, env.JWT_SECRET, {
-    algorithm: 'HS256', expiresIn: '8h', issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
+    algorithm: 'HS256', expiresIn: teacherStudyMode ? '30m' : '8h', issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
   });
   res.cookie(env.SSO_COOKIE_NAME, sessionToken, {
     httpOnly: true,
@@ -41,7 +47,7 @@ function setSsoCookie(res, token) {
     sameSite: 'lax',
     path: '/',
     ...(env.SSO_COOKIE_DOMAIN ? { domain: env.SSO_COOKIE_DOMAIN } : {}),
-    maxAge: 8 * 60 * 60 * 1000
+    maxAge
   });
 }
 
@@ -55,4 +61,4 @@ function clearSsoCookie(res) {
   });
 }
 
-module.exports = { login, setSsoCookie, clearSsoCookie };
+module.exports = { login, issueToken, setSsoCookie, clearSsoCookie };

@@ -19,7 +19,7 @@ class DX_LMS_M_Controller
      */
     private $moduleFolders = [
         'Auth', 'Student', 'Student/Dashboard', 'Student/Courses', 'Student/Learning',
-        'Student/Forum', 'Student/History', 'Student/Notifications', 'Student/Profile',
+        'Student/Forum', 'Student/Grades', 'Student/History', 'Student/Notifications', 'Student/Profile',
         'Teacher', 'Admin',
     ];
 

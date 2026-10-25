@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from 'react';
  * Daftar tipe materi yang tersedia beserta label, ikon, dan metadata tampilan.
  */
 const MATERIAL_TYPES = [
-  { value: 'text',     label: 'Materi Teks',           icon: '\u{1F4DD}', desc: 'Konten artikel/bacaan dengan format HTML (Bold, Heading, tabel, dll.)' },
-  { value: 'video',    label: 'Video YouTube / File',  icon: '\u{1F3AC}', desc: 'Link YouTube atau unggah file video (mp4, webm, mov)' },
-  { value: 'pdf',      label: 'Dokumen PDF',           icon: '\u{1F4C4}', desc: 'Unggah file PDF' },
-  { value: 'image',    label: 'Gambar / Infografis',   icon: '\u{1F5BC}', desc: 'Unggah gambar (PNG, JPG, WebP, GIF)' },
-  { value: 'document', label: 'Dokumen Office / ODF',  icon: '\u{1F4CB}', desc: 'Unggah file Word, PowerPoint, Excel, atau ODF' },
-  { value: 'audio',    label: 'Audio',                 icon: '\u{1F3B5}', desc: 'Unggah file audio (MP3, WAV, OGG, M4A)' },
-  { value: 'link',     label: 'Tautan HTTPS',          icon: '\u{1F517}', desc: 'Masukkan URL tautan eksternal (harus HTTPS)' },
+  { value: 'text',     label: 'Materi Teks',           icon: 'article',        desc: 'Konten artikel/bacaan dengan format HTML (Bold, Heading, tabel, dll.)' },
+  { value: 'video',    label: 'Video YouTube / File',  icon: 'play_circle',    desc: 'Link YouTube atau unggah file video (mp4, webm, mov)' },
+  { value: 'pdf',      label: 'Dokumen PDF',           icon: 'picture_as_pdf', desc: 'Unggah file PDF' },
+  { value: 'image',    label: 'Gambar / Infografis',   icon: 'image',          desc: 'Unggah gambar (PNG, JPG, WebP, GIF)' },
+  { value: 'document', label: 'Dokumen Office / ODF',  icon: 'description',    desc: 'Unggah file Word, PowerPoint, Excel, atau ODF' },
+  { value: 'audio',    label: 'Audio',                 icon: 'audiotrack',     desc: 'Unggah file audio (MP3, WAV, OGG, M4A)' },
+  { value: 'link',     label: 'Tautan HTTPS',          icon: 'link',           desc: 'Masukkan URL tautan eksternal (harus HTTPS)' },
 ];
 
 const ACCEPT_MAP = {
@@ -115,7 +115,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
   return (
     <div className="border-t border-outline/30 bg-white dark:bg-slate-900 px-5 py-5">
       <div className="mb-4 flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-lg">{typeInfo?.icon}</span>
+        <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><span className="material-symbol text-lg" aria-hidden="true">{typeInfo?.icon}</span></span>
         <div>
           <h4 className="text-sm font-bold text-on-surface">Ajukan Materi Baru</h4>
           <p className="text-xs text-muted">Dikirim ke antrean persetujuan Admin setelah diklik.</p>
@@ -155,7 +155,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
               >
                 <input type="radio" name="type" value={t.value} checked={type === t.value}
                   onChange={() => setType(t.value)} className="sr-only" />
-                <span className="shrink-0 text-base leading-none">{t.icon}</span>
+                <span className="material-symbol shrink-0 text-lg" aria-hidden="true">{t.icon}</span>
                 <span className="leading-tight">{t.label}</span>
               </label>
             ))}
@@ -179,7 +179,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
                     : 'border border-outline/50 bg-white text-secondary hover:bg-surface-low'
                 }`}
               >
-                <span className="text-base">▶</span>
+                <span className="material-symbol text-base" aria-hidden="true">smart_display</span>
                 Link YouTube (HTTPS)
               </button>
               <button
@@ -191,7 +191,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
                     : 'border border-outline/50 bg-white text-secondary hover:bg-surface-low'
                 }`}
               >
-                <span className="text-base">📁</span>
+                <span className="material-symbol text-base" aria-hidden="true">folder_open</span>
                 Unggah File Video (MP4)
               </button>
             </div>

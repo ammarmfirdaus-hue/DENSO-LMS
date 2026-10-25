@@ -1,6 +1,5 @@
 import React from 'react';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
+import { API_BASE } from '../../api/client';
 
 function youtubeEmbed(url) {
   if (!url) return null;
@@ -75,8 +74,8 @@ export default function FinalMaterialDetailModal({ material, onClose, onDelete, 
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset ${typeMeta.badge}`}>
                   {typeMeta.label}
                 </span>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
-                  ✓ Final (Terbit ke Student)
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
+                  <span className="material-symbol text-sm" aria-hidden="true">check_circle</span>Final (Terbit ke Student)
                 </span>
               </div>
               <h2 className="mt-1 text-lg font-bold text-on-surface sm:text-xl">
@@ -90,7 +89,7 @@ export default function FinalMaterialDetailModal({ material, onClose, onDelete, 
             aria-label="Tutup modal"
             className="grid size-9 place-items-center rounded-xl text-muted transition hover:bg-surface-low hover:text-secondary"
           >
-            ✕
+            <span className="material-symbol text-lg" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -165,7 +164,7 @@ export default function FinalMaterialDetailModal({ material, onClose, onDelete, 
                 <>
                   <div className="flex items-center justify-between rounded-xl bg-surface-low p-3 text-xs">
                     <span className="font-semibold text-secondary">
-                      📄 File PDF: {material.original_file_name || 'Dokumen materi'}
+                      <span className="material-symbol mr-1 align-middle text-base" aria-hidden="true">picture_as_pdf</span>File PDF: {material.original_file_name || 'Dokumen materi'}
                     </span>
                     <a
                       href={fileUrl}

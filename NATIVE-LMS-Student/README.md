@@ -13,11 +13,17 @@ On Windows, run `install.bat` from this folder to check PHP 8.1+/`pdo_mysql` and
 From this directory, configure the environment values documented in `.env.example`, create the database, then run:
 
 ```powershell
-Get-Content ..\database\student.sql | mysql -u root -p
+node ..\database\migrate.js up student
 php -S 127.0.0.1:8082 -t public public/router.php
 ```
 
-Open `http://127.0.0.1:8082`. The student API endpoints are `GET /api/index.php?resource=me`, `GET /api/index.php?resource=dashboard`, and `GET /api/index.php?resource=courses`. All require the authenticated student session cookie. Read endpoints do not mutate data. The PHP portal serves UI and API on the same origin to avoid broad CORS exposure.
+Run the migration command from the repository root if the relative path does not resolve from your shell. Configure the MySQL migration credentials as described in [`../database/MIGRATIONS.md`](../database/MIGRATIONS.md).
+
+Open `http://127.0.0.1:8082`. The same-origin, GET-only JSON endpoints are `GET /api/index.php?resource=me`, `GET /api/index.php?resource=dashboard`, and `GET /api/index.php?resource=courses`. They require the authenticated Student session. The nilai page reads the authenticated Student's MySQL enrollment directly through PHP/PDO; forum and notification clients call the backend API separately. The PHP portal keeps its page and JSON API same-origin.
+
+### Install as an app (PWA)
+
+The Student portal can be installed from a supported browser. Use HTTPS in deployments; localhost is allowed for development. Chrome/Edge show the install prompt from the portal, while iPhone/iPad users can use **Bagikan → Tambahkan ke Layar Utama**. The service worker caches static assets and a small offline page; private PHP pages and API responses are not cached.
 
 Create student accounts by setting `STUDENT_PASSWORD` in the process environment (12+ characters), then run `php scripts/provision-student.php NPK "Full Name" employee@example.com`. The account password is stored with PHP `password_hash()`; do not store plaintext passwords or commit database credentials. Run `npm install` and `npm run build:css` when changing view utility classes. `APP_ENV=production` disables display of runtime errors.
 
@@ -41,6 +47,11 @@ The idempotent seeder adds three student accounts, four courses, sessions/materi
 - All private student pages and API resources require a student session.
 - No teacher/admin access or role switching is implemented here.
 - Some deep learning screens still contain migrated sample content; the dashboard/course GET endpoints read the new MySQL schema. Populate the database before relying on these views for real learning records.
+- `/student/nilai` displays quiz score and course score separately from MySQL `course_enrollments`.
+- Published course quizzes are stored in `course_quizzes`, `course_quiz_questions`, and `course_quiz_attempts`. Students must mark every active course material complete before the quiz unlocks; a unique database constraint limits each student to one attempt. Quiz scores are copied to the Admin/Teacher SQL Server progress snapshot by the configured student sync.
+- Students use the published course quiz after completing all active course materials; each student receives one recorded attempt.
+- `/student/forum/*` and `/student/notifikasi` use the authenticated backend API and require an online connection. Forum and notification records live in SQL Server, not in Student MySQL tables.
+- Student profile/settings screens do not yet provide production profile CRUD. See [`../docs/IMPLEMENTATION-AUDIT.md`](../docs/IMPLEMENTATION-AUDIT.md) for the complete feature matrix and known gaps.
 
 ### Security tests
 

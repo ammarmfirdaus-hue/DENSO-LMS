@@ -25,6 +25,9 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <meta name="description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
 <meta name="application-name" content="DENSO LMS">
 <meta name="theme-color" content="#d71920">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DENSO LMS">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="dls-api-base" content="<?= htmlspecialchars(SSO_API_URL, ENT_QUOTES, 'UTF-8') ?>">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DENSO LMS">
@@ -37,7 +40,9 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <meta name="twitter:image" content="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
 <link rel="icon" type="image/png" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
 <link rel="shortcut icon" type="image/png" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
-<link rel="apple-touch-icon" href="<?= htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8') ?>">
+<link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars($base_path . 'assets/img/icon/dls-student-pwa-180.png', ENT_QUOTES, 'UTF-8') ?>">
+<link rel="manifest" href="<?= htmlspecialchars($base_path . 'manifest.webmanifest', ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars($base_path . 'assets/css/DX_LMS_M_Pwa_Install.css', ENT_QUOTES, 'UTF-8') ?>">
 <title><?= htmlspecialchars($page_title) ?></title>
 
 <!-- =====================================================
@@ -94,10 +99,15 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Tailwind_Output.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Responsive_Redesign.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Coursera_Theme.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Action_Controls.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Student_Experience.css">
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_Network.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_Api.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Helpers.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Notifications_Badge.js" defer></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_Action_Controls.js" defer></script>
+<script src="<?= htmlspecialchars($base_path . 'assets/js/DX_LMS_M_Pwa_Install.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 
 <!-- =====================================================
      Dark Mode Early Initialization (Prevent FOUC) & DLS Theme Controller

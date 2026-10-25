@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
+const { isStudentSessionActive } = require('../services/student-auth');
 
 /**
  * Membaca nilai cookie tertentu dari header request HTTP.
@@ -26,7 +27,7 @@ function readCookie(req, name) {
  * @param {import('express').Response} res Objek response Express.
  * @param {import('express').NextFunction} next Fungsi middleware berikutnya.
  */
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const value = req.get('authorization') || '';
   const [scheme, token] = value.split(' ');
   const cookieToken = readCookie(req, env.SSO_COOKIE_NAME);
@@ -34,9 +35,26 @@ function authenticate(req, res, next) {
   if (!tokens.length) return res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Silakan masuk kembali.' } });
   for (const candidate of tokens) {
     try {
-      req.user = jwt.verify(candidate, env.JWT_SECRET, {
+      const claims = jwt.verify(candidate, env.JWT_SECRET, {
         algorithms: ['HS256'], issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
       });
+      if (claims.role === 'student') {
+        if (!Number.isSafeInteger(Number(claims.student_id)) || Number(claims.student_id) < 1
+          || ((claims.mode || claims.source_role)
+            && (claims.mode !== 'teacher_student' || claims.source_role !== 'teacher'))) {
+          return res.status(401).json({ error: { code: 'INVALID_STUDENT_SESSION', message: 'Sesi Student tidak valid. Silakan masuk kembali.' } });
+        }
+        try {
+          const active = await isStudentSessionActive({
+            studentId: claims.student_id, npk: claims.sub, mode: claims.mode || '', sourceRole: claims.source_role || ''
+          });
+          if (!active) return res.status(401).json({ error: { code: 'STUDENT_SESSION_REVOKED', message: 'Akun atau sesi Student sudah tidak aktif. Silakan masuk kembali.' } });
+        } catch (error) {
+          console.error('Student SSO identity check failed:', error.code || 'STUDENT_DB_UNAVAILABLE');
+          return res.status(503).json({ error: { code: 'STUDENT_IDENTITY_UNAVAILABLE', message: 'Identitas Student belum dapat diverifikasi. Coba kembali sebentar lagi.' } });
+        }
+      }
+      req.user = claims;
       return next();
     } catch { /* Fall back to the SSO cookie after the short bearer token expires. */ }
   }

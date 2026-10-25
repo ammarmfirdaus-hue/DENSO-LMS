@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { api } from '../../api/client';
+import { api, API_BASE, fetchApi } from '../../api/client';
 import ListFilterBar from '../../components/ListFilterBar';
 import Pagination, { usePagination } from '../../components/Pagination';
 import EditMaterialModal from './EditMaterialModal';
@@ -17,7 +17,6 @@ const statusLabel = {
   rejected: 'Perlu diperbaiki',
   published: 'Terbit untuk student'
 };
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
 
 function getYoutubeEmbed(url) {
   if (!url) return null;
@@ -216,7 +215,7 @@ export default function MaterialsPage() {
 
   async function openFile(id) {
     try {
-      const response = await fetch(`${API_BASE}/material-workflow/submissions/${id}/file`, { credentials: 'include' });
+      const response = await fetchApi(`/material-workflow/submissions/${id}/file`, { credentials: 'include', timeoutMs: 60000 });
       if (!response.ok) throw new Error('File tidak dapat dibuka.');
       const url = URL.createObjectURL(await response.blob());
       window.open(url, '_blank', 'noopener');
@@ -468,8 +467,8 @@ export default function MaterialsPage() {
                         <span className="rounded-full bg-surface-low px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">
                           {item.material_type}
                         </span>
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
-                          ✓ Final
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
+                          <span className="material-symbol text-sm" aria-hidden="true">check_circle</span>Final
                         </span>
                       </div>
                     </div>
@@ -582,7 +581,7 @@ export default function MaterialsPage() {
               Apakah Anda yakin ingin menghapus materi final &ldquo;<strong>{deletingMaterial.title}</strong>&rdquo;?
             </p>
             <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
-              ⚠️ Materi ini akan dihapus dari sistem LMS dan langsung ditarik dari tampilan student di database.
+               Materi ini akan dihapus dari sistem LMS dan langsung ditarik dari tampilan student di database.
             </div>
 
             <div className="mt-6 flex justify-end gap-2 border-t border-outline/40 pt-4">
@@ -652,7 +651,7 @@ export default function MaterialsPage() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-outline/40 pb-3">
               <h3 className="text-base font-bold text-red-700">Tolak Materi &amp; Minta Perbaikan</h3>
-              <button type="button" onClick={() => setRejectingSubmission(null)} className="text-muted hover:text-secondary">✕</button>
+              <button type="button" onClick={() => setRejectingSubmission(null)} aria-label="Tutup dialog" className="grid size-8 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-low hover:text-secondary"><span className="material-symbol text-lg" aria-hidden="true">close</span></button>
             </div>
             <p className="mt-2 text-xs text-muted">
               Materi &ldquo;<span className="font-semibold text-secondary">{rejectingSubmission.title}</span>&rdquo; akan dikembalikan ke trainer untuk direvisi.

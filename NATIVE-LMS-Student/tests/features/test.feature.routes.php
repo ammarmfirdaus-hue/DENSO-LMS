@@ -5,7 +5,7 @@ require_once APP_ROOT . '/Core/DX_LMS_M_Route_Catalog.php';
 
 featureTest('Student page route catalog points to existing controller actions', static function (): void {
     $expectedPaths = [
-        '/student', '/student/courses', '/student/courses/filters', '/student/riwayat',
+        '/student', '/student/courses', '/student/courses/filters', '/student/riwayat', '/student/nilai',
         '/student/notifikasi', '/student/profil', '/student/profil/detail',
         '/student/profil/pengaturan', '/student/profil/bantuan', '/student/course/detail',
         '/student/forum/category', '/student/forum/thread', '/student/forum/new',

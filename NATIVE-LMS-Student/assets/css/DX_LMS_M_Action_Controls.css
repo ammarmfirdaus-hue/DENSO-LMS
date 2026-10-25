@@ -1,0 +1,113 @@
+.dls-action-control {
+    gap: .45rem;
+}
+
+.dls-action-icon {
+    flex: 0 0 auto;
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.dls-action-solid-neutral {
+    background-color: #fff !important;
+    border: 1px solid #d9dee4 !important;
+}
+
+.dls-action-solid-neutral:hover:not(:disabled) {
+    background-color: #f0f2f5 !important;
+}
+
+.dls-action-solid-primary {
+    background-color: #d71920 !important;
+    border: 1px solid #b9141b !important;
+    color: #fff !important;
+}
+
+.dls-action-solid-primary:hover:not(:disabled) {
+    background-color: #b9141b !important;
+}
+
+.dls-action-solid-neutral.bg-primary,
+.dls-action-solid-neutral.bg-error,
+.dls-action-solid-neutral.bg-tertiary {
+    background-color: #d71920 !important;
+    border-color: #b9141b !important;
+    color: #fff !important;
+}
+
+.dls-action-control[hidden] {
+    display: none !important;
+}
+
+/* Four sibling action buttons stay in a compact, responsive two-by-two grid. */
+.dls-action-grid-2x2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch;
+    justify-content: end;
+    gap: .5rem;
+    min-width: 0;
+}
+
+.dls-action-grid-2x2 > .dls-action-control {
+    display: inline-flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center;
+    white-space: normal !important;
+    text-align: center;
+    line-height: 1.2;
+    padding-inline: .55rem;
+}
+
+@media (max-width: 480px) {
+    .dls-action-grid-2x2 { gap: .375rem; }
+    .dls-action-grid-2x2 > .dls-action-control {
+        min-height: 2.25rem;
+        padding-inline: .4rem;
+        font-size: .75rem;
+    }
+}
+
+html.dark .dls-action-solid-neutral {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+}
+
+html.dark .dls-action-solid-neutral:hover:not(:disabled) {
+    background-color: #334155 !important;
+}
+
+.swal2-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin: 24px auto 0 !important;
+}
+
+.swal2-actions > .swal2-styled {
+    min-width: 132px !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 480px) {
+    .swal2-popup {
+        width: calc(100% - 24px) !important;
+        max-width: 440px !important;
+        padding: 22px 16px 18px !important;
+    }
+
+    .swal2-actions {
+        gap: 8px !important;
+        margin-top: 20px !important;
+    }
+
+    .swal2-actions > .swal2-styled {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+}

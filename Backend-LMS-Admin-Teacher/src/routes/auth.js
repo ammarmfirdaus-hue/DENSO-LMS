@@ -3,8 +3,11 @@ const crypto = require('node:crypto');
 const { ipKeyGenerator } = require('express-rate-limit');
 const { z } = require('zod');
 const { buildLimiter } = require('../middleware/rate-limit');
-const { login, setSsoCookie, clearSsoCookie } = require('../services/auth');
-const { authenticate } = require('../middleware/auth');
+const { login, issueToken, setSsoCookie, clearSsoCookie } = require('../services/auth');
+const { authenticate, allowRoles } = require('../middleware/auth');
+const env = require('../config/env');
+const { pool, sql } = require('../config/database');
+const { ensureTeacherShadowAccount } = require('../services/student-auth');
 
 const router = express.Router();
 const loginLimiter = buildLimiter({
@@ -26,9 +29,57 @@ router.post('/login', loginLimiter, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/me', authenticate, async (req, res, next) => {
+function hasOrigin(req, expectedUrl) {
+  const origin = req.get('origin');
+  if (!origin) return false;
+  try { return new URL(origin).origin === new URL(expectedUrl).origin; }
+  catch { return false; }
+}
+
+router.post('/student-mode', authenticate, allowRoles('teacher'), async (req, res, next) => {
+  if (!hasOrigin(req, env.FRONTEND_ORIGIN)) {
+    return res.status(403).json({ error: { code: 'UNTRUSTED_ORIGIN', message: 'Permintaan mode belajar berasal dari halaman yang tidak diizinkan.' } });
+  }
   try {
-    const { pool, sql } = require('../config/database');
+    const result = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
+      .query(`SELECT employee_npk,fullname,status,role FROM dbo.employee_accounts
+        WHERE employee_npk=@npk AND role='teacher' AND status='active'`);
+    const teacher = result.recordset[0];
+    if (!teacher) return res.status(403).json({ error: { code: 'TEACHER_INACTIVE', message: 'Akun teacher tidak aktif atau role sudah berubah.' } });
+    const studentId = await ensureTeacherShadowAccount({ npk: teacher.employee_npk, fullname: teacher.fullname });
+    const token = issueToken({
+      sub: teacher.employee_npk, role: 'student', name: teacher.fullname, student_id: studentId,
+      mode: 'teacher_student', source_role: 'teacher'
+    }, '30m');
+    setSsoCookie(res, token);
+    return res.json({ redirectUrl: env.STUDENT_APP_URL, expiresIn: 1800 });
+  } catch (error) { next(error); }
+});
+
+router.post('/teacher-mode', authenticate, allowRoles('student'), async (req, res, next) => {
+  if (!hasOrigin(req, env.STUDENT_APP_URL)) {
+    return res.status(403).json({ error: { code: 'UNTRUSTED_ORIGIN', message: 'Permintaan kembali ke portal teacher berasal dari halaman yang tidak diizinkan.' } });
+  }
+  if (req.user.mode !== 'teacher_student' || req.user.source_role !== 'teacher') {
+    return res.status(403).json({ error: { code: 'TEACHER_MODE_REQUIRED', message: 'Sesi ini bukan sesi belajar teacher.' } });
+  }
+  try {
+    const result = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
+      .query(`SELECT employee_npk,fullname,email FROM dbo.employee_accounts
+        WHERE employee_npk=@npk AND role='teacher' AND status='active'`);
+    const teacher = result.recordset[0];
+    if (!teacher) return res.status(403).json({ error: { code: 'TEACHER_INACTIVE', message: 'Akun teacher tidak aktif lagi.' } });
+    const token = issueToken({ sub: teacher.employee_npk, role: 'teacher', name: teacher.fullname }, env.JWT_TTL);
+    setSsoCookie(res, token);
+    return res.json({ redirectUrl: env.FRONTEND_ORIGIN });
+  } catch (error) { next(error); }
+});
+
+router.get('/me', authenticate, async (req, res, next) => {
+  if (req.user.role === 'student') {
+    return res.json({ user: { npk: req.user.sub, name: req.user.name || req.user.sub, email: '', role: 'student' } });
+  }
+  try {
     const result = await pool.request()
       .input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT employee_npk, fullname, email, role, status FROM dbo.employee_accounts WHERE employee_npk = @npk`);
@@ -46,7 +97,7 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
-router.put('/profile', authenticate, async (req, res, next) => {
+router.put('/profile', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
   const bcrypt = require('bcryptjs');
   const { pool, sql } = require('../config/database');
   const profileSchema = z.object({

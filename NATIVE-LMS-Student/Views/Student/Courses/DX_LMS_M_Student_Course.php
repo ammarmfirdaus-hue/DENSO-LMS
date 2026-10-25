@@ -90,8 +90,11 @@
                             $icon,
                         ) ?></span>
                     </div>
-                    <?php if ($c['status'] !== 'selesai'): ?>
-                    <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>
+                    <?php if (empty($c['has_access'])): ?>
+                    <?php $accessLabel = ($c['access_status'] ?? '') === 'pending' ? 'Menunggu Admin' : ((($c['access_status'] ?? '') === 'rejected') ? 'Ditolak · Ajukan ulang' : 'Perlu persetujuan'); ?>
+                    <div class="absolute top-2 left-2 rounded-full border border-white/70 bg-white px-2.5 py-1 text-xs font-semibold text-secondary shadow-sm"><?= e($accessLabel) ?></div>
+                    <?php elseif ($c['status'] !== 'selesai'): ?>
+                    <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm"><?= e((string) ($c['category'] ?? 'Course')) ?></div>
                     <?php endif; ?>
                     <?php if ($c['status'] === 'selesai'): ?>
                     <div class="absolute top-2 right-2 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-sm text-label-sm shadow-sm backdrop-blur-sm flex items-center gap-1">
@@ -123,7 +126,10 @@
                     </div>
                     <div class="pt-stack-sm space-y-2">
                         <div class="flex justify-between font-label-sm text-label-sm">
-                            <?php if ($c['status'] === 'sedang_dipelajari'): ?>
+                            <?php if (empty($c['has_access'])): ?>
+                            <span class="text-on-surface-variant">Akses</span>
+                            <span class="font-semibold <?= ($c['access_status'] ?? '') === 'rejected' ? 'text-error' : 'text-secondary' ?>"><?= ($c['access_status'] ?? '') === 'pending' ? 'Menunggu Admin' : ((($c['access_status'] ?? '') === 'rejected') ? 'Ditolak' : 'Belum diminta') ?></span>
+                            <?php elseif ($c['status'] === 'sedang_dipelajari'): ?>
                             <span class="text-on-surface-variant">Progress</span>
                             <span class="text-tertiary font-bold"><?= e((string) $c['progress']) ?>%</span>
                             <?php elseif ($c['status'] === 'selesai'): ?>
@@ -137,7 +143,11 @@
                             <div class="bg-tertiary h-2 rounded-full" style="width: <?= (int) $c['progress'] ?>%"></div>
                         </div>
                     </div>
-                    <?php if ($c['status'] === 'sedang_dipelajari'): ?>
+                    <?php if (empty($c['has_access'])): ?>
+                    <button onclick="window.location.href='?route=/student/course/detail&id=<?= e($c['id']) ?>'" class="w-full mt-stack-md inline-flex items-center justify-center gap-2 rounded-lg border border-primary bg-white px-4 py-3 font-label-md text-primary hover:bg-primary/5">
+                        <span class="material-symbols-outlined" aria-hidden="true">lock_open</span><?= ($c['access_status'] ?? '') === 'pending' ? 'Lihat Status Permintaan' : ((($c['access_status'] ?? '') === 'rejected') ? 'Lihat Alasan & Ajukan Ulang' : 'Minta Akses Course') ?>
+                    </button>
+                    <?php elseif ($c['status'] === 'sedang_dipelajari'): ?>
                     <button onclick="window.location.href='?route=/student/course/detail&id=<?= e(
                         $c['id'],
                     ) ?>'" class="w-full mt-stack-md bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded-lg shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] active:scale-95 transition-transform">

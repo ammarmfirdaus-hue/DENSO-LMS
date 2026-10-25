@@ -708,7 +708,8 @@ router.get('/published/:materialId/file', authenticate, allowRoles('student', 'a
     if (!result.recordset[0]) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File materi tidak tersedia.' } });
     const material = result.recordset[0];
     if (req.user.role === 'student') {
-      if (!await studentHasCourseAccess(Number(req.user.student_id), material.course_code)) {
+      const studentAccountType = req.user.mode === 'teacher_student' && req.user.source_role === 'teacher' ? 'teacher_shadow' : 'student';
+      if (!await studentHasCourseAccess(Number(req.user.student_id), material.course_code, studentAccountType)) {
         return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File materi tidak tersedia.' } });
       }
     } else if (req.user.role !== 'admin' && req.user.role !== 'teacher') {

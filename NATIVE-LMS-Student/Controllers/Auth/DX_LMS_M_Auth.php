@@ -12,7 +12,7 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             exit;
         }
         $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
-        if ($claims && ($claims['role'] ?? '') === 'student') {
+        if ($claims && ($claims['role'] ?? '') === 'student' && isSsoStudentIdentityActive($claims)) {
             createStudentSession($claims);
             header('Location: /?route=/student', true, 303);
             exit;
@@ -72,16 +72,26 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         $response = is_string($responseBody) ? json_decode($responseBody, true) : null;
         $ssoToken = '';
         foreach (($http_response_header ?? []) as $responseHeader) {
+            if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $responseHeader, $statusMatches)) {
+                $upstreamStatus = (int) $statusMatches[1];
+            }
             if (preg_match('/^Set-Cookie:\s*' . preg_quote(SSO_COOKIE_NAME, '/') . '=([^;]*)/i', $responseHeader, $matches)) {
                 $ssoToken = rawurldecode($matches[1]);
                 break;
             }
         }
+        // An unavailable API is a service error, not a bad password. Do not
+        // consume the student's login attempts while the backend is offline.
+        if (!is_string($responseBody) || !is_array($response) || ($upstreamStatus ?? 0) === 0 || ($upstreamStatus ?? 0) >= 500) {
+            header('Location: /?route=/login&error=sso', true, 303);
+            exit;
+        }
         $claims = $ssoToken !== '' ? verifySsoToken($ssoToken) : null;
-        if (!$claims || ($claims['role'] ?? '') !== 'student' || (int) ($claims['student_id'] ?? 0) < 1) {
-            $pdo->prepare("UPDATE login_rate_limits SET attempts=IF(window_started_at < UTC_TIMESTAMP() - INTERVAL 15 MINUTE,1,attempts+1),window_started_at=IF(window_started_at < UTC_TIMESTAMP() - INTERVAL 15 MINUTE,UTC_TIMESTAMP(),window_started_at),locked_until=IF(attempts+1>=8,UTC_TIMESTAMP() + INTERVAL 15 MINUTE,NULL) WHERE ip_hash=:ip")
-                ->execute(['ip' => $ipHash]);
+        if (!$claims || ($claims['role'] ?? '') !== 'student' || (int) ($claims['student_id'] ?? 0) < 1
+            || !isSsoStudentIdentityActive($claims)) {
             if (($response['error']['code'] ?? '') === 'INVALID_CREDENTIALS') {
+                $pdo->prepare("UPDATE login_rate_limits SET attempts=IF(window_started_at < UTC_TIMESTAMP() - INTERVAL 15 MINUTE,1,attempts+1),window_started_at=IF(window_started_at < UTC_TIMESTAMP() - INTERVAL 15 MINUTE,UTC_TIMESTAMP(),window_started_at),locked_until=IF(attempts+1>=8,UTC_TIMESTAMP() + INTERVAL 15 MINUTE,NULL) WHERE ip_hash=:ip")
+                    ->execute(['ip' => $ipHash]);
                 header('Location: /?route=/login&error=1', true, 303);
                 exit;
             }
@@ -92,6 +102,62 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         setSsoBrowserCookie($ssoToken);
         createStudentSession($claims);
         header('Location: /?route=/student', true, 303);
+        exit;
+    }
+
+    public function teacherMode(): void
+    {
+        startAppSession();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verifyCsrf()
+            || ($_SESSION['sso_mode'] ?? '') !== 'teacher_student') {
+            http_response_code(403);
+            exit('Permintaan untuk kembali ke portal Teacher tidak valid.');
+        }
+        $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
+        if (!$claims || ($claims['mode'] ?? '') !== 'teacher_student' || ($claims['source_role'] ?? '') !== 'teacher') {
+            http_response_code(401);
+            exit('Sesi belajar Teacher sudah berakhir. Masuk kembali melalui portal Teacher.');
+        }
+
+        $appParts = parse_url(APP_URL);
+        $origin = isset($appParts['scheme'], $appParts['host'])
+            ? $appParts['scheme'] . '://' . $appParts['host'] . (isset($appParts['port']) ? ':' . $appParts['port'] : '')
+            : '';
+        if ($origin === '') {
+            http_response_code(500);
+            exit('Konfigurasi portal Student belum lengkap.');
+        }
+        $context = stream_context_create(['http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/json\r\nAccept: application/json\r\nOrigin: {$origin}\r\nCookie: " . SSO_COOKIE_NAME . '=' . rawurlencode((string) ($_COOKIE[SSO_COOKIE_NAME] ?? '')) . "\r\nConnection: close\r\n",
+            'content' => '{}',
+            'timeout' => 10,
+            'ignore_errors' => true,
+        ], 'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+        $responseBody = @file_get_contents(SSO_API_URL . '/auth/teacher-mode', false, $context);
+        $upstreamStatus = 0;
+        $ssoToken = '';
+        foreach (($http_response_header ?? []) as $responseHeader) {
+            if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $responseHeader, $statusMatches)) $upstreamStatus = (int) $statusMatches[1];
+            if (preg_match('/^Set-Cookie:\s*' . preg_quote(SSO_COOKIE_NAME, '/') . '=([^;]*)/i', $responseHeader, $matches)) {
+                $ssoToken = rawurldecode($matches[1]);
+            }
+        }
+        $teacherClaims = $ssoToken !== '' ? verifySsoToken($ssoToken) : null;
+        if (!is_string($responseBody) || $upstreamStatus !== 200 || !$teacherClaims
+            || ($teacherClaims['role'] ?? '') !== 'teacher' || ($teacherClaims['sub'] ?? '') !== ($claims['sub'] ?? '')) {
+            http_response_code($upstreamStatus >= 400 && $upstreamStatus < 600 ? $upstreamStatus : 502);
+            exit('Portal Teacher belum dapat dibuka. Pastikan backend aktif dan akun Teacher masih aktif.');
+        }
+
+        setSsoBrowserCookie($ssoToken);
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+        }
+        session_destroy();
+        header('Location: ' . SSO_FRONTEND_URL, true, 303);
         exit;
     }
 

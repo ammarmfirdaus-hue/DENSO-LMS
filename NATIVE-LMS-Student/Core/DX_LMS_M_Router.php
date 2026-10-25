@@ -23,7 +23,7 @@ class DX_LMS_M_Router
     private $moduleFolders = [
         'Auth', 'Student', 'Student/Dashboard', 'Student/Courses', 'Student/Learning',
         'Student/Forum', 'Student/History', 'Student/Notifications', 'Student/Profile',
-        'Teacher', 'Admin',
+        'Student/Grades', 'Teacher', 'Admin',
     ];
 
     /**

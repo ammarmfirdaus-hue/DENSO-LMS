@@ -13,6 +13,8 @@
 $active_tab = $active_tab ?? 'beranda';
 $base_path = $base_path ?? '';
 $route_prefix = '/student';
+$student_name = $_SESSION['student_name'] ?? ($_SESSION['user']['name'] ?? 'Siswa DENSO');
+$student_npk = $_SESSION['student_npk'] ?? ($_SESSION['user']['npk'] ?? 'Student');
 
 $tabs = [
     [
@@ -26,6 +28,12 @@ $tabs = [
         'icon' => 'school',
         'label' => 'Course',
         'href' => '?route=' . $route_prefix . '/courses',
+    ],
+    [
+        'id' => 'nilai',
+        'icon' => 'grade',
+        'label' => 'Nilai',
+        'href' => '?route=' . $route_prefix . '/nilai',
     ],
     [
         'id' => 'riwayat',
@@ -67,12 +75,33 @@ $tabs = [
     <?php foreach ($tabs as $tab): ?>
     <?php
     $is_active = $active_tab === $tab['id'];
+    $is_mobile_profile_active = $tab['id'] === 'profil' && in_array($active_tab, ['profil', 'notifikasi'], true);
     $active_class = $is_active
         ? 'text-primary dark:text-primary-fixed bg-primary-container-light lg:bg-primary-container-light font-semibold'
         : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
     ?>
+    <?php if ($tab['id'] === 'profil'): ?>
+    <button type="button"
+       class="dls-mobile-profile-trigger flex-1 flex flex-col items-center justify-center rounded-xl py-2 transition-transform duration-200 active:scale-95 relative <?= $is_mobile_profile_active ? 'text-primary bg-primary-container-light font-semibold' : 'text-on-surface-variant' ?>"
+       id="nav-profil"
+       onclick="window.toggleStudentMobileProfileMenu()"
+       aria-label="Menu Profil"
+       aria-haspopup="true"
+       aria-expanded="false"
+       aria-controls="studentMobileProfileDropup">
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' <?= $is_mobile_profile_active ? '1' : '0' ?>;">person</span>
+        <span class="font-label-sm text-label-sm">Profil</span>
+    </button>
+    <a href="<?= $tab['href'] ?>"
+       class="dls-desktop-profile-link flex-1 lg:flex-none hidden lg:flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
+       id="nav-profil-desktop"
+       aria-label="Profil"<?= $is_active ? ' aria-current="page"' : '' ?>>
+        <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3" style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;">person</span>
+        <span class="font-label-sm text-label-sm lg:text-body-md">Profil</span>
+    </a>
+    <?php else: ?>
     <a href="<?= $tab['href'] ?>" 
-       class="flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>" 
+       class="<?= $tab['id'] === 'notifikasi' ? 'dls-mobile-nav-notifications ' : '' ?>flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
        id="nav-<?= $tab['id'] ?>"
        aria-label="<?= $tab['label'] ?>"<?= $is_active ? ' aria-current="page"' : '' ?>>
         
@@ -86,12 +115,26 @@ $tabs = [
         <span data-notification-count class="dls-bottom-notification-count" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
         <?php endif; ?>
     </a>
+    <?php endif; ?>
     <?php endforeach; ?>
 
-    <?php
-    $student_name = $_SESSION['student_name'] ?? ($_SESSION['user']['name'] ?? 'Siswa DENSO');
-    $student_npk = $_SESSION['student_npk'] ?? ($_SESSION['user']['npk'] ?? 'Student');
-    ?>
+    <!-- Mobile profile menu opens upward from the bottom navigation. -->
+    <div id="studentMobileProfileDropup" class="dls-mobile-profile-menu hidden absolute bottom-[calc(100%+10px)] right-3 z-[60] w-[min(280px,calc(100vw-24px))] flex-col gap-1 rounded-2xl border border-outline-variant bg-white p-2 shadow-xl dark:bg-slate-900" role="menu" aria-label="Menu Profil">
+        <div class="mb-1 rounded-xl bg-surface-container-low px-3 py-2.5">
+            <p class="truncate text-sm font-bold text-on-surface"><?= htmlspecialchars($student_name, ENT_QUOTES, 'UTF-8') ?></p>
+            <p class="mt-0.5 truncate text-xs text-on-surface-variant">NPK <?= htmlspecialchars($student_npk, ENT_QUOTES, 'UTF-8') ?></p>
+        </div>
+        <a href="?route=/student/notifikasi" class="dls-mobile-profile-menu-item flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low" role="menuitem"<?= $active_tab === 'notifikasi' ? ' aria-current="page"' : '' ?>>
+            <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">notifications</span>
+            <span class="flex-1">Notifikasi</span>
+            <?php if ((int) ($notif_count ?? 0) > 0): ?><span class="dls-mobile-profile-unread"><?= (int) $notif_count > 99 ? '99+' : (int) $notif_count ?></span><?php endif; ?>
+        </a>
+        <a href="?route=/student/profil" class="dls-mobile-profile-menu-item flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low" role="menuitem"<?= $active_tab === 'profil' ? ' aria-current="page"' : '' ?>>
+            <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">person</span>
+            <span>Profil Saya</span>
+        </a>
+    </div>
+
     <!-- Desktop Profile Dropup Section -->
     <div class="hidden lg:block relative mt-auto pt-3 border-t border-outline-variant/50 dark:border-slate-800 w-full">
         <!-- Dropup Menu (Initially hidden) -->
@@ -218,6 +261,18 @@ window.toggleStudentProfileDropup = function() {
     }
 };
 
+window.toggleStudentMobileProfileMenu = function(forceOpen) {
+    var menu = document.getElementById('studentMobileProfileDropup');
+    var trigger = document.getElementById('nav-profil');
+    if (!menu || !trigger) return;
+    var shouldOpen = typeof forceOpen === 'boolean'
+        ? forceOpen
+        : menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', !shouldOpen);
+    menu.classList.toggle('flex', shouldOpen);
+    trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+};
+
 window.toggleStudentTheme = function() {
     if (window.DLS_Theme) {
         var next = window.DLS_Theme.toggle();
@@ -276,9 +331,16 @@ window.confirmStudentLogout = function() {
 document.addEventListener('DOMContentLoaded', function() {
     window.updateThemeUI();
     document.addEventListener('click', function(e) {
+        var mobileMenu = document.getElementById('studentMobileProfileDropup');
+        var mobileTrigger = document.getElementById('nav-profil');
+        if (mobileMenu && !mobileMenu.classList.contains('hidden') &&
+            !mobileMenu.contains(e.target) && mobileTrigger && !mobileTrigger.contains(e.target)) {
+            window.toggleStudentMobileProfileMenu(false);
+        }
+
         var menu = document.getElementById('studentProfileDropup');
         var trigger = document.getElementById('btnStudentProfileTrigger');
-        if (menu && !menu.classList.contains('hidden')) {
+        if (menu && trigger && !menu.classList.contains('hidden')) {
             if (!menu.contains(e.target) && !trigger.contains(e.target)) {
                 menu.classList.add('hidden');
                 menu.classList.remove('flex');
@@ -286,6 +348,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (chevron) chevron.classList.remove('rotate-180');
             }
         }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') window.toggleStudentMobileProfileMenu(false);
+    });
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) window.toggleStudentMobileProfileMenu(false);
     });
 });
 </script>

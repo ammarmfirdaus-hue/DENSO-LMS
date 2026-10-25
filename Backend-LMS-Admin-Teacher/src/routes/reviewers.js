@@ -169,4 +169,23 @@ router.put('/:npk', async (req, res, next) => {
   }
 });
 
+// Keep the reviewer record for review history; removing access is implemented as deactivation.
+router.delete('/:npk', async (req, res, next) => {
+  const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
+  if (!npk.success) return res.status(400).json({ error: { code: 'INVALID_NPK', message: 'NPK tidak valid.' } });
+  try {
+    const result = await pool.request().input('npk', sql.VarChar(50), npk.data)
+      .query(`UPDATE dbo.employee_accounts SET status='inactive',updated_at=SYSUTCDATETIME()
+        OUTPUT INSERTED.employee_npk WHERE employee_npk=@npk AND role='reviewer'
+          AND NOT EXISTS (SELECT 1 FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review');`);
+    if (!result.recordset.length) {
+      const pending = await pool.request().input('npk', sql.VarChar(50), npk.data)
+        .query(`SELECT TOP 1 1 AS exists_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
+      if (pending.recordset.length) return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.' } });
+      return res.status(404).json({ error: { code: 'REVIEWER_NOT_FOUND', message: 'Akun reviewer tidak ditemukan.' } });
+    }
+    res.json({ deleted: true, deactivated: true, message: 'Akun reviewer dinonaktifkan; riwayat review tetap tersimpan.' });
+  } catch (error) { next(error); }
+});
+
 module.exports = router;

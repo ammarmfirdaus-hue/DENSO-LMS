@@ -101,7 +101,7 @@ export default function ProfileModal({ user, onClose, onUserUpdated }) {
             aria-label="Tutup modal"
             className="grid size-9 place-items-center rounded-xl text-muted transition hover:bg-surface-low hover:text-secondary cursor-pointer"
           >
-            ✕
+            <span className="material-symbol text-lg" aria-hidden="true">close</span>
           </button>
         </div>
 

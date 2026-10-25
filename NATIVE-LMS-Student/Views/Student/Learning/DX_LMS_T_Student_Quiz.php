@@ -2,11 +2,7 @@
 /** Pengaturan properti basis evaluasi diturunkan oleh Pengontrol (Controller). */
 
 $title = '';
-if ($type === 'pre_test') {
-    $title = 'Pre-Test: ' . $session['title'];
-} elseif ($type === 'post_test') {
-    $title = 'Post-Test: ' . $session['title'];
-} elseif ($type === 'quiz') {
+if ($type === 'quiz') {
     $title = 'Quiz Course: ' . $course['title'];
 } elseif ($type === 'final_assessment') {
     $title = 'Final Assessment: ' . $course['title'];
@@ -24,13 +20,7 @@ $backUrl =
         ? '?route=/student/riwayat/detail&id=' . urlencode($course['id'])
         : '?route=/student/course/detail&id=' . urlencode($course['id']);
 
-if ($isHistoryMode) {
-    if ($type === 'pre_test' || $type === 'post_test') {
-        $title = 'Riwayat ' . $title;
-    } else {
-        $title = 'Riwayat ' . $title;
-    }
-}
+if ($isHistoryMode) $title = 'Riwayat ' . $title;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -99,7 +89,29 @@ if ($isHistoryMode) {
 
     <main class="dls-main dls-quiz-main flex-1 w-full bg-surface-container-low p-container-margin">
         <div class="max-w-3xl mx-auto mt-4 mb-8">
-
+            <?php if ($isRealCourseQuiz): ?>
+            <div class="mb-5 rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-7">
+                <div class="flex items-start gap-4"><span class="material-symbols-outlined grid size-12 shrink-0 place-items-center rounded-xl bg-primary text-2xl text-white">quiz</span><div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wide text-primary"><?= e($course['title']) ?></p><h2 class="mt-1 text-2xl font-bold text-on-surface"><?= e($realQuiz['title'] ?? 'Quiz Course') ?></h2><p class="mt-2 text-sm leading-6 text-on-surface-variant"><?= e($realQuiz['description'] ?? '') ?></p></div></div>
+                <?php if (!empty($realQuiz['has_quiz'])): ?><div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-outline-variant/40 pt-4 text-sm text-on-surface-variant"><span><strong class="text-on-surface"><?= (int) ($realQuiz['question_count'] ?? 0) ?></strong> pertanyaan</span><span>Nilai kelulusan <strong class="text-on-surface"><?= e($realQuiz['passing_score'] ?? 75) ?></strong></span><span>Satu kali pengerjaan</span></div><?php endif; ?>
+            </div>
+            <?php if ($quizError !== ''): ?><p role="alert" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><?= e($quizError) ?></p><?php endif; ?>
+            <?php if (empty($realQuiz['has_quiz'])): ?>
+            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-7 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">assignment_late</span><h3 class="mt-2 text-lg font-bold">Quiz belum tersedia</h3><p class="mt-1 text-sm text-on-surface-variant">Pengajar belum menerbitkan quiz untuk course ini.</p></section>
+            <?php elseif (!empty($realQuiz['attempt'])): ?>
+            <?php $attempt = $realQuiz['attempt']; $passed = (float) $attempt['score'] >= (float) ($realQuiz['passing_score'] ?? 75); ?>
+            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-7"><div class="flex flex-col items-center gap-3 text-center"><span class="material-symbols-outlined grid size-16 place-items-center rounded-full <?= $passed ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface' ?> text-3xl"><?= $passed ? 'task_alt' : 'fact_check' ?></span><div><p class="text-sm font-semibold text-on-surface-variant">Quiz sudah dikirim</p><p class="mt-1 text-4xl font-bold text-primary"><?= e(number_format((float) $attempt['score'], 2, ',', '.')) ?></p><p class="mt-1 text-sm font-bold <?= $passed ? 'text-primary' : 'text-on-surface-variant' ?>"><?= $passed ? 'Memenuhi nilai kelulusan' : 'Belum mencapai nilai kelulusan' ?></p></div></div><div class="mt-6 grid gap-3 border-t border-outline-variant/40 pt-5 text-center sm:grid-cols-2"><p class="rounded-xl bg-surface-container-low p-3 text-sm"><strong class="block text-lg text-on-surface"><?= (int) $attempt['correct_count'] ?> / <?= (int) $attempt['total_questions'] ?></strong>Jawaban benar</p><p class="rounded-xl bg-surface-container-low p-3 text-sm"><strong class="block text-lg text-on-surface"><?= e(date('d M Y H:i', strtotime((string) $attempt['submitted_at']))) ?></strong>Waktu pengiriman</p></div><p class="mt-4 text-center text-sm text-on-surface-variant">Percobaan quiz sudah digunakan dan tidak dapat diulang.</p><div class="mt-5 flex justify-center"><a href="<?= e($backUrl) ?>" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white"><span class="material-symbols-outlined">arrow_back</span>Kembali ke Course</a></div></section>
+            <?php elseif (($realQuiz['status'] ?? 'terkunci') !== 'belum_dimulai'): ?>
+            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-7 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">lock</span><h3 class="mt-2 text-lg font-bold"><?= in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true) ? 'Quiz belum dapat dikerjakan' : 'Quiz masih terkunci' ?></h3><p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-on-surface-variant"><?php if (in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true)): ?>Pengajar belum menerbitkan quiz ini.<?php else: ?>Selesaikan dan tandai seluruh <?= (int) ($realQuiz['total_materials'] ?? 0) ?> materi course sebagai selesai. Saat ini <?= (int) ($realQuiz['completed_materials'] ?? 0) ?> materi sudah selesai.<?php endif; ?></p><a href="<?= e($backUrl) ?>" class="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-outline/60 bg-white px-5 font-semibold text-on-surface hover:bg-surface-container-low"><span class="material-symbols-outlined">menu_book</span>Kembali ke Materi</a></section>
+            <?php else: ?>
+            <form id="courseQuizForm" method="post" action="?route=/student/quiz&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;type=quiz" class="space-y-4">
+                <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
+                <?php foreach ($realQuiz['questions'] as $index => $question): ?>
+                <fieldset class="rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-6"><legend class="sr-only">Pertanyaan <?= $index + 1 ?></legend><div class="mb-4 flex items-start gap-3"><span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white"><?= $index + 1 ?></span><p class="pt-1 font-semibold leading-6 text-on-surface"><?= e($question['question']) ?><span class="ml-1 text-primary" aria-label="Wajib diisi">*</span></p></div><div class="space-y-2 pl-0 sm:pl-11"><?php foreach ($question['options'] as $optionIndex => $option): ?><label class="flex cursor-pointer items-start gap-3 rounded-xl border border-outline-variant/50 p-3 transition hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5"><input type="radio" name="answers[<?= (int) $question['id'] ?>]" value="<?= (int) $optionIndex ?>" required class="mt-1 size-4 shrink-0 accent-primary" <?= (string) ($submittedAnswers[(string) $question['id']] ?? '') === (string) $optionIndex ? 'checked' : '' ?>><span class="text-sm leading-6 text-on-surface"><?= e($option) ?></span></label><?php endforeach; ?></div></fieldset>
+                <?php endforeach; ?>
+                <div class="sticky bottom-2 flex flex-col gap-3 rounded-2xl border border-outline-variant/50 bg-surface p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between"><p class="text-xs leading-5 text-on-surface-variant">Periksa kembali jawaban sebelum dikirim. Quiz hanya dapat dikerjakan satu kali.</p><button type="submit" class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-white hover:bg-primary/90"><span class="material-symbols-outlined">send</span>Kirim Jawaban</button></div>
+            </form>
+            <?php endif; ?>
+            <?php else: ?>
             <?php if ($isHistoryMode): ?>
             <!-- History Banner -->
             <div class="bg-surface rounded-2xl p-6 shadow-sm border border-outline-variant/30 mb-6">
@@ -319,6 +331,7 @@ if ($isHistoryMode) {
                 </div>
                 <?php endif; ?>
             </form>
+            <?php endif; ?>
             <?php endif; ?>
         </div>
     </main>

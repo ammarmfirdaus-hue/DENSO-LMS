@@ -3,7 +3,7 @@
   const endpoint = '/api/index.php?resource=';
 
   async function get(resource) {
-    const response = await fetch(endpoint + encodeURIComponent(resource), {
+    const response = await window.dlsFetch(endpoint + encodeURIComponent(resource), {
       method: 'GET', credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store'
     });
     const payload = await response.json();
@@ -53,9 +53,9 @@
       progressBar.style.width = `${percentage}%`;
       progressTrack.append(progressBar);
       const action = document.createElement('a');
-      action.className = 'dls-course-link mt-4 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary';
+      action.className = 'dls-course-link mt-4 inline-flex items-center justify-center rounded-xl border border-primary bg-white px-4 py-3 text-sm font-semibold text-primary';
       action.href = `/?route=/student/course/detail&id=${encodeURIComponent(course.course_code)}`;
-      action.textContent = 'Buka course';
+      action.textContent = course.has_access ? 'Buka course' : course.access_status === 'pending' ? 'Menunggu persetujuan Admin' : course.access_status === 'rejected' ? 'Lihat alasan & ajukan ulang' : 'Minta akses course';
       card.append(badge, title, code, description, progress, progressTrack, action);
       target.append(card);
     });

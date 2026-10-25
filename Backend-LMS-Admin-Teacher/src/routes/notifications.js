@@ -35,7 +35,7 @@ router.get('/unread-count', async (req, res, next) => {
     const result = await pool.request().input('role', sql.VarChar(20), req.user.role)
       .input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n
-        WHERE n.audience_role=@role AND NOT EXISTS (
+        WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk) AND NOT EXISTS (
           SELECT 1 FROM dbo.lms_notification_reads r
           WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
         )`);
@@ -90,10 +90,11 @@ router.get('/', async (req, res, next) => {
           FROM dbo.lms_notifications n
           LEFT JOIN dbo.lms_notification_reads r ON r.notification_id=n.notification_id
             AND r.recipient_role=@role AND r.recipient_npk=@npk
-          WHERE n.audience_role=@role ORDER BY n.created_at DESC,n.notification_id DESC`),
+          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
+          ORDER BY n.created_at DESC,n.notification_id DESC`),
       pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
         .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n
-          WHERE n.audience_role=@role AND NOT EXISTS (
+          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk) AND NOT EXISTS (
             SELECT 1 FROM dbo.lms_notification_reads r
             WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
           )`)
@@ -190,7 +191,7 @@ router.post('/read-all', trustedWriteOrigin, async (req, res, next) => {
     await pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
       .query(`MERGE dbo.lms_notification_reads WITH (HOLDLOCK) AS target
         USING (SELECT n.notification_id,@role AS recipient_role,@npk AS recipient_npk
-          FROM dbo.lms_notifications n WHERE n.audience_role=@role) AS source
+          FROM dbo.lms_notifications n WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)) AS source
         ON target.notification_id=source.notification_id AND target.recipient_role=source.recipient_role AND target.recipient_npk=source.recipient_npk
         WHEN NOT MATCHED THEN INSERT(notification_id,recipient_role,recipient_npk)
           VALUES(source.notification_id,source.recipient_role,source.recipient_npk);`);
@@ -205,7 +206,8 @@ router.post('/:id/read', trustedWriteOrigin, async (req, res, next) => {
   try {
     const result = await pool.request().input('id', sql.BigInt, id.data)
       .input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
-      .query(`IF NOT EXISTS(SELECT 1 FROM dbo.lms_notifications WHERE notification_id=@id AND audience_role=@role)
+      .query(`IF NOT EXISTS(SELECT 1 FROM dbo.lms_notifications WHERE notification_id=@id AND audience_role=@role
+          AND (recipient_npk IS NULL OR recipient_npk=@npk))
         SELECT CAST(0 AS BIT) AS available;
       ELSE BEGIN
         MERGE dbo.lms_notification_reads WITH (HOLDLOCK) AS target

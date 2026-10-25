@@ -70,12 +70,23 @@ function connectDevTools(url) {
       call(method, params = {}) {
         const id = ++nextId;
         return new Promise((done, fail) => {
-          pending.set(id, { done, fail });
+          const timer = setTimeout(() => {
+            pending.delete(id);
+            fail(new Error(`Browser DevTools command timed out: ${method}`));
+          }, 12000);
+          pending.set(id, { done, fail, timer, method });
           socket.send(JSON.stringify({ id, method, params }));
         });
       }
     }));
     socket.addEventListener('error', reject, { once: true });
+    socket.addEventListener('close', () => {
+      for (const [id, waiter] of pending) {
+        clearTimeout(waiter.timer);
+        waiter.fail(new Error(`Browser DevTools connection closed during ${waiter.method}.`));
+        pending.delete(id);
+      }
+    });
     socket.addEventListener('message', event => {
       const message = JSON.parse(event.data);
       if (message.method === 'Runtime.exceptionThrown') exceptions.push(message.params.exceptionDetails?.text || 'Runtime exception');
@@ -88,6 +99,7 @@ function connectDevTools(url) {
       const waiter = pending.get(message.id);
       if (!waiter) return;
       pending.delete(message.id);
+      clearTimeout(waiter.timer);
       if (message.error) waiter.fail(new Error(message.error.message));
       else waiter.done(message.result);
     });
@@ -162,7 +174,7 @@ test('Admin/Teacher web pages render in a browser and enforce admin-only page gu
   assert.ok(path.resolve(profile).startsWith(`${path.resolve(os.tmpdir())}${path.sep}`), 'browser profile is isolated under the OS temp directory');
   const port = await findFreePort();
   const browser = spawn(process.env.DLS_BROWSER_EXECUTABLE, [
-    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--remote-allow-origins=*',
     '--disable-background-mode',
     `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, 'about:blank'
   ], { stdio: 'ignore', windowsHide: true });
@@ -174,7 +186,8 @@ test('Admin/Teacher web pages render in a browser and enforce admin-only page gu
     await devtools.call('Runtime.enable');
     await devtools.call('Network.enable');
     const cookie = await devtools.call('Network.setCookie', {
-      url: `${apiBase}/`, name: cookieName, value: makeToken(apiEnv, 'admin'), path: '/', httpOnly: true, secure: false, sameSite: 'Lax'
+      // The Admin UI uses Vite's same-origin /api proxy in local development.
+      url: `${frontendOrigin}/`, name: cookieName, value: makeToken(apiEnv, 'admin'), path: '/', httpOnly: true, secure: false, sameSite: 'Lax'
     });
     assert.equal(cookie.success, true, 'browser accepts the signed local SSO cookie');
 
@@ -204,7 +217,7 @@ test('Admin/Teacher web pages render in a browser and enforce admin-only page gu
     }
 
     const teacherCookie = await devtools.call('Network.setCookie', {
-      url: `${apiBase}/`, name: cookieName, value: makeToken(apiEnv, 'teacher'), path: '/', httpOnly: true, secure: false, sameSite: 'Lax'
+      url: `${frontendOrigin}/`, name: cookieName, value: makeToken(apiEnv, 'teacher'), path: '/', httpOnly: true, secure: false, sameSite: 'Lax'
     });
     assert.equal(teacherCookie.success, true);
     await navigateAndWait(devtools, new URL('/users', frontendOrigin).href, 'Dashboard');
@@ -280,6 +293,11 @@ test('Admin/Teacher web pages render in a browser and enforce admin-only page gu
     if (path.dirname(path.resolve(profile)) !== path.resolve(os.tmpdir()) || !path.basename(profile).startsWith('dls-lms-browser-smoke-')) {
       throw new Error('Refusing to remove a browser profile outside its isolated temporary directory.');
     }
-    rmSync(profile, { recursive: true, force: true, maxRetries: 40, retryDelay: 250 });
+    try {
+      rmSync(profile, { recursive: true, force: true, maxRetries: 40, retryDelay: 250 });
+    } catch (error) {
+      if (!['EPERM', 'EBUSY', 'EACCES'].includes(error.code)) throw error;
+      t.diagnostic('Windows denied removal of the isolated temporary Edge profile; the browser test result is preserved.');
+    }
   }
 });

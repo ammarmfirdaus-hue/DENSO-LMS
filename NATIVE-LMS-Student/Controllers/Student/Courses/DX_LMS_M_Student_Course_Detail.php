@@ -33,6 +33,49 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
             exit();
         }
 
+        if (empty($course['has_access'])) {
+            $requestError = '';
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!verifyCsrf()) {
+                    http_response_code(403);
+                    exit('Sesi formulir tidak valid. Muat ulang halaman lalu coba kembali.');
+                }
+                $requestNote = $_POST['request_note'] ?? '';
+                if (!is_string($requestNote) || strlen($requestNote) > 1000) {
+                    $requestError = 'Catatan maksimal 1.000 karakter.';
+                } else {
+                    try {
+                        require_once dirname(__DIR__, 3) . '/includes/StudentApi.php';
+                        $requesterRole = ($_SESSION['sso_mode'] ?? '') === 'teacher_student' ? 'teacher' : 'student';
+                        apiRequestStudentCourseAccess(
+                            (string) $course['id'],
+                            (int) ($_SESSION['student_id'] ?? 0),
+                            (string) ($_SESSION['student_npk'] ?? ''),
+                            trim($requestNote),
+                            $requesterRole,
+                        );
+                        header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['id']), true, 303);
+                        exit();
+                    } catch (PDOException $error) {
+                        error_log('Student course access request failed: ' . $error->getMessage());
+                        $requestError = 'Permintaan belum dapat disimpan. Coba lagi sebentar lagi.';
+                    } catch (RuntimeException $error) {
+                        $requestError = $error->getMessage() ?: 'Permintaan akses belum dapat dikirim.';
+                    } catch (Throwable $error) {
+                        error_log('Student course access request failed: ' . $error->getMessage());
+                        $requestError = 'Permintaan belum dapat disimpan. Coba lagi sebentar lagi.';
+                    }
+                }
+            }
+            $this->view('DX_LMS_M_Student_Course_Access', [
+                'course' => $course,
+                'stats' => DX_LMS_M_Student_Data::getStats(),
+                'csrf_token' => csrfToken(),
+                'request_error' => $requestError,
+            ]);
+            return;
+        }
+
         // Normalize assessment data because live course records can omit fields
         // that the legacy course-detail view expects.
         $course['quiz'] = array_replace(
@@ -61,18 +104,6 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
             }
             $session['status'] = $session['status'] ?? 'terkunci';
             $session['materials'] = is_array($session['materials'] ?? null) ? $session['materials'] : [];
-            foreach (['pre_test', 'post_test'] as $assessmentKey) {
-                $session[$assessmentKey] = array_replace(
-                    ['status' => 'terkunci', 'questions' => [], 'history' => [], 'score' => null],
-                    is_array($session[$assessmentKey] ?? null) ? $session[$assessmentKey] : [],
-                );
-                $session[$assessmentKey]['questions'] = is_array($session[$assessmentKey]['questions'] ?? null)
-                    ? $session[$assessmentKey]['questions']
-                    : [];
-                $session[$assessmentKey]['history'] = is_array($session[$assessmentKey]['history'] ?? null)
-                    ? $session[$assessmentKey]['history']
-                    : [];
-            }
         }
         unset($session);
 

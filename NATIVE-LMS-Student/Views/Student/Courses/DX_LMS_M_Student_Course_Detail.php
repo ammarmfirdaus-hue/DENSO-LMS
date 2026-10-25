@@ -225,47 +225,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         <?php endif; ?>
                     </div>
 
-                    <!-- Pre Test -->
-                    <?php if (isset($session['pre_test'])): ?>
-                    <?php $preTest = $session['pre_test']; ?>
-                    <div class="flex flex-col border-b border-surface-variant/30 pb-3 mb-3">
-                        <a href="<?= $preTest['status'] !== 'terkunci'
-                            ? '?route=/student/quiz&id=' .
-                                e($courseId) .
-                                '&session_id=' .
-                                e($session['id']) .
-                                '&type=pre_test'
-                            : 'javascript:void(0)' ?>" class="flex items-center gap-4 py-2 <?= $preTest['status'] ===
-'terkunci'
-    ? 'opacity-50 cursor-not-allowed'
-    : 'hover:bg-surface-container/50 transition-colors' ?>">
-                            <div class="w-10 h-10 rounded-lg <?= $preTest['status'] === 'terkunci'
-                                ? 'bg-surface-variant text-on-surface-variant'
-                                : 'bg-primary-container/20 text-primary' ?> flex items-center justify-center shrink-0 overflow-hidden">
-                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $preTest[
-                                    'status'
-                                ] === 'selesai'
-                                    ? '1'
-                                    : '0' ?>;">assignment</span>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-body-md text-on-surface">Pre-Test</p>
-                                <p class="font-label-sm text-on-surface-variant">
-                                    <?= count($preTest['questions']) ?> Soal
-                                    <?= $preTest['status'] === 'selesai' && $preTest['score'] !== null ? ' | Skor tertinggi: ' . e($preTest['score']) : '' ?>
-                                </p>
-                            </div>
-                            <?php if ($preTest['status'] === 'selesai'): ?>
-                            <span class="material-symbols-outlined text-tertiary">check_circle</span>
-                            <?php elseif ($preTest['status'] === 'terkunci'): ?>
-                            <span class="material-symbols-outlined text-on-surface-variant">lock</span>
-                            <?php else: ?>
-                            <span class="material-symbols-outlined text-secondary">play_arrow</span>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                    <?php endif; ?>
-
                     <!-- Materials -->
                     <div class="pl-4 border-l-2 border-surface-variant/50 ml-5 my-2 flex flex-col gap-1 relative">
                         <!-- Dot connector top -->
@@ -318,46 +277,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         <div class="absolute -bottom-3 -left-[5px] w-2 h-2 rounded-full bg-surface-variant/50"></div>
                     </div>
 
-                    <!-- Post Test -->
-                    <?php if (isset($session['post_test'])): ?>
-                    <?php $postTest = $session['post_test']; ?>
-                    <div class="flex flex-col border-t border-surface-variant/30 mt-3 pt-3">
-                        <a href="<?= $postTest['status'] !== 'terkunci'
-                            ? '?route=/student/quiz&id=' .
-                                e($courseId) .
-                                '&session_id=' .
-                                e($session['id']) .
-                                '&type=post_test'
-                            : 'javascript:void(0)' ?>" class="flex items-center gap-4 py-2 <?= $postTest['status'] ===
-'terkunci'
-    ? 'opacity-50 cursor-not-allowed'
-    : 'hover:bg-surface-container/50 transition-colors' ?>">
-                            <div class="w-10 h-10 rounded-lg <?= $postTest['status'] === 'terkunci'
-                                ? 'bg-surface-variant text-on-surface-variant'
-                                : 'bg-primary-container/20 text-primary' ?> flex items-center justify-center shrink-0 overflow-hidden">
-                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' <?= $postTest[
-                                    'status'
-                                ] === 'selesai'
-                                    ? '1'
-                                    : '0' ?>;">assignment_turned_in</span>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-body-md text-on-surface">Post-Test</p>
-                                <p class="font-label-sm text-on-surface-variant">
-                                    <?= count($postTest['questions']) ?> Soal
-                                    <?= $postTest['status'] === 'selesai' && $postTest['score'] !== null ? ' | Skor tertinggi: ' . e($postTest['score']) : '' ?>
-                                </p>
-                            </div>
-                            <?php if ($postTest['status'] === 'selesai'): ?>
-                            <span class="material-symbols-outlined text-tertiary">check_circle</span>
-                            <?php elseif ($postTest['status'] === 'terkunci'): ?>
-                            <span class="material-symbols-outlined text-on-surface-variant">lock</span>
-                            <?php else: ?>
-                            <span class="material-symbols-outlined text-secondary">play_arrow</span>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                    <?php endif; ?>
+
 
                 </div>
                 <?php endforeach; ?>
@@ -480,8 +400,6 @@ $all_sessions_completed = $all_sessions_completed ?? false;
 
             <?php
             $activities = [];
-            $pre_tests = [];
-            $post_tests = [];
             $assessments = [];
 
             if (!empty($course['sessions'])) {
@@ -512,37 +430,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         }
                     }
 
-                    if (!empty($session['pre_test']['history'])) {
-                        $pre_tests[] = [
-                            'session_title' => $session['title'],
-                            'history' => $session['pre_test']['history'],
-                        ];
-                        foreach ($session['pre_test']['history'] as $h) {
-                            $activities[] = [
-                                'title' => 'Mengerjakan Pre-Test',
-                                'desc' => $session['title'] . ' (Percobaan ' . $h['attempt'] . ')',
-                                'date' => $h['date'],
-                                'icon' => 'assignment',
-                                'color' => 'primary',
-                            ];
-                        }
-                    }
 
-                    if (!empty($session['post_test']['history'])) {
-                        $post_tests[] = [
-                            'session_title' => $session['title'],
-                            'history' => $session['post_test']['history'],
-                        ];
-                        foreach ($session['post_test']['history'] as $h) {
-                            $activities[] = [
-                                'title' => 'Mengerjakan Post-Test',
-                                'desc' => $session['title'] . ' (Percobaan ' . $h['attempt'] . ')',
-                                'date' => $h['date'],
-                                'icon' => 'assignment_turned_in',
-                                'color' => 'tertiary',
-                            ];
-                        }
-                    }
                 }
             }
 
@@ -632,167 +520,13 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                 </div>
             </section>
 
-            <!-- 2. Riwayat Pengulangan Pre Test -->
-            <section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-outline-variant/60 overflow-hidden">
-                <button type="button" onclick="toggleAccordion('riwayat-pretest')" class="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-surface-container-low/30 transition-colors duration-200 gap-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary shrink-0" style="font-variation-settings: 'FILL' 1;">assignment</span>
-                            <span class="font-label-lg sm:font-headline-sm text-on-surface font-bold">2. Riwayat Pre-Test</span>
-                        </div>
-                        <?php $preTestCount = array_sum(
-                            array_map(function ($pt) {
-                                return count($pt['history']);
-                            }, $pre_tests),
-                        ); ?>
-                        <span class="font-label-sm text-on-surface-variant font-normal ml-6 sm:ml-0">(<?= $preTestCount ?> percobaan)</span>
-                    </div>
-                    <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-300 shrink-0 rotate-[-90deg]" id="riwayat-pretest-chevron">expand_more</span>
-                </button>
-                <div id="riwayat-pretest" class="accordion-body" style="display: none;">
-                    <div class="px-5 pb-5">
-                        <?php if (empty($pre_tests)): ?>
-                        <div class="text-center py-6 text-on-surface-variant">
-                            <p class="font-body-md">Belum ada riwayat pengerjaan Pre-Test.</p>
-                        </div>
-                        <?php else: ?>
-                        <div class="flex flex-col gap-4" id="riwayat-pretest-list">
-                            <?php
-                            $preIdx = 0;
-                            foreach ($pre_tests as $pt): ?>
-                            <div class="border border-outline-variant/40 rounded-lg p-4 bg-surface-container-lowest/50 riwayat-item <?= $preIdx >=
-                            5
-                                ? 'riwayat-hidden'
-                                : '' ?>" <?= $preIdx >= 5 ? 'style="display:none;"' : '' ?>>
-                                <h4 class="font-label-md font-bold text-on-surface mb-3"><?= e(
-                                    $pt['session_title'],
-                                ) ?></h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <?php foreach ($pt['history'] as $h): ?>
-                                    <div class="bg-surface-container-high/20 rounded-md p-3 flex justify-between items-center border border-surface-variant/30">
-                                        <div>
-                                            <p class="font-label-sm font-bold text-on-surface">Percobaan <?= $h[
-                                                'attempt'
-                                            ] ?></p>
-                                            <p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5"><?= date(
-                                                'd M Y, H:i',
-                                                strtotime($h['date']),
-                                            ) ?></p>
-                                        </div>
-                                        <div class="text-right">
-                                            <?php
-                                            $_s = $h['score'] ?? $h['nilai'];
-                                            $_sc =
-                                                $_s >= 75
-                                                    ? 'text-tertiary'
-                                                    : ($_s >= 50
-                                                        ? 'text-[#D4A017]'
-                                                        : 'text-error');
-                                            ?>
-                                            <span class="font-headline-sm font-bold <?= $_sc ?>"><?= $_s ?></span>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <?php $preIdx++;endforeach;
-                            ?>
-                        </div>
-                        <?php if (count($pre_tests) > 5): ?>
-                        <button type="button" onclick="toggleShowAll('riwayat-pretest-list', this)" class="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-outline-variant/50 text-primary font-label-md font-bold hover:bg-primary-container/10 transition-colors duration-200">
-                            <span class="material-symbols-outlined text-[18px]">unfold_more</span>
-                            <span class="btn-text">Tampilkan Semua (<?= count($pre_tests) - 5 ?> lainnya)</span>
-                        </button>
-                        <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Riwayat Pengulangan Post Test -->
-            <section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-outline-variant/60 overflow-hidden">
-                <button type="button" onclick="toggleAccordion('riwayat-posttest')" class="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-surface-container-low/30 transition-colors duration-200 gap-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-tertiary shrink-0" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
-                            <span class="font-label-lg sm:font-headline-sm text-on-surface font-bold">3. Riwayat Post-Test</span>
-                        </div>
-                        <?php $postTestCount = array_sum(
-                            array_map(function ($pt) {
-                                return count($pt['history']);
-                            }, $post_tests),
-                        ); ?>
-                        <span class="font-label-sm text-on-surface-variant font-normal ml-6 sm:ml-0">(<?= $postTestCount ?> percobaan)</span>
-                    </div>
-                    <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-300 shrink-0 rotate-[-90deg]" id="riwayat-posttest-chevron">expand_more</span>
-                </button>
-                <div id="riwayat-posttest" class="accordion-body" style="display: none;">
-                    <div class="px-5 pb-5">
-                        <?php if (empty($post_tests)): ?>
-                        <div class="text-center py-6 text-on-surface-variant">
-                            <p class="font-body-md">Belum ada riwayat pengerjaan Post-Test.</p>
-                        </div>
-                        <?php else: ?>
-                        <div class="flex flex-col gap-4" id="riwayat-posttest-list">
-                            <?php
-                            $postIdx = 0;
-                            foreach ($post_tests as $pt): ?>
-                            <div class="border border-outline-variant/40 rounded-lg p-4 bg-surface-container-lowest/50 riwayat-item <?= $postIdx >=
-                            5
-                                ? 'riwayat-hidden'
-                                : '' ?>" <?= $postIdx >= 5 ? 'style="display:none;"' : '' ?>>
-                                <h4 class="font-label-md font-bold text-on-surface mb-3"><?= e(
-                                    $pt['session_title'],
-                                ) ?></h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <?php foreach ($pt['history'] as $h): ?>
-                                    <div class="bg-surface-container-high/20 rounded-md p-3 flex justify-between items-center border border-surface-variant/30">
-                                        <div>
-                                            <p class="font-label-sm font-bold text-on-surface">Percobaan <?= $h[
-                                                'attempt'
-                                            ] ?></p>
-                                            <p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5"><?= date(
-                                                'd M Y, H:i',
-                                                strtotime($h['date']),
-                                            ) ?></p>
-                                        </div>
-                                        <div class="text-right">
-                                            <?php
-                                            $_s = $h['score'] ?? $h['nilai'];
-                                            $_sc =
-                                                $_s >= 75
-                                                    ? 'text-tertiary'
-                                                    : ($_s >= 50
-                                                        ? 'text-[#D4A017]'
-                                                        : 'text-error');
-                                            ?>
-                                            <span class="font-headline-sm font-bold <?= $_sc ?>"><?= $_s ?></span>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <?php $postIdx++;endforeach;
-                            ?>
-                        </div>
-                        <?php if (count($post_tests) > 5): ?>
-                        <button type="button" onclick="toggleShowAll('riwayat-posttest-list', this)" class="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-outline-variant/50 text-tertiary font-label-md font-bold hover:bg-tertiary-container/10 transition-colors duration-200">
-                            <span class="material-symbols-outlined text-[18px]">unfold_more</span>
-                            <span class="btn-text">Tampilkan Semua (<?= count($post_tests) - 5 ?> lainnya)</span>
-                        </button>
-                        <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </section>
-
             <!-- 4. Riwayat Quiz dan Assessment -->
             <section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-outline-variant/60 overflow-hidden">
                 <button type="button" onclick="toggleAccordion('riwayat-qa')" class="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-surface-container-low/30 transition-colors duration-200 gap-3">
                     <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-error shrink-0" style="font-variation-settings: 'FILL' 1;">military_tech</span>
-                            <span class="font-label-lg sm:font-headline-sm text-on-surface font-bold">4. Quiz &amp; Assessment</span>
+                            <span class="font-label-lg sm:font-headline-sm text-on-surface font-bold">2. Quiz &amp; Assessment</span>
                         </div>
                         <?php $qaCount = count($assessments['quiz'] ?? []) + count($assessments['final'] ?? []); ?>
                         <span class="font-label-sm text-on-surface-variant font-normal ml-6 sm:ml-0">(<?= $qaCount ?> percobaan)</span>
@@ -924,6 +658,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         <div class="p-container-margin flex flex-col gap-stack-md mt-4">
             <?php if (!empty($course['quiz'])): ?>
             <?php $quiz = $course['quiz']; ?>
+            <?php $quizQuestionCount = (int) ($quiz['question_count'] ?? count($quiz['questions'] ?? [])); ?>
             <!-- Quiz -->
             <div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col gap-3 w-full">
                 <a href="<?= $quiz['status'] !== 'terkunci'
@@ -943,14 +678,14 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <h3 class="font-headline-sm text-headline-sm text-on-surface">Quiz Course</h3>
+                            <h3 class="font-headline-sm text-headline-sm text-on-surface"><?= e($quiz['title'] ?? 'Quiz Course') ?></h3>
                             <?php if ($quiz['status'] === 'terkunci'): ?>
                             <span class="px-2 py-0.5 text-[10px] bg-error/10 text-error rounded-full font-bold uppercase tracking-wider">Terkunci</span>
                             <?php endif; ?>
                         </div>
                         <p class="font-body-md text-body-md text-on-surface-variant">
-                            <?= count($quiz['questions']) > 0 ? count($quiz['questions']) . ' Pertanyaan' : 'Soal belum tersedia' ?>
-                            <?= $quiz['status'] === 'selesai' && $quiz['score'] !== null ? ' | Skor tertinggi: ' . e($quiz['score']) : '' ?>
+                            <?= $quizQuestionCount > 0 ? $quizQuestionCount . ' Pertanyaan' : (!empty($quiz['has_quiz']) ? 'Soal belum tersedia' : 'Quiz belum dibuat') ?>
+                            <?= $quiz['status'] === 'selesai' && $quiz['score'] !== null ? ' | Nilai: ' . e($quiz['score']) : '' ?>
                         </p>
                     </div>
                     <div class="shrink-0">
@@ -971,7 +706,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             <?php if (!empty($course['final_assessment'])): ?>
             <?php $fa = $course['final_assessment']; ?>
             <?php
-            $isQuizCompleted = empty($course['quiz']) || $course['quiz']['status'] === 'selesai';
+            $isQuizCompleted = empty($course['quiz']['has_quiz']) || $course['quiz']['status'] === 'selesai';
             $faStatus =
                 $all_sessions_completed && $isQuizCompleted
                     ? ($fa['status'] === 'terkunci'

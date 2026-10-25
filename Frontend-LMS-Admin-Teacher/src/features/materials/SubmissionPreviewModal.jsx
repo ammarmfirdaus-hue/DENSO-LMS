@@ -1,6 +1,5 @@
 import React from 'react';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001/api/v1';
+import { API_BASE } from '../../api/client';
 
 function youtubeEmbed(url) {
   if (!url) return null;
@@ -114,7 +113,7 @@ export default function SubmissionPreviewModal({
             aria-label="Tutup modal"
             className="grid size-9 place-items-center rounded-xl text-muted transition hover:bg-surface-low hover:text-secondary cursor-pointer"
           >
-            ✕
+            <span className="material-symbol text-lg" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -192,7 +191,7 @@ export default function SubmissionPreviewModal({
                   <div className="p-3 bg-zinc-900 text-xs text-zinc-300 flex items-center justify-between">
                     <span>Sumber: YouTube</span>
                     <a href={submission.content} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      Buka di YouTube ↗
+                      Buka di YouTube <span className="material-symbol ml-1 align-middle text-sm" aria-hidden="true">open_in_new</span>
                     </a>
                   </div>
                 </div>
@@ -209,7 +208,7 @@ export default function SubmissionPreviewModal({
                   <div className="p-3 bg-zinc-900 text-xs text-zinc-300 flex items-center justify-between">
                     <span>File Video: {submission.original_file_name || 'video'}</span>
                     <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      Buka di Tab Baru ↗
+                      Buka di Tab Baru <span className="material-symbol ml-1 align-middle text-sm" aria-hidden="true">open_in_new</span>
                     </a>
                   </div>
                 </div>

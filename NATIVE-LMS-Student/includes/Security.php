@@ -65,7 +65,35 @@ function verifySsoToken(string $token): ?array
         || (int) ($claims['exp'] ?? 0) <= time() || (int) ($claims['iat'] ?? 0) > time() + 60
         || empty($claims['sub']) || !in_array(($claims['role'] ?? ''), ['admin', 'teacher', 'reviewer', 'student'], true)
         || (($claims['role'] ?? '') === 'student' && (int) ($claims['student_id'] ?? 0) < 1)) return null;
+    if (isset($claims['mode']) || isset($claims['source_role'])) {
+        if (($claims['mode'] ?? '') !== 'teacher_student' || ($claims['source_role'] ?? '') !== 'teacher'
+            || ($claims['role'] ?? '') !== 'student') return null;
+    }
     return $claims;
+}
+
+/** Pastikan role pada cookie masih sesuai dengan tipe/status identitas Student di MySQL. */
+function ssoStudentAccountState(array $claims): ?array
+{
+    if (($claims['role'] ?? '') !== 'student' || (int) ($claims['student_id'] ?? 0) < 1 || empty($claims['sub'])) return null;
+    require_once __DIR__ . '/Database.php';
+    try {
+        $query = db()->prepare('SELECT student_id,npk,account_type,status FROM student_accounts WHERE student_id=:id AND npk=:npk LIMIT 1');
+        $query->execute(['id' => (int) $claims['student_id'], 'npk' => (string) $claims['sub']]);
+        $row = $query->fetch();
+        if (!$row || $row['status'] !== 'active') return null;
+        $expectedType = ($claims['mode'] ?? '') === 'teacher_student' ? 'teacher_shadow' : 'student';
+        if (($row['account_type'] ?? 'student') !== $expectedType) return null;
+        return $row;
+    } catch (Throwable $error) {
+        error_log('SSO Student account check failed: ' . $error->getMessage());
+        return null;
+    }
+}
+
+function isSsoStudentIdentityActive(array $claims): bool
+{
+    return ssoStudentAccountState($claims) !== null;
 }
 
 /**
@@ -76,8 +104,10 @@ function verifySsoToken(string $token): ?array
 function setSsoBrowserCookie(string $token): void
 {
     if (!preg_match('/^[A-Za-z0-9_-]{3,64}$/', SSO_COOKIE_NAME)) return;
+    $claims = verifySsoToken($token);
+    $maxAge = ($claims['mode'] ?? '') === 'teacher_student' ? 1800 : 28800;
     $options = [
-        'expires' => time() + 28800,
+        'expires' => time() + $maxAge,
         'path' => '/',
         'secure' => APP_ENV === 'production',
         'httponly' => true,
@@ -116,7 +146,8 @@ function createStudentSession(array $claims): void
     $_SESSION['student_npk'] = (string) $claims['sub'];
     $_SESSION['student_name'] = (string) ($claims['name'] ?? 'Student');
     $_SESSION['role'] = 'student';
-    $_SESSION['user'] = ['npk' => $_SESSION['student_npk'], 'name' => $_SESSION['student_name'], 'role' => 'student'];
+    $_SESSION['sso_mode'] = (string) ($claims['mode'] ?? '');
+    $_SESSION['user'] = ['npk' => $_SESSION['student_npk'], 'name' => $_SESSION['student_name'], 'role' => 'student', 'mode' => $_SESSION['sso_mode']];
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
@@ -128,13 +159,32 @@ function requireStudent(): void
 {
     startAppSession();
     $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
+    $identity = $claims && ($claims['role'] ?? '') === 'student' ? ssoStudentAccountState($claims) : null;
+    $promotedToTeacher = $identity === null && $claims && ($claims['role'] ?? '') === 'student'
+        && ($claims['mode'] ?? '') !== 'teacher_student'
+        && (int) ($claims['student_id'] ?? 0) > 0;
+    if ($promotedToTeacher) {
+        try {
+            require_once __DIR__ . '/Database.php';
+            $query = db()->prepare("SELECT 1 FROM student_accounts WHERE student_id=:id AND npk=:npk AND account_type='teacher_shadow' AND status='active' LIMIT 1");
+            $query->execute(['id' => (int) $claims['student_id'], 'npk' => (string) $claims['sub']]);
+            $promotedToTeacher = (bool) $query->fetchColumn();
+        } catch (Throwable $error) { $promotedToTeacher = false; }
+    }
     if (empty($_SESSION['student_id']) || ($_SESSION['role'] ?? '') !== 'student'
         || !$claims || ($claims['role'] ?? '') !== 'student'
-        || (int) $claims['student_id'] !== (int) $_SESSION['student_id']) {
+        || (int) $claims['student_id'] !== (int) $_SESSION['student_id']
+        || (string) ($claims['mode'] ?? '') !== (string) ($_SESSION['sso_mode'] ?? '')
+        || !$identity) {
         $_SESSION = [];
         if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
+        clearSsoBrowserCookie();
         if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/api/')) {
             jsonResponse(['error' => ['code' => 'UNAUTHENTICATED', 'message' => 'Silakan masuk kembali.']], 401);
+        }
+        if ($promotedToTeacher) {
+            header('Location: ' . SSO_FRONTEND_URL, true, 303);
+            exit;
         }
         header('Location: /?route=/login', true, 303);
         exit;

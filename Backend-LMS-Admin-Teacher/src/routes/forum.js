@@ -20,6 +20,9 @@ const courseCodeSchema = z.string().trim().min(2).max(30);
 const sessionCodeSchema = z.string().trim().min(1).max(50);
 const roleOf = req => req.user?.role;
 const isEmployee = req => ['admin', 'teacher'].includes(roleOf(req));
+const studentAccountType = req => req.user?.mode === 'teacher_student' && req.user?.source_role === 'teacher'
+  ? 'teacher_shadow'
+  : 'student';
 
 function trustedWriteOrigin(req, res, next) {
   const origin = req.get('origin');
@@ -42,12 +45,12 @@ async function canAccessCourse(req, courseCode) {
         AND EXISTS(SELECT 1 FROM dbo.employee_accounts ea WHERE ea.employee_npk=@npk AND ea.role=@role AND ea.status='active')`);
     return result.recordset.length > 0;
   }
-  if (roleOf(req) === 'student') return studentHasCourseAccess(Number(req.user.student_id), courseCode);
+  if (roleOf(req) === 'student') return studentHasCourseAccess(Number(req.user.student_id), courseCode, studentAccountType(req));
   return false;
 }
 
 async function canAccessSession(req, courseCode, sessionCode) {
-  if (roleOf(req) === 'student') return studentHasSessionAccess(Number(req.user.student_id), courseCode, sessionCode);
+  if (roleOf(req) === 'student') return studentHasSessionAccess(Number(req.user.student_id), courseCode, sessionCode, studentAccountType(req));
   if (!isEmployee(req)) return false;
   const result = await pool.request().input('course', sql.VarChar(30), courseCode)
     .input('session', sql.VarChar(50), sessionCode)

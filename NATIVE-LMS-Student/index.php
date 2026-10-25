@@ -27,6 +27,7 @@ $router->add('/', 'DX_LMS_M_Auth@login');
 $router->add('/login', 'DX_LMS_M_Auth@login');
 $router->add('/auth/process', 'DX_LMS_M_Auth@processLogin');
 $router->add('/auth/logout', 'DX_LMS_M_Auth@logout');
+$router->add('/auth/teacher-mode', 'DX_LMS_M_Auth@teacherMode');
 $routes = studentRouteCatalog();
 foreach ($routes as $path => $action) $router->add($path, $action);
 

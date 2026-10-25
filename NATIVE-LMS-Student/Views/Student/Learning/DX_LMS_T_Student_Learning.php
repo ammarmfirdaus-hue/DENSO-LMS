@@ -174,13 +174,17 @@ $isVideoEmbed = $materialType === 'video'
 
     <!-- Progress Indicator (Di bawah header standar) -->
     <div class="fixed top-14 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] bg-slate-100 h-1 z-30 transition-all duration-300">
-        <?php $progressPercent = (($materialIndex + 1) / $totalMaterials) * 100; ?>
+        <?php $progressPercent = !empty($isLiveCourse)
+            ? max(0, min(100, (int) ($course['progress'] ?? 0)))
+            : ((($displayMaterialIndex ?? ($materialIndex + 1)) / max(1, ($totalCourseMaterials ?? $totalMaterials))) * 100); ?>
         <div class="bg-primary h-full transition-all duration-500 ease-out" style="width: <?= $progressPercent ?>%;"></div>
     </div>
 
     <!-- Main Content Area -->
     <main class="flex-1 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] mt-[60px] mb-[72px] sm:mb-[80px] bg-slate-50 overflow-y-auto content-scroll relative flex flex-col items-center transition-all duration-300">
         <div class="w-full xl:max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col fade-in pb-10">
+            <?php if (!empty($completionError)): ?><p role="alert" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><?= e($completionError) ?></p><?php endif; ?>
+            <?php if (($_GET['completed'] ?? '') === '1'): ?><p role="status" class="mt-4 rounded-xl border border-outline/50 bg-white p-3 text-sm text-on-surface"><span class="material-symbols-outlined mr-1 align-middle text-primary">check_circle</span>Materi ditandai selesai. Lanjutkan ke materi berikutnya.</p><?php endif; ?>
             <?php if ($materialType === 'video'): ?>
             <!-- Video Container -->
             <div class="w-full aspect-video bg-slate-900 sm:rounded-b-2xl shadow-xl overflow-hidden">
@@ -218,7 +222,7 @@ $isVideoEmbed = $materialType === 'video'
                 <div class="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed font-body-md border-t border-slate-100 pt-6 !text-justify">
                     <p class="text-[17px] text-slate-700">Simak video pembelajaran berikut untuk memahami materi <strong><?= e(
                         $material['title'],
-                    ) ?></strong> secara visual. Pastikan Anda memperhatikan setiap detail karena poin-poin penting akan diujikan pada Post-Test sesi ini.</p>
+                    ) ?></strong> secara visual. Pastikan Anda memperhatikan setiap detail agar materi dapat dipahami dengan baik.</p>
 
                     <div class="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
                         <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -415,7 +419,7 @@ $isVideoEmbed = $materialType === 'video'
             <div class="mt-2 sm:mt-4 mb-6 mx-4 sm:mx-0">
                 <div class="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 rounded-2xl p-3 sm:p-5 flex items-center justify-between transition-all hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
 
-                    <?php if ($materialIndex === 0 && !$isCompleted): ?>
+                    <?php if (($isFirstCourseMaterial ?? ($materialIndex === 0)) && !$isCompleted): ?>
                     <a href="<?= e($prevUrl) ?>" class="group flex items-center justify-center px-3 py-2.5 sm:px-5 sm:py-2.5 rounded-xl hover:bg-slate-50 transition-all duration-300 active:scale-95 text-slate-600 font-semibold opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">
                         <span class="material-symbols-outlined text-[20px] mr-1.5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
                         <span class="hidden sm:inline">Materi Sebelumnya</span>
@@ -424,7 +428,7 @@ $isVideoEmbed = $materialType === 'video'
                     <?php else: ?>
                     <a href="<?= e($prevUrl) ?>" class="group flex items-center justify-center px-3 py-2.5 sm:px-5 sm:py-2.5 rounded-xl hover:bg-slate-50 transition-all duration-300 active:scale-95 text-slate-600 font-semibold">
                         <span class="material-symbols-outlined text-[20px] mr-1.5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
-                        <?php if ($materialIndex === 0 && $isCompleted): ?>
+                        <?php if (($isFirstCourseMaterial ?? ($materialIndex === 0)) && $isCompleted): ?>
                         <span class="hidden sm:inline">Kembali ke Riwayat</span>
                         <span class="sm:hidden">Riwayat</span>
                         <?php else: ?>
@@ -436,22 +440,30 @@ $isVideoEmbed = $materialType === 'video'
 
                     <div class="flex items-center justify-center px-2">
                         <div class="font-bold text-slate-800 text-[14px] sm:text-[15px] whitespace-nowrap bg-slate-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-slate-100">
-                            <span class="hidden sm:inline">Materi </span><span class="text-primary text-[16px] sm:text-[18px] mx-0.5"><?= $materialIndex +
-                                1 ?></span>
-                            <span class="text-slate-400 font-medium text-[13px] sm:text-[14px] mx-1">/</span> <?= $totalMaterials ?>
+                            <span class="hidden sm:inline">Materi </span><span class="text-primary text-[16px] sm:text-[18px] mx-0.5"><?= $displayMaterialIndex ?? ($materialIndex + 1) ?></span>
+                            <span class="text-slate-400 font-medium text-[13px] sm:text-[14px] mx-1">/</span> <?= $totalCourseMaterials ?? $totalMaterials ?>
                         </div>
                     </div>
 
+                    <?php if (!empty($isLiveCourse) && !$materialIsCompleted && !$isCompleted): ?>
+                    <form method="post" action="?route=/student/learning&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;session_id=<?= rawurlencode((string) $session['id']) ?>&amp;material_index=<?= (int) $materialIndex ?>">
+                        <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
+                        <button type="submit" class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-semibold text-white transition-all hover:bg-primary/90 active:scale-95 sm:px-6"><span class="material-symbols-outlined text-[20px]">task_alt</span><span>Tandai selesai</span></button>
+                    </form>
+                    <?php else: ?>
                     <a href="<?= e($nextUrl) ?>" class="group flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 active:scale-95 font-semibold">
-                        <?php if ($materialIndex === $totalMaterials - 1): ?>
+                        <?php if (($isLastCourseMaterial ?? ($materialIndex === $totalMaterials - 1))): ?>
                         <?php if ($isCompleted): ?>
                         <span class="hidden sm:inline">Kembali ke Riwayat</span>
                         <span class="sm:hidden">Riwayat</span>
                         <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">history</span>
+                        <?php elseif (!empty($isLiveCourse)): ?>
+                        <span>Lanjut ke Quiz</span>
+                        <span class="material-symbols-outlined text-[20px] ml-1.5">quiz</span>
                         <?php else: ?>
-                        <span class="hidden sm:inline">Selesai &amp; Post-Test</span>
-                        <span class="sm:hidden">Post-Test</span>
-                        <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">assignment_turned_in</span>
+                        <span class="hidden sm:inline">Kembali ke Course</span>
+                        <span class="sm:hidden">Course</span>
+                        <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         <?php endif; ?>
                         <?php else: ?>
                         <span class="hidden sm:inline">Materi Selanjutnya</span>
@@ -459,6 +471,7 @@ $isVideoEmbed = $materialType === 'video'
                         <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         <?php endif; ?>
                     </a>
+                    <?php endif; ?>
 
                 </div>
             </div>

@@ -2,6 +2,8 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
+import JobsCenter from '../components/JobsCenter';
+import showAlert from '../utils/alert';
 
 export default function AppLayout({ user: initialUser, onLogout }) {
   const { pathname } = useLocation();
@@ -24,6 +26,8 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         ? 'Detail Course'
         : pathname === '/materials'
           ? 'Materi & Persetujuan'
+        : pathname === '/quizzes'
+          ? 'Kelola Quiz'
           : pathname === '/activity'
             ? 'Aktivitas'
             : pathname === '/grades'
@@ -35,8 +39,17 @@ export default function AppLayout({ user: initialUser, onLogout }) {
                 : pathname === '/reviewers'
                   ? 'Kelola Reviewer'
                   : pathname === '/users'
-                    ? 'Manajemen Pengguna'
+                    ? 'Kelola Pengguna'
+                    : pathname === '/enrollments'
+                      ? 'Persetujuan Course'
                     : 'Dashboard';
+
+  async function enterStudentMode() {
+    try {
+      const result = await api('/auth/student-mode', { method: 'POST', body: '{}' });
+      window.location.assign(result.redirectUrl);
+    } catch (error) { showAlert.error('Mode Belajar Tidak Dapat Dibuka', error.message); }
+  }
 
   function toggleDesktopSidebar() {
     setDesktopCollapsed(prev => {
@@ -116,6 +129,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            {user?.role === 'teacher' && <button type="button" onClick={enterStudentMode} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-primary/30 bg-white px-3 text-xs font-semibold text-primary hover:bg-primary/5 sm:text-sm"><span className="material-symbol" aria-hidden="true">school</span><span className="hidden sm:inline">Mode Belajar</span></button>}
             <span className="hidden text-xs font-medium text-muted md:block">
               Selamat datang, <strong className="text-secondary dark:text-slate-100">{user?.name}</strong>
             </span>
@@ -134,6 +148,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
           <Outlet context={user} />
         </main>
       </div>
+      <JobsCenter role={user?.role} />
     </div>
   );
 }
