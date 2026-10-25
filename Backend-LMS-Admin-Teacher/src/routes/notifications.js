@@ -177,7 +177,7 @@ router.post('/', allowRoles('admin', 'teacher'), trustedWriteOrigin, sendLimiter
       await transaction.commit();
     } catch (error) { await transaction.rollback().catch(() => {}); throw error; }
 
-    publishNotificationEvent({ roles: targetRoles });
+    publishNotificationEvent({ roles: targetRoles, type: 'notification_created' });
     res.status(201).json({
       created: targetRoles.length,
       recipients: targetRoles.map(audienceLabel),

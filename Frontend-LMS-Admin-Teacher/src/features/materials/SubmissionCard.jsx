@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const statusLabel = {
@@ -8,295 +9,161 @@ const statusLabel = {
   published: 'Terbit untuk student'
 };
 
-function statusStyle(status) {
-  if (status === 'approved' || status === 'published') return 'bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950/30 dark:text-emerald-300';
-  if (status === 'rejected') return 'bg-red-50 text-red-800 ring-red-600/20 dark:bg-red-950/30 dark:text-red-300';
-  if (status === 'pending_review') return 'bg-blue-50 text-blue-800 ring-blue-600/20 dark:bg-blue-950/30 dark:text-blue-300';
-  return 'bg-amber-50 text-amber-900 ring-amber-600/20 dark:bg-amber-950/30 dark:text-amber-300';
-}
-
 const TYPE_ICONS = {
-  text: 'article',
-  video: 'play_circle',
-  pdf: 'picture_as_pdf',
-  image: 'image',
-  document: 'description',
-  audio: 'audiotrack',
-  link: 'link'
+  text: 'article', video: 'play_circle', pdf: 'picture_as_pdf', image: 'image',
+  document: 'description', audio: 'audiotrack', link: 'link'
 };
 
-export default function SubmissionCard({
-  item,
-  currentUser,
-  isAdmin,
-  reviewers,
-  busy,
-  onPreview,
-  onEdit,
-  onReject,
-  onSendReview,
-  onPublish,
-  onDelete
-}) {
+function statusStyle(status) {
+  if (status === 'approved' || status === 'published') return 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300';
+  if (status === 'rejected') return 'border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300';
+  if (status === 'pending_review') return 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300';
+  return 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300';
+}
+
+function externalPreview(value = '') {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return null;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    if (host === 'youtu.be' || host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      const id = host === 'youtu.be' ? url.pathname.split('/').filter(Boolean)[0] :
+        (url.searchParams.get('v') || url.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)?.[1]);
+      if (id && /^[A-Za-z0-9_-]{6,20}$/.test(id)) {
+        return { platform: 'YouTube', icon: 'smart_display', image: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, url: value };
+      }
+    }
+    if ((host === 'tiktok.com' || host.endsWith('.tiktok.com'))) {
+      const id = url.pathname.match(/\/video\/(\d+)/)?.[1];
+      return { platform: 'TikTok', icon: 'music_note', embed: id ? `https://www.tiktok.com/player/v1/${id}?description=0&music_info=0` : null, url: value };
+    }
+    if (host === 'instagram.com' || host.endsWith('.instagram.com')) {
+      const match = url.pathname.match(/^\/(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+      const pathType = match?.[1] === 'reels' ? 'reel' : match?.[1];
+      return { platform: 'Instagram', icon: 'photo_camera', embed: match ? `https://www.instagram.com/${pathType}/${match[2]}/embed/` : null, url: value };
+    }
+    return { platform: host, icon: 'link', url: value };
+  } catch { return null; }
+}
+
+function MediaCover({ item, onPreview }) {
+  const preview = externalPreview(item.content || '');
+  if (item.material_type === 'video' && item.file_path) {
+    return <button type="button" onClick={onPreview} className="group relative block aspect-video w-full overflow-hidden bg-slate-900 text-left" aria-label={`Pratinjau video ${item.title}`}>
+      <span className="absolute inset-0 grid place-items-center text-white"><span className="material-symbol grid size-14 place-items-center rounded-full bg-black/55 text-4xl" aria-hidden="true">play_arrow</span></span>
+      <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-black/65 px-3 py-2 text-xs font-medium text-white"><span className="material-symbol" aria-hidden="true">movie</span><span className="truncate">{item.original_file_name || 'File video'}</span></span>
+    </button>;
+  }
+  if (preview?.image) {
+    return <button type="button" onClick={onPreview} className="group relative block aspect-video w-full overflow-hidden bg-slate-900 text-left" aria-label={`Buka pratinjau ${preview.platform}: ${item.title}`}>
+      <img src={preview.image} alt={`Thumbnail ${item.title}`} loading="lazy" className="size-full object-cover transition duration-200 group-hover:scale-[1.02]" onError={event => { event.currentTarget.style.display = 'none'; }} />
+      <span className="absolute inset-0 grid place-items-center bg-black/15 text-white"><span className="material-symbol grid size-12 place-items-center rounded-full bg-black/60 text-3xl" aria-hidden="true">play_arrow</span></span>
+      <span className="absolute bottom-2 left-2 rounded-md bg-black/75 px-2 py-1 text-[11px] font-semibold text-white">YouTube</span>
+    </button>;
+  }
+  if (preview?.embed) {
+    return <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+      <iframe title={`${preview.platform}: ${item.title}`} src={preview.embed} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen className="size-full border-0" />
+    </div>;
+  }
+
+  const label = preview?.platform || (item.material_type === 'video' ? 'Video materi' : item.material_type === 'link' ? 'Tautan materi' : item.original_file_name || 'Konten materi');
+  const icon = preview?.icon || TYPE_ICONS[item.material_type] || 'article';
+  const color = preview?.platform === 'TikTok' ? 'bg-slate-950 text-white' : preview?.platform === 'Instagram' ? 'bg-fuchsia-700 text-white' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200';
+  return <button type="button" onClick={onPreview} className={`group flex aspect-video w-full flex-col items-center justify-center gap-2 px-4 text-center ${color}`} aria-label={`Buka pratinjau ${item.title}`}>
+    <span className="material-symbol grid size-12 place-items-center rounded-full border border-current/20 bg-white/10 text-3xl" aria-hidden="true">{icon}</span>
+    <span className="max-w-full truncate text-xs font-semibold">{label}</span>
+    {preview?.url && <span className="max-w-full truncate text-[10px] opacity-80">Buka pratinjau materi</span>}
+  </button>;
+}
+
+const smallButton = 'inline-flex h-10 min-w-0 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-xs !text-xs !leading-none font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50';
+
+export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, busy, onPreview, onEdit, onReject, onSendReview, onPublish, onDelete }) {
+  const [reviewerEmail, setReviewerEmail] = useState('');
   const isSubmitter = item.submitted_by === currentUser?.npk;
   const canTeacherEdit = !isAdmin && isSubmitter && item.status === 'rejected';
   const canAdminEdit = isAdmin && (item.status === 'pending_admin' || item.status === 'rejected');
   const canEdit = canAdminEdit || canTeacherEdit;
   const canDeleteSubmission = isAdmin || (isSubmitter && item.status !== 'pending_review');
+  const plainText = item.material_type === 'text' ? (item.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+  const chosenReviewer = reviewers.find(reviewer => reviewer.email === reviewerEmail);
 
   return (
-    <article className="flex min-w-0 flex-col rounded-2xl border border-outline/50 bg-white dark:bg-slate-900 p-4 transition hover:border-primary/40 hover:shadow-xs">
-      <div className="flex h-full min-w-0 flex-col gap-3">
-        <div className="min-w-0 flex-1 space-y-2.5">
-          
-          {/* Header: Type icon, title, status badge */}
-          <div className="flex items-start gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-              <span className="material-symbol text-lg" aria-hidden="true">
-                {TYPE_ICONS[item.material_type] || 'article'}
-              </span>
+    <article className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-outline/60 bg-white shadow-sm transition hover:border-primary/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+      <MediaCover item={item} onPreview={onPreview} />
+      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-outline/50 bg-slate-50 text-secondary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            <span className="material-symbol text-xl" aria-hidden="true">{TYPE_ICONS[item.material_type] || 'article'}</span>
+          </span>
+          <div className="min-w-0 flex-1">
+            <Link to={`/courses/${item.course_id}`} className="block break-words text-sm font-bold leading-5 text-on-surface hover:text-primary" title={item.title}>{item.title}</Link>
+            <span className={`mt-2 inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusStyle(item.status)}`}>
+              <span className="truncate">{statusLabel[item.status] || item.status}</span>
             </span>
-            <div className="min-w-0 flex-1">
-              <Link
-                to={`/courses/${item.course_id}`}
-                className="block font-bold text-sm text-on-surface hover:text-primary transition line-clamp-1"
-                title={item.title}
-              >
-                {item.title}
-              </Link>
-              <span className={`inline-block mt-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ring-inset ${statusStyle(item.status)}`}>
-                {statusLabel[item.status] || item.status}
-              </span>
-            </div>
           </div>
-
-          {/* Course & Session info */}
-          <div>
-            <p className="text-xs font-semibold text-secondary dark:text-slate-200 line-clamp-1" title={`${item.course_title || 'Course'} / ${item.session_title || 'Sesi'}`}>
-              {item.course_title || 'Course'} <span className="px-1 text-outline">/</span> {item.session_title || 'Sesi'}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted">
-              Tipe: <span className="font-semibold uppercase text-secondary dark:text-slate-300">{item.material_type}</span> <span className="px-0.5">·</span> diajukan oleh {item.submitter_name || item.submitted_by}
-            </p>
-            {item.reviewer_name && (
-              <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                Reviewer: <span className="font-bold">{item.reviewer_name}</span>
-              </p>
-            )}
-          </div>
-
-          {/* Compact Content Preview Strip */}
-          <div className="rounded-xl border border-outline/40 bg-surface-low/40 dark:bg-slate-800/40 p-2.5 text-xs">
-            {item.material_type === 'video' && (
-              item.content ? (
-                <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                  <span className="material-symbol text-base text-red-600 shrink-0">smart_display</span>
-                  <span className="truncate">YouTube: {item.content}</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                  <span className="material-symbol text-base text-indigo-600 shrink-0">movie</span>
-                  <span className="truncate">{item.original_file_name || 'File Video MP4'}</span>
-                </div>
-              )
-            )}
-
-            {item.material_type === 'text' && (
-              <div className="flex items-start gap-1.5 text-[11px] text-secondary dark:text-slate-300">
-                <span className="material-symbol text-base text-emerald-600 shrink-0">article</span>
-                <p className="line-clamp-2 italic text-muted">
-                  {item.content ? item.content.replace(/<[^>]+>/g, ' ').slice(0, 100) : 'Konten teks TinyMCE.'}
-                </p>
-              </div>
-            )}
-
-            {item.material_type === 'pdf' && (
-              <div className="flex items-center justify-between gap-2 text-[11px]">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="material-symbol text-base text-red-600 shrink-0">picture_as_pdf</span>
-                  <span className="truncate font-medium text-slate-800 dark:text-slate-200">
-                    {item.original_file_name || 'Dokumen PDF'}
-                  </span>
-                </div>
-                <span className="text-[10px] font-bold text-red-600 dark:text-red-400 shrink-0">PDF</span>
-              </div>
-            )}
-
-            {item.material_type === 'image' && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                <span className="material-symbol text-base text-amber-600 shrink-0">image</span>
-                <span className="truncate">{item.original_file_name || 'File Gambar'}</span>
-              </div>
-            )}
-
-            {item.material_type === 'document' && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                <span className="material-symbol text-base text-blue-600 shrink-0">description</span>
-                <span className="truncate">{item.original_file_name || 'Dokumen Office / ODF'}</span>
-              </div>
-            )}
-
-            {item.material_type === 'audio' && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                <span className="material-symbol text-base text-purple-600 shrink-0">audiotrack</span>
-                <span className="truncate">{item.original_file_name || 'File Audio'}</span>
-              </div>
-            )}
-
-            {item.material_type === 'link' && (
-              <div className="flex items-center gap-1.5 text-[11px] text-teal-700 dark:text-teal-400">
-                <span className="material-symbol text-base shrink-0">link</span>
-                <span className="truncate">{item.content}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Admin & Reviewer Notes */}
-          {item.reviewer_comment && (
-            <div className="rounded-lg border border-red-200 bg-red-50/80 dark:border-red-900/40 dark:bg-red-950/20 px-2.5 py-1.5 text-[11px] text-red-900 dark:text-red-300">
-              <span className="font-bold">Catatan Reviewer: </span>{item.reviewer_comment}
-            </div>
-          )}
-          {item.admin_comment && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/20 px-2.5 py-1.5 text-[11px] text-amber-900 dark:text-amber-300">
-              <span className="font-bold">Catatan Admin: </span>{item.admin_comment}
-            </div>
-          )}
-
-          {/* Lock indicator */}
-          {!isAdmin && item.status === 'pending_admin' && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/70 p-2 text-[11px] font-semibold text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/25 dark:text-amber-300">
-              <span className="material-symbol text-sm shrink-0">lock</span>
-              <span>Menunggu persetujuan Admin</span>
-            </div>
-          )}
-          {item.status === 'pending_review' && (
-            <div className="flex items-start gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 p-2 text-[11px] font-semibold text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/25 dark:text-blue-300">
-              <span className="material-symbol text-sm shrink-0 mt-0.5">lock_clock</span>
-              <span>Materi Terkunci: Sedang ditinjau Reviewer {item.reviewer_name ? `(${item.reviewer_name})` : ''}. Materi terkunci dari perubahan sampai ada evaluasi.</span>
-            </div>
-          )}
-          {item.status === 'rejected' && (
-            <div className="flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50/70 p-2 text-[11px] font-semibold text-red-900 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
-              <span className="material-symbol text-sm shrink-0 mt-0.5">assignment_late</span>
-              <span>Perlu perbaikan sebelum diajukan kembali.</span>
-            </div>
-          )}
-
         </div>
 
-        {/* Action Buttons Footer */}
-        <div className="mt-auto flex min-w-0 flex-col gap-2 pt-2 border-t border-outline/30">
-          {/* Tombol Pratinjau Lengkap */}
-          <button
-            type="button"
-            onClick={onPreview}
-            className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-xl bg-surface-low border border-outline/70 px-3 py-1.5 text-xs font-bold text-secondary transition hover:bg-primary/10 hover:border-primary/40 hover:text-primary cursor-pointer"
-          >
-            <span className="material-symbol text-base text-primary" aria-hidden="true">visibility</span>
-            Lihat Pratinjau &amp; Detail
-          </button>
+        <div className="mt-4 space-y-2 border-t border-outline/40 pt-3 dark:border-slate-700">
+          <div className="flex items-start gap-2 text-xs">
+            <span className="material-symbol mt-0.5 text-sm text-muted" aria-hidden="true">menu_book</span>
+            <p className="min-w-0 break-words font-semibold text-secondary dark:text-slate-200">{item.course_title || 'Course'} <span className="px-1 text-muted">/</span> {item.session_title || 'Sesi'}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-muted">
+            <span className="material-symbol text-sm" aria-hidden="true">person</span>
+            <span>Diajukan oleh</span><span className="break-all font-medium text-secondary dark:text-slate-300">{item.submitter_name || item.submitted_by}</span>
+            {item.reviewer_name && <><span aria-hidden="true">·</span><span>Reviewer: <strong className="text-secondary dark:text-slate-300">{item.reviewer_name}</strong></span></>}
+          </div>
+          {plainText && <p className="line-clamp-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-muted dark:bg-slate-800">{plainText}</p>}
+          {item.original_file_name && !['video', 'text'].includes(item.material_type) && <p className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-secondary dark:bg-slate-800 dark:text-slate-300"><span className="material-symbol shrink-0 text-base" aria-hidden="true">{TYPE_ICONS[item.material_type] || 'description'}</span><span className="truncate">{item.original_file_name}</span></p>}
+        </div>
 
-          {/* Edit Button */}
-          {canEdit && (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-xl border border-primary/50 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-primary/10 cursor-pointer"
-            >
-              <span className="material-symbol text-base" aria-hidden="true">edit</span>
-              {item.status === 'rejected' ? 'Perbaiki & Ajukan Ulang' : 'Edit Materi'}
+        {item.reviewer_comment && <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"><strong>Catatan Reviewer: </strong>{item.reviewer_comment}</div>}
+        {item.admin_comment && <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"><strong>Catatan Admin: </strong>{item.admin_comment}</div>}
+
+        {item.status === 'pending_admin' && !isAdmin && <p className="mt-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"><span className="material-symbol" aria-hidden="true">lock</span>Menunggu persetujuan Admin</p>}
+        {item.status === 'pending_review' && <p className="mt-3 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs leading-5 font-medium text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200"><span className="material-symbol mt-0.5" aria-hidden="true">lock_clock</span><span>Materi terkunci selama ditinjau Reviewer{item.reviewer_name ? ` (${item.reviewer_name})` : ''}.</span></p>}
+        {item.status === 'rejected' && <p className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"><span className="material-symbol" aria-hidden="true">assignment_late</span>Perlu diperbaiki sebelum diajukan kembali.</p>}
+
+        <div className="mt-auto border-t border-outline/40 pt-4 dark:border-slate-700">
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={onPreview} className={`${smallButton} border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700`}>
+              <span className="material-symbol !text-base" aria-hidden="true">visibility</span><span className="truncate">Pratinjau</span>
             </button>
-          )}
 
-          {/* Admin Reject Button */}
-          {isAdmin && item.status === 'pending_admin' && (
-            <button
-              type="button"
-              onClick={onReject}
-              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100 cursor-pointer"
-            >
-              <span className="material-symbol text-base" aria-hidden="true">cancel</span>
-              Tolak / Minta Revisi
-            </button>
-          )}
+            {canEdit && <button type="button" onClick={onEdit} className={`${smallButton} border-primary bg-primary text-white hover:bg-red-700`}>
+              <span className="material-symbol !text-base" aria-hidden="true">edit</span><span className="truncate">{item.status === 'rejected' ? 'Perbaiki' : 'Edit'}</span>
+            </button>}
+          </div>
 
-          {/* Admin Send to Reviewer Form */}
-          {isAdmin && item.status === 'pending_admin' && (
-            <form onSubmit={onSendReview} className="rounded-xl bg-surface-low/70 p-2.5">
-              <label htmlFor={`reviewer-select-${item.submission_id}`} className="block text-[11px] font-bold text-secondary">
-                Kirim ke Reviewer
-              </label>
-              <div className="mt-1.5 flex flex-col gap-1.5">
-                {reviewers.length > 0 ? (
-                  <select
-                    id={`reviewer-select-${item.submission_id}`}
-                    name="reviewerEmail"
-                    required
-                    className="h-8 min-w-0 rounded-lg border border-outline/70 bg-white px-2 text-xs outline-none transition focus:border-primary dark:bg-slate-900"
-                  >
-                    <option value="">-- Pilih Reviewer --</option>
-                    {reviewers.map(r => (
-                      <option key={r.employee_npk} value={r.email}>
-                        {r.fullname} {r.position ? `(${r.position})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    id={`reviewer-email-${item.submission_id}`}
-                    name="reviewerEmail"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    maxLength="254"
-                    placeholder="reviewer@denso.co.id"
-                    className="h-8 min-w-0 rounded-lg border border-outline/70 bg-white px-2.5 text-xs outline-none transition placeholder:text-muted/70 focus:border-primary dark:bg-slate-900"
-                  />
-                )}
-                <button
-                  disabled={busy}
-                  className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg bg-secondary px-3 py-1 text-xs font-bold text-white transition hover:bg-[#242c33] disabled:opacity-50 cursor-pointer"
-                >
-                  <span className="material-symbol text-sm" aria-hidden="true">mail</span>
-                  Kirim link review
-                </button>
-              </div>
-            </form>
-          )}
+          {isAdmin && item.status === 'pending_admin' && <button type="button" onClick={onReject} className={`${smallButton} mt-2 !w-fit border-red-700 bg-red-700 px-3 text-white hover:bg-red-800`}>
+            <span className="material-symbol !text-base" aria-hidden="true">assignment_return</span><span>Minta revisi</span>
+          </button>}
 
-          {/* Admin Publish Button */}
-          {isAdmin && item.status === 'approved' && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onPublish}
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-white shadow-xs transition hover:brightness-110 disabled:opacity-50 cursor-pointer"
-            >
-              <span className="material-symbol text-base" aria-hidden="true">cloud_upload</span>
-              Unggah ke Database Student
-            </button>
-          )}
-
-          {/* Status Published Indicator */}
-          {item.status === 'published' && (
-            <div className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
-              <span className="material-symbol text-base" aria-hidden="true">check_circle</span>
-              Telah terbit ke student
+          {isAdmin && item.status === 'pending_admin' && <form onSubmit={onSendReview} className="mt-2 rounded-xl border border-outline/50 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/70">
+            <label htmlFor={`reviewer-select-${item.submission_id}`} className="block text-xs font-semibold text-secondary dark:text-slate-200">Kirim ke Reviewer</label>
+            <div className="mt-2 flex min-w-0 flex-col gap-2 sm:flex-row">
+              {reviewers.length > 0 ? <select id={`reviewer-select-${item.submission_id}`} name="reviewerEmail" required value={reviewerEmail} onChange={event => setReviewerEmail(event.target.value)} className="h-10 min-w-0 flex-1 rounded-lg border border-outline/70 bg-white px-3 text-xs text-secondary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                <option value="">Pilih reviewer...</option>{reviewers.map(reviewer => <option key={reviewer.employee_npk} value={reviewer.email}>{reviewer.fullname}{reviewer.position ? ` (${reviewer.position})` : ''}</option>)}
+              </select> : <input id={`reviewer-email-${item.submission_id}`} name="reviewerEmail" type="email" autoComplete="email" required maxLength="254" placeholder="reviewer@denso.co.id" value={reviewerEmail} onChange={event => setReviewerEmail(event.target.value)} className="h-10 min-w-0 flex-1 rounded-lg border border-outline/70 bg-white px-3 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />}
+              <button type="submit" disabled={busy} className={`${smallButton} !w-fit shrink-0 border-slate-800 bg-slate-800 px-3 text-white hover:bg-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600`}><span className="material-symbol !text-base" aria-hidden="true">send</span><span>Kirim</span></button>
             </div>
-          )}
+            {(chosenReviewer || (reviewers.length === 0 && reviewerEmail.trim())) && <p role="status" className="mt-2 flex min-w-0 items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
+              <span className="material-symbol mt-0.5 shrink-0 text-base" aria-hidden="true">check_circle</span>
+              <span className="min-w-0 break-all"><strong>{chosenReviewer ? 'Reviewer dipilih: ' : 'Email reviewer: '}</strong>{chosenReviewer ? `${chosenReviewer.fullname} · ${chosenReviewer.email}` : reviewerEmail.trim()}</span>
+            </p>}
+          </form>}
 
-          {/* Delete unapproved submission */}
-          {canDeleteSubmission && item.status !== 'published' && (
-            <button
-              type="button"
-              onClick={onDelete}
-              className="inline-flex items-center justify-center gap-1 text-[11px] font-semibold text-red-600 hover:text-red-800 hover:underline pt-0.5 cursor-pointer"
-            >
-              <span className="material-symbol text-sm" aria-hidden="true">delete</span>
-              Hapus pengajuan ini
-            </button>
-          )}
+          {isAdmin && item.status === 'approved' && <button type="button" disabled={busy} onClick={onPublish} className={`${smallButton} mt-2 !w-fit border-emerald-700 bg-emerald-700 px-3 text-white hover:bg-emerald-800`}>
+            <span className="material-symbol !text-base" aria-hidden="true">publish</span><span>Terbitkan</span>
+          </button>}
+
+          {item.status === 'published' && <p className="mt-2 flex min-h-9 items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"><span className="material-symbol" aria-hidden="true">check_circle</span>Telah terbit ke Student</p>}
+
+          {canDeleteSubmission && item.status !== 'published' && <button type="button" onClick={onDelete} className="mt-2 inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold !text-xs !leading-none text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/30 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950">
+            <span className="material-symbol !text-base" aria-hidden="true">delete</span><span>Hapus pengajuan</span>
+          </button>}
         </div>
       </div>
     </article>

@@ -24,6 +24,7 @@ const { closeStudentAuthPool } = require('./services/student-auth');
 const { startNotificationMailWorker } = require('./services/notification-mail');
 const { registerJobHandler, startAdminJobWorker } = require('./services/admin-jobs');
 const { registerUserJobHandler } = require('./services/user-job-handler');
+const { registerRecordDeleteJobHandler } = require('./services/record-delete-job-handler');
 const { closeQuizStore } = require('./services/quiz-store');
 
 const app = express();
@@ -79,6 +80,7 @@ async function start() {
 
   stopNotificationMail = startNotificationMailWorker();
   registerUserJobHandler(registerJobHandler);
+  registerRecordDeleteJobHandler(registerJobHandler);
   stopAdminJobs = await startAdminJobWorker();
 
   // Student sync is an optional integration. A missing Student DB credential

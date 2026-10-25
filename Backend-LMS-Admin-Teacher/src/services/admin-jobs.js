@@ -104,7 +104,7 @@ async function processJob(job) {
       .query(`UPDATE dbo.lms_admin_jobs SET current_item=@current,updated_at=SYSUTCDATETIME() WHERE job_id=@id`);
     await appendEvent(job.job_id, itemNo, label, 'processing', 'Sedang diproses.');
     try {
-      const message = await handler(item, { ownerNpk: job.created_by, jobId: job.job_id });
+      const message = await handler(item, { ownerNpk: job.created_by, ownerRole: job.created_by_role, jobId: job.job_id });
       successes += 1;
       await updateJobAfterItem(job, items, label, 'completed', message || 'Selesai.', successes, failures);
     } catch (error) {

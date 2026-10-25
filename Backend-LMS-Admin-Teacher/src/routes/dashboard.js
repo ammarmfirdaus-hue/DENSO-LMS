@@ -2,6 +2,7 @@ const express = require('express');
 const { sql, pool } = require('../config/database');
 const { authenticate, allowRoles } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
+const { getActivityFeed } = require('../services/activity-feed');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin', 'teacher'));
@@ -37,12 +38,58 @@ router.get('/courses', async (_req, res, next) => {
   } catch (error) { next(error); }
 });
 
+const activeActivityStreams = new Map();
+router.get('/activity/events', async (req, res, next) => {
+  const streamKey = `${req.user.role}:${req.user.sub}`;
+  const current = activeActivityStreams.get(streamKey) || 0;
+  if (current >= 2) return res.status(429).json({ error: { code: 'STREAM_LIMIT', message: 'Batas koneksi aktivitas realtime tercapai.' } });
+  try {
+    const initial = await getActivityFeed(req.user.role, 1);
+    let lastActivityKey = initial[0]?.activity_id || '';
+    activeActivityStreams.set(streamKey, current + 1);
+    res.status(200).set({
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+    res.flushHeaders?.();
+    res.write('event: ready\ndata: {}\n\n');
+
+    let checking = false;
+    const poll = async () => {
+      if (checking || res.writableEnded) return;
+      checking = true;
+      try {
+        const latest = (await getActivityFeed(req.user.role, 1))[0];
+        if (latest && latest.activity_id !== lastActivityKey) {
+          lastActivityKey = latest.activity_id;
+          res.write(`id: ${latest.activity_id}\nevent: activity\ndata: ${JSON.stringify(latest)}\n\n`);
+        }
+      } catch (error) {
+        console.warn('[activity-feed] Realtime check failed:', error.message);
+      } finally { checking = false; }
+    };
+    const pollTimer = setInterval(poll, 4000);
+    const heartbeat = setInterval(() => res.write(': keep-alive\n\n'), 25000);
+    const remainingSessionMs = Math.max(1000, ((Number(req.user.exp) || Math.floor(Date.now() / 1000) + 8 * 60 * 60) * 1000) - Date.now());
+    const expiry = setTimeout(() => res.end(), remainingSessionMs);
+    res.on('close', () => {
+      clearInterval(pollTimer);
+      clearInterval(heartbeat);
+      clearTimeout(expiry);
+      const nextCount = Math.max(0, (activeActivityStreams.get(streamKey) || 1) - 1);
+      if (nextCount) activeActivityStreams.set(streamKey, nextCount);
+      else activeActivityStreams.delete(streamKey);
+    });
+  } catch (error) { next(error); }
+});
+
 router.get('/activity', async (_req, res, next) => {
   try {
-    const request = pool.request().input('isAdmin', sql.Bit, _req.user.role === 'admin').input('npk', sql.VarChar(50), _req.user.sub);
-    const result = await request.query(`SELECT TOP 10 activity_id, activity_type, description, created_at
-      FROM dbo.activity_logs WHERE (@isAdmin=1 OR employee_npk=@npk) ORDER BY created_at DESC`);
-    const page = paginateCollection(_req, result.recordset);
+    const activities = await getActivityFeed(_req.user.role, 100);
+    const page = paginateCollection(_req, activities);
+    res.set('Cache-Control', 'private, no-store');
     res.json({ activities: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });

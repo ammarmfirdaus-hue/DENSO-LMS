@@ -76,7 +76,7 @@ router.post('/:requestId/decision', allowRoles('admin'), trustedStaffOrigin, asy
         .input('senderName', sql.NVarChar(150), String(req.user.name || req.user.sub).slice(0, 150))
         .query(`INSERT INTO dbo.lms_notifications(audience_role,recipient_npk,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested)
           VALUES('student',@npk,@title,@message,'course','important',@senderNpk,'admin',@senderName,0)`);
-      publishNotificationEvent({ roles: ['student'], recipientNpk: decision.studentNpk });
+      publishNotificationEvent({ roles: ['student'], recipientNpk: decision.studentNpk, type: 'notification_created' });
     } catch (notificationError) {
       console.error('Course enrollment decision notification failed:', notificationError.code || 'NOTIFICATION_ERROR');
     }

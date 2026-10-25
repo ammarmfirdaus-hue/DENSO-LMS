@@ -144,7 +144,7 @@ $isVideoEmbed = $materialType === 'video'
         .tinymce-content strong,.tinymce-content b { font-weight: 700; }
         .tinymce-content em,.tinymce-content i { font-style: italic; }
         .tinymce-content blockquote { border-left: 4px solid #d71920; padding-left: 1rem; color: #475569; font-style: italic; margin: .8em 0; }
-        .tinymce-content table { border-collapse: collapse; width: 100%; margin: .8em 0; font-size: .9em; }
+        .tinymce-content table { display: block; border-collapse: collapse; width: max-content; min-width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; margin: .8em 0; font-size: .9em; }
         .tinymce-content td,.tinymce-content th { border: 1px solid #e2e8f0; padding: 8px 12px; }
         .tinymce-content th { background: #f8fafc; font-weight: 600; }
         .tinymce-content img { max-width: 100%; border-radius: .5rem; }

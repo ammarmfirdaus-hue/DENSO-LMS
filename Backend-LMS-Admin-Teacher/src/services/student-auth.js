@@ -123,6 +123,21 @@ async function getStudentIdentity(studentId) {
   return rows[0] || null;
 }
 
+async function listStudentActivityLogs(limit = 100) {
+  const studentPool = getStudentManagementPool();
+  const safeLimit = Math.max(1, Math.min(100, Number(limit) || 100));
+  const [rows] = await studentPool.query(
+    `SELECT a.activity_id, a.activity_type, a.description, a.created_at,
+        s.npk AS employee_npk, s.fullname AS actor_name, 'student' AS actor_role
+     FROM activity_logs a
+     JOIN student_accounts s ON s.student_id=a.student_id
+     WHERE s.account_type='student'
+     ORDER BY a.created_at DESC, a.activity_id DESC
+     LIMIT ${safeLimit}`
+  );
+  return rows;
+}
+
 async function listActiveStudentRecipients(limit = 5001) {
   const studentPool = getStudentPool();
   if (!studentPool) {
@@ -315,4 +330,4 @@ async function closeStudentAuthPool() {
   await Promise.all(pools.map(activePool => activePool.end()));
 }
 
-module.exports = { authenticateStudent, isStudentSessionActive, studentHasCourseAccess, studentHasSessionAccess, getStudentIdentity, listActiveStudentRecipients, getActiveStudentRecipient, createStudentAccount, listStudentAccounts, updateStudentAccount, getStudentAccountState, deactivateStudentAccount, deleteStudentAccount, getStudentAccountForPromotion, promoteStudentAccountToTeacherShadow, ensureTeacherShadowAccount, getStudentManagementPool, closeStudentAuthPool };
+module.exports = { authenticateStudent, isStudentSessionActive, studentHasCourseAccess, studentHasSessionAccess, getStudentIdentity, listStudentActivityLogs, listActiveStudentRecipients, getActiveStudentRecipient, createStudentAccount, listStudentAccounts, updateStudentAccount, getStudentAccountState, deactivateStudentAccount, deleteStudentAccount, getStudentAccountForPromotion, promoteStudentAccountToTeacherShadow, ensureTeacherShadowAccount, getStudentManagementPool, closeStudentAuthPool };

@@ -38,6 +38,23 @@ const inputSchema = z.object({
   }).strict()).min(1).max(5000)
 }).strict();
 
+const recordDeleteSchema = z.object({
+  items: z.array(z.discriminatedUnion('kind', [
+    z.object({ kind: z.literal('grade'), npk: z.string().trim().min(1).max(50), courseCode: z.string().trim().min(1).max(30), label: z.string().trim().min(1).max(300) }).strict(),
+    z.object({ kind: z.literal('quiz'), courseCode: z.string().trim().min(1).max(30), label: z.string().trim().min(1).max(300) }).strict(),
+    z.object({ kind: z.enum(['material_submission', 'published_material']), id: z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER), label: z.string().trim().min(1).max(300) }).strict()
+  ])).min(1).max(5000)
+}).strict();
+
+router.post('/records/delete', allowRoles('admin'), async (req, res, next) => {
+  const parsed = recordDeleteSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data penghapusan massal tidak valid.' } });
+  try {
+    const jobId = await createJob({ ownerNpk: req.user.sub, ownerRole: req.user.role, type: 'records_delete', items: parsed.data.items });
+    res.status(202).json({ jobId, status: 'queued', total: parsed.data.items.length });
+  } catch (error) { next(error); }
+});
+
 router.post('/users', async (req, res, next) => {
   const parsed = inputSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data job pengguna tidak valid.' } });

@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
 import JobsCenter from '../components/JobsCenter';
@@ -17,6 +17,12 @@ export default function AppLayout({ user: initialUser, onLogout }) {
   });
   const [user, setUser] = useState(initialUser);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [notificationToast, setNotificationToast] = useState(null);
+  const [notificationToastWide, setNotificationToastWide] = useState(false);
+  const [activityToast, setActivityToast] = useState(null);
+  const [activityToastWide, setActivityToastWide] = useState(false);
+  const notificationToastTimer = useRef(null);
+  const toastTimer = useRef(null);
 
   const pageTitle = pathname === '/'
     ? 'Dashboard'
@@ -63,25 +69,64 @@ export default function AppLayout({ user: initialUser, onLogout }) {
 
   useEffect(() => {
     let mounted = true;
+    let latestNotificationId = null;
     const refreshCount = async () => {
       try {
         const result = await api('/notifications/unread-count');
         if (mounted) setNotificationCount(Number(result.unreadCount || 0));
       } catch { if (mounted) setNotificationCount(0); }
     };
-    const syncNotifications = () => {
+    const primeLatestNotification = async () => {
+      try {
+        const result = await api('/notifications?limit=1');
+        if (mounted && latestNotificationId === null) latestNotificationId = result.notifications?.[0]?.notification_id ?? null;
+      } catch {}
+    };
+    const showIncomingNotification = async () => {
+      try {
+        const result = await api('/notifications?limit=1');
+        const notification = result.notifications?.[0];
+        if (!mounted || !notification) return;
+        const notificationId = String(notification.notification_id);
+        if (latestNotificationId !== null && String(latestNotificationId) === notificationId) return;
+        latestNotificationId = notificationId;
+        setNotificationToast(previous => ({ notification, count: previous ? previous.count + 1 : 1 }));
+        window.clearTimeout(notificationToastTimer.current);
+        notificationToastTimer.current = window.setTimeout(() => setNotificationToast(null), 7000);
+      } catch {}
+    };
+    const syncNotifications = event => {
       refreshCount();
-      window.dispatchEvent(new Event('dls_notifications_changed'));
+      window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: event.type || 'notification_changed' } }));
+      if (event.type === 'notification_created') showIncomingNotification();
     };
     refreshCount();
     const events = new EventSource(`${API_BASE}/notifications/events`, { withCredentials: true });
-    events.addEventListener('ready', refreshCount);
+    events.addEventListener('ready', () => { refreshCount(); primeLatestNotification(); });
     events.addEventListener('notification', syncNotifications);
     window.addEventListener('focus', refreshCount);
     return () => {
       mounted = false;
       events.close();
+      window.clearTimeout(notificationToastTimer.current);
       window.removeEventListener('focus', refreshCount);
+    };
+  }, [user?.role, user?.npk]);
+
+  useEffect(() => {
+    const events = new EventSource(`${API_BASE}/dashboard/activity/events`, { withCredentials: true });
+    const handleActivity = event => {
+      let activity;
+      try { activity = JSON.parse(event.data); } catch { return; }
+      window.dispatchEvent(new CustomEvent('dls_activity_changed', { detail: activity }));
+      setActivityToast(previous => ({ activity, count: previous ? previous.count + 1 : 1 }));
+      window.clearTimeout(toastTimer.current);
+      toastTimer.current = window.setTimeout(() => setActivityToast(null), 6000);
+    };
+    events.addEventListener('activity', handleActivity);
+    return () => {
+      events.close();
+      window.clearTimeout(toastTimer.current);
     };
   }, [user?.role, user?.npk]);
 
@@ -148,6 +193,32 @@ export default function AppLayout({ user: initialUser, onLogout }) {
           <Outlet context={user} />
         </main>
       </div>
+      {notificationToast && <div className={`fixed right-3 top-20 z-[61] w-[calc(100vw-1.5rem)] sm:right-6 ${notificationToastWide ? 'max-w-xl' : 'max-w-sm'}`} role="status" aria-live="polite">
+        <div className="overflow-hidden rounded-xl border border-red-200 bg-white text-slate-900 shadow-xl dark:border-red-900 dark:bg-slate-900 dark:text-slate-100">
+          <div className="flex items-start gap-2 border-l-4 border-red-600 p-3 sm:gap-3 sm:p-4">
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"><span className="material-symbol" aria-hidden="true">notifications_active</span></span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2"><p className="pt-1 text-sm font-bold">Notifikasi baru{notificationToast.count > 1 ? ` · ${notificationToast.count}` : ''}</p><div className="flex shrink-0 items-center gap-1"><button type="button" onClick={() => setNotificationToastWide(value => !value)} className="grid size-8 place-items-center rounded-lg border border-outline/50 text-muted hover:bg-surface-low" aria-label={notificationToastWide ? 'Perkecil notifikasi' : 'Lebarkan notifikasi'} title={notificationToastWide ? 'Perkecil' : 'Lebarkan'}><span className="material-symbol" aria-hidden="true">{notificationToastWide ? 'close_fullscreen' : 'open_in_full'}</span></button><button type="button" onClick={() => setNotificationToast(null)} className="grid size-8 place-items-center rounded-lg border border-outline/50 text-muted hover:bg-surface-low" aria-label="Tutup notifikasi"><span className="material-symbol" aria-hidden="true">close</span></button></div></div>
+              <p className="mt-1 break-words text-sm font-semibold text-secondary dark:text-slate-200">{notificationToast.notification.title}</p>
+              <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted">{notificationToast.notification.message}</p>
+              <Link to="/notifications" onClick={() => setNotificationToast(null)} className="mt-2 inline-flex min-h-8 items-center rounded-md border border-red-200 px-2.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950">Lihat notifikasi</Link>
+            </div>
+          </div>
+        </div>
+      </div>}
+      {activityToast && <div className={`fixed right-3 ${notificationToast ? 'top-64' : 'top-20'} z-[60] w-[calc(100vw-1.5rem)] sm:right-6 ${activityToastWide ? 'max-w-xl' : 'max-w-sm'}`} role="status" aria-live="polite">
+        <div className="overflow-hidden rounded-xl border border-red-200 bg-white text-slate-900 shadow-xl dark:border-red-900 dark:bg-slate-900 dark:text-slate-100">
+          <div className="flex items-start gap-2 border-l-4 border-red-600 p-3 sm:gap-3 sm:p-4">
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"><span className="material-symbol" aria-hidden="true">history</span></span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2"><p className="pt-1 text-sm font-bold">Aktivitas baru{activityToast.count > 1 ? ` · ${activityToast.count}` : ''}</p><div className="flex shrink-0 items-center gap-1"><button type="button" onClick={() => setActivityToastWide(value => !value)} className="grid size-8 place-items-center rounded-lg border border-outline/50 text-muted hover:bg-surface-low" aria-label={activityToastWide ? 'Perkecil pemberitahuan aktivitas' : 'Lebarkan pemberitahuan aktivitas'} title={activityToastWide ? 'Perkecil' : 'Lebarkan'}><span className="material-symbol" aria-hidden="true">{activityToastWide ? 'close_fullscreen' : 'open_in_full'}</span></button><button type="button" onClick={() => setActivityToast(null)} className="grid size-8 place-items-center rounded-lg border border-outline/50 text-muted hover:bg-surface-low" aria-label="Tutup pemberitahuan aktivitas"><span className="material-symbol" aria-hidden="true">close</span></button></div></div>
+              <p className="mt-1 line-clamp-2 break-words text-sm text-secondary dark:text-slate-300">{activityToast.activity.description || 'Aktivitas baru tercatat'}</p>
+              <p className="mt-1 text-xs text-muted">{activityToast.activity.actor_name ? `${activityToast.activity.actor_name} · ` : ''}{activityToast.activity.activity_type || 'Aktivitas'}</p>
+              <Link to="/activity" onClick={() => setActivityToast(null)} className="mt-2 inline-flex min-h-8 items-center rounded-md border border-red-200 px-2.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950">Lihat aktivitas</Link>
+            </div>
+          </div>
+        </div>
+      </div>}
       <JobsCenter role={user?.role} />
     </div>
   );

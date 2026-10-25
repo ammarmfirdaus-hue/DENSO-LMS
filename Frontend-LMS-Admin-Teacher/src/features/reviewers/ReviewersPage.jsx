@@ -11,6 +11,7 @@ export default function ReviewersPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [selectedReviewers, setSelectedReviewers] = useState(() => new Set());
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -46,6 +47,8 @@ export default function ReviewersPage() {
   }, [reviewers, statusFilter, search]);
 
   const page = usePagination(filteredReviewers, 10);
+  const eligibleReviewers = filteredReviewers.filter(reviewer => reviewer.status === 'active' && Number(reviewer.active_reviews) === 0);
+  const selectedEligibleReviewers = eligibleReviewers.filter(reviewer => selectedReviewers.has(String(reviewer.employee_npk)));
 
   const summary = useMemo(() => ({
     total: reviewers.length,
@@ -164,6 +167,55 @@ export default function ReviewersPage() {
     } catch (err) {
       setError(err.message);
       showAlert.error('Gagal Menghapus Reviewer', err.message);
+    } finally { setBusy(false); }
+  }
+
+  function toggleReviewerSelection(npk) {
+    const key = String(npk);
+    setSelectedReviewers(previous => {
+      const next = new Set(previous);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function toggleAllEligibleReviewers() {
+    setSelectedReviewers(previous => {
+      const next = new Set(previous);
+      const allSelected = eligibleReviewers.length > 0 && eligibleReviewers.every(reviewer => next.has(String(reviewer.employee_npk)));
+      eligibleReviewers.forEach(reviewer => allSelected
+        ? next.delete(String(reviewer.employee_npk))
+        : next.add(String(reviewer.employee_npk)));
+      return next;
+    });
+  }
+
+  async function handleBulkDelete() {
+    if (!selectedEligibleReviewers.length) return;
+    const count = selectedEligibleReviewers.length;
+    const confirmed = await showAlert.confirm({
+      title: `Hapus ${count} reviewer?`,
+      text: 'Akun tanpa riwayat terkait akan dihapus permanen. Jika memiliki riwayat, akun otomatis dinonaktifkan agar catatan review tetap tersimpan. Reviewer dengan tugas review aktif tidak dapat dipilih.',
+      confirmText: `Proses ${count} Reviewer`,
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (!confirmed) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const result = await api('/jobs/users', {
+        method: 'POST',
+        body: JSON.stringify({ items: selectedEligibleReviewers.map(reviewer => ({
+          action: 'delete', npk: reviewer.employee_npk, role: 'reviewer',
+          label: `${reviewer.fullname} (${reviewer.employee_npk})`
+        })) })
+      });
+      setSelectedReviewers(new Set());
+      showAlert.success('Penghapusan Masuk Antrean', `${result.total || count} reviewer akan diproses satu per satu. Progress tetap tersimpan jika halaman dimuat ulang.`);
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Membuat Antrean Hapus', err.message);
     } finally { setBusy(false); }
   }
 
@@ -311,13 +363,21 @@ export default function ReviewersPage() {
               { value: 'inactive', label: 'Hanya Non-aktif' }
             ]}
           />
+          {selectedEligibleReviewers.length > 0 && <div className="mt-3 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-red-900 dark:bg-red-950/30">
+            <p className="text-sm font-medium text-red-900 dark:text-red-200">{selectedEligibleReviewers.length} reviewer dipilih untuk dihapus.</p>
+            <button type="button" disabled={busy} onClick={handleBulkDelete} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white transition hover:bg-red-800 disabled:opacity-50 sm:w-fit">
+              <span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Terpilih ({selectedEligibleReviewers.length})
+            </button>
+          </div>}
         </div>
 
         {page.pagedItems.length ? (
-          <div className="overflow-x-auto p-4 sm:p-6">
-            <table className="w-full text-left text-sm">
+          <div className="max-w-full overflow-x-auto overscroll-x-contain p-4 sm:p-6" role="region" aria-label="Tabel daftar reviewer" tabIndex={0}>
+            <p className="mb-2 px-1 text-xs text-muted sm:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
+            <table className="w-full min-w-[1120px] text-left text-sm">
               <thead className="border-b border-outline/40 bg-surface-low/50 text-xs font-bold uppercase text-secondary">
                 <tr>
+                  <th className="w-12 px-4 py-3"><input type="checkbox" aria-label="Pilih semua reviewer aktif tanpa tugas review pada hasil filter" disabled={!eligibleReviewers.length || busy} checked={eligibleReviewers.length > 0 && eligibleReviewers.every(reviewer => selectedReviewers.has(String(reviewer.employee_npk)))} onChange={toggleAllEligibleReviewers} className="size-4 accent-primary" /></th>
                   <th className="px-4 py-3">Reviewer / HRD</th>
                   <th className="px-4 py-3">Jabatan & Departemen</th>
                   <th className="px-4 py-3">Kontak</th>
@@ -329,6 +389,7 @@ export default function ReviewersPage() {
               <tbody className="divide-y divide-outline/30">
                 {page.pagedItems.map(reviewer => (
                   <tr key={reviewer.employee_npk} className="transition hover:bg-surface-low/40">
+                    <td className="px-4 py-4"><input type="checkbox" aria-label={`Pilih ${reviewer.fullname}`} disabled={busy || reviewer.status !== 'active' || Number(reviewer.active_reviews) > 0} checked={selectedReviewers.has(String(reviewer.employee_npk)) && reviewer.status === 'active' && Number(reviewer.active_reviews) === 0} onChange={() => toggleReviewerSelection(reviewer.employee_npk)} className="size-4 accent-primary" /></td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary-container/30 font-bold text-secondary">

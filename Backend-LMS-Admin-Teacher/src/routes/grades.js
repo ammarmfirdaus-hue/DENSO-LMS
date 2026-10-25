@@ -140,7 +140,7 @@ router.post('/:npk/:courseCode/notify', trustedWriteOrigin, async (req, res, nex
       await transaction.commit();
     } catch (error) { await transaction.rollback().catch(() => {}); throw error; }
 
-    publishNotificationEvent({ roles: ['student'], recipientNpk: identity.data.npk });
+    publishNotificationEvent({ roles: ['student'], recipientNpk: identity.data.npk, type: 'notification_created' });
     res.status(201).json({ sent: true, emailQueued: notification.data.sendEmail ? 1 : 0, notificationId });
   } catch (error) { next(error); }
 });

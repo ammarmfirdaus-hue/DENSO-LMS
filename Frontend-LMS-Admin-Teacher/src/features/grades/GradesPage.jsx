@@ -28,6 +28,7 @@ export default function GradesPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [busy, setBusy] = useState(false);
+  const [selectedGrades, setSelectedGrades] = useState(() => new Set());
   const [editing, setEditing] = useState(null);
   const [notifying, setNotifying] = useState(null);
   const [sendEmail, setSendEmail] = useState(false);
@@ -37,11 +38,57 @@ export default function GradesPage() {
     catch (e) { setError(e.message); }
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    window.addEventListener('dls_job_settled', load);
+    return () => window.removeEventListener('dls_job_settled', load);
+  }, []);
 
   const statuses = useMemo(() => [...new Set(rows.map(row => row.enrollment_status).filter(Boolean))].sort(), [rows]);
   const filtered = useMemo(() => rows.filter(row => (status === 'all' || row.enrollment_status === status)
     && `${row.student_npk} ${row.course_title || ''} ${row.course_code || ''} ${row.enrollment_status}`.toLowerCase().includes(search.trim().toLowerCase())), [rows, search, status]);
   const page = usePagination(filtered);
+  const selectedFiltered = filtered.filter(row => selectedGrades.has(`${row.student_npk}::${row.course_code}`));
+
+  function toggleGradeSelection(row) {
+    const key = `${row.student_npk}::${row.course_code}`;
+    setSelectedGrades(previous => {
+      const next = new Set(previous);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+
+  function toggleAllFilteredGrades() {
+    setSelectedGrades(previous => {
+      const next = new Set(previous);
+      const allSelected = filtered.length > 0 && filtered.every(row => next.has(`${row.student_npk}::${row.course_code}`));
+      filtered.forEach(row => {
+        const key = `${row.student_npk}::${row.course_code}`;
+        if (allSelected) next.delete(key); else next.add(key);
+      });
+      return next;
+    });
+  }
+
+  async function deleteSelectedGrades() {
+    if (!isAdmin || !selectedFiltered.length) return;
+    const confirmed = await showAlert.confirm({
+      title: `Hapus ${selectedFiltered.length} nilai?`,
+      text: 'Nilai dan umpan balik akan dikosongkan. Data progres course student tetap disimpan.',
+      confirmText: `Proses ${selectedFiltered.length} Nilai`, cancelText: 'Batal', danger: true
+    });
+    if (!confirmed) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const result = await api('/jobs/records/delete', { method: 'POST', body: JSON.stringify({ items: selectedFiltered.map(row => ({
+        kind: 'grade', npk: row.student_npk, courseCode: row.course_code,
+        label: `${row.student_npk} · ${row.course_title || row.course_code}`
+      })) }) });
+      setSelectedGrades(new Set());
+      showAlert.success('Penghapusan Masuk Antrean', `${result.total} nilai akan diproses satu per satu. Progress tersimpan jika halaman dimuat ulang.`);
+    } catch (e) { setError(e.message); showAlert.error('Gagal Membuat Antrean Hapus', e.message); }
+    finally { setBusy(false); }
+  }
 
   async function saveGrade(event) {
     event.preventDefault();
@@ -96,12 +143,13 @@ export default function GradesPage() {
     {notice && <p role="status" className="mt-4 rounded-xl bg-green-50 p-4 text-green-800">{notice}</p>}
 
     <div className="mt-7 overflow-hidden rounded-2xl border border-outline/50 bg-white">
-      <div className="p-5 pb-1"><p className="mb-3 text-sm text-muted">Menampilkan {filtered.length} dari {rows.length} data nilai/progres</p>
+      <div className="p-5 pb-1"><div className="mb-3 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted">Menampilkan {filtered.length} dari {rows.length} data nilai/progres</p>{isAdmin && selectedFiltered.length > 0 && <button type="button" disabled={busy} onClick={deleteSelectedGrades} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Nilai Terpilih ({selectedFiltered.length})</button>}</div>
         <ListFilterBar search={search} onSearch={setSearch} placeholder="Cari NPK atau course..." filter={status} onFilter={setStatus} label="Filter status" options={[{ value: 'all', label: 'Semua status' }, ...statuses.map(value => ({ value, label: value }))]} />
       </div>
-      <div className="overflow-x-auto"><table className="w-full min-w-[1160px] text-left text-sm">
-        <thead className="bg-surface-low text-muted"><tr><th className="px-4 py-4">NPK</th><th className="px-4 py-4">Course</th><th className="px-4 py-4">Nilai Quiz</th><th className="px-4 py-4">Nilai Course</th><th className="px-4 py-4">Progres</th><th className="px-4 py-4">Status</th><th className="px-4 py-4">Diperbarui</th><th className="px-4 py-4">Aksi</th></tr></thead>
+      <div className="max-w-full overflow-x-auto overscroll-x-contain" role="region" aria-label="Tabel nilai student" tabIndex={0}><table className="w-full min-w-[1160px] text-left text-sm">
+        <thead className="bg-surface-low text-muted"><tr>{isAdmin && <th className="w-12 px-4 py-4"><input type="checkbox" aria-label="Pilih semua nilai hasil filter" disabled={!filtered.length || busy} checked={filtered.length > 0 && selectedFiltered.length === filtered.length} onChange={toggleAllFilteredGrades} className="size-4 accent-primary" /></th>}<th className="px-4 py-4">NPK</th><th className="px-4 py-4">Course</th><th className="px-4 py-4">Nilai Quiz</th><th className="px-4 py-4">Nilai Course</th><th className="px-4 py-4">Progres</th><th className="px-4 py-4">Status</th><th className="px-4 py-4">Diperbarui</th><th className="px-4 py-4">Aksi</th></tr></thead>
         <tbody className="divide-y divide-outline/40">{page.pagedItems.map((row, index) => <tr key={`${row.student_npk}-${row.course_code}-${index}`}>
+          {isAdmin && <td className="px-4 py-4"><input type="checkbox" aria-label={`Pilih nilai ${row.student_npk} ${row.course_title || row.course_code}`} disabled={busy} checked={selectedGrades.has(`${row.student_npk}::${row.course_code}`)} onChange={() => toggleGradeSelection(row)} className="size-4 accent-primary" /></td>}
           <td className="px-4 py-4 font-semibold">{row.student_npk}</td><td className="px-4 py-4">{row.course_title || row.course_code}</td>
           <td className="px-4 py-4">{row.quiz_score == null ? <span className="text-muted">Belum dikerjakan</span> : <span className="font-bold text-primary">{Number(row.quiz_score).toLocaleString('id-ID')}</span>}</td>
           <td className="px-4 py-4">{row.score === null || row.score === undefined ? <span className="text-muted">Belum dinilai</span> : <span className="font-bold">{Number(row.score).toLocaleString('id-ID')}</span>}{row.grade_feedback && <p className="mt-1 max-w-xs truncate text-xs text-muted" title={row.grade_feedback}>{row.grade_feedback}</p>}</td>

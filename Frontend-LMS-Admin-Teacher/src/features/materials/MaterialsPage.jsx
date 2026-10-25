@@ -79,6 +79,8 @@ export default function MaterialsPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [selectedSubmissions, setSelectedSubmissions] = useState(() => new Set());
+  const [selectedFinalMaterials, setSelectedFinalMaterials] = useState(() => new Set());
 
   // Modals
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -135,7 +137,57 @@ export default function MaterialsPage() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    window.addEventListener('dls_job_settled', load);
+    return () => window.removeEventListener('dls_job_settled', load);
+  }, []);
+
+  const selectableSubmissions = filteredSubmissions.filter(item => item.status !== 'published');
+  const selectedFilteredSubmissions = selectableSubmissions.filter(item => selectedSubmissions.has(String(item.submission_id)));
+  const selectedFilteredFinalMaterials = filteredFinalMaterials.filter(item => selectedFinalMaterials.has(String(item.material_id)));
+
+  function toggleSelected(setter, id) {
+    setter(previous => {
+      const next = new Set(previous);
+      const key = String(id);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+
+  function toggleAllSelected(setter, items, selected) {
+    setter(previous => {
+      const next = new Set(previous);
+      const allSelected = items.length > 0 && items.every(item => selected.has(String(item.id)));
+      items.forEach(item => allSelected ? next.delete(String(item.id)) : next.add(String(item.id)));
+      return next;
+    });
+  }
+
+  async function bulkDeleteMaterials(items, kind, clearSelection) {
+    if (!isAdmin || !items.length) return;
+    const count = items.length;
+    const label = kind === 'material_submission' ? 'pengajuan materi' : 'materi final';
+    const confirmed = await showAlert.confirm({
+      title: `Hapus ${count} ${label}?`,
+      text: kind === 'material_submission'
+        ? 'Pengajuan terpilih beserta file terkait akan dihapus. Materi yang sudah terbit dikelola dari daftar Materi Final.'
+        : 'Materi akan ditarik dari LMS dan student. File serta materi terbit terkait akan ikut dihapus.',
+      confirmText: `Proses ${count} Data`, cancelText: 'Batal', danger: true
+    });
+    if (!confirmed) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const result = await api('/jobs/records/delete', { method: 'POST', body: JSON.stringify({ items: items.map(item => ({
+        kind, id: item.id,
+        label: `${item.title} (${item.course_title || item.course_code || item.submission_id || item.material_id})`
+      })) }) });
+      clearSelection(new Set());
+      showAlert.success('Penghapusan Masuk Antrean', `${result.total} ${label} akan diproses satu per satu. Progress tersimpan jika halaman dimuat ulang.`);
+    } catch (e) { setError(e.message); showAlert.error('Gagal Membuat Antrean Hapus', e.message); }
+    finally { setBusy(false); }
+  }
 
   async function sendReview(event, id) {
     event.preventDefault();
@@ -352,13 +404,18 @@ export default function MaterialsPage() {
             label="Filter status antrean"
             options={statusOptions}
           />
+          {isAdmin && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-outline/40 bg-surface-low/40 px-3 py-2.5">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-secondary"><input type="checkbox" disabled={!selectableSubmissions.length || busy} checked={selectableSubmissions.length > 0 && selectedFilteredSubmissions.length === selectableSubmissions.length} onChange={() => toggleAllSelected(setSelectedSubmissions, selectableSubmissions.map(item => ({ id: item.submission_id })), selectedSubmissions)} className="size-4 accent-primary" />Pilih semua pengajuan yang tampil ({selectableSubmissions.length})</label>
+            {selectedFilteredSubmissions.length > 0 && <button type="button" disabled={busy} onClick={() => bulkDeleteMaterials(selectedFilteredSubmissions.map(item => ({ ...item, id: item.submission_id })), 'material_submission', setSelectedSubmissions)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Terpilih ({selectedFilteredSubmissions.length})</button>}
+          </div>}
         </div>
 
         {page.pagedItems.length ? (
           <div className="grid gap-4 p-4 pt-2 sm:grid-cols-2 lg:grid-cols-3 sm:p-6 sm:pt-3">
             {page.pagedItems.map(item => (
-              <SubmissionCard
-                key={item.submission_id}
+              <div key={item.submission_id} className="relative">
+                {isAdmin && item.status !== 'published' && <label className="absolute left-3 top-3 z-10 inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-outline/50 bg-white shadow-sm" title="Pilih pengajuan"><input type="checkbox" aria-label={`Pilih pengajuan ${item.title}`} disabled={busy} checked={selectedSubmissions.has(String(item.submission_id))} onChange={() => toggleSelected(setSelectedSubmissions, item.submission_id)} className="size-4 accent-primary" /></label>}
+                <SubmissionCard
                 item={item}
                 currentUser={user}
                 isAdmin={isAdmin}
@@ -371,6 +428,7 @@ export default function MaterialsPage() {
                 onPublish={() => publish(item.submission_id)}
                 onDelete={() => handleDeleteSubmission(item)}
               />
+              </div>
             ))}
           </div>
         ) : (
@@ -437,6 +495,10 @@ export default function MaterialsPage() {
               </select>
             </div>
           </div>
+          {isAdmin && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-outline/40 bg-white px-3 py-2.5">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-secondary"><input type="checkbox" disabled={!filteredFinalMaterials.length || busy} checked={filteredFinalMaterials.length > 0 && selectedFilteredFinalMaterials.length === filteredFinalMaterials.length} onChange={() => toggleAllSelected(setSelectedFinalMaterials, filteredFinalMaterials.map(item => ({ id: item.material_id })), selectedFinalMaterials)} className="size-4 accent-primary" />Pilih semua materi yang tampil ({filteredFinalMaterials.length})</label>
+            {selectedFilteredFinalMaterials.length > 0 && <button type="button" disabled={busy} onClick={() => bulkDeleteMaterials(selectedFilteredFinalMaterials.map(item => ({ ...item, id: item.material_id })), 'published_material', setSelectedFinalMaterials)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Terpilih ({selectedFilteredFinalMaterials.length})</button>}
+          </div>}
         </div>
 
         {/* Final Materials Grid */}
@@ -453,8 +515,9 @@ export default function MaterialsPage() {
               return (
                 <article
                   key={item.material_id}
-                  className="group flex flex-col justify-between rounded-2xl border border-outline/40 bg-white p-5 shadow-xs transition hover:border-emerald-500/40 hover:shadow-md"
+                  className="group relative flex flex-col justify-between rounded-2xl border border-outline/40 bg-white p-5 shadow-xs transition hover:border-emerald-500/40 hover:shadow-md"
                 >
+                  {isAdmin && <label className="absolute right-3 top-3 z-10 inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-outline/50 bg-white shadow-sm" title="Pilih materi final"><input type="checkbox" aria-label={`Pilih materi ${item.title}`} disabled={busy} checked={selectedFinalMaterials.has(String(item.material_id))} onChange={() => toggleSelected(setSelectedFinalMaterials, item.material_id)} className="size-4 accent-primary" /></label>}
                   <div>
                     {/* Header: Type icon & Badges */}
                     <div className="flex items-start justify-between gap-2">

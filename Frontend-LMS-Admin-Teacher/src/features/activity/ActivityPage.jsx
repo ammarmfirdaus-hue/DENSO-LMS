@@ -26,10 +26,14 @@ export default function ActivityPage() {
   const [type, setType] = useState('all');
 
   useEffect(() => {
-    api('/dashboard/activity')
-      .then(value => setItems(value.activities || []))
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+    let active = true;
+    const load = () => api('/dashboard/activity?limit=100')
+      .then(value => { if (active) { setItems(value.activities || []); setError(''); } })
+      .catch(e => { if (active) setError(e.message); })
+      .finally(() => { if (active) setLoading(false); });
+    load();
+    window.addEventListener('dls_activity_changed', load);
+    return () => { active = false; window.removeEventListener('dls_activity_changed', load); };
   }, []);
 
   const types = useMemo(() => [...new Set(items.map(item => item.activity_type).filter(Boolean))].sort(), [items]);
@@ -40,7 +44,7 @@ export default function ActivityPage() {
   return <div className="mx-auto max-w-7xl space-y-6">
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div><p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Pemantauan</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Aktivitas</h1><p className="mt-2 text-sm leading-6 text-muted">Pantau catatan aktivitas terbaru pada portal pengelola.</p></div>
-      <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white px-4 py-3 shadow-sm"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><span className="material-symbol">event_available</span></span><div><p className="text-xl font-bold leading-none">{todayCount}</p><p className="mt-1 text-xs text-muted">Aktivitas hari ini</p></div></div>
+      <div className="flex flex-wrap items-center gap-3"><div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white px-4 py-3 shadow-sm"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><span className="material-symbol">event_available</span></span><div><p className="text-xl font-bold leading-none">{todayCount}</p><p className="mt-1 text-xs text-muted">Aktivitas hari ini</p></div></div><span className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-green-200 bg-white px-3 text-xs font-semibold text-green-800"><span className="size-2 rounded-full bg-green-600" aria-hidden="true" />Pembaruan langsung</span></div>
     </header>
 
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
@@ -54,7 +58,7 @@ export default function ActivityPage() {
       {page.pagedItems.length ? <div className="divide-y divide-outline/40">
         {page.pagedItems.map(item => <article key={item.activity_id} className="flex gap-3 px-4 py-4 transition hover:bg-surface-low/50 sm:gap-4 sm:px-6 sm:py-5">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary sm:size-11"><span className="material-symbol">{activityIcon(item.activity_type)}</span></span>
-          <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="break-words text-sm font-semibold leading-6 text-on-surface">{item.description || 'Aktivitas tercatat'}</p><span className="rounded-full bg-surface-low px-2.5 py-1 text-[11px] font-semibold capitalize text-secondary">{item.activity_type || 'Umum'}</span></div><p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted"><span className="material-symbol text-sm" aria-hidden="true">schedule</span>{formatDate(item.created_at)}</p></div>
+          <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="break-words text-sm font-semibold leading-6 text-on-surface">{item.description || 'Aktivitas tercatat'}</p><span className="rounded-full bg-surface-low px-2.5 py-1 text-[11px] font-semibold capitalize text-secondary">{item.activity_type || 'Umum'}</span></div><p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted"><span className="material-symbol text-sm" aria-hidden="true">schedule</span>{formatDate(item.created_at)}{item.actor_name && <><span aria-hidden="true">·</span><span>{item.actor_name}</span><span className="capitalize">({item.actor_role || (item.activity_source === 'student' ? 'student' : 'akun')})</span></>}</p></div>
         </article>)}
       </div> : <div className="p-10 text-center sm:p-14"><span className="material-symbol mx-auto grid size-14 place-items-center rounded-2xl bg-surface-low text-3xl text-muted">{loading ? 'hourglass_top' : 'history'}</span><h3 className="mt-4 font-bold">{loading ? 'Memuat aktivitas…' : items.length ? 'Tidak ada aktivitas yang cocok' : 'Belum ada aktivitas'}</h3><p className="mt-1 text-sm text-muted">{loading ? 'Mohon tunggu sebentar.' : 'Catatan aktivitas akan tampil di sini saat tersedia.'}</p></div>}
 
