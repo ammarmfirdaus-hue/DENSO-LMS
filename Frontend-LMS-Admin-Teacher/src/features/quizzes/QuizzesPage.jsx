@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../../api/client';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
+import Pagination, { usePagination } from '../../components/Pagination';
 import showAlert from '../../utils/alert';
 
 const blankQuestion = () => ({ text: '', options: ['', '', '', ''], correctOption: 0 });
@@ -38,6 +41,7 @@ export default function QuizzesPage() {
   const filtered = useMemo(() => courses.filter(course =>
     `${course.title} ${course.course_code} ${course.quiz?.title || ''}`.toLowerCase().includes(search.trim().toLowerCase())
   ), [courses, search]);
+  const quizPage = usePagination(filtered, 8);
   const filteredQuizzes = filtered.filter(course => course.quiz);
   const selectedFilteredQuizzes = filteredQuizzes.filter(course => selectedCourses.has(String(course.course_code)));
 
@@ -166,17 +170,43 @@ export default function QuizzesPage() {
     } finally { setBusy(false); }
   }
 
-  return <div className="mx-auto min-w-0 max-w-7xl space-y-6">
-    <header className="flex flex-wrap items-end justify-between gap-4">
-      <div><p className="text-sm font-bold tracking-wide text-primary">PEMBELAJARAN</p><h1 className="mt-2 text-3xl font-bold">Kelola Quiz</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">Buat quiz pilihan ganda di akhir course. Student baru bisa mengerjakan setelah semua materi ditandai selesai, dan hanya mendapat satu kali percobaan.</p></div>
-      <div className="flex w-full max-w-xl flex-col gap-2 sm:flex-row sm:items-end"><label className="min-w-0 flex-1 text-sm font-semibold">Cari course<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Nama atau kode course" className={fieldClass} /></label>{isAdmin && selectedFilteredQuizzes.length > 0 && <button type="button" disabled={busy} onClick={deleteSelectedQuizzes} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Terpilih ({selectedFilteredQuizzes.length})</button>}</div>
-    </header>
+  return (
+    <div className="mx-auto min-w-0 max-w-7xl space-y-6">
+      <PageHeader
+        eyebrow="PEMBELAJARAN"
+        title="Kelola Quiz"
+        description="Buat dan kelola quiz pilihan ganda akhir course. Student baru dapat mengerjakan setelah semua materi ditandai selesai, dengan satu kali kesempatan attempt."
+        actions={
+          <div className="flex w-full max-w-xl flex-col gap-2 sm:flex-row sm:items-end">
+            <label className="min-w-0 flex-1 text-xs font-semibold text-muted">
+              Cari Course
+              <input
+                type="search"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Nama atau kode course..."
+                className={fieldClass}
+              />
+            </label>
+            {isAdmin && selectedFilteredQuizzes.length > 0 && (
+              <Button
+                variant="danger"
+                disabled={busy}
+                onClick={deleteSelectedQuizzes}
+                icon="delete_sweep"
+              >
+                Hapus Terpilih ({selectedFilteredQuizzes.length})
+              </Button>
+            )}
+          </div>
+        }
+      />
 
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
     {notice && <p role="status" className="rounded-xl border border-outline/50 bg-white p-4 text-sm text-on-surface">{notice}</p>}
     {loading ? <div className="rounded-2xl border border-outline/50 bg-white p-10 text-center text-sm text-muted">Memuat daftar course...</div>
       : filtered.length ? <><section className="mb-3 flex items-center gap-2 rounded-xl border border-outline/50 bg-white px-4 py-3 text-sm text-secondary"><input type="checkbox" aria-label="Pilih semua quiz hasil filter" disabled={!isAdmin || !filteredQuizzes.length || busy} checked={isAdmin && filteredQuizzes.length > 0 && selectedFilteredQuizzes.length === filteredQuizzes.length} onChange={toggleAllFilteredQuizzes} className="size-4 accent-primary" /><span>Pilih semua quiz pada hasil filter ({filteredQuizzes.length})</span>{selectedFilteredQuizzes.length > 0 && <span className="ml-auto font-semibold">{selectedFilteredQuizzes.length} dipilih</span>}</section><section className="grid gap-4 lg:grid-cols-2" aria-label="Daftar quiz per course">
-        {filtered.map(course => {
+        {quizPage.pagedItems.map(course => {
           const quiz = course.quiz;
           const status = { published: 'Terbit', draft: 'Draft', inactive: 'Nonaktif' }[quiz?.status] || 'Belum dibuat';
           return <article key={course.course_code} className="flex min-w-0 flex-col rounded-2xl border border-outline/50 bg-white p-5 shadow-sm">
@@ -186,7 +216,16 @@ export default function QuizzesPage() {
             <div className="mt-auto flex flex-wrap gap-2 pt-5"><button type="button" disabled={busy} onClick={() => openEditor(course)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">{quiz ? 'edit' : 'add'}</span>{quiz ? 'Edit Quiz' : 'Buat Quiz'}</button>{quiz && <button type="button" disabled={busy} onClick={() => removeQuiz(course)} className={secondaryButton}><span className="material-symbol text-primary" aria-hidden="true">delete</span>Hapus</button>}</div>
           </article>;
         })}
-      </section></> : <div className="rounded-2xl border border-outline/50 bg-white p-10 text-center text-sm text-muted">{courses.length ? 'Tidak ada course yang cocok dengan pencarian.' : 'Belum ada course yang dapat Anda kelola.'}</div>}
+      </section>
+      <div className="mt-4 overflow-hidden rounded-2xl border border-outline/40 bg-white dark:border-slate-800 dark:bg-[#1e293b]">
+        <Pagination
+          {...quizPage}
+          onPageChange={quizPage.setPage}
+          onPageSizeChange={quizPage.setPageSize}
+          pageSizes={[8, 16, 32]}
+        />
+      </div>
+      </> : <div className="rounded-2xl border border-outline/50 bg-white p-10 text-center text-sm text-muted">{courses.length ? 'Tidak ada course yang cocok dengan pencarian.' : 'Belum ada course yang dapat Anda kelola.'}</div>}
 
     {editor && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/50 p-3 sm:p-6"><form onSubmit={save} role="dialog" aria-modal="true" aria-labelledby="quiz-editor-title" className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-y-auto rounded-2xl border border-outline/50 bg-white shadow-2xl">
       <header className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-outline/40 bg-white p-4 sm:p-6"><div className="min-w-0"><p className="text-xs font-bold text-primary">{editor.course.course_code} · {editor.course.title}</p><h2 id="quiz-editor-title" className="mt-1 text-xl font-bold">{editor.quizId ? 'Edit Quiz' : 'Buat Quiz Course'}</h2><p className="mt-1 text-sm text-muted">Tambahkan pertanyaan dan tandai satu opsi sebagai jawaban benar.</p></div><button type="button" onClick={() => setEditor(null)} className="grid size-10 shrink-0 place-items-center rounded-lg border border-outline/50 bg-white hover:bg-surface-low" aria-label="Tutup form quiz"><span className="material-symbol" aria-hidden="true">close</span></button></header>
@@ -203,5 +242,6 @@ export default function QuizzesPage() {
       </div>
       <footer className="sticky bottom-0 flex flex-col-reverse gap-2 border-t border-outline/40 bg-white p-4 sm:flex-row sm:justify-end sm:p-6"><button type="button" onClick={() => setEditor(null)} className={secondaryButton}>Batal</button><button type="submit" disabled={busy} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">save</span>{busy ? 'Menyimpan...' : 'Simpan Quiz'}</button></footer>
     </form></div>}
-  </div>;
+  </div>
+  );
 }

@@ -288,7 +288,7 @@ $isVideoEmbed = $materialType === 'video'
             </div>
             <div class="w-full bg-slate-100 p-4 sm:p-8 sm:rounded-b-2xl shadow-inner">
                 <?php if ($materialUrl !== ''): ?>
-                <div class="rounded-2xl border border-slate-200 bg-white p-2 sm:p-4 shadow-xl"><img src="<?= e($materialUrl) ?>" class="mx-auto max-h-[78vh] w-full rounded-xl object-contain" alt="<?= e($materialFilename ?: $material['title']) ?>"></div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-2 sm:p-4 shadow-xl"><img src="<?= e($materialUrl) ?>" loading="lazy" decoding="async" class="mx-auto max-h-[78vh] w-full rounded-xl object-contain" alt="<?= e($materialFilename ?: $material['title']) ?>"></div>
                 <?php else: ?>
                 <div class="mx-auto flex min-h-[300px] max-w-3xl flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
                     <span class="material-symbols-outlined mb-3 text-5xl text-emerald-600">image</span>
@@ -385,7 +385,7 @@ $isVideoEmbed = $materialType === 'video'
                     <p class="whitespace-pre-line"><?= e($blockContent) ?></p>
                     <?php endif; ?>
                     <?php elseif ($blockType === 'image' && $blockUrl !== ''): ?>
-                    <figure><img src="<?= e($blockUrl) ?>" alt="<?= e($block['caption'] ?? 'Gambar materi') ?>" class="mx-auto max-h-[70vh] w-full rounded-xl object-contain"><figcaption class="mt-2 text-center text-sm text-slate-500"><?= e($block['caption'] ?? '') ?></figcaption></figure>
+                    <figure><img src="<?= e($blockUrl) ?>" loading="lazy" decoding="async" alt="<?= e($block['caption'] ?? 'Gambar materi') ?>" class="mx-auto max-h-[70vh] w-full rounded-xl object-contain"><figcaption class="mt-2 text-center text-sm text-slate-500"><?= e($block['caption'] ?? '') ?></figcaption></figure>
                     <?php elseif ($blockType === 'video_embed' && $blockUrl !== ''): ?>
                     <?php $blockHost = strtolower((string) ($blockParts['host'] ?? '')); ?>
                     <?php if (in_array($blockHost, $trustedVideoHosts, true) && strtolower((string) ($blockParts['scheme'] ?? '')) === 'https'): ?>

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, API_BASE } from '../../api/client';
 import { compressForumImage } from '../../utils/compress-forum-image';
+import PageHeader from '../../components/PageHeader';
+import Pagination, { usePagination } from '../../components/Pagination';
 
 const fieldClass = 'h-10 w-full rounded-lg border border-outline/60 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 const messageClass = 'w-full resize-y rounded-lg border border-outline/60 bg-white p-3 text-sm leading-6 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
@@ -9,6 +11,7 @@ export default function ForumPage() {
   const [sessions, setSessions] = useState([]);
   const [selectedKey, setSelectedKey] = useState('');
   const [threads, setThreads] = useState([]);
+  const threadPage = usePagination(threads, 10);
   const [details, setDetails] = useState({});
   const [expanded, setExpanded] = useState(null);
   const [error, setError] = useState('');
@@ -150,12 +153,13 @@ export default function ForumPage() {
     return [...courses.entries()].map(([code, value]) => ({ code, ...value }));
   }, [sessions]);
 
-  return <div className="mx-auto min-w-0 max-w-6xl">
-    <header className="mb-6 border-b border-outline/50 pb-5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">KOMUNITAS PEMBELAJARAN</p>
-      <h1 className="mt-2 text-2xl font-bold text-on-surface sm:text-3xl">Forum diskusi</h1>
-      <p className="mt-2 text-sm text-muted">Kelola forum per course dan sesi, lalu ikut berdiskusi bersama peserta.</p>
-    </header>
+  return (
+    <div className="mx-auto min-w-0 max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow="KOMUNITAS PEMBELAJARAN"
+        title="Forum Diskusi"
+        description="Kelola forum per course dan sesi, moderasi percakapan, serta berdiskusi interaktif bersama peserta."
+      />
 
     {error && <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
     {notice && <p role="status" className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
@@ -191,7 +195,7 @@ export default function ForumPage() {
       </form>
 
       <div className="space-y-4">
-        {threads.length ? threads.map(thread => <article key={thread.thread_id} className="min-w-0 rounded-xl border border-outline/50 bg-white p-4 sm:p-5">
+        {threads.length ? threadPage.pagedItems.map(thread => <article key={thread.thread_id} className="min-w-0 rounded-xl border border-outline/50 bg-white p-4 sm:p-5">
           <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex min-w-0 items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-surface-low text-sm font-semibold text-secondary">{String(thread.author_name || '?').trim().slice(0, 1).toLocaleUpperCase('id')}</span><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"><h3 className="min-w-0 break-words font-semibold text-on-surface">{thread.title}</h3><RoleBadge role={thread.author_role} /></div><p className="mt-1 break-words text-xs text-muted">{thread.author_name} · {formatDate(thread.created_at)}</p></div></div>
@@ -224,10 +228,20 @@ export default function ForumPage() {
           </div>}
         </article>) : <div className="rounded-xl border border-dashed border-outline/60 bg-white p-8 text-center text-sm text-muted">Belum ada diskusi untuk sesi ini.</div>}
       </div>
+      {Boolean(threads.length) && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-outline/40 bg-white dark:border-slate-800 dark:bg-[#1e293b]">
+          <Pagination
+            {...threadPage}
+            onPageChange={threadPage.setPage}
+            onPageSizeChange={threadPage.setPageSize}
+            pageSizes={[10, 20, 50]}
+          />
+        </div>
+      )}
     </>}
-  </div>;
+  </div>
+  );
 }
-
 function sessionKey(item) { return item ? `${item.course_code}:${item.session_code}` : ''; }
 function formatDate(value) { const date = new Date(value); return Number.isNaN(date.valueOf()) ? '' : date.toLocaleString('id-ID'); }
 function RoleBadge({ role }) {

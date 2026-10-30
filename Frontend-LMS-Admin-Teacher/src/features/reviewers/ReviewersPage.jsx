@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/client';
 import ListFilterBar from '../../components/ListFilterBar';
 import Pagination, { usePagination } from '../../components/Pagination';
+import PageHeader from '../../components/PageHeader';
+import StatCard from '../../components/StatCard';
+import StatusBadge from '../../components/StatusBadge';
+import Button from '../../components/Button';
 import showAlert from '../../utils/alert';
 
 export default function ReviewersPage() {
@@ -265,65 +269,47 @@ export default function ReviewersPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Administrasi & Manajemen</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Kelola Reviewer</h1>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
-            Kelola data akun reviewer, penanggung jawab HRD, serta petinggi yang berwenang meninjau kelayakan materi sebelum diterbitkan ke student.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => { setShowCreateModal(true); setError(''); setNotice(''); }}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110"
-        >
-          <span className="material-symbol" aria-hidden="true">person_add</span>
-          Tambah Reviewer Baru
-        </button>
-      </header>
+      <PageHeader
+        eyebrow="ADMINISTRASI & MANAJEMEN"
+        title="Kelola Reviewer"
+        description="Kelola data akun reviewer, penanggung jawab HRD, serta petinggi yang berwenang meninjau kelayakan materi sebelum diterbitkan ke student."
+        actions={
+          <Button
+            type="button"
+            icon="person_add"
+            onClick={() => { setShowCreateModal(true); setError(''); setNotice(''); }}
+          >
+            Tambah Reviewer Baru
+          </Button>
+        }
+      />
 
       {/* Summary Cards */}
-      <section aria-label="Ringkasan Reviewer" className="grid gap-3 sm:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white p-4 shadow-sm">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-xl text-primary">
-            <span className="material-symbol">groups</span>
-          </span>
-          <div className="min-w-0">
-            <p className="text-2xl font-bold leading-none">{summary.total}</p>
-            <p className="mt-1 text-xs text-muted">Total Reviewer</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white p-4 shadow-sm">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-50 text-xl text-emerald-700">
-            <span className="material-symbol">verified_user</span>
-          </span>
-          <div className="min-w-0">
-            <p className="text-2xl font-bold leading-none">{summary.active}</p>
-            <p className="mt-1 text-xs text-muted">Reviewer Aktif</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white p-4 shadow-sm">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-50 text-xl text-amber-700">
-            <span className="material-symbol">person_off</span>
-          </span>
-          <div className="min-w-0">
-            <p className="text-2xl font-bold leading-none">{summary.inactive}</p>
-            <p className="mt-1 text-xs text-muted">Non-aktif</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-white p-4 shadow-sm">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-xl text-blue-700">
-            <span className="material-symbol">task</span>
-          </span>
-          <div className="min-w-0">
-            <p className="text-2xl font-bold leading-none">{summary.totalReviews}</p>
-            <p className="mt-1 text-xs text-muted">Total Materi Direview</p>
-          </div>
-        </div>
+      <section aria-label="Ringkasan Reviewer" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Total Reviewer"
+          value={summary.total}
+          icon="groups"
+          tone="primary"
+        />
+        <StatCard
+          label="Reviewer Aktif"
+          value={summary.active}
+          icon="verified_user"
+          tone="emerald"
+        />
+        <StatCard
+          label="Non-aktif"
+          value={summary.inactive}
+          icon="person_off"
+          tone="amber"
+        />
+        <StatCard
+          label="Total Materi Direview"
+          value={summary.totalReviews}
+          icon="task"
+          tone="blue"
+        />
       </section>
 
       {error && (
@@ -410,13 +396,7 @@ export default function ReviewersPage() {
                       <p className="text-xs text-muted">{reviewer.phone_number || '-'}</p>
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                        reviewer.status === 'active'
-                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
-                          : 'bg-zinc-100 text-zinc-600 ring-1 ring-inset ring-zinc-500/20'
-                      }`}>
-                        {reviewer.status === 'active' ? 'Aktif' : 'Non-aktif'}
-                      </span>
+                      <StatusBadge status={reviewer.status} />
                     </td>
                     <td className="px-4 py-4 text-center">
                       <span className="font-bold text-secondary">{reviewer.total_reviews || 0}</span>

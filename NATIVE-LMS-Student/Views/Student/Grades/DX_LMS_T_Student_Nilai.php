@@ -12,11 +12,13 @@ $grades = is_array($grades ?? null) ? $grades : [];
     <?php include APP_ROOT . '/includes/components/DX_LMS_M_Header.php'; ?>
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto min-w-0 max-w-5xl">
-            <header class="mb-6 border-b border-outline-variant/40 pb-5">
-                <p class="text-xs font-semibold uppercase tracking-wider text-primary">PEMBELAJARAN</p>
-                <h1 class="mt-2 text-2xl font-bold sm:text-3xl">Nilai Saya</h1>
-                <p class="mt-2 text-sm text-on-surface-variant">Lihat hasil Quiz Course dan progres belajar Anda.</p>
-            </header>
+            <?php
+            $page_eyebrow = 'PEMBELAJARAN';
+            $page_title_heading = 'Nilai Saya';
+            $page_description = 'Lihat rekapitulasi nilai Quiz Course dan progres belajar Anda.';
+            $page_actions_html = '<span class="inline-flex min-h-9 items-center rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-3.5 text-xs font-semibold text-on-surface-variant">' . count($grades) . ' course terdata</span>';
+            include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+            ?>
             <?php if (!empty($grade_error)): ?><p role="alert" class="mb-4 rounded-xl border border-error/30 bg-error-container/50 p-4 text-sm text-on-error-container"><?= e($grade_error) ?></p><?php endif; ?>
             <div class="dls-grade-table-scroll max-w-full overflow-x-auto rounded-xl border border-outline-variant/50 bg-surface-container-lowest" role="region" aria-label="Tabel nilai saya" tabindex="0"<?= $grades ? ' aria-describedby="grade-table-scroll-hint"' : '' ?>>
                 <?php if ($grades): ?><p id="grade-table-scroll-hint" class="dls-grade-table-hint"><span class="material-symbols-outlined" aria-hidden="true">swipe</span><span>Geser tabel ke samping untuk melihat semua kolom.</span></p><?php endif; ?>
@@ -26,7 +28,7 @@ $grades = is_array($grades ?? null) ? $grades : [];
                     </tr></thead>
                     <tbody class="divide-y divide-outline-variant/30">
                     <?php foreach ($grades as $grade): ?>
-                        <tr>
+                        <tr class="grade-row">
                             <td class="px-4 py-4"><p class="font-semibold text-on-surface"><?= e($grade['course_title']) ?></p><p class="mt-0.5 text-xs text-on-surface-variant"><?= e($grade['course_code']) ?></p></td>
                             <td class="px-4 py-4"><?= e($grade['category']) ?></td>
                             <td class="px-4 py-4"><?php if (($grade['quiz_score'] ?? null) === null): ?><span class="text-xs text-on-surface-variant">Belum mengerjakan</span><?php else: ?><span class="text-lg font-bold text-primary"><?= e(number_format((float) $grade['quiz_score'], 2, ',', '.')) ?></span><?php endif; ?></td>
@@ -37,6 +39,52 @@ $grades = is_array($grades ?? null) ? $grades : [];
                 </table>
                 <?php if (!$grades): ?><p class="p-10 text-center text-sm text-on-surface-variant">Belum ada course atau nilai untuk ditampilkan.</p><?php endif; ?>
             </div>
+            <?php if (!empty($grades)): ?>
+            <div class="mt-4">
+                <?php include APP_ROOT . '/includes/components/DX_LMS_M_Pagination.php'; ?>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const rows = Array.from(document.querySelectorAll('.grade-row'));
+                    if (!rows.length) return;
+                    const pageSizeSelect = document.getElementById('pageSizeSelect');
+                    const pagContainer = document.getElementById('paginationContainer');
+                    const pageIndicator = document.getElementById('pageIndicator');
+                    const prevPageBtn = document.getElementById('prevPageBtn');
+                    const nextPageBtn = document.getElementById('nextPageBtn');
+                    let currentPage = 1;
+
+                    function render() {
+                        const pageSize = Number(pageSizeSelect?.value) || 10;
+                        const totalPages = Math.ceil(rows.length / pageSize) || 1;
+                        if (currentPage > totalPages) currentPage = totalPages;
+                        if (currentPage < 1) currentPage = 1;
+                        const start = (currentPage - 1) * pageSize;
+                        const end = start + pageSize;
+                        rows.forEach((r, idx) => {
+                            r.style.display = (idx >= start && idx < end) ? '' : 'none';
+                        });
+                        if (rows.length > 5) {
+                            pagContainer?.classList.remove('hidden');
+                            if (pageIndicator) pageIndicator.textContent = 'Halaman ' + currentPage + ' dari ' + totalPages;
+                            if (prevPageBtn) prevPageBtn.disabled = (currentPage === 1);
+                            if (nextPageBtn) nextPageBtn.disabled = (currentPage === totalPages);
+                        } else {
+                            pagContainer?.classList.add('hidden');
+                        }
+                    }
+
+                    pageSizeSelect?.addEventListener('change', () => { currentPage = 1; render(); });
+                    prevPageBtn?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(); } });
+                    nextPageBtn?.addEventListener('click', () => {
+                        const pageSize = Number(pageSizeSelect?.value) || 10;
+                        const totalPages = Math.ceil(rows.length / pageSize) || 1;
+                        if (currentPage < totalPages) { currentPage++; render(); }
+                    });
+                    render();
+                });
+            </script>
+            <?php endif; ?>
         </div>
     </main>
     <?php include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>

@@ -31,6 +31,21 @@ const { closeQuizStore } = require('./services/quiz-store');
 
 const app = express();
 app.disable('x-powered-by');
+
+// Pengukuran latensi respons (ms) dan header performa
+app.use((req, res, next) => {
+  const start = performance.now();
+  const originalEnd = res.end;
+  res.end = function (...args) {
+    if (!res.headersSent) {
+      const durationMs = (performance.now() - start).toFixed(2);
+      res.setHeader('X-Response-Time', `${durationMs}ms`);
+    }
+    return originalEnd.apply(this, args);
+  };
+  next();
+});
+
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' }

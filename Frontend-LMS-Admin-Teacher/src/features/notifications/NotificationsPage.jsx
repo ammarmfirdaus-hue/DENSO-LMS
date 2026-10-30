@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../../api/client';
+import PageHeader from '../../components/PageHeader';
+import Pagination, { usePagination } from '../../components/Pagination';
 
 const categories = [
   ['all', 'Semua'], ['unread', 'Belum dibaca'], ['important', 'Penting'],
@@ -22,6 +24,7 @@ export default function NotificationsPage() {
   const [notice, setNotice] = useState('');
   const [targetRoles, setTargetRoles] = useState(['student']);
   const [sendEmail, setSendEmail] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   async function loadNotifications() {
     try {
@@ -48,6 +51,8 @@ export default function NotificationsPage() {
     });
   }, [items, filter, search]);
 
+  const page = usePagination(filtered, 10);
+
   function toggleAudience(role) {
     setTargetRoles(current => current.includes(role) ? current.filter(value => value !== role) : [...current, role]);
   }
@@ -64,10 +69,10 @@ export default function NotificationsPage() {
         body: JSON.stringify({
           title: data.get('title'), message: data.get('message'),
           category: data.get('category'), priority: data.get('priority'),
-          targetRoles, sendEmail
+          targetRoles, sendEmail, showPopup
         })
       });
-      form.reset(); setTargetRoles(['student']); setSendEmail(false);
+      form.reset(); setTargetRoles(['student']); setSendEmail(false); setShowPopup(false);
       const emailNote = sendEmail ? ` ${result.emailQueued || 0} email masuk antrean pengiriman.` : '';
       setNotice(`Notifikasi terkirim ke ${result.recipients.join(', ')}.${emailNote}`);
       await loadNotifications();
@@ -91,14 +96,18 @@ export default function NotificationsPage() {
     finally { setBusy(false); }
   }
 
-  return <div className="mx-auto min-w-0 max-w-6xl">
-    <header className="mb-6 border-b border-outline/50 pb-5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">PUSAT INFORMASI</p>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-        <div><h1 className="text-2xl font-bold text-on-surface sm:text-3xl">Notifikasi</h1><p className="mt-2 text-sm text-muted">Pengumuman dan pengingat untuk akun LMS.</p></div>
-        <span className="rounded-lg border border-outline/50 bg-white px-3 py-2 text-sm text-secondary">{unreadCount} belum dibaca</span>
-      </div>
-    </header>
+  return (
+    <div className="mx-auto min-w-0 max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow="PUSAT INFORMASI"
+        title="Notifikasi"
+        description="Pengumuman, instruksi pelatihan, dan pengingat untuk akun pengguna portal LMS."
+        actions={
+          <span className="rounded-xl border border-outline/50 bg-white px-3.5 py-2 text-xs font-semibold text-muted shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            {unreadCount} pesan belum dibaca
+          </span>
+        }
+      />
 
     {error && <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
     {notice && <p role="status" className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
@@ -140,6 +149,16 @@ export default function NotificationsPage() {
         <input type="checkbox" checked={sendEmail} onChange={event => setSendEmail(event.target.checked)} className="mt-0.5 accent-primary" />
         <span><strong className="font-semibold text-on-surface">Kirim juga melalui email</strong><span className="mt-0.5 block text-xs text-muted">Email akan masuk antrean untuk akun penerima yang memiliki alamat email.</span></span>
       </label>
+
+      {isAdmin && (
+        <label className="mt-3 flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-outline/40 bg-surface-low/50 p-3 text-sm text-secondary">
+          <input type="checkbox" checked={showPopup} onChange={event => setShowPopup(event.target.checked)} className="mt-0.5 accent-primary" />
+          <span>
+            <strong className="font-semibold text-on-surface">Munculkan Popup Modal</strong>
+            <span className="mt-0.5 block text-xs text-muted">Notifikasi akan langsung muncul sebagai jendela popup modal di layar penerima secara realtime.</span>
+          </span>
+        </label>
+      )}
       <div className="mt-4 flex justify-end"><button disabled={busy} className="min-h-11 w-full rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60 sm:w-auto">{busy ? 'Mengirim…' : 'Kirim notifikasi'}</button></div>
     </form>
 
@@ -158,7 +177,7 @@ export default function NotificationsPage() {
       </div>
       <div className="space-y-3" aria-live="polite">
         {loading ? <div className="rounded-xl border border-outline/50 bg-white p-8 text-center text-sm text-muted">Memuat notifikasi…</div>
-          : filtered.length ? filtered.map(item => <article key={item.notification_id} className={`min-w-0 rounded-xl border bg-white p-4 sm:p-5 ${item.is_read ? 'border-outline/50' : 'border-primary/30 bg-primary/[0.02]'}`}>
+          : filtered.length ? page.pagedItems.map(item => <article key={item.notification_id} className={`min-w-0 rounded-xl border bg-white p-4 sm:p-5 ${item.is_read ? 'border-outline/50' : 'border-primary/30 bg-primary/[0.02]'}`}>
             <div className="flex min-w-0 items-start gap-3">
               <span className={`material-symbol mt-0.5 text-xl ${item.is_read ? 'text-muted' : 'text-primary'}`} aria-hidden="true">{item.category === 'course' ? 'school' : item.category === 'assessment' ? 'assignment' : item.category === 'forum' ? 'forum' : item.category === 'system' ? 'settings' : 'campaign'}</span>
               <div className="min-w-0 flex-1">
@@ -168,7 +187,14 @@ export default function NotificationsPage() {
                 </div>
                 <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-secondary">{item.message}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-outline/30 pt-3">
-                  <span className="rounded-md bg-surface-low px-2 py-1 text-xs text-muted">{categoryName[item.category] || item.category}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md bg-surface-low px-2 py-1 text-xs text-muted">{categoryName[item.category] || item.category}</span>
+                    {Boolean(item.show_popup) && (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
+                        <span className="material-symbol text-xs" aria-hidden="true">campaign</span>Popup Modal
+                      </span>
+                    )}
+                  </div>
                   {!item.is_read && <button type="button" onClick={() => markRead(item.notification_id)} className="min-h-9 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/5">Tandai dibaca</button>}
                 </div>
               </div>
@@ -176,6 +202,18 @@ export default function NotificationsPage() {
           </article>)
           : <div className="rounded-xl border border-dashed border-outline/60 bg-white p-10 text-center"><p className="font-semibold text-on-surface">{items.length ? 'Tidak ada hasil' : 'Belum ada notifikasi'}</p><p className="mt-1 text-sm text-muted">{items.length ? 'Coba kata kunci atau kategori lain.' : 'Notifikasi baru akan muncul di sini.'}</p></div>}
       </div>
+
+      {Boolean(filtered.length) && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-outline/40 bg-white dark:border-slate-800 dark:bg-[#1e293b]">
+          <Pagination
+            {...page}
+            onPageChange={page.setPage}
+            onPageSizeChange={page.setPageSize}
+            pageSizes={[10, 25, 50]}
+          />
+        </div>
+      )}
     </section>
-  </div>;
+  </div>
+  );
 }

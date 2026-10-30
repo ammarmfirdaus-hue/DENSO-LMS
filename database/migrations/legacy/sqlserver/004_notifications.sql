@@ -13,6 +13,7 @@ BEGIN
     sender_role VARCHAR(20) NOT NULL CHECK (sender_role IN ('admin','teacher')),
     sender_name NVARCHAR(150) NOT NULL,
     email_requested BIT NOT NULL DEFAULT 0,
+    show_popup BIT NOT NULL DEFAULT 0,
     created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
   );
 END;

@@ -8,6 +8,7 @@ const { listActiveStudentRecipients } = require('../services/student-auth');
 const { isMailConfigured } = require('../services/notification-mail');
 const { notificationEvents, publishNotificationEvent } = require('../services/notification-events');
 const { permittedRoles, notificationInputSchema, canSendToRoles, audienceLabel, emailBatches } = require('../services/notification-rules');
+const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
 const sendLimiter = buildLimiter({
@@ -61,7 +62,7 @@ router.get('/events', (req, res) => {
   const send = event => {
     if (!event.roles.includes(req.user.role)) return;
     if (event.recipientNpk && event.recipientNpk !== String(req.user.sub)) return;
-    res.write(`id: ${event.id}\nevent: notification\ndata: ${JSON.stringify({ type: event.type })}\n\n`);
+    res.write(`id: ${event.id}\nevent: notification\ndata: ${JSON.stringify({ type: event.type, showPopup: Boolean(event.showPopup) })}\n\n`);
   };
   const heartbeat = setInterval(() => res.write(': keep-alive\n\n'), 25000);
   const remainingSessionMs = Math.max(1000, ((Number(req.user.exp) || Math.floor(Date.now() / 1000) + 8 * 60 * 60) * 1000) - Date.now());
@@ -86,6 +87,7 @@ router.get('/', async (req, res, next) => {
         .input('limit', sql.Int, parsed.data)
         .query(`SELECT TOP (@limit) n.notification_id,n.title,n.message,n.category,n.priority,
             n.sender_npk,n.sender_name,n.sender_role,n.created_at,
+            CAST(ISNULL(n.show_popup, 0) AS BIT) AS show_popup,
             CAST(CASE WHEN r.notification_id IS NULL THEN 0 ELSE 1 END AS BIT) AS is_read
           FROM dbo.lms_notifications n
           LEFT JOIN dbo.lms_notification_reads r ON r.notification_id=n.notification_id
@@ -100,7 +102,8 @@ router.get('/', async (req, res, next) => {
           )`)
     ]);
     res.set('Cache-Control', 'private, no-store');
-    res.json({ notifications: items.recordset, unreadCount: Number(count.recordset[0]?.unread_count || 0) });
+    const page = paginateCollection(req, items.recordset);
+    res.json({ notifications: page.data, unreadCount: Number(count.recordset[0]?.unread_count || 0), pagination: page.pagination });
   } catch (error) { next(error); }
 });
 
@@ -153,9 +156,10 @@ router.post('/', allowRoles('admin', 'teacher'), trustedWriteOrigin, sendLimiter
           .input('senderRole', sql.VarChar(20), req.user.role)
           .input('senderName', sql.NVarChar(150), String(req.user.name || req.user.sub).slice(0, 150))
           .input('emailRequested', sql.Bit, input.sendEmail)
-          .query(`INSERT INTO dbo.lms_notifications(audience_role,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested)
+          .input('showPopup', sql.Bit, input.showPopup)
+          .query(`INSERT INTO dbo.lms_notifications(audience_role,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested,show_popup)
             OUTPUT INSERTED.notification_id,INSERTED.audience_role
-            VALUES(@audience,@title,@message,@category,@priority,@npk,@senderRole,@senderName,@emailRequested)`);
+            VALUES(@audience,@title,@message,@category,@priority,@npk,@senderRole,@senderName,@emailRequested,@showPopup)`);
         created.push(row.recordset[0]);
       }
 
@@ -177,7 +181,7 @@ router.post('/', allowRoles('admin', 'teacher'), trustedWriteOrigin, sendLimiter
       await transaction.commit();
     } catch (error) { await transaction.rollback().catch(() => {}); throw error; }
 
-    publishNotificationEvent({ roles: targetRoles, type: 'notification_created' });
+    publishNotificationEvent({ roles: targetRoles, type: 'notification_created', showPopup: Boolean(input.showPopup) });
     res.status(201).json({
       created: targetRoles.length,
       recipients: targetRoles.map(audienceLabel),

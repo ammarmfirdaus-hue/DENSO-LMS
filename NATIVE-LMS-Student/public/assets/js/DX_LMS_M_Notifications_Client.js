@@ -81,7 +81,13 @@
     body.append(heading);
     body.append(make('p', 'mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-on-surface-variant', item.message || ''));
     const footer = make('div', 'mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/30 pt-3');
-    footer.append(make('span', 'rounded-md bg-surface-container-low px-2 py-1 text-xs text-on-surface-variant', labels[item.category] || 'Notifikasi'));
+    const footerLeft = make('div', 'flex items-center gap-2');
+    footerLeft.append(make('span', 'rounded-md bg-surface-container-low px-2 py-1 text-xs text-on-surface-variant', labels[item.category] || 'Notifikasi'));
+    if (item.show_popup === true || item.show_popup === 1) {
+      const popupBadge = make('span', 'inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700', 'Popup Modal');
+      footerLeft.append(popupBadge);
+    }
+    footer.append(footerLeft);
     if (!read) {
       const readButton = make('button', 'min-h-9 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/5', 'Tandai dibaca');
       readButton.type = 'button';

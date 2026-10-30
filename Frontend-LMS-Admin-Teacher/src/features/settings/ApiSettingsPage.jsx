@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, API_BASE, storeApiBaseUrl } from '../../api/client';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
 import showAlert from '../../utils/alert';
 
 const inputClass = 'mt-1.5 min-h-11 w-full rounded-lg border border-outline/60 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
@@ -69,8 +71,13 @@ export default function ApiSettingsPage() {
     finally { setSyncing(false); }
   }
 
-  return <div className="mx-auto max-w-4xl space-y-6">
-    <header><p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Administrasi &amp; Manajemen</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Atur API</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-muted">Atur alamat Backend LMS untuk portal Admin &amp; Teacher dan aplikasi Native PHP Student, serta jalankan sinkronisasi data Student.</p></header>
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader
+        eyebrow="ADMINISTRASI & MANAJEMEN"
+        title="Atur API"
+        description="Atur alamat Backend LMS untuk portal Admin & Teacher dan aplikasi Native PHP Student, serta jalankan sinkronisasi data Student."
+      />
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800">{error}</p>}
     {message && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{message}</p>}
 
@@ -94,9 +101,9 @@ export default function ApiSettingsPage() {
       {sync?.lastSyncError && <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">Sinkronisasi terakhir gagal: {sync.lastSyncError}</p>}
       <p className="mt-4 rounded-lg border border-outline/40 bg-surface-low/50 p-3 text-xs leading-5 text-muted">Kredensial dan alamat database MySQL Student tetap dikelola lewat konfigurasi <code>.env</code> backend. Halaman ini tidak menampilkan atau menyimpan password database. URL backend yang disimpan di atas juga digunakan Native PHP Student; <code>SSO_API_URL</code> pada <code>.env</code> Student hanya menjadi alamat bootstrap/fallback.</p>
     </section>
-  </div>;
+  </div>
+  );
 }
-
 function Info({ label, value }) {
   return <div className="min-w-0 rounded-xl border border-outline/40 bg-surface-low/40 p-3"><dt className="text-xs font-medium text-muted">{label}</dt><dd className="mt-1 break-words text-sm font-semibold text-secondary">{value || '—'}</dd></div>;
 }

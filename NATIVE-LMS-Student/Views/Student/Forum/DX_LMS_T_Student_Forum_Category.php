@@ -17,14 +17,14 @@ $backUrl = '?route=/student/course/detail&id=' . rawurlencode((string) $courseId
     <?php $header_title = 'Forum Diskusi'; $show_back = true; $back_url = $backUrl; include APP_ROOT . '/includes/components/DX_LMS_M_Header.php'; ?>
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto max-w-4xl">
-            <header class="mb-5 min-w-0 border-b border-outline-variant/40 pb-5">
-                <p class="break-words text-sm font-medium text-on-surface-variant"><?= e($course['title']) ?> <span class="px-1">/</span> <?= e($categoryTitle) ?></p>
-                <div class="mt-2 flex min-w-0 flex-wrap items-center justify-between gap-3">
-                    <div class="min-w-0"><h1 class="text-2xl font-bold">Diskusi sesi</h1><p class="mt-1 text-sm text-on-surface-variant">Tanya, berbagi pengalaman, dan saling menanggapi.</p></div>
-                    <span data-forum-status class="inline-flex shrink-0 rounded-md bg-surface-container px-2.5 py-1.5 text-xs font-semibold text-on-surface-variant">Memuat status…</span>
-                </div>
-                <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-on-surface-variant"><span data-thread-count>Memuat diskusi…</span><span aria-hidden="true">·</span><span>Sesi: <?= e($categoryTitle) ?></span></div>
-            </header>
+            <?php
+            $page_eyebrow = e($course['title']) . ' / ' . e($categoryTitle);
+            $page_title_heading = 'Diskusi Sesi';
+            $page_description = 'Tanya, berbagi pengalaman, dan saling berdiskusi bersama instruktur dan rekan kerja.';
+            $page_actions_html = '<span data-forum-status class="inline-flex shrink-0 items-center rounded-xl border border-outline-variant/50 bg-surface-container px-3 py-1.5 text-xs font-semibold text-on-surface-variant">Memuat status…</span>';
+            include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+            ?>
+            <div class="-mt-3 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-on-surface-variant"><span data-thread-count>Memuat diskusi…</span><span aria-hidden="true">·</span><span>Sesi: <?= e($categoryTitle) ?></span></div>
 
             <?php if ($isRiwayat): ?>
             <div class="mb-4 rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 text-sm text-on-surface-variant">Course telah selesai. Forum ini hanya dapat dibaca.</div>

@@ -5,6 +5,7 @@ const env = require('../config/env');
 const { authenticate, allowRoles } = require('../middleware/auth');
 const { publishNotificationEvent } = require('../services/notification-events');
 const { listActiveStudents, createTeacherRecommendation, listEnrollmentRequests, decideEnrollmentRequest } = require('../services/course-enrollments');
+const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin', 'teacher'));
@@ -34,7 +35,8 @@ router.get('/requests', async (req, res, next) => {
   try {
     const status = ['all', 'pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'all';
     const requests = await listEnrollmentRequests({ isAdmin: req.user.role === 'admin', teacherNpk: req.user.sub, status });
-    res.json({ requests });
+    const page = paginateCollection(req, requests);
+    res.json({ requests: page.data, pagination: page.pagination });
   } catch (error) { next(error); }
 });
 

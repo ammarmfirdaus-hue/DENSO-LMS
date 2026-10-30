@@ -8,6 +8,7 @@ import FinalMaterialDetailModal from './FinalMaterialDetailModal';
 import SubmissionPreviewModal from './SubmissionPreviewModal';
 import SubmitMaterialModal from './SubmitMaterialModal';
 import SubmissionCard from './SubmissionCard';
+import PageHeader from '../../components/PageHeader';
 import showAlert from '../../utils/alert';
 
 const statusLabel = {
@@ -350,13 +351,11 @@ export default function MaterialsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 pb-12">
       {/* ── HEADER ── */}
-      <header className="mb-1">
-        <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Pengelolaan pembelajaran</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Antrean &amp; Persetujuan Materi</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-          Tinjau alur pengajuan materi, kelola perbaikan, kirim tautan evaluasi ke reviewer HRD/manajemen, terbitkan materi yang disetujui, serta pantau seluruh materi final yang sudah aktif di student.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="PENGELOLAAN PEMBELAJARAN"
+        title="Antrean & Persetujuan Materi"
+        description="Tinjau alur pengajuan materi, kelola perbaikan, kirim tautan evaluasi ke reviewer HRD/manajemen, terbitkan materi yang disetujui, serta pantau seluruh materi final yang sudah aktif di student."
+      />
 
       {/* ── RINGKASAN STATUS ── */}
       <section aria-label="Ringkasan status materi" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

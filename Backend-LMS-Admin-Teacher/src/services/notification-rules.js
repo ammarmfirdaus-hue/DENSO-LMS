@@ -8,7 +8,8 @@ const notificationInputSchema = z.object({
   category: z.enum(['announcement', 'course', 'assessment', 'forum', 'system']).default('announcement'),
   priority: z.enum(['normal', 'important']).default('normal'),
   targetRoles: z.array(z.enum(permittedRoles)).min(1).max(3),
-  sendEmail: z.boolean().default(false)
+  sendEmail: z.boolean().default(false),
+  showPopup: z.boolean().default(false)
 }).strict();
 
 function canSendToRoles(senderRole, targetRoles) {

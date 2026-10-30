@@ -11,6 +11,16 @@ test('notification payload validation applies defaults and rejects unsafe extra 
     assert.equal(result.data.category, 'announcement');
     assert.equal(result.data.priority, 'normal');
     assert.equal(result.data.sendEmail, false);
+    assert.equal(result.data.showPopup, false);
+
+    const withPopup = notificationInputSchema.safeParse({
+      title: 'Pemberitahuan Mendesak',
+      message: 'Harap segera cek modul.',
+      targetRoles: ['student', 'teacher'],
+      showPopup: true
+    });
+    assert.equal(withPopup.success, true);
+    assert.equal(withPopup.data.showPopup, true);
   });
 
   await t.test('rejects blank, multiline, too long, and unknown fields', () => {

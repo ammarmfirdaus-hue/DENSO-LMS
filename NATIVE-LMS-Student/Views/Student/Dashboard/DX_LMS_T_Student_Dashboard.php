@@ -111,7 +111,7 @@ $userRole = 'Peserta DENSO';
                 ) ?>">
                     <div class="h-32 bg-surface-container-high relative">
                         <?php if ($c['thumbnail']): ?>
-                        <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" src="<?= e(
+                        <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" src="<?= e(
     $c['thumbnail'],
 ) ?>">
                         <?php else: ?>

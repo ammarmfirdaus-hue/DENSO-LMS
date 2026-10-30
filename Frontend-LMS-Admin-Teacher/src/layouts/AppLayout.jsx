@@ -1,9 +1,10 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
 import JobsCenter from '../components/JobsCenter';
 import showAlert from '../utils/alert';
+import ModalNotif from '../components/ModalNotif';
 
 export default function AppLayout({ user: initialUser, onLogout }) {
   const { pathname } = useLocation();
@@ -18,6 +19,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
   const [user, setUser] = useState(initialUser);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notificationToast, setNotificationToast] = useState(null);
+  const [modalNotification, setModalNotification] = useState(null);
   const [notificationToastWide, setNotificationToastWide] = useState(false);
   const [activityToast, setActivityToast] = useState(null);
   const [activityToastWide, setActivityToastWide] = useState(false);
@@ -52,6 +54,11 @@ export default function AppLayout({ user: initialUser, onLogout }) {
                         ? 'Atur API'
                         : 'Dashboard';
 
+  // Perbarui judul tab browser dan landmark aksesibilitas secara dinamis
+  useEffect(() => {
+    document.title = `${pageTitle} | DENSO LMS`;
+  }, [pageTitle]);
+
   async function enterStudentMode() {
     try {
       const result = await api('/auth/student-mode', { method: 'POST', body: '{}' });
@@ -69,6 +76,19 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     });
   }
 
+  const handleCloseModalNotification = async () => {
+    if (modalNotification) {
+      const notifId = modalNotification.notification_id;
+      sessionStorage.setItem(`dls_dismissed_popup_${notifId}`, '1');
+      try {
+        await api(`/notifications/${notifId}/read`, { method: 'POST', body: '{}' });
+        setNotificationCount(count => Math.max(0, count - 1));
+        window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: 'notification_read' } }));
+      } catch {}
+    }
+    setModalNotification(null);
+  };
+
   useEffect(() => {
     let mounted = true;
     let latestNotificationId = null;
@@ -81,7 +101,15 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     const primeLatestNotification = async () => {
       try {
         const result = await api('/notifications?limit=1');
-        if (mounted && latestNotificationId === null) latestNotificationId = result.notifications?.[0]?.notification_id ?? null;
+        const notification = result.notifications?.[0];
+        if (!mounted || !notification) return;
+        if (latestNotificationId === null) latestNotificationId = notification.notification_id ?? null;
+        if (!notification.is_read && notification.show_popup) {
+          const dismissedKey = `dls_dismissed_popup_${notification.notification_id}`;
+          if (!sessionStorage.getItem(dismissedKey)) {
+            setModalNotification(notification);
+          }
+        }
       } catch {}
     };
     const showIncomingNotification = async () => {
@@ -92,11 +120,15 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         const notificationId = String(notification.notification_id);
         if (latestNotificationId !== null && String(latestNotificationId) === notificationId) return;
         latestNotificationId = notificationId;
-        setNotificationToast(previous => ({ notification, count: previous ? previous.count + 1 : 1 }));
-        window.clearTimeout(notificationToastTimer.current);
-        notificationToastTimer.current = window.setTimeout(() => setNotificationToast(null), 7000);
+        if (notification.show_popup) {
+          setModalNotification(notification);
+        } else {
+          setNotificationToast(previous => ({ notification, count: previous ? previous.count + 1 : 1 }));
+          window.clearTimeout(notificationToastTimer.current);
+          notificationToastTimer.current = window.setTimeout(() => setNotificationToast(null), 7000);
+        }
       } catch {}
-    };
+    };  
     const syncNotifications = event => {
       refreshCount();
       window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: event.type || 'notification_changed' } }));
@@ -192,7 +224,9 @@ export default function AppLayout({ user: initialUser, onLogout }) {
           </div>
         </header>
         <main className="mx-auto max-w-7xl p-4 md:p-8">
-          <Outlet context={user} />
+          <Suspense fallback={<PageSkeleton />}>
+            <Outlet context={user} />
+          </Suspense>
         </main>
       </div>
       {notificationToast && <div className={`fixed right-3 top-20 z-[61] w-[calc(100vw-1.5rem)] sm:right-6 ${notificationToastWide ? 'max-w-xl' : 'max-w-sm'}`} role="status" aria-live="polite">
@@ -221,7 +255,36 @@ export default function AppLayout({ user: initialUser, onLogout }) {
           </div>
         </div>
       </div>}
+      <ModalNotif
+        isOpen={Boolean(modalNotification)}
+        notification={modalNotification}
+        onClose={handleCloseModalNotification}
+      />
       <JobsCenter role={user?.role} />
+    </div>
+  );
+}
+
+/**
+ * Skeleton placeholder saat lazy-loaded chunk halaman dimuat.
+ * Menjaga layout sidebar & header tetap stabil tanpa layar putih.
+ */
+function PageSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Memuat konten halaman...">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="h-3.5 w-24 rounded-md bg-surface-low dark:bg-slate-800" />
+          <div className="h-7 w-48 rounded-lg bg-surface-low dark:bg-slate-800" />
+        </div>
+        <div className="h-10 w-36 rounded-xl bg-surface-low dark:bg-slate-800" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="h-28 rounded-2xl bg-surface-low dark:bg-slate-800" />
+        <div className="h-28 rounded-2xl bg-surface-low dark:bg-slate-800" />
+        <div className="h-28 rounded-2xl bg-surface-low dark:bg-slate-800" />
+      </div>
+      <div className="h-80 rounded-2xl bg-surface-low dark:bg-slate-800" />
     </div>
   );
 }

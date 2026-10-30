@@ -3,6 +3,9 @@ import { useOutletContext } from 'react-router-dom';
 import { api } from '../../api/client';
 import ListFilterBar from '../../components/ListFilterBar';
 import Pagination, { usePagination } from '../../components/Pagination';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
+import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
 import { buildGradesXlsx } from './grade-export';
 
@@ -133,14 +136,25 @@ export default function GradesPage() {
     finally { setBusy(false); }
   }
 
-  return <div className="mx-auto min-w-0 max-w-7xl">
-    <p className="text-sm font-semibold text-primary">PEMBELAJARAN</p>
-    <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-      <div><h1 className="text-3xl font-bold">Kelola Nilai</h1><p className="mt-2 text-muted">Nilai kursus Student dan progres tersinkron.</p></div>
-      <button type="button" onClick={() => exportGrades(filtered)} disabled={!filtered.length} className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">Ekspor Excel</button>
-    </div>
-    {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-    {notice && <p role="status" className="mt-4 rounded-xl bg-green-50 p-4 text-green-800">{notice}</p>}
+  return (
+    <div className="mx-auto min-w-0 max-w-7xl space-y-6">
+      <PageHeader
+        eyebrow="PEMBELAJARAN"
+        title="Kelola Nilai"
+        description="Pantau dan kelola snapshot nilai quiz, penilaian kursus, serta progres belajar student yang tersinkronisasi."
+        actions={
+          <Button
+            type="button"
+            icon="download"
+            disabled={!filtered.length}
+            onClick={() => exportGrades(filtered)}
+          >
+            Ekspor Excel
+          </Button>
+        }
+      />
+      {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">{error}</p>}
+    {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">{notice}</p>}
 
     <div className="mt-7 overflow-hidden rounded-2xl border border-outline/50 bg-white">
       <div className="p-5 pb-1"><div className="mb-3 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted">Menampilkan {filtered.length} dari {rows.length} data nilai/progres</p>{isAdmin && selectedFiltered.length > 0 && <button type="button" disabled={busy} onClick={deleteSelectedGrades} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50"><span className="material-symbol" aria-hidden="true">delete_sweep</span>Hapus Nilai Terpilih ({selectedFiltered.length})</button>}</div>
@@ -180,5 +194,6 @@ export default function GradesPage() {
       <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-lg border border-outline/40 p-3 text-sm"><input type="checkbox" checked={sendEmail} onChange={event => setSendEmail(event.target.checked)} className="mt-0.5 accent-primary" /><span><strong>Kirim juga melalui email</strong><span className="mt-0.5 block text-xs text-muted">Email masuk antrean jika SMTP aktif dan Student memiliki email.</span></span></label>
       <div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setNotifying(null)} className={buttonClass}>Batal</button><button disabled={busy} className="min-h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-white">Kirim</button></div>
     </form></div>}
-  </div>;
+  </div>
+  );
 }

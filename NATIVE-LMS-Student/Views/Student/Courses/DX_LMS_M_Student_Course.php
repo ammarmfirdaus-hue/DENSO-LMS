@@ -58,7 +58,7 @@
                     <?php if ($c['thumbnail']): ?>
                     <img alt="<?= e(
                         $c['title'],
-                    ) ?>" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="<?= e(
+                    ) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="<?= e(
     $c['thumbnail'],
 ) ?>">
                     <?php endif; ?>

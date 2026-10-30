@@ -177,7 +177,7 @@ export default function ReviewerPortalPage() {
       return embed ? <div className="aspect-video overflow-hidden rounded-2xl bg-black"><iframe title={item.title} src={embed} className="size-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div> : <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Tautan video tidak dapat ditampilkan.</p>;
     }
     if (!fileUrl) return item.content ? <a className="inline-flex min-h-10 items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white" href={item.content} target="_blank" rel="noreferrer">Buka materi</a> : <div className="grid min-h-48 place-items-center rounded-lg bg-surface-low text-sm text-muted">Memuat materi…</div>;
-    if (type === 'image') return <img src={fileUrl} alt={item.title} className="mx-auto max-h-[60vh] max-w-full rounded-2xl object-contain" />;
+    if (type === 'image') return <img src={fileUrl} alt={item.title} loading="lazy" decoding="async" className="mx-auto max-h-[60vh] max-w-full rounded-2xl object-contain" />;
     if (type === 'video') return <video src={fileUrl} controls className="max-h-[60vh] w-full rounded-2xl bg-black" />;
     if (type === 'audio') return <audio src={fileUrl} controls className="w-full" />;
     if (type === 'pdf') return <iframe title={item.title} src={fileUrl} className="h-[65vh] w-full rounded-2xl border border-outline" />;

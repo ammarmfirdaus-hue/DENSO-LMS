@@ -4,6 +4,7 @@ const { sql, pool } = require('../config/database');
 const env = require('../config/env');
 const { authenticate, allowRoles } = require('../middleware/auth');
 const { getQuizStore } = require('../services/quiz-store');
+const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
 router.use(authenticate, allowRoles('admin', 'teacher'));
@@ -75,7 +76,9 @@ router.get('/', async (req, res, next) => {
       question_count: Number(quiz.question_count || 0),
       attempt_count: Number(quiz.attempt_count || 0)
     }]));
-    res.json({ courses: courses.map(course => ({ ...course, quiz: quizByCode.get(course.course_code) || null })) });
+    const mapped = courses.map(course => ({ ...course, quiz: quizByCode.get(course.course_code) || null }));
+    const page = paginateCollection(req, mapped);
+    res.json({ courses: page.data, pagination: page.pagination });
   } catch (error) { next(error); }
 });
 

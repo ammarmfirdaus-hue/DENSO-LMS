@@ -15,16 +15,13 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
 
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto min-w-0 max-w-5xl">
-            <header class="mb-6 flex min-w-0 flex-wrap items-end justify-between gap-4 border-b border-outline-variant/40 pb-5">
-                <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-primary">PUSAT INFORMASI</p>
-                    <h1 class="mt-2 text-2xl font-bold text-on-surface sm:text-3xl">Notifikasi</h1>
-                    <p class="mt-2 text-sm text-on-surface-variant">Pengumuman dan pengingat terkait pembelajaran Anda.</p>
-                </div>
-                <span class="inline-flex min-h-9 shrink-0 items-center rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-3 text-sm font-semibold text-on-surface-variant">
-                    <span data-notification-unread-count><?= $notif_count ?></span>&nbsp;belum dibaca
-                </span>
-            </header>
+            <?php
+            $page_eyebrow = 'PUSAT INFORMASI';
+            $page_title_heading = 'Notifikasi';
+            $page_description = 'Pengumuman dan pengingat terkait pembelajaran Anda.';
+            $page_actions_html = '<span class="inline-flex min-h-9 shrink-0 items-center rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-3.5 text-xs font-semibold text-on-surface-variant"><span data-notification-unread-count>' . $notif_count . '</span>&nbsp;belum dibaca</span>';
+            include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+            ?>
 
             <div class="mb-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto]">
                 <label class="relative block min-w-0">
