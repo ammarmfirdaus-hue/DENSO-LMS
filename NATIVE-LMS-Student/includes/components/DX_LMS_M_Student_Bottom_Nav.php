@@ -54,7 +54,7 @@ $tabs = [
         'href' => '?route=' . $route_prefix . '/profil',
     ],
 ];
-?>
+
 $hari_list = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 $bulan_list = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 $current_day_name = $hari_list[(int)date('w')];
@@ -91,9 +91,22 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
                 type="search"
                 id="studentMenuSearch"
                 placeholder="Cari menu..."
-                class="h-8 w-full rounded-xl border border-outline-variant/70 bg-white dark:bg-slate-900 pl-8 pr-3 text-xs outline-none transition focus:border-primary dark:text-slate-100 dark:placeholder:text-slate-500"
+                class="h-8 w-full rounded-xl border border-outline-variant/70 bg-white dark:bg-slate-900 pl-8 pr-7 text-xs outline-none transition focus:border-primary dark:text-slate-100 dark:placeholder:text-slate-500"
                 oninput="window.filterStudentMenu(this.value)"
             />
+            <button
+                type="button"
+                id="btnStudentClearSearch"
+                onclick="window.clearStudentMenuSearch()"
+                class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
+                aria-label="Hapus pencarian menu"
+            >
+                <span class="material-symbols-outlined text-[14px]">close</span>
+            </button>
+        </div>
+        <div id="studentMenuNoResult" class="hidden py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined text-lg block mb-1">search_off</span>
+            Menu tidak ditemukan
         </div>
     </div>
 
@@ -271,6 +284,47 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
     // Also restore if DOMContentLoaded already fired
     if (document.readyState !== 'loading') restoreState();
 })();
+
+/* ── Student Menu Search Filtering ── */
+window.filterStudentMenu = function(query) {
+    query = (query || '').toLowerCase().trim();
+    var clearBtn = document.getElementById('btnStudentClearSearch');
+    if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !query);
+    }
+    var nav = document.getElementById('bottomNavBar');
+    if (!nav) return;
+    
+    var linkIds = ['nav-beranda', 'nav-course', 'nav-nilai', 'nav-riwayat', 'nav-notifikasi', 'nav-profil-desktop'];
+    var matchedCount = 0;
+    
+    linkIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var text = (el.textContent || '').replace(/[\r\n\t]+/g, ' ').toLowerCase();
+        var isMatch = !query || text.indexOf(query) !== -1;
+        if (isMatch) {
+            el.style.display = '';
+            matchedCount++;
+        } else {
+            el.style.display = 'none';
+        }
+    });
+
+    var emptyMsg = document.getElementById('studentMenuNoResult');
+    if (emptyMsg) {
+        emptyMsg.classList.toggle('hidden', !query || matchedCount > 0);
+    }
+};
+
+window.clearStudentMenuSearch = function() {
+    var input = document.getElementById('studentMenuSearch');
+    if (input) {
+        input.value = '';
+        window.filterStudentMenu('');
+        input.focus();
+    }
+};
 
 window.toggleStudentProfileDropup = function() {
     var menu = document.getElementById('studentProfileDropup');
