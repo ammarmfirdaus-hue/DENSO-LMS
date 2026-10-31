@@ -55,6 +55,14 @@ $tabs = [
     ],
 ];
 ?>
+$hari_list = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+$bulan_list = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+$current_day_name = $hari_list[(int)date('w')];
+$current_day_num  = date('j');
+$current_month_name = $bulan_list[(int)date('n')];
+$current_year     = date('Y');
+$current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_name} {$current_year}";
+?>
 <form id="studentNavLogoutForm" class="hidden" method="POST" action="?route=/auth/logout" aria-hidden="true">
     <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
 </form>
@@ -68,6 +76,25 @@ $tabs = [
         <button type="button" id="dlsSidebarCollapseBtn" onclick="window.toggleStudentSidebar()" class="dls-sidebar-text ml-auto flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition cursor-pointer" title="Kecilkan sidebar" aria-label="Kecilkan sidebar">
             <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
         </button>
+    </div>
+
+    <!-- Date & Search Box untuk Sidebar Desktop -->
+    <div class="hidden lg:flex flex-col gap-2 my-2 w-full dls-sidebar-text">
+        <div class="p-2.5 rounded-xl border border-outline-variant/60 bg-slate-50 dark:bg-slate-800/60 text-center">
+            <p class="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                <?= $current_date_str ?>
+            </p>
+        </div>
+        <div class="relative w-full">
+            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none" aria-hidden="true">search</span>
+            <input
+                type="search"
+                id="studentMenuSearch"
+                placeholder="Cari menu..."
+                class="h-8 w-full rounded-xl border border-outline-variant/70 bg-white dark:bg-slate-900 pl-8 pr-3 text-xs outline-none transition focus:border-primary dark:text-slate-100 dark:placeholder:text-slate-500"
+                oninput="window.filterStudentMenu(this.value)"
+            />
+        </div>
     </div>
 
     <p class="dls-nav-section-label dls-sidebar-text">MENU UTAMA</p>

@@ -100,7 +100,7 @@ export default function DashboardPage() {
       <section className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
         
         {/* Left: Material distribution progress */}
-        <article className="rounded-2xl border border-outline/50 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-[#1e293b]">
+        <article className="rounded-2xl border border-slate-200/90 bg-slate-100 p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-800/90">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-on-surface">Materi per Course</h2>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
         </article>
 
         {/* Right: Recent activity feed */}
-        <article className="rounded-2xl border border-outline/50 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-[#1e293b]">
+        <article className="rounded-2xl border border-slate-200/90 bg-slate-100 p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-800/90">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-on-surface">Aktivitas Terkini</h2>

@@ -6,8 +6,8 @@
     --student-ink: #172b3c;
     --student-muted: #687887;
     --student-paper: #f6f7f7;
-    --student-card: #fff;
-    --student-line: #e4e9ed;
+    --student-card: #f1f5f9;
+    --student-line: #cbd5e1;
     --student-green: #27815d;
     --student-focus: rgba(201, 31, 42, .2);
     --student-shadow: 0 5px 18px rgba(24, 42, 58, .055);
@@ -16,8 +16,8 @@
     --crs-red: #c91f2a;
     --crs-green: #27815d;
     --crs-surface: #f6f7f7;
-    --crs-card: #fff;
-    --crs-border: #e4e9ed;
+    --crs-card: #f1f5f9;
+    --crs-border: #cbd5e1;
     --crs-text: #172b3c;
     --crs-text-muted: #687887;
     --crs-r-sm: 9px;

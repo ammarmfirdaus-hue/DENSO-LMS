@@ -47,6 +47,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isDark, setIsDark] = useState(() => getInitialTheme() === 'dark');
   const [isHovered, setIsHovered] = useState(false);
+  const [menuSearch, setMenuSearch] = useState('');
   const dropupRef = useRef(null);
 
   // Desktop expanded state is true if NOT collapsed OR when hovered over collapsed sidebar
@@ -172,11 +173,62 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
           </button>
         </div>
 
+        {/* Date & Search — hanya tampil saat sidebar terbuka/expanded */}
+        {isExpanded && (
+          <div className="mx-2.5 mt-3 mb-1 space-y-2">
+            {/* Tanggal */}
+            <div className="rounded-xl border border-outline/50 bg-slate-50 px-3 py-2 text-center dark:border-slate-700 dark:bg-slate-800/60">
+              <p className="text-xs font-semibold text-on-surface">
+                {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            {/* Cari menu */}
+            <div className="relative">
+              <span className="material-symbol absolute left-2.5 top-1/2 -translate-y-1/2 text-base text-muted pointer-events-none" aria-hidden="true">search</span>
+              <input
+                type="search"
+                placeholder="Cari menu..."
+                value={menuSearch}
+                onChange={e => setMenuSearch(e.target.value)}
+                className="h-9 w-full rounded-xl border border-outline/60 bg-white pl-8 pr-7 text-xs outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+              />
+              {menuSearch && (
+                <button
+                  type="button"
+                  onClick={() => setMenuSearch('')}
+                  aria-label="Hapus pencarian menu"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-secondary p-0.5 rounded cursor-pointer"
+                >
+                  <span className="material-symbol text-xs" aria-hidden="true">close</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Grouped Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-4">
-          {MENU_GROUPS.map(group => {
-            if (group.adminOnly && !isAdmin) return null;
-            return (
+        <nav className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
+          {(() => {
+            const query = menuSearch.trim().toLowerCase();
+            const filteredGroups = MENU_GROUPS.map(group => {
+              if (group.adminOnly && !isAdmin) return null;
+              const links = group.links
+                .filter(link => (!link.teacherOnly || user?.role === 'teacher') && (!link.adminOnly || isAdmin))
+                .filter(link => !query || link.label.toLowerCase().includes(query));
+              if (links.length === 0) return null;
+              return { ...group, links };
+            }).filter(Boolean);
+
+            if (filteredGroups.length === 0 && query) {
+              return (
+                <div className="px-3 py-6 text-center">
+                  <span className="material-symbol text-2xl text-muted" aria-hidden="true">search_off</span>
+                  <p className="mt-1 text-xs text-muted">Menu &quot;{menuSearch}&quot; tidak ditemukan</p>
+                </div>
+              );
+            }
+
+            return filteredGroups.map(group => (
               <div key={group.title || 'dashboard'} className="space-y-1">
                 {!group.standalone && (isExpanded ? (
                   <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted/80 truncate">
@@ -185,12 +237,15 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                 ) : (
                   <div className="mx-2 my-2 border-t border-outline/40" title={group.title} />
                 ))}
-                {group.links.filter(link => (!link.teacherOnly || user?.role === 'teacher') && (!link.adminOnly || isAdmin)).map(link => (
+                {group.links.map(link => (
                   <NavLink
                     key={link.to}
                     to={link.to}
                     end={link.to === '/'}
-                    onClick={onClose}
+                    onClick={() => {
+                      if (menuSearch) setMenuSearch('');
+                      onClose?.();
+                    }}
                     title={!isExpanded ? link.label : undefined}
                     className={({ isActive }) =>
                       `flex items-center rounded-xl text-xs font-semibold transition ${
@@ -209,8 +264,8 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                   </NavLink>
                 ))}
               </div>
-            );
-          })}
+            ));
+          })()}
         </nav>
 
         {/* ── BOTTOM PROFILE SECTION WITH DROPUP ── */}

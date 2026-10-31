@@ -514,7 +514,7 @@ export default function MaterialsPage() {
               return (
                 <article
                   key={item.material_id}
-                  className="group relative flex flex-col justify-between rounded-2xl border border-outline/40 bg-white p-5 shadow-xs transition hover:border-emerald-500/40 hover:shadow-md"
+                  className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-100 p-5 shadow-xs transition hover:border-emerald-500/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90"
                 >
                   {isAdmin && <label className="absolute right-3 top-3 z-10 inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-outline/50 bg-white shadow-sm" title="Pilih materi final"><input type="checkbox" aria-label={`Pilih materi ${item.title}`} disabled={busy} checked={selectedFinalMaterials.has(String(item.material_id))} onChange={() => toggleSelected(setSelectedFinalMaterials, item.material_id)} className="size-4 accent-primary" /></label>}
                   <div>
@@ -557,7 +557,7 @@ export default function MaterialsPage() {
 
                     {/* Text Preview Snippet if Text */}
                     {item.material_type === 'text' && item.content && (
-                      <div className="mt-3 line-clamp-2 rounded-lg bg-surface-low/50 p-2 text-xs text-muted">
+                      <div className="mt-3 line-clamp-2 rounded-lg bg-white border border-slate-200/60 p-2 text-xs text-muted dark:bg-slate-900 dark:border-slate-700/60">
                         <div dangerouslySetInnerHTML={{ __html: item.content.slice(0, 160) }} />
                       </div>
                     )}

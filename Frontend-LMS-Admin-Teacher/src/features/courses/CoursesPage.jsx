@@ -170,7 +170,7 @@ export default function CoursesPage() {
             {coursePage.pagedItems.map(course => (
               <article
                 key={course.course_id}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-xs transition duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-[#1e293b]"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-800/90"
               >
                 <div className="h-1.5 bg-primary/80" />
                 <div className="flex flex-1 flex-col p-5">
@@ -258,7 +258,7 @@ export default function CoursesPage() {
 /** Stat snippet widget within course cards */
 function MiniStat({ label, value }) {
   return (
-    <div className="rounded-xl bg-surface-low px-3 py-2 dark:bg-slate-800/60">
+    <div className="rounded-xl border border-slate-200/60 bg-white px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900">
       <p className="text-base font-bold text-on-surface">{value || 0}</p>
       <p className="text-[11px] text-muted">{label}</p>
     </div>

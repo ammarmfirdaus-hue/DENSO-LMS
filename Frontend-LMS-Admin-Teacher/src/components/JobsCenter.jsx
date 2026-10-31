@@ -188,12 +188,14 @@ export default function JobsCenter({ role }) {
 
   function startDrag(event) {
     const element = hidden ? restoreRef.current : panelRef.current;
-    if (event.button !== 0 || !element) return;
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !element) return;
     event.preventDefault();
     const rect = element.getBoundingClientRect();
     dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, element };
     setPosition(clampPosition(rect.left, rect.top, element));
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    } catch {}
   }
 
   function moveDrag(event) {
@@ -205,7 +207,9 @@ export default function JobsCenter({ role }) {
   function endDrag(event) {
     if (dragRef.current?.pointerId !== event.pointerId) return;
     dragRef.current = null;
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    try {
+      if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {}
   }
 
   function nudgePosition(event) {
@@ -222,12 +226,12 @@ export default function JobsCenter({ role }) {
   if (hidden) return <div
     ref={restoreRef}
     style={floatingPosition}
-    className="fixed bottom-3 right-3 z-40 inline-flex min-h-11 max-w-[calc(100vw-1.5rem)] items-center overflow-hidden rounded-full border border-primary bg-primary text-sm font-semibold text-white shadow-xl"
+    className="fixed bottom-3 right-3 z-40 inline-flex min-h-9 max-w-[calc(100vw-1.5rem)] items-center overflow-hidden rounded-full border border-primary bg-primary text-xs font-semibold text-white shadow-lg"
     aria-label="Antrean tersembunyi"
   >
-    <button type="button" data-dls-action-ignore="true" onClick={() => setHidden(false)} className="inline-flex min-h-11 min-w-0 items-center gap-2 px-4 py-2 text-left text-white hover:bg-red-800" aria-label={`Tampilkan antrean ${currentJob.job_id}, progres ${percent}%`} title="Tampilkan progres antrean">
-      <span className="material-symbol text-white" aria-hidden="true">pending_actions</span>
-      <span className="max-w-48 truncate">Antrean #{currentJob.job_id} · {percent}%</span>
+    <button type="button" data-dls-action-ignore="true" onClick={() => setHidden(false)} className="inline-flex min-h-9 min-w-0 items-center gap-1.5 px-3 py-1.5 text-left text-white hover:bg-red-800" aria-label={`Tampilkan antrean ${currentJob.job_id}, progres ${percent}%`} title="Tampilkan progres antrean">
+      <span className="material-symbol text-base text-white" aria-hidden="true">pending_actions</span>
+      <span className="max-w-40 truncate">Antrean #{currentJob.job_id} · {percent}%</span>
     </button>
     <button
       type="button"
@@ -239,17 +243,17 @@ export default function JobsCenter({ role }) {
       onKeyDown={nudgePosition}
       title="Seret untuk memindahkan; gunakan tombol panah untuk menggeser"
       aria-label="Pindahkan tombol antrean"
-      className="touch-none cursor-move self-stretch border-l border-white px-2 text-white hover:bg-red-800"
-    ><span className="material-symbol" aria-hidden="true">drag_indicator</span></button>
+      className="inline-flex touch-none cursor-move self-stretch border-l border-white/40 px-2 text-white hover:bg-red-800 items-center"
+    ><span className="material-symbol text-sm" aria-hidden="true">drag_indicator</span></button>
   </div>;
 
-  return <aside ref={panelRef} style={floatingPosition} className="fixed bottom-3 right-3 z-40 max-h-[calc(100dvh-1.5rem)] w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950" aria-label="Progress antrean">
-    <div className="flex items-center justify-between gap-2 border-b border-primary bg-primary px-3 py-3 text-white sm:gap-3 sm:px-4">
-      <button type="button" data-dls-action-ignore="true" onClick={() => setExpanded(value => !value)} className="flex min-w-0 flex-1 items-center gap-2 text-left text-white hover:text-white">
-        <span className="material-symbol text-white" aria-hidden="true">{isActive ? 'pending_actions' : 'task_alt'}</span>
-        <span className="min-w-0"><strong className="block truncate text-sm">Antrean #{currentJob.job_id}</strong><span className="block truncate text-xs text-white">{statusLabels[currentJob.status] || currentJob.status}</span></span>
+  return <aside ref={panelRef} style={floatingPosition} className="fixed bottom-3 right-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-950 text-xs" aria-label="Progress antrean">
+    <div className="flex items-center justify-between gap-1.5 border-b border-primary bg-primary px-3 py-2 text-white">
+      <button type="button" data-dls-action-ignore="true" onClick={() => setExpanded(value => !value)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-white hover:text-white">
+        <span className="material-symbol text-base text-white shrink-0" aria-hidden="true">{isActive ? 'pending_actions' : 'task_alt'}</span>
+        <span className="min-w-0"><strong className="block truncate text-xs font-bold">Antrean #{currentJob.job_id}</strong><span className="block truncate text-[10px] text-white/90">{statusLabels[currentJob.status] || currentJob.status}</span></span>
       </button>
-      <div className="flex shrink-0 items-center gap-1" data-dls-action-layout-ignore="true">
+      <div className="flex shrink-0 items-center gap-0.5" data-dls-action-layout-ignore="true">
         <button
           type="button"
           data-dls-action-ignore="true"
@@ -260,26 +264,27 @@ export default function JobsCenter({ role }) {
           onKeyDown={nudgePosition}
           title="Seret untuk memindahkan; gunakan tombol panah untuk menggeser"
           aria-label="Pindahkan modal antrean"
-          className="touch-none cursor-move rounded-lg border border-white bg-white px-2 py-1.5 text-primary hover:bg-neutral-100"
-        ><span className="material-symbol" aria-hidden="true">drag_indicator</span></button>
-        {['stopped', 'failed'].includes(currentJob.status) && currentJob.processed_items < currentJob.total_items && <button type="button" data-dls-action-ignore="true" disabled={busy} onClick={() => control('resume')} title="Lanjutkan antrean" aria-label="Lanjutkan antrean" className="rounded-lg border border-white bg-white px-2 py-1.5 text-primary hover:bg-neutral-100 disabled:opacity-50"><span className="material-symbol">play_arrow</span></button>}
-        {isActive && <button type="button" data-dls-action-ignore="true" disabled={busy || currentJob.status === 'stopping'} onClick={() => control('stop')} title="Hentikan antrean" aria-label="Hentikan antrean" className="rounded-lg border border-white bg-white px-2 py-1.5 text-primary hover:bg-neutral-100 disabled:opacity-50"><span className="material-symbol">stop</span></button>}
-        <button type="button" data-dls-action-ignore="true" onClick={() => setExpanded(value => !value)} title={expanded ? 'Ciutkan progress' : 'Tampilkan progress'} aria-label={expanded ? 'Ciutkan progress' : 'Tampilkan progress'} className="rounded-lg border border-white bg-white px-2 py-1.5 text-primary hover:bg-neutral-100"><span className="material-symbol">{expanded ? 'expand_more' : 'expand_less'}</span></button>
-        <button type="button" data-dls-action-ignore="true" onClick={() => setHidden(true)} title="Sembunyikan antrean" aria-label="Sembunyikan modal antrean" className="rounded-lg border border-white bg-white px-2 py-1.5 text-primary hover:bg-neutral-100"><span className="material-symbol" aria-hidden="true">visibility_off</span></button>
+          className="inline-flex touch-none cursor-move rounded-md border border-white/60 bg-white/10 p-1 text-white hover:bg-white hover:text-primary transition"
+        ><span className="material-symbol text-xs" aria-hidden="true">drag_indicator</span></button>
+        {['stopped', 'failed'].includes(currentJob.status) && currentJob.processed_items < currentJob.total_items && <button type="button" data-dls-action-ignore="true" disabled={busy} onClick={() => control('resume')} title="Lanjutkan antrean" aria-label="Lanjutkan antrean" className="rounded-md border border-white/60 bg-white/10 p-1 text-white hover:bg-white hover:text-primary disabled:opacity-50 transition"><span className="material-symbol text-xs">play_arrow</span></button>}
+        {isActive && <button type="button" data-dls-action-ignore="true" disabled={busy || currentJob.status === 'stopping'} onClick={() => control('stop')} title="Hentikan antrean" aria-label="Hentikan antrean" className="rounded-md border border-white/60 bg-white/10 p-1 text-white hover:bg-white hover:text-primary disabled:opacity-50 transition"><span className="material-symbol text-xs">stop</span></button>}
+        <button type="button" data-dls-action-ignore="true" onClick={() => setExpanded(value => !value)} title={expanded ? 'Ciutkan progress' : 'Tampilkan progress'} aria-label={expanded ? 'Ciutkan progress' : 'Tampilkan progress'} className="rounded-md border border-white/60 bg-white/10 p-1 text-white hover:bg-white hover:text-primary transition"><span className="material-symbol text-xs">{expanded ? 'expand_more' : 'expand_less'}</span></button>
+        <button type="button" data-dls-action-ignore="true" onClick={() => setHidden(true)} title="Sembunyikan antrean" aria-label="Sembunyikan modal antrean" className="rounded-md border border-white/60 bg-white/10 p-1 text-white hover:bg-white hover:text-primary transition"><span className="material-symbol text-xs" aria-hidden="true">visibility_off</span></button>
       </div>
     </div>
-    {expanded && <div className="max-h-[calc(100dvh-5rem)] overflow-y-auto bg-white p-3 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 sm:p-4">
-      <div className="mb-2 flex justify-between text-xs text-neutral-700 dark:text-neutral-300"><span>{currentJob.processed_items} dari {currentJob.total_items} diproses</span><span>{percent}%</span></div>
-      <div className="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"><div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${percent}%` }}/></div>
-      {currentJob.current_item && <p className="mt-3 truncate text-sm font-medium" title={currentJob.current_item}>Sedang diproses: {typedCurrent}{typedCurrent.length < currentJob.current_item.length ? '▍' : ''}</p>}
-      <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">{currentJob.success_count} berhasil · {currentJob.failure_count} gagal · item berikutnya tetap di antrean jika dihentikan.</p>
-      {controlError && <p role="alert" className="mt-2 text-xs text-red-700">{controlError}</p>}
-      <ol className="mt-3 max-h-48 space-y-1 overflow-y-auto border-t border-neutral-200 pt-3 dark:border-neutral-800" aria-live="polite">
-        {events.filter(event => event.item_no > 0 && event.item_status !== 'processing').slice(-12).map(event => <li key={event.event_id} className="flex items-start justify-between gap-3 text-xs">
-          <span className="min-w-0"><strong className="mr-1 text-neutral-600 dark:text-neutral-400">{event.item_no}.</strong><span className="break-words">{event.item_label}</span>{event.message && <span className="block pl-4 text-neutral-600 dark:text-neutral-400">{event.message}</span>}</span>
-          <span className={`shrink-0 font-semibold ${event.item_status === 'failed' ? 'text-primary' : 'text-neutral-700 dark:text-neutral-300'}`}>{labelEvent(event)}</span>
+    {expanded && <div className="bg-white p-3 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+      <div className="mb-1.5 flex justify-between text-[11px] font-semibold text-neutral-700 dark:text-neutral-300"><span>{currentJob.processed_items} dari {currentJob.total_items} diproses</span><span className="font-bold text-primary">{percent}%</span></div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"><div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${percent}%` }}/></div>
+      {currentJob.current_item && <p className="mt-2 truncate text-[11px] font-medium" title={currentJob.current_item}>Sedang diproses: {typedCurrent}{typedCurrent.length < currentJob.current_item.length ? '▍' : ''}</p>}
+      <p className="mt-1 text-[10px] text-neutral-500 dark:text-neutral-400">{currentJob.success_count} berhasil · {currentJob.failure_count} gagal<span className="hidden sm:inline"> · item berikutnya tetap di antrean jika dihentikan.</span></p>
+      {controlError && <p role="alert" className="mt-1 text-[11px] text-red-700">{controlError}</p>}
+      {/* Log event detail: disembunyikan di mobile agar modal tidak besar di layar ponsel */}
+      <ol className="hidden sm:block mt-2 max-h-28 space-y-1 overflow-y-auto border-t border-neutral-200 pt-2 text-[11px] dark:border-neutral-800" aria-live="polite">
+        {events.filter(event => event.item_no > 0 && event.item_status !== 'processing').slice(-8).map(event => <li key={event.event_id} className="flex items-start justify-between gap-2">
+          <span className="min-w-0"><strong className="mr-1 text-neutral-500 dark:text-neutral-400">{event.item_no}.</strong><span className="break-words">{event.item_label}</span>{event.message && <span className="block pl-3 text-[10px] text-neutral-500 dark:text-neutral-400">{event.message}</span>}</span>
+          <span className={`shrink-0 font-semibold text-[10px] ${event.item_status === 'failed' ? 'text-primary' : 'text-neutral-600 dark:text-neutral-400'}`}>{labelEvent(event)}</span>
         </li>)}
-        {!events.some(event => event.item_no > 0) && <li className="text-xs text-neutral-600 dark:text-neutral-400">Menunggu item pertama…</li>}
+        {!events.some(event => event.item_no > 0) && <li className="text-[10px] text-neutral-500 dark:text-neutral-400">Menunggu item pertama…</li>}
       </ol>
     </div>}
   </aside>;

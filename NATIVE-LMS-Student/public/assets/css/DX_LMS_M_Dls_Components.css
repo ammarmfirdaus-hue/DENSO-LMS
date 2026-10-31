@@ -23,6 +23,98 @@
     box-shadow: var(--dls-shadow-md);
 }
 
+/* Card list data styling: solid non-white, non-gradient card surface */
+.course-card,
+.dls-stat-card,
+.dls-card {
+    background-color: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+}
+
+html.dark .course-card,
+body.dark .course-card,
+html.dark .dls-stat-card,
+body.dark .dls-stat-card,
+html.dark .dls-card,
+body.dark .dls-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* === Excel-like Table Styling === */
+.dls-grade-table,
+.dls-table,
+.tinymce-content table,
+.overflow-x-auto > table {
+    width: 100%;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
+.dls-grade-table th,
+.dls-table th,
+.tinymce-content table th,
+.overflow-x-auto > table th {
+    border: 1px solid #cbd5e1 !important;
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    padding: 10px 14px !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+
+.dls-grade-table td,
+.dls-table td,
+.tinymce-content table td,
+.overflow-x-auto > table td {
+    border: 1px solid #e2e8f0 !important;
+    padding: 10px 14px !important;
+    vertical-align: middle !important;
+}
+
+.dls-grade-table tbody tr:nth-child(even) td,
+.dls-table tbody tr:nth-child(even) td,
+.overflow-x-auto > table tbody tr:nth-child(even) td {
+    background-color: #f8fafc;
+}
+
+.dls-grade-table tbody tr:hover td,
+.dls-table tbody tr:hover td,
+.overflow-x-auto > table tbody tr:hover td {
+    background-color: #eff6ff !important;
+}
+
+/* Dark mode Excel gridlines */
+html.dark .dls-grade-table th,
+html.dark .dls-table th,
+html.dark .tinymce-content table th,
+html.dark .overflow-x-auto > table th {
+    border-color: #334155 !important;
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark .dls-grade-table td,
+html.dark .dls-table td,
+html.dark .tinymce-content table td,
+html.dark .overflow-x-auto > table td {
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark .dls-grade-table tbody tr:nth-child(even) td,
+html.dark .dls-table tbody tr:nth-child(even) td,
+html.dark .overflow-x-auto > table tbody tr:nth-child(even) td {
+    background-color: rgba(30, 41, 59, 0.4) !important;
+}
+
+html.dark .dls-grade-table tbody tr:hover td,
+html.dark .dls-table tbody tr:hover td,
+html.dark .overflow-x-auto > table tbody tr:hover td {
+    background-color: rgba(51, 65, 85, 0.6) !important;
+}
+
 .dls-card-body {
     padding: var(--dls-stack-md);
 }

@@ -38,7 +38,7 @@ export default function DataTable({
             <thead className="border-b border-outline/50 bg-surface-low text-xs font-semibold uppercase tracking-wider text-muted dark:border-slate-800 dark:bg-slate-900/60">
               <tr>
                 {columns.map((col, index) => {
-                  const alignClass = col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left';
+                  const alignClass = col.align === 'right' ? 'text-right' : col.align === 'left' ? 'text-left' : 'text-center';
                   return (
                     <th
                       key={col.key || index}

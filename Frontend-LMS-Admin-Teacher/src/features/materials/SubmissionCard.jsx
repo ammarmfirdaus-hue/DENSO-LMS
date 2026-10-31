@@ -48,36 +48,56 @@ function externalPreview(value = '') {
 
 function MediaCover({ item, onPreview }) {
   const preview = externalPreview(item.content || '');
+
+  // Shared wrapper class: compact fixed height on mobile, aspect-video on sm+
+  const wrapClass = 'relative h-28 w-full overflow-hidden sm:h-auto sm:aspect-video';
+
   if (item.material_type === 'video' && item.file_path) {
-    return <button type="button" onClick={onPreview} className="group relative block aspect-video w-full overflow-hidden bg-slate-900 text-left" aria-label={`Pratinjau video ${item.title}`}>
-      <span className="absolute inset-0 grid place-items-center text-white"><span className="material-symbol grid size-14 place-items-center rounded-full bg-black/55 text-4xl" aria-hidden="true">play_arrow</span></span>
-      <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-black/65 px-3 py-2 text-xs font-medium text-white"><span className="material-symbol" aria-hidden="true">movie</span><span className="truncate">{item.original_file_name || 'File video'}</span></span>
-    </button>;
+    return (
+      <button type="button" onClick={onPreview} className={`group block bg-slate-900 text-left ${wrapClass}`} aria-label={`Pratinjau video ${item.title}`}>
+        <span className="absolute inset-0 grid place-items-center text-white">
+          <span className="material-symbol grid size-12 place-items-center rounded-full bg-black/55 text-3xl sm:size-14 sm:text-4xl" aria-hidden="true">play_arrow</span>
+        </span>
+        <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-black/65 px-3 py-1.5 text-[11px] font-medium text-white sm:py-2 sm:text-xs">
+          <span className="material-symbol text-sm" aria-hidden="true">movie</span>
+          <span className="truncate">{item.original_file_name || 'File video'}</span>
+        </span>
+      </button>
+    );
   }
   if (preview?.image) {
-    return <button type="button" onClick={onPreview} className="group relative block aspect-video w-full overflow-hidden bg-slate-900 text-left" aria-label={`Buka pratinjau ${preview.platform}: ${item.title}`}>
-      <img src={preview.image} alt={`Thumbnail ${item.title}`} loading="lazy" className="size-full object-cover transition duration-200 group-hover:scale-[1.02]" onError={event => { event.currentTarget.style.display = 'none'; }} />
-      <span className="absolute inset-0 grid place-items-center bg-black/15 text-white"><span className="material-symbol grid size-12 place-items-center rounded-full bg-black/60 text-3xl" aria-hidden="true">play_arrow</span></span>
-      <span className="absolute bottom-2 left-2 rounded-md bg-black/75 px-2 py-1 text-[11px] font-semibold text-white">YouTube</span>
-    </button>;
+    return (
+      <button type="button" onClick={onPreview} className={`group block bg-slate-900 text-left ${wrapClass}`} aria-label={`Buka pratinjau ${preview.platform}: ${item.title}`}>
+        <img src={preview.image} alt={`Thumbnail ${item.title}`} loading="lazy" className="size-full object-cover transition duration-200 group-hover:scale-[1.02]" onError={event => { event.currentTarget.style.display = 'none'; }} />
+        <span className="absolute inset-0 grid place-items-center bg-black/15 text-white">
+          <span className="material-symbol grid size-10 place-items-center rounded-full bg-black/60 text-2xl sm:size-12 sm:text-3xl" aria-hidden="true">play_arrow</span>
+        </span>
+        <span className="absolute bottom-1.5 left-2 rounded-md bg-black/75 px-2 py-0.5 text-[10px] font-semibold text-white sm:bottom-2 sm:text-[11px]">YouTube</span>
+      </button>
+    );
   }
   if (preview?.embed) {
-    return <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-      <iframe title={`${preview.platform}: ${item.title}`} src={preview.embed} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen className="size-full border-0" />
-    </div>;
+    return (
+      <div className={`bg-slate-950 ${wrapClass}`}>
+        <iframe title={`${preview.platform}: ${item.title}`} src={preview.embed} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; picture-in-picture; web-share" allowFullScreen className="size-full border-0" />
+      </div>
+    );
   }
 
   const label = preview?.platform || (item.material_type === 'video' ? 'Video materi' : item.material_type === 'link' ? 'Tautan materi' : item.original_file_name || 'Konten materi');
   const icon = preview?.icon || TYPE_ICONS[item.material_type] || 'article';
   const color = preview?.platform === 'TikTok' ? 'bg-slate-950 text-white' : preview?.platform === 'Instagram' ? 'bg-fuchsia-700 text-white' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200';
-  return <button type="button" onClick={onPreview} className={`group flex aspect-video w-full flex-col items-center justify-center gap-2 px-4 text-center ${color}`} aria-label={`Buka pratinjau ${item.title}`}>
-    <span className="material-symbol grid size-12 place-items-center rounded-full border border-current/20 bg-white/10 text-3xl" aria-hidden="true">{icon}</span>
-    <span className="max-w-full truncate text-xs font-semibold">{label}</span>
-    {preview?.url && <span className="max-w-full truncate text-[10px] opacity-80">Buka pratinjau materi</span>}
-  </button>;
+  return (
+    <button type="button" onClick={onPreview} className={`group flex flex-col items-center justify-center gap-2 px-4 text-center ${color} ${wrapClass}`} aria-label={`Buka pratinjau ${item.title}`}>
+      <span className="material-symbol grid size-10 place-items-center rounded-full border border-current/20 bg-white/10 text-2xl sm:size-12 sm:text-3xl" aria-hidden="true">{icon}</span>
+      <span className="max-w-full truncate text-[11px] font-semibold sm:text-xs">{label}</span>
+      {preview?.url && <span className="max-w-full truncate text-[10px] opacity-80">Buka pratinjau materi</span>}
+    </button>
+  );
 }
 
-const smallButton = 'inline-flex h-10 min-w-0 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-xs !text-xs !leading-none font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50';
+/* Shared button style for action buttons in the card footer */
+const smallButton = 'inline-flex h-9 min-w-0 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50';
 
 export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, busy, onPreview, onEdit, onReject, onSendReview, onPublish, onDelete }) {
   const [reviewerEmail, setReviewerEmail] = useState('');
@@ -90,11 +110,12 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
   const chosenReviewer = reviewers.find(reviewer => reviewer.email === reviewerEmail);
 
   return (
-    <article className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-outline/60 bg-white shadow-sm transition hover:border-primary/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+    <article className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm transition hover:border-primary/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
       <MediaCover item={item} onPreview={onPreview} />
-      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+      {/* Compact padding on mobile (p-3), comfortable on desktop (sm:p-4) */}
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-outline/50 bg-slate-50 text-secondary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-outline/50 bg-white text-secondary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
             <span className="material-symbol text-xl" aria-hidden="true">{TYPE_ICONS[item.material_type] || 'article'}</span>
           </span>
           <div className="min-w-0 flex-1">
@@ -115,8 +136,8 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
             <span>Diajukan oleh</span><span className="break-all font-medium text-secondary dark:text-slate-300">{item.submitter_name || item.submitted_by}</span>
             {item.reviewer_name && <><span aria-hidden="true">·</span><span>Reviewer: <strong className="text-secondary dark:text-slate-300">{item.reviewer_name}</strong></span></>}
           </div>
-          {plainText && <p className="line-clamp-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-muted dark:bg-slate-800">{plainText}</p>}
-          {item.original_file_name && !['video', 'text'].includes(item.material_type) && <p className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-secondary dark:bg-slate-800 dark:text-slate-300"><span className="material-symbol shrink-0 text-base" aria-hidden="true">{TYPE_ICONS[item.material_type] || 'description'}</span><span className="truncate">{item.original_file_name}</span></p>}
+          {plainText && <p className="line-clamp-2 rounded-lg bg-white px-3 py-2 text-xs leading-5 text-muted dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700/60">{plainText}</p>}
+          {item.original_file_name && !['video', 'text'].includes(item.material_type) && <p className="flex min-w-0 items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs text-secondary dark:bg-slate-900 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"><span className="material-symbol shrink-0 text-base" aria-hidden="true">{TYPE_ICONS[item.material_type] || 'description'}</span><span className="truncate">{item.original_file_name}</span></p>}
         </div>
 
         {item.reviewer_comment && <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"><strong>Catatan Reviewer: </strong>{item.reviewer_comment}</div>}
@@ -128,7 +149,7 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
 
         <div className="mt-auto border-t border-outline/40 pt-4 dark:border-slate-700">
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={onPreview} className={`${smallButton} border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700`}>
+            <button type="button" onClick={onPreview} className={`${smallButton} border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-650`}>
               <span className="material-symbol !text-base" aria-hidden="true">visibility</span><span className="truncate">Pratinjau</span>
             </button>
 
@@ -141,7 +162,7 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
             <span className="material-symbol !text-base" aria-hidden="true">assignment_return</span><span>Minta revisi</span>
           </button>}
 
-          {isAdmin && item.status === 'pending_admin' && <form onSubmit={onSendReview} className="mt-2 rounded-xl border border-outline/50 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/70">
+          {isAdmin && item.status === 'pending_admin' && <form onSubmit={onSendReview} className="mt-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
             <label htmlFor={`reviewer-select-${item.submission_id}`} className="block text-xs font-semibold text-secondary dark:text-slate-200">Kirim ke Reviewer</label>
             <div className="mt-2 flex min-w-0 flex-col gap-2 sm:flex-row">
               {reviewers.length > 0 ? <select id={`reviewer-select-${item.submission_id}`} name="reviewerEmail" required value={reviewerEmail} onChange={event => setReviewerEmail(event.target.value)} className="h-10 min-w-0 flex-1 rounded-lg border border-outline/70 bg-white px-3 text-xs text-secondary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
@@ -161,7 +182,7 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
 
           {item.status === 'published' && <p className="mt-2 flex min-h-9 items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"><span className="material-symbol" aria-hidden="true">check_circle</span>Telah terbit ke Student</p>}
 
-          {canDeleteSubmission && item.status !== 'published' && <button type="button" onClick={onDelete} className="mt-2 inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold !text-xs !leading-none text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/30 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950">
+          {canDeleteSubmission && item.status !== 'published' && <button type="button" onClick={onDelete} className="mt-2 inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/30 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950">
             <span className="material-symbol !text-base" aria-hidden="true">delete</span><span>Hapus pengajuan</span>
           </button>}
         </div>

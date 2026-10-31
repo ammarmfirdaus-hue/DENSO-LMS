@@ -207,9 +207,9 @@ main pre, main code { max-width: 100%; overflow-x: auto; }
 #course-results > .course-card {
     min-width: 0;
     overflow: hidden;
-    border: 1px solid #e1e7ee;
+    border: 1px solid #cbd5e1;
     border-radius: 18px;
-    background: #fff;
+    background: #f1f5f9;
     box-shadow: 0 8px 26px rgba(25,38,51,.055);
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }

@@ -177,7 +177,7 @@ export default function NotificationsPage() {
       </div>
       <div className="space-y-3" aria-live="polite">
         {loading ? <div className="rounded-xl border border-outline/50 bg-white p-8 text-center text-sm text-muted">Memuat notifikasi…</div>
-          : filtered.length ? page.pagedItems.map(item => <article key={item.notification_id} className={`min-w-0 rounded-xl border bg-white p-4 sm:p-5 ${item.is_read ? 'border-outline/50' : 'border-primary/30 bg-primary/[0.02]'}`}>
+          : filtered.length ? page.pagedItems.map(item => <article key={item.notification_id} className={`min-w-0 rounded-xl border p-4 sm:p-5 ${item.is_read ? 'border-slate-200/90 bg-slate-100 dark:border-slate-800 dark:bg-slate-800/90' : 'border-primary/40 bg-red-50/70 dark:border-primary/50 dark:bg-red-950/30'}`}>
             <div className="flex min-w-0 items-start gap-3">
               <span className={`material-symbol mt-0.5 text-xl ${item.is_read ? 'text-muted' : 'text-primary'}`} aria-hidden="true">{item.category === 'course' ? 'school' : item.category === 'assessment' ? 'assignment' : item.category === 'forum' ? 'forum' : item.category === 'system' ? 'settings' : 'campaign'}</span>
               <div className="min-w-0 flex-1">

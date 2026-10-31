@@ -264,8 +264,8 @@ export default function CourseDetailPage() {
               const visibleSubmissions = (submissionsBySession[session.session_id] || []).filter(item => (submissionStatus === 'all' || item.status === submissionStatus) && `${item.title} ${item.material_type} ${item.submitter_name} ${item.status}`.toLowerCase().includes(contentSearch.trim().toLowerCase()));
 
               return (
-                <article key={session.session_id} className="overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline/40 bg-surface-low/60 px-5 py-4">
+                <article key={session.session_id} className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm dark:border-slate-800 dark:bg-slate-800/90">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-200/50 px-5 py-4 dark:border-slate-700/80 dark:bg-slate-900/60">
                     <div className="flex items-center gap-3">
                       <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-sm font-bold text-primary">{String((sessionPage.page - 1) * sessionPage.pageSize + index + 1).padStart(2,'0')}</span>
                       <div>

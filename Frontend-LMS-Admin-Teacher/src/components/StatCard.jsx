@@ -33,7 +33,7 @@ export default function StatCard({
 
   return (
     <article
-      className={`rounded-2xl border border-outline/50 bg-white p-5 shadow-xs transition hover:shadow-sm dark:border-slate-800 dark:bg-[#1e293b] ${className}`}
+      className={`rounded-2xl border border-slate-200/90 bg-slate-100 p-5 shadow-xs transition hover:shadow-sm dark:border-slate-800 dark:bg-slate-800/90 ${className}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">

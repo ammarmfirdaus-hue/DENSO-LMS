@@ -142,7 +142,7 @@ export default function ActivityPage() {
       )}
 
       {/* Main Container */}
-      <section className="overflow-hidden rounded-2xl border border-outline/50 bg-white shadow-xs dark:border-slate-800 dark:bg-[#1e293b]">
+      <section className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-xs dark:border-slate-800 dark:bg-slate-800/90">
         <div className="border-b border-outline/40 p-4 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

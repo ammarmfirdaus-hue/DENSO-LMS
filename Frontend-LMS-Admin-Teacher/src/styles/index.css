@@ -319,3 +319,90 @@ html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #33
   margin: 0 !important;
 }
 
+/* ============================================================
+   CARD LIST DATA STYLING
+   Solid non-white, non-gradient card surface across all list pages
+   ============================================================ */
+.dls-card-surface,
+.dls-card-solid {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .dls-card-surface,
+html.dark .dls-card-solid {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* ============================================================
+   EXCEL-STYLE TABLE GRID & CELL BORDERS
+   Menampilkan border kolom dan sel rapi presisi seperti spreadsheet Excel
+   ============================================================ */
+.excel-table,
+.dls-table,
+div[role="region"] > table,
+.overflow-x-auto > table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+}
+
+div[role="region"] > table th,
+.overflow-x-auto > table th,
+.excel-table th,
+.dls-table th,
+table th {
+  border: 1px solid #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 1rem !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+div[role="region"] > table td,
+.overflow-x-auto > table td,
+.excel-table td {
+  border: 1px solid #e2e8f0 !important;
+  padding: 0.75rem 1rem !important;
+  vertical-align: middle !important;
+}
+
+div[role="region"] > table tbody tr:nth-child(even) td,
+.overflow-x-auto > table tbody tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+div[role="region"] > table tbody tr:hover td,
+.overflow-x-auto > table tbody tr:hover td {
+  background-color: #eff6ff !important;
+}
+
+/* Dark Mode Excel Table Gridlines */
+html.dark div[role="region"] > table th,
+html.dark .overflow-x-auto > table th,
+html.dark .excel-table th {
+  border-color: #334155 !important;
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark div[role="region"] > table td,
+html.dark .overflow-x-auto > table td,
+html.dark .excel-table td {
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark div[role="region"] > table tbody tr:nth-child(even) td,
+html.dark .overflow-x-auto > table tbody tr:nth-child(even) td {
+  background-color: rgba(30, 41, 59, 0.4) !important;
+}
+
+html.dark div[role="region"] > table tbody tr:hover td,
+html.dark .overflow-x-auto > table tbody tr:hover td {
+  background-color: rgba(51, 65, 85, 0.6) !important;
+}
+

@@ -258,11 +258,23 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-5 lg:p-6 backdrop-blur-xs overflow-y-auto">
-      <div className="relative flex max-h-[94vh] h-full sm:h-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl flex-col overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Tambah materi pembelajaran">
+      {/* Backdrop — closes modal when clicked */}
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={onClose} aria-hidden="true" />
+
+      {/*
+        Mobile  → bottom sheet (rounded-t-3xl, slides from bottom, max-h 92dvh)
+        Desktop → centered modal (sm:rounded-3xl, sm:max-w-5xl, max-h 90dvh)
+      */}
+      <div className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] w-full flex-col rounded-t-3xl border-t border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:inset-0 sm:m-auto sm:max-h-[90dvh] sm:max-w-5xl sm:rounded-3xl sm:border lg:max-w-6xl xl:max-w-7xl">
         
+        {/* Drag handle pill — visible only on mobile (hidden on sm+) */}
+        <div className="flex shrink-0 justify-center pt-2.5 pb-1 sm:hidden" aria-hidden="true">
+          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
+        </div>
+
         {/* Header Modal */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 py-4.5 bg-slate-50/70 dark:bg-slate-900">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/70 dark:bg-slate-900">
           <div className="flex items-center gap-3.5">
             <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xs">
               <span className="material-symbol text-2xl">post_add</span>
@@ -294,8 +306,8 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Body Modal */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        {/* Body — scrollable content area */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 sm:px-6 sm:py-5">
           {notice && (
             <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/90 p-3.5 text-xs text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-xs animate-fade-in">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -557,7 +569,7 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50/70 dark:bg-slate-900">
+        <div className="flex shrink-0 flex-col-reverse items-stretch gap-2.5 border-t border-slate-200 dark:border-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4 bg-slate-50/70 dark:bg-slate-900">
           <div className="flex flex-wrap items-center gap-3">
             <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
               <input
