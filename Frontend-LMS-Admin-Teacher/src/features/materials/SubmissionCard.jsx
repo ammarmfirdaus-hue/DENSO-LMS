@@ -110,7 +110,7 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
   const chosenReviewer = reviewers.find(reviewer => reviewer.email === reviewerEmail);
 
   return (
-    <article className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm transition hover:border-primary/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
+    <article className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm transition hover:border-primary/40 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
       <MediaCover item={item} onPreview={onPreview} />
       {/* Compact padding on mobile (p-3), comfortable on desktop (sm:p-4) */}
       <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
@@ -146,15 +146,21 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
         {item.status === 'pending_admin' && !isAdmin && <p className="mt-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"><span className="material-symbol" aria-hidden="true">lock</span>Menunggu persetujuan Admin</p>}
         {item.status === 'pending_review' && <p className="mt-3 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs leading-5 font-medium text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200"><span className="material-symbol mt-0.5" aria-hidden="true">lock_clock</span><span>Materi terkunci selama ditinjau Reviewer{item.reviewer_name ? ` (${item.reviewer_name})` : ''}.</span></p>}
         {item.status === 'rejected' && <p className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"><span className="material-symbol" aria-hidden="true">assignment_late</span>Perlu diperbaiki sebelum diajukan kembali.</p>}
+        {item.status === 'approved' && <p className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 font-medium text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"><span className="material-symbol mt-0.5 text-base text-emerald-600 dark:text-emerald-400" aria-hidden="true">verified</span><span>Materi telah disetujui Reviewer dan siap diterbitkan ke portal Student.</span></p>}
+        {item.status === 'published' && <p className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 font-medium text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"><span className="material-symbol mt-0.5 text-base text-emerald-600 dark:text-emerald-400" aria-hidden="true">task_alt</span><span>Materi sudah aktif dipublikasikan dan dapat diakses oleh Student.</span></p>}
 
         <div className="mt-auto border-t border-outline/40 pt-4 dark:border-slate-700">
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={onPreview} className={`${smallButton} border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-650`}>
+            <button type="button" onClick={onPreview} className={`${smallButton} border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-650 ${!canEdit && !(isAdmin && item.status === 'approved') ? 'col-span-2' : ''}`}>
               <span className="material-symbol !text-base" aria-hidden="true">visibility</span><span className="truncate">Pratinjau</span>
             </button>
 
             {canEdit && <button type="button" onClick={onEdit} className={`${smallButton} border-primary bg-primary text-white hover:bg-red-700`}>
               <span className="material-symbol !text-base" aria-hidden="true">edit</span><span className="truncate">{item.status === 'rejected' ? 'Perbaiki' : 'Edit'}</span>
+            </button>}
+
+            {isAdmin && item.status === 'approved' && <button type="button" disabled={busy} onClick={onPublish} className={`${smallButton} border-primary bg-primary text-white hover:bg-red-700`}>
+              <span className="material-symbol !text-base" aria-hidden="true">publish</span><span className="truncate">Terbitkan</span>
             </button>}
           </div>
 
@@ -175,10 +181,6 @@ export default function SubmissionCard({ item, currentUser, isAdmin, reviewers, 
               <span className="min-w-0 break-all"><strong>{chosenReviewer ? 'Reviewer dipilih: ' : 'Email reviewer: '}</strong>{chosenReviewer ? `${chosenReviewer.fullname} · ${chosenReviewer.email}` : reviewerEmail.trim()}</span>
             </p>}
           </form>}
-
-          {isAdmin && item.status === 'approved' && <button type="button" disabled={busy} onClick={onPublish} className={`${smallButton} mt-2 !w-fit border-emerald-700 bg-emerald-700 px-3 text-white hover:bg-emerald-800`}>
-            <span className="material-symbol !text-base" aria-hidden="true">publish</span><span>Terbitkan</span>
-          </button>}
 
           {item.status === 'published' && <p className="mt-2 flex min-h-9 items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"><span className="material-symbol" aria-hidden="true">check_circle</span>Telah terbit ke Student</p>}
 

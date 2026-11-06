@@ -412,7 +412,7 @@ export default function MaterialsPage() {
         {page.pagedItems.length ? (
           <div className="grid gap-4 p-4 pt-2 sm:grid-cols-2 lg:grid-cols-3 sm:p-6 sm:pt-3">
             {page.pagedItems.map(item => (
-              <div key={item.submission_id} className="relative">
+              <div key={item.submission_id} className="relative flex flex-col h-full">
                 {isAdmin && item.status !== 'published' && <label className="absolute left-3 top-3 z-10 inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-outline/50 bg-white shadow-sm" title="Pilih pengajuan"><input type="checkbox" aria-label={`Pilih pengajuan ${item.title}`} disabled={busy} checked={selectedSubmissions.has(String(item.submission_id))} onChange={() => toggleSelected(setSelectedSubmissions, item.submission_id)} className="size-4 accent-primary" /></label>}
                 <SubmissionCard
                 item={item}
