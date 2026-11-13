@@ -44,14 +44,23 @@ const FIELD_CLASS =
 /**
  * Modal untuk menambahkan & mengajukan satu atau lebih materi baru ke antrean persetujuan Admin.
  */
-export default function SubmitMaterialModal({ onClose, onSuccess }) {
+export default function SubmitMaterialModal({
+  onClose,
+  onSuccess,
+  initialCourseId = '',
+  initialSessionId = ''
+}) {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState(
+    initialCourseId ? String(initialCourseId) : ''
+  );
 
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState('');
+  const [selectedSessionId, setSelectedSessionId] = useState(
+    initialSessionId ? String(initialSessionId) : ''
+  );
 
   const [showNewSessionInput, setShowNewSessionInput] = useState(false);
   const [newSessionTitle, setNewSessionTitle] = useState('');
@@ -82,7 +91,9 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         if (active) {
           const list = res.courses || [];
           setCourses(list);
-          if (list.length === 1) {
+          if (initialCourseId) {
+            setSelectedCourseId(String(initialCourseId));
+          } else if (list.length === 1) {
             setSelectedCourseId(String(list[0].course_id));
           }
         }
@@ -116,7 +127,14 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         if (active) {
           const sessList = res.sessions || [];
           setSessions(sessList);
-          if (sessList.length > 0) {
+          if (
+            initialSessionId &&
+            String(selectedCourseId) === String(initialCourseId) &&
+            sessList.some((s) => String(s.session_id) === String(initialSessionId))
+          ) {
+            setSelectedSessionId(String(initialSessionId));
+            setShowNewSessionInput(false);
+          } else if (sessList.length > 0) {
             setSelectedSessionId(String(sessList[0].session_id));
             setShowNewSessionInput(false);
           } else {

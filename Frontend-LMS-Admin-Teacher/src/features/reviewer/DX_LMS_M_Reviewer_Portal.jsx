@@ -468,7 +468,7 @@ export default function ReviewerPortalPage() {
                           data-dls-action-ignore="true"
                           disabled={busy || comment.trim().length < 3}
                           onClick={() => decide('rejected')}
-                          className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-outline-strong bg-white px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-45"
+                          className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-45"
                         >
                           <X className="h-4 w-4" aria-hidden="true" />
                           Minta Perbaikan
@@ -478,7 +478,7 @@ export default function ReviewerPortalPage() {
                           data-dls-action-ignore="true"
                           disabled={busy}
                           onClick={() => decide('approved')}
-                          className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-container disabled:cursor-wait disabled:opacity-50"
+                          className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-50"
                         >
                           <Check className="h-4 w-4" aria-hidden="true" />
                           Setujui Materi

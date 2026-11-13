@@ -549,7 +549,7 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             to="/materials"
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-strong bg-white px-4 text-sm font-medium text-on-surface transition hover:bg-surface-low dark:bg-[#1e2633]"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-indigo-700"
           >
             Antrean Materi ({pipelinePendingTotal})
           </Link>

@@ -17,11 +17,15 @@ export default function Button({
 }) {
   const variants = {
     primary: 'bg-primary text-white hover:bg-primary-container shadow-xs border border-primary/20',
-    secondary: 'border border-slate-300/80 bg-slate-100 text-slate-800 hover:bg-slate-200/90 hover:text-slate-900 shadow-2xs dark:bg-slate-800/90 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700',
-    outline: 'border border-primary/40 bg-red-50/80 text-primary font-semibold hover:bg-red-100/90 shadow-2xs dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/50 dark:hover:bg-red-900/50',
-    ghost: 'bg-slate-100/60 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-xs border border-red-700/30',
-    success: 'bg-tertiary text-white hover:opacity-90 shadow-xs border border-tertiary/30'
+    secondary: 'border border-slate-300 bg-slate-200 text-slate-800 hover:bg-slate-300 hover:text-slate-900 shadow-2xs dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600 dark:hover:bg-slate-600',
+    outline: 'border border-red-300 bg-red-100/80 text-red-800 font-semibold hover:bg-red-200/80 shadow-2xs dark:bg-red-950/60 dark:text-red-200 dark:border-red-700/70 dark:hover:bg-red-900/70',
+    ghost: 'border border-slate-300/80 bg-slate-200/80 text-slate-800 hover:bg-slate-300/80 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700',
+    info: 'bg-sky-600 text-white hover:bg-sky-700 shadow-xs border border-sky-700/30 dark:bg-sky-600 dark:hover:bg-sky-500',
+    indigo: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs border border-indigo-700/30 dark:bg-indigo-600 dark:hover:bg-indigo-500',
+    warning: 'bg-amber-600 text-white hover:bg-amber-700 shadow-xs border border-amber-700/30 dark:bg-amber-600 dark:hover:bg-amber-500',
+    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-xs border border-red-700/30 dark:bg-red-600 dark:hover:bg-red-500',
+    success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs border border-emerald-700/30 dark:bg-emerald-600 dark:hover:bg-emerald-500',
+    neutral: 'bg-slate-600 text-white hover:bg-slate-700 shadow-xs border border-slate-700/30 dark:bg-slate-600 dark:hover:bg-slate-500'
   };
 
   const sizes = {

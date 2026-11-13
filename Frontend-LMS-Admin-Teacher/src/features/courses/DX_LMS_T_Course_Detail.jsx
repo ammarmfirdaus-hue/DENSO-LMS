@@ -30,7 +30,7 @@ import Button from '../../components/Button';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
 import EditMaterialModal from '../materials/EditMaterialModal';
-import SubmitMaterialForm from '../materials/SubmitMaterialForm';
+import SubmitMaterialModal from '../materials/SubmitMaterialModal';
 import FinalMaterialDetailModal from '../materials/FinalMaterialDetailModal';
 import showAlert from '../../utils/alert';
 import { hasPermission } from '../../utils/access-control';
@@ -91,6 +91,7 @@ export default function CourseDetailPage() {
   const [submissionStatus, setSubmissionStatus] = useState('all');
 
   const [editingSubmission, setEditingSubmission] = useState(null);
+  const [submitModalSessionId, setSubmitModalSessionId] = useState(null);
   const [rejectingSubmission, setRejectingSubmission] = useState(null);
   const [rejectComment, setRejectComment] = useState('');
   const [selectedDetailMaterial, setSelectedDetailMaterial] = useState(null);
@@ -624,7 +625,20 @@ export default function CourseDetailPage() {
                         </p>
                       </div>
                     </div>
-                    <StatusBadge status={session.status} dot />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge status={session.status} dot />
+                      {canSubmitMaterial && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="primary"
+                          icon={<Plus className="size-3.5" />}
+                          onClick={() => setSubmitModalSessionId(String(session.session_id))}
+                        >
+                          Tambah Materi
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Materi Terbit */}
@@ -652,15 +666,6 @@ export default function CourseDetailPage() {
                       </p>
                     )}
                   </div>
-
-                  {/* Form Ajukan Materi Baru */}
-                  {canSubmitMaterial && (
-                    <SubmitMaterialForm
-                      sessionId={session.session_id}
-                      busy={busy}
-                      onSubmit={submitMaterial}
-                    />
-                  )}
 
                   {/* Riwayat Pengajuan Materi */}
                   {!!(submissionsBySession[session.session_id] || []).length && (
@@ -767,6 +772,18 @@ export default function CourseDetailPage() {
           </Card>
         )}
       </section>
+
+      {/* Modal Tambah / Ajukan Materi Baru */}
+      {submitModalSessionId && (
+        <SubmitMaterialModal
+          initialCourseId={detail?.course?.course_id || id}
+          initialSessionId={submitModalSessionId}
+          onClose={() => setSubmitModalSessionId(null)}
+          onSuccess={() => {
+            load();
+          }}
+        />
+      )}
 
       {/* Modal Edit Pengajuan */}
       {editingSubmission && (
@@ -879,14 +896,15 @@ function MaterialRow({ material, onDetail, onDelete, canDelete }) {
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-2 pt-1 sm:pt-0">
+      <div className="grid w-full max-w-[220px] shrink-0 grid-cols-2 gap-1.5 pt-1 sm:pt-0">
         <Button
           size="xs"
-          variant="outline"
+          variant="info"
           icon={<Eye className="size-3.5" />}
           onClick={() => onDetail(material)}
+          className="w-full justify-center"
         >
-          Lihat Detail
+          Detail
         </Button>
 
         {url && (
@@ -894,7 +912,7 @@ function MaterialRow({ material, onDetail, onDelete, canDelete }) {
             href={url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-outline bg-surface-lowest px-2.5 text-xs font-semibold text-secondary transition hover:bg-surface-low dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="inline-flex h-7 w-full items-center justify-center gap-1 rounded-md bg-indigo-600 px-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-indigo-700"
           >
             Buka
             <ExternalLink className="size-3" />
@@ -909,7 +927,10 @@ function MaterialRow({ material, onDetail, onDelete, canDelete }) {
             icon={<Trash2 className="size-3.5" />}
             title="Hapus materi final ini"
             aria-label={`Hapus materi ${material.title}`}
-          />
+            className="w-full justify-center"
+          >
+            Hapus
+          </Button>
         )}
       </div>
     </div>
@@ -994,29 +1015,42 @@ function SubmissionRow({
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        {item.original_file_name && (
-          <Button
-            size="xs"
-            variant="outline"
-            icon={<Eye className="size-3.5" />}
-            onClick={() => onFile(item.submission_id)}
-          >
-            Pratinjau File
-          </Button>
-        )}
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="grid w-full max-w-[230px] grid-cols-2 gap-1.5">
+          {item.original_file_name && (
+            <Button
+              size="xs"
+              variant="info"
+              icon={<Eye className="size-3.5" />}
+              onClick={() => onFile(item.submission_id)}
+              className="w-full justify-center"
+            >
+              Pratinjau
+            </Button>
+          )}
 
-        {canEdit && (
-          <Button size="xs" variant="secondary" onClick={() => onEdit(item)}>
-            {item.status === 'rejected' ? 'Perbaiki & Ajukan Ulang' : 'Edit Materi'}
-          </Button>
-        )}
+          {canEdit && (
+            <Button
+              size="xs"
+              variant={item.status === 'rejected' ? 'warning' : 'indigo'}
+              onClick={() => onEdit(item)}
+              className="w-full justify-center"
+            >
+              {item.status === 'rejected' ? 'Perbaiki' : 'Edit Materi'}
+            </Button>
+          )}
 
-        {allowSendReview && item.status === 'pending_admin' && (
-          <Button size="xs" variant="danger" onClick={() => onReject(item)}>
-            Tolak
-          </Button>
-        )}
+          {allowSendReview && item.status === 'pending_admin' && (
+            <Button
+              size="xs"
+              variant="danger"
+              onClick={() => onReject(item)}
+              className="w-full justify-center"
+            >
+              Tolak
+            </Button>
+          )}
+        </div>
 
         {allowSendReview && item.status === 'pending_admin' && (
           <form

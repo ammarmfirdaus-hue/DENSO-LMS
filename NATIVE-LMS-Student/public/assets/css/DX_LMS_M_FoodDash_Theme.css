@@ -549,35 +549,37 @@ body.dls-app-shell #bottomNavBar.dls-bottomnav {
 .fd-btn-secondary,
 .dls-btn-secondary,
 .dls-btn--outline {
-  background-color: transparent !important;
-  color: var(--fd-primary) !important;
-  border: 1.5px solid var(--fd-primary) !important;
+  background-color: #173E67 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #102C4B !important;
   border-radius: var(--fd-radius-pill) !important;
+  box-shadow: var(--fd-shadow-sm);
 }
 
 .fd-btn-secondary:hover:not(:disabled),
 .dls-btn-secondary:hover:not(:disabled),
 .dls-btn--outline:hover:not(:disabled) {
-  background-color: var(--fd-primary-soft) !important;
+  background-color: #102C4B !important;
+  box-shadow: var(--fd-shadow-md);
 }
 
 .fd-btn-ghost,
 .dls-btn-ghost {
-  background-color: transparent !important;
-  color: var(--fd-text-secondary) !important;
-  border: none !important;
+  background-color: #E2E8F0 !important;
+  color: #1E293B !important;
+  border: 1px solid #CBD5E1 !important;
   border-radius: var(--fd-radius-pill) !important;
 }
 
 .fd-btn-ghost:hover:not(:disabled),
 .dls-btn-ghost:hover:not(:disabled) {
-  background-color: var(--fd-surface-muted) !important;
-  color: var(--fd-text-primary) !important;
+  background-color: #CBD5E1 !important;
+  color: #0F172A !important;
 }
 
 .fd-btn-destructive,
 .dls-btn-danger {
-  background-color: #171717 !important;
+  background-color: #B91C1C !important;
   color: #FFFFFF !important;
   border: none !important;
   border-radius: var(--fd-radius-pill) !important;
@@ -585,7 +587,7 @@ body.dls-app-shell #bottomNavBar.dls-bottomnav {
 
 .fd-btn-destructive:hover:not(:disabled),
 .dls-btn-danger:hover:not(:disabled) {
-  background-color: #404040 !important;
+  background-color: #991B1B !important;
 }
 
 /* === FoodDash Inputs (42px, 12px Radius, #E5E5E5 -> #DC2626 + Focus Ring) === */

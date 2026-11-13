@@ -13,7 +13,7 @@ const dlsSwal = Swal.mixin({
     confirmButton:
       'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
     cancelButton:
-      'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
+      'inline-flex items-center justify-center rounded-xl border border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-700 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 transition cursor-pointer mx-1.5',
     denyButton:
       'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5',
   },
@@ -122,7 +122,7 @@ export const showAlert = {
           ? 'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5'
           : 'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
         cancelButton:
-          'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
+          'inline-flex items-center justify-center rounded-xl border border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-700 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 transition cursor-pointer mx-1.5',
       },
     });
     return result.isConfirmed;
@@ -182,7 +182,7 @@ export const showAlert = {
           ? 'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5'
           : 'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
         cancelButton:
-          'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
+          'inline-flex items-center justify-center rounded-xl border border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-700 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 transition cursor-pointer mx-1.5',
       },
     });
     if (result.isConfirmed) {

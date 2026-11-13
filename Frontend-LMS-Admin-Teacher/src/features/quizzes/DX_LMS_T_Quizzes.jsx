@@ -500,12 +500,11 @@ export default function QuizzesPage() {
                       </Button>
                       {quiz && (
                         <Button
-                          variant="outline"
+                          variant="danger"
                           size="sm"
                           disabled={busy}
                           onClick={() => removeQuiz(course)}
-                          icon={<Trash2 className="size-3.5 text-red-600" />}
-                          className="text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
+                          icon={<Trash2 className="size-3.5" />}
                         >
                           Hapus
                         </Button>
@@ -665,9 +664,9 @@ export default function QuizzesPage() {
                       <Button
                         type="button"
                         size="xs"
-                        variant="outline"
+                        variant="danger"
                         disabled={editor.questions.length <= 1}
-                        icon={<Trash2 className="size-3.5 text-red-600" />}
+                        icon={<Trash2 className="size-3.5" />}
                         onClick={() =>
                           setEditor({
                             ...editor,
@@ -676,7 +675,6 @@ export default function QuizzesPage() {
                             )
                           })
                         }
-                        className="text-red-700 hover:bg-red-50 dark:text-red-300"
                       >
                         Hapus Soal
                       </Button>

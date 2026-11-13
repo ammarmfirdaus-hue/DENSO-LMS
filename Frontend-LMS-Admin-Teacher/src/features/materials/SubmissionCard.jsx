@@ -347,7 +347,7 @@ export default function SubmissionCard({
           <div className="grid grid-cols-2 gap-2">
             <Button
               size="sm"
-              variant="outline"
+              variant="info"
               icon={<Eye className="size-3.5" />}
               onClick={onPreview}
               className="w-full"
@@ -358,7 +358,7 @@ export default function SubmissionCard({
             {canEdit && (
               <Button
                 size="sm"
-                variant="primary"
+                variant="indigo"
                 icon={<Pencil className="size-3.5" />}
                 onClick={onEdit}
                 className="w-full"
@@ -439,13 +439,14 @@ export default function SubmissionCard({
             </form>
           )}
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {allowSendReview && item.status === 'pending_admin' && (
               <Button
                 size="xs"
-                variant="danger"
+                variant="warning"
                 icon={<RotateCcw className="size-3.5" />}
                 onClick={onReject}
+                className="w-full justify-center"
               >
                 Minta Revisi
               </Button>
@@ -459,6 +460,7 @@ export default function SubmissionCard({
                   disabled={busy}
                   icon={<CheckCircle2 className="size-3.5" />}
                   onClick={onReviewerApprove}
+                  className="w-full justify-center"
                 >
                   Setujui Review
                 </Button>
@@ -468,6 +470,7 @@ export default function SubmissionCard({
                   disabled={busy}
                   icon={<RotateCcw className="size-3.5" />}
                   onClick={onReviewerReject}
+                  className="w-full justify-center"
                 >
                   Tolak Review
                 </Button>
@@ -481,13 +484,14 @@ export default function SubmissionCard({
                 disabled={busy}
                 icon={<Upload className="size-3.5" />}
                 onClick={onPublish}
+                className="w-full justify-center"
               >
                 Terbitkan
               </Button>
             )}
 
             {item.status === 'published' && (
-              <p className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <p className="col-span-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
                 <CheckCircle2 className="size-3.5" />
                 Telah terbit ke Student
               </p>
@@ -496,10 +500,10 @@ export default function SubmissionCard({
             {canDeleteSubmission && item.status !== 'published' && (
               <Button
                 size="xs"
-                variant="outline"
+                variant="danger"
                 onClick={onDelete}
-                icon={<Trash2 className="size-3.5 text-red-600" />}
-                className="text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
+                icon={<Trash2 className="size-3.5" />}
+                className="w-full justify-center"
               >
                 Hapus
               </Button>

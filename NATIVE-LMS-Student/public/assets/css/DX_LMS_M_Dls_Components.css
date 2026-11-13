@@ -173,13 +173,14 @@ html.dark .overflow-x-auto > table tbody tr:hover td {
 }
 
 .dls-btn-outline {
-    background-color: transparent;
-    color: var(--dls-on-surface);
-    border: 1px solid var(--dls-outline-variant);
+    background-color: #E2E8F0;
+    color: #1E293B;
+    border: 1px solid #CBD5E1;
 }
 
 .dls-btn-outline:hover {
-    background-color: var(--dls-surface-container-low);
+    background-color: #CBD5E1;
+    color: #0F172A;
 }
 
 .dls-btn-block {

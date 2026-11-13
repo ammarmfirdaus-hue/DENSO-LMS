@@ -484,7 +484,7 @@ export default function CoursesPage() {
                         </select>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="indigo"
                           disabled={busy}
                           onClick={() => assignTrainer(course)}
                         >

@@ -400,12 +400,12 @@ export default function ReviewersPage() {
         />
       )
     },
-    { key: 'reviewer', label: 'Reviewer / HRD' },
-    { key: 'role', label: 'Jabatan & Departemen' },
-    { key: 'contact', label: 'Kontak' },
-    { key: 'status', label: 'Status', align: 'center' },
-    { key: 'reviews', label: 'Tugas Review', align: 'center' },
-    { key: 'actions', label: 'Aksi', align: 'right' }
+    { key: 'reviewer', label: 'Reviewer / HRD', className: 'min-w-[280px]' },
+    { key: 'role', label: 'Jabatan & Departemen', className: 'min-w-[200px]' },
+    { key: 'contact', label: 'Kontak', className: 'min-w-[210px]' },
+    { key: 'status', label: 'Status', align: 'center', className: 'w-28 whitespace-nowrap' },
+    { key: 'reviews', label: 'Tugas Review', align: 'center', className: 'w-32 whitespace-nowrap' },
+    { key: 'actions', label: 'Aksi', align: 'right', className: 'min-w-[236px] whitespace-nowrap' }
   ];
 
   return (
@@ -582,13 +582,15 @@ export default function ReviewersPage() {
                     className="h-4 w-4 rounded border-outline accent-primary disabled:opacity-40"
                   />
                 </td>
-                <td className="px-4 py-3.5">
+                <td className="min-w-[280px] px-4 py-3.5">
                   <div className="flex items-center gap-3">
                     <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#173e67]/10 text-sm font-bold text-[#173e67] dark:bg-sky-900/40 dark:text-sky-300">
                       {reviewer.fullname?.charAt(0)?.toUpperCase() || 'R'}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-on-surface">{reviewer.fullname}</p>
+                      <p className="whitespace-nowrap font-semibold text-on-surface">
+                        {reviewer.fullname}
+                      </p>
                       <p className="font-mono text-xs text-muted">
                         NPK: {reviewer.employee_npk}
                       </p>
@@ -618,11 +620,11 @@ export default function ReviewersPage() {
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                  <div className="inline-flex items-center justify-end gap-2 whitespace-nowrap">
+                <td className="min-w-[236px] px-4 py-3.5 text-right align-middle">
+                  <div className="ml-auto grid w-[220px] grid-cols-2 gap-1.5">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="primary"
                       size="xs"
                       icon={<Edit3 className="h-3.5 w-3.5" />}
                       disabled={busy}
@@ -631,6 +633,7 @@ export default function ReviewersPage() {
                         setError('');
                         setNotice('');
                       }}
+                      className="w-full justify-center !border-sky-600 !bg-sky-600 !text-white hover:!bg-sky-700 dark:!border-sky-500 dark:!bg-sky-600 dark:hover:!bg-sky-500"
                     >
                       Edit
                     </Button>
@@ -638,7 +641,33 @@ export default function ReviewersPage() {
                     {reviewer.status === 'active' ? (
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="primary"
+                        size="xs"
+                        icon={<Mail className="h-3.5 w-3.5" />}
+                        disabled={busy || !reviewer.email}
+                        onClick={() => setEmailTarget(reviewer)}
+                        className="w-full justify-center !border-indigo-600 !bg-indigo-600 !text-white hover:!bg-indigo-700 dark:!border-indigo-500 dark:!bg-indigo-600 dark:hover:!bg-indigo-500"
+                      >
+                        Email
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="primary"
+                        size="xs"
+                        icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+                        disabled={busy}
+                        onClick={() => handleReactivate(reviewer)}
+                        className="w-full justify-center !border-emerald-600 !bg-emerald-600 !text-white hover:!bg-emerald-700 dark:!border-emerald-500 dark:!bg-emerald-600 dark:hover:!bg-emerald-500"
+                      >
+                        Aktifkan
+                      </Button>
+                    )}
+
+                    {reviewer.status === 'active' && (
+                      <Button
+                        type="button"
+                        variant="primary"
                         size="xs"
                         icon={<UserX className="h-3.5 w-3.5" />}
                         disabled={busy || hasActiveReviews}
@@ -648,40 +677,15 @@ export default function ReviewersPage() {
                             : 'Nonaktifkan akses reviewer'
                         }
                         onClick={() => handleDelete(reviewer)}
-                        className="border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/40"
+                        className="w-full justify-center !border-amber-600 !bg-amber-600 !text-white hover:!bg-amber-700 dark:!border-amber-500 dark:!bg-amber-600 dark:hover:!bg-amber-500"
                       >
                         Nonaktifkan
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="xs"
-                        icon={<CheckCircle2 className="h-3.5 w-3.5" />}
-                        disabled={busy}
-                        onClick={() => handleReactivate(reviewer)}
-                        className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
-                      >
-                        Aktifkan
-                      </Button>
-                    )}
-
-                    {reviewer.status === 'active' && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="xs"
-                        icon={<Mail className="h-3.5 w-3.5" />}
-                        disabled={busy || !reviewer.email}
-                        onClick={() => setEmailTarget(reviewer)}
-                      >
-                        Email
                       </Button>
                     )}
 
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="danger"
                       size="xs"
                       icon={<Trash2 className="h-3.5 w-3.5" />}
                       disabled={busy || hasActiveReviews}
@@ -691,7 +695,7 @@ export default function ReviewersPage() {
                           : 'Hapus akun secara permanen jika tidak memiliki riwayat terkait.'
                       }
                       onClick={() => handleHardDelete(reviewer)}
-                      className="border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/40"
+                      className="w-full justify-center !border-red-600 !bg-red-600 !text-white hover:!bg-red-700 dark:!border-red-500 dark:!bg-red-600 dark:hover:!bg-red-500"
                     >
                       Hapus
                     </Button>

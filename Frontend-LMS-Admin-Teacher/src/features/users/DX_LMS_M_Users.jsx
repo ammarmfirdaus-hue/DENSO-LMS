@@ -950,16 +950,17 @@ export default function UsersPage() {
               <td>
                 <StatusBadge status={user.status} dot />
               </td>
-              <td className="text-right whitespace-nowrap">
+              <td className="min-w-[232px] text-right align-middle">
                 {canManageUserAccounts && (
-                  <div className="inline-flex items-center justify-end gap-2 whitespace-nowrap">
+                  <div className="ml-auto grid w-[220px] grid-cols-2 gap-1.5">
                     <Button
                       type="button"
                       size="xs"
-                      variant="outline"
+                      variant="info"
                       disabled={busy}
                       icon={<Pencil className="size-3.5" />}
                       onClick={() => setEditing(user)}
+                      className="w-full justify-center"
                     >
                       Edit
                     </Button>
@@ -968,10 +969,11 @@ export default function UsersPage() {
                       <Button
                         type="button"
                         size="xs"
-                        variant="outline"
+                        variant="indigo"
                         disabled={busy}
                         icon={<Mail className="size-3.5" />}
                         onClick={() => setEmailTarget(user)}
+                        className="w-full justify-center"
                       >
                         Email
                       </Button>
@@ -981,12 +983,13 @@ export default function UsersPage() {
                       <Button
                         type="button"
                         size="xs"
-                        variant="outline"
+                        variant="warning"
                         disabled={busy}
-                        icon={<UserMinus className="size-3.5 text-amber-600" />}
+                        icon={<UserMinus className="size-3.5" />}
                         onClick={() => deactivateUser(user)}
+                        className="w-full justify-center"
                       >
-                        Nonaktifkan
+                        Nonaktif
                       </Button>
                     ) : (
                       <Button
@@ -996,6 +999,7 @@ export default function UsersPage() {
                         disabled={busy}
                         icon={<CheckCircle2 className="size-3.5" />}
                         onClick={() => reactivateUser(user)}
+                        className="w-full justify-center"
                       >
                         Aktifkan
                       </Button>
@@ -1010,7 +1014,10 @@ export default function UsersPage() {
                         icon={<Trash2 className="size-3.5" />}
                         onClick={() => deleteUser(user)}
                         title="Hapus akun pengguna"
-                      />
+                        className="w-full justify-center"
+                      >
+                        Hapus
+                      </Button>
                     )}
                   </div>
                 )}

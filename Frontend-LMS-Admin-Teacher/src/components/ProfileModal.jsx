@@ -211,7 +211,7 @@ export default function ProfileModal({ user, onClose, onUserUpdated }) {
               type="button"
               data-dls-action-ignore="true"
               onClick={onClose}
-              className="h-10 cursor-pointer rounded-lg border border-outline-strong bg-white px-4 text-sm font-medium text-on-surface hover:bg-surface-low"
+              className="h-10 cursor-pointer rounded-lg border border-slate-300 bg-slate-200 px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
             >
               Batal
             </button>

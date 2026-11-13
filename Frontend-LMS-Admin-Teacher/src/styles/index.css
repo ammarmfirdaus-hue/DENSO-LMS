@@ -313,12 +313,22 @@ div[role="region"] > table tbody td,
   padding-right: 0.75rem;
 }
 
-.dls-table-wrap table tbody td.text-right > div,
-.dls-table-wrap table tbody td > .inline-flex {
+.dls-table-wrap table tbody td.text-right > div:not(.grid):not(.dls-action-grid-2x2),
+.dls-table-wrap table tbody td > .inline-flex:not(.grid) {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
+}
+
+.dls-table-wrap table tbody td.text-right > div.grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.375rem;
+  width: 216px;
+  max-width: 100%;
+  margin-left: auto;
+  white-space: normal;
 }
 
 .dls-table-wrap table thead th:last-child,

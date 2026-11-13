@@ -483,13 +483,14 @@ export default function EnrollmentsPage() {
               </td>
               <td className="text-right">
                 {canDecide && request.status === 'pending' ? (
-                  <div className="inline-flex flex-wrap justify-end gap-2">
+                  <div className="ml-auto grid w-[190px] grid-cols-2 gap-1.5">
                     <Button
                       size="xs"
                       variant="success"
                       disabled={busy}
                       icon={<Check className="size-3.5" />}
                       onClick={() => decide(request, 'approved')}
+                      className="w-full justify-center"
                     >
                       Setujui
                     </Button>
@@ -499,6 +500,7 @@ export default function EnrollmentsPage() {
                       disabled={busy}
                       icon={<X className="size-3.5" />}
                       onClick={() => decide(request, 'rejected')}
+                      className="w-full justify-center"
                     >
                       Tolak
                     </Button>

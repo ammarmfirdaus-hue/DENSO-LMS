@@ -532,9 +532,9 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
 
       {/* TAB 1: EDITOR PER-ROLE */}
       {activeTab === 'editor' && (
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Kolom Kiri: Pilihan Role */}
-          <aside className="space-y-3 lg:col-span-4 xl:col-span-3">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
+          {/* Kolom Kiri: Pilihan Role (Sticky di bawah header saat scroll) */}
+          <aside className="space-y-3 lg:sticky lg:top-20 lg:col-span-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 xl:col-span-3">
             <h2 className="px-1 text-xs font-bold uppercase tracking-[0.12em] text-muted">
               Pilih Role Sistem
             </h2>
