@@ -2,18 +2,18 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { reviewerSchema, reviewerUpdateSchema } = require('../services/reviewer-rules');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin'));
+router.use(authenticate);
 
 /**
  * GET /api/v1/reviewers
- * Mengambil seluruh daftar reviewer beserta statistik review aktif. Hanya untuk Admin.
+ * Mengambil seluruh daftar reviewer beserta statistik review aktif.
  */
-router.get('/', async (req, res, next) => {
+router.get('/', requirePermission('reviewers.view'), async (req, res, next) => {
   try {
     const result = await pool.request().query(`
       SELECT 
@@ -48,7 +48,7 @@ router.get('/', async (req, res, next) => {
  * POST /api/v1/reviewers
  * Mendaftarkan akun reviewer baru dengan profil HRD/eksekutif. Hanya untuk Admin.
  */
-router.post('/', async (req, res, next) => {
+router.post('/', requirePermission('reviewers.manage'), async (req, res, next) => {
   const parsed = reviewerSchema.safeParse(req.body);
   if (!parsed.success) {
     const message = parsed.error.issues?.[0]?.message || 'Data akun reviewer tidak valid.';
@@ -101,7 +101,7 @@ router.post('/', async (req, res, next) => {
  * PUT /api/v1/reviewers/:npk
  * Memperbarui data profil, status akun, atau mereset kata sandi reviewer. Hanya untuk Admin.
  */
-router.put('/:npk', async (req, res, next) => {
+router.put('/:npk', requirePermission('reviewers.manage'), async (req, res, next) => {
   const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
   if (!npk.success) {
     return res.status(400).json({ error: { code: 'INVALID_NPK', message: 'NPK tidak valid.' } });
@@ -170,7 +170,7 @@ router.put('/:npk', async (req, res, next) => {
 });
 
 // Keep the reviewer record for review history; removing access is implemented as deactivation.
-router.delete('/:npk', async (req, res, next) => {
+router.delete('/:npk', requirePermission('reviewers.manage'), async (req, res, next) => {
   const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
   if (!npk.success) return res.status(400).json({ error: { code: 'INVALID_NPK', message: 'NPK tidak valid.' } });
   try {

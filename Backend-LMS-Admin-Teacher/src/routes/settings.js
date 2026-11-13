@@ -1,7 +1,7 @@
 const express = require('express');
 const { z } = require('zod');
 const env = require('../config/env');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { getApiBaseUrl, saveApiBaseUrl } = require('../services/system-settings');
 const { syncStudentNow, getStudentSyncStatus } = require('../services/student-sync');
 
@@ -10,7 +10,7 @@ const router = express.Router();
 // Bootstrap endpoint lets the admin frontend discover its database-persisted API URL.
 router.get('/runtime-config', (_req, res) => res.json({ apiBaseUrl: getApiBaseUrl() }));
 
-router.use(authenticate, allowRoles('admin'));
+router.use(authenticate, requirePermission('settings.api'));
 
 router.get('/api', (_req, res) => res.json({
   apiBaseUrl: getApiBaseUrl(),

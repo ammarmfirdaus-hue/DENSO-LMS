@@ -66,7 +66,7 @@ The migration set is based on the tables actually queried by the two current app
 ### Admin/Teacher SQL Server
 
 - `employee_accounts`: staff identity, credentials, admin/teacher/reviewer role, reviewer profile, active status, and timestamps.
-- `courses`: catalog, category/status, creator/updater, and assigned trainer.
+- `courses`: catalog, category/status, cover thumbnail path, creator/updater, and assigned trainer.
 - `course_sessions`, `course_materials`: course structure and published learning content.
 - `activity_logs`, `student_progress_snapshots`: staff activity and synchronized student progress, automatic quiz scores, editable course scores (0–100), feedback, grader, and grading time.
 - `material_submissions`, `material_review_links`: material submission, moderation state, reviewer assignment, hashed one-use review links, comments, and publication reference.
@@ -74,6 +74,8 @@ The migration set is based on the tables actually queried by the two current app
 - `lms_notifications`, `lms_notification_reads`, `lms_notification_email_outbox`: role-targeted and student-specific notifications, per-recipient read state, and retryable email delivery.
 - `lms_admin_jobs`, `lms_admin_job_events`: persistent Admin/Teacher bulk queues, ordered per-item results, stop/resume state, and refresh-safe progress. Job payloads are AES-GCM encrypted with a key derived from `JWT_SECRET`; completed jobs clear their payload.
 - `lms_system_settings`: Admin-managed shared API URL for the Admin/Teacher portal and Native PHP Student, with editor identity and update timestamp. Student reads it through the public runtime-config endpoint; it stores no Student database credentials.
+- `dashboard_daily_snapshots`: daily LMS telemetry snapshots (`snapshot_date`, `scope_key`, course/user/session/material/progress/activity counters) for Chart.js dashboard trends alongside reporting indexes on `activity_logs`, `student_progress_snapshots`, `material_submissions`, and `course_materials`.
+- `lms_role_definitions`, `lms_role_permissions`, `lms_role_audit_logs`: configurable RBAC role definitions, granular per-role permission switches, staff-portal access control, and change audit history.
 - `schema_migrations`: applied migration versions for this database.
 
 ### Student MySQL

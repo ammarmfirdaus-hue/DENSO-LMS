@@ -19,35 +19,35 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
             $page_eyebrow = 'PUSAT INFORMASI';
             $page_title_heading = 'Notifikasi';
             $page_description = 'Pengumuman dan pengingat terkait pembelajaran Anda.';
-            $page_actions_html = '<span class="inline-flex min-h-9 shrink-0 items-center rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-3.5 text-xs font-semibold text-on-surface-variant"><span data-notification-unread-count>' . $notif_count . '</span>&nbsp;belum dibaca</span>';
+            $page_actions_html = '<span class="inline-flex min-h-9 shrink-0 items-center rounded-full bg-[#FEF2F2] px-3.5 text-xs font-semibold text-[#DC2626]"><span class="fd-mono mr-1 font-bold" data-notification-unread-count>' . $notif_count . '</span> belum dibaca</span>';
             include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
             ?>
 
-            <div class="mb-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div class="mb-[18px] grid min-w-0 gap-[12px] md:grid-cols-[minmax(0,1fr)_auto_auto]">
                 <label class="relative block min-w-0">
-                    <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant" aria-hidden="true">search</span>
+                    <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[#737373]" aria-hidden="true">search</span>
                     <span class="sr-only">Cari notifikasi</span>
-                    <input type="search" id="notificationSearch" placeholder="Cari notifikasi..." class="h-11 w-full min-w-0 rounded-lg border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
+                    <input type="search" id="notificationSearch" placeholder="Cari notifikasi..." class="fd-input fd-search-input h-[42px] w-full min-w-0">
                 </label>
                 <label class="block min-w-0">
                     <span class="sr-only">Filter berdasarkan tanggal</span>
-                    <input type="date" id="notificationDate" class="h-11 w-full min-w-0 rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-3 text-sm text-on-surface-variant outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
+                    <input type="date" id="notificationDate" class="fd-input h-[42px] w-full min-w-0">
                 </label>
-                <button type="button" id="notificationMarkAll" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-4 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low disabled:cursor-not-allowed disabled:opacity-50">
-                    <span class="material-symbols-outlined text-[18px] text-primary" aria-hidden="true">done_all</span>
+                <button type="button" id="notificationMarkAll" class="fd-btn fd-btn-secondary fd-btn-md shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40">
+                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">done_all</span>
                     Tandai semua dibaca
                 </button>
             </div>
 
-            <div class="mb-5 -mx-4 max-w-full px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
-                <div class="max-w-full overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]" role="region" aria-label="Kategori notifikasi" tabindex="0">
-                    <div class="flex w-max min-w-full gap-1 rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-1.5" role="tablist" aria-label="Filter kategori">
+            <div class="mb-[18px] -mx-4 max-w-full px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+                <div class="max-w-full overflow-x-auto overscroll-x-contain pb-1 hide-scrollbar" role="region" aria-label="Kategori notifikasi" tabindex="0">
+                    <div class="flex w-max min-w-full gap-[6px] rounded-full bg-[#F5F5F5] p-[6px]" role="tablist" aria-label="Filter kategori">
                         <?php foreach ([
                             'all' => 'Semua', 'unread' => 'Belum Dibaca', 'important' => 'Penting',
                             'announcement' => 'Pengumuman', 'course' => 'Course', 'assessment' => 'Assessment',
                             'forum' => 'Forum', 'system' => 'System',
                         ] as $filter => $label): ?>
-                        <button type="button" class="notification-filter min-h-10 shrink-0 whitespace-nowrap rounded-lg px-3 text-xs font-semibold text-on-surface-variant transition hover:bg-surface-container-low hover:text-on-surface sm:px-4 sm:text-sm" data-filter="<?= e($filter) ?>" aria-selected="false" role="tab">
+                        <button type="button" class="notification-filter fd-filter-chip shrink-0 whitespace-nowrap" data-filter="<?= e($filter) ?>" aria-selected="false" role="tab">
                             <?= e($label) ?>
                         </button>
                         <?php endforeach; ?>
@@ -55,13 +55,13 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
                 </div>
             </div>
 
-            <p class="mb-3 text-xs text-on-surface-variant" id="notificationResultCount" aria-live="polite">Memuat notifikasi...</p>
+            <p class="mb-[12px] text-xs font-medium text-[#737373]" id="notificationResultCount" aria-live="polite">Memuat notifikasi...</p>
             <p id="notificationMessage" hidden class="mb-4"></p>
-            <div id="studentNotifications" class="min-w-0 space-y-3" aria-live="polite">
-                <div class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center text-sm text-on-surface-variant">Memuat notifikasi...</div>
+            <div id="studentNotifications" class="min-w-0 space-y-[12px]" aria-live="polite">
+                <div class="fd-card rounded-[12px] bg-white p-8 text-center text-sm text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Memuat notifikasi...</div>
             </div>
             <div class="mt-4 flex justify-center">
-                <button type="button" id="notificationLoadMore" class="hidden min-h-10 rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-4 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low">Muat lainnya</button>
+                <button type="button" id="notificationLoadMore" class="fd-btn fd-btn-secondary fd-btn-md hidden">Muat lainnya</button>
             </div>
         </div>
     </main>

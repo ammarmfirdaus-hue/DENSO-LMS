@@ -31,12 +31,19 @@
   }
   function showMessage(text, kind = 'error') {
     const box = root.querySelector('[data-forum-message]');
-    if (!box) return;
-    box.textContent = text;
-    box.hidden = !text;
-    box.className = kind === 'error'
-      ? 'mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800'
-      : 'mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800';
+    if (box) {
+      box.textContent = text;
+      box.hidden = !text;
+      box.className = kind === 'error'
+        ? 'mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800'
+        : 'mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800';
+    }
+    if (!text || !window.DLS) return;
+    if (kind === 'error') {
+      window.DLS.error('Gagal Memproses Forum', text);
+    } else {
+      window.DLS.success('Berhasil', text);
+    }
   }
   function make(tag, className, text = '') {
     const node = document.createElement(tag);
@@ -56,11 +63,11 @@
   }
   function roleBadge(role) {
     const colors = role === 'teacher'
-      ? 'bg-primary-container-light text-primary'
+      ? 'fd-chip fd-chip-info'
       : role === 'admin'
-        ? 'bg-surface-container text-on-surface-variant'
-        : 'bg-secondary-container-light text-on-secondary-fixed-variant';
-    const node = make('span', `shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold ${colors}`, roleName(role));
+        ? 'fd-chip fd-chip-promo'
+        : 'fd-chip fd-chip-neutral';
+    const node = make('span', `shrink-0 text-[11px] font-semibold ${colors}`, roleName(role));
     return node;
   }
   async function like(targetType, targetId) {
@@ -71,8 +78,8 @@
     } catch (error) { showMessage(error.message); }
   }
   function interactionRow(type, id, count, liked, replyCount) {
-    const row = make('div', 'mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-outline-variant/30 pt-3');
-    const likeButton = make('button', `inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${liked ? 'font-semibold text-primary' : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'}`);
+    const row = make('div', 'mt-[12px] flex flex-wrap items-center gap-x-[18px] gap-y-[6px] border-t border-[#F5F5F5] pt-[12px]');
+    const likeButton = make('button', `fd-btn fd-btn-ghost fd-btn-sm rounded-full disabled:cursor-not-allowed disabled:opacity-40 ${liked ? 'font-semibold !text-[#DC2626] !bg-[#FEF2F2]' : 'text-[#525252]'}`);
     const likeIcon = make('span', 'material-symbols-outlined text-[18px]', liked ? 'thumb_up' : 'thumb_up_off_alt');
     likeIcon.setAttribute('aria-hidden', 'true');
     likeButton.append(likeIcon);
@@ -81,22 +88,22 @@
     likeButton.disabled = readOnly;
     likeButton.addEventListener('click', () => like(type, id));
     row.append(likeButton);
-    if (replyCount !== undefined) row.append(make('span', 'min-h-10 py-2 text-sm text-on-surface-variant', `${replyCount || 0} balasan`));
+    if (replyCount !== undefined) row.append(make('span', 'fd-mono py-1 text-[13px] text-[#525252]', `${replyCount || 0} balasan`));
     return row;
   }
   function renderPost(post, isReply = false) {
-    const card = make('article', isReply ? 'border-t border-outline-variant/30 py-4' : 'rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 sm:p-5');
+    const card = make('article', isReply ? 'border-t border-[#F5F5F5] py-[18px]' : 'fd-card rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]');
     const author = post.author_name || post.author_npk || 'Pengguna';
-    const top = make('div', 'flex min-w-0 items-start gap-3');
-    top.append(make('span', 'grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-container text-sm font-semibold text-on-surface-variant', Array.from(author.trim())[0]?.toLocaleUpperCase('id') || 'U'));
-    const metadata = make('div', 'flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1');
-    metadata.append(make('strong', 'min-w-0 break-words text-sm font-semibold text-on-surface', author));
+    const top = make('div', 'flex min-w-0 items-start gap-[12px]');
+    top.append(make('span', 'grid h-10 w-10 shrink-0 place-items-center rounded-[8px] bg-[#FEF2F2] text-sm font-semibold text-[#DC2626]', Array.from(author.trim())[0]?.toLocaleUpperCase('id') || 'U'));
+    const metadata = make('div', 'flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[4px]');
+    metadata.append(make('strong', 'min-w-0 break-words text-[14px] font-semibold text-[#171717]', author));
     metadata.append(roleBadge(post.author_role));
-    metadata.append(make('time', 'text-xs text-on-surface-variant', dateText(post.created_at)));
+    metadata.append(make('time', 'fd-mono text-[12px] text-[#737373]', dateText(post.created_at)));
     top.append(metadata);
     card.append(top);
-    if (!isReply) card.append(make('h3', 'mt-3 break-words text-base font-semibold text-on-surface', post.title));
-    card.append(make('p', 'mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-on-surface-variant', post.body));
+    if (!isReply) card.append(make('h3', 'fd-h3 mt-[12px] break-words text-[#171717]', post.title));
+    card.append(make('p', 'mt-[6px] whitespace-pre-wrap break-words text-[14px] leading-[22px] text-[#525252]', post.body));
     const attachment = renderAttachment(post.attachment_path, 'Gambar lampiran forum');
     if (attachment) card.append(attachment);
     if (post.status === 'locked') card.append(make('p', 'mt-3 text-xs font-medium text-on-surface-variant', 'Diskusi ini ditutup untuk balasan.'));
@@ -206,6 +213,9 @@
       const submit = form.querySelector('button[type="submit"]'); submit.disabled = true;
       try {
         await request(`/forum/courses/${encodeURIComponent(courseCode)}/sessions/${encodeURIComponent(sessionCode)}/threads`, { method: 'POST', body: await formBody(form, ['title', 'body']) });
+        if (window.DLS?.success) {
+          await window.DLS.success('Diskusi Terkirim', 'Topik diskusi baru berhasil dipublikasikan.');
+        }
         window.location.assign(categoryUrl);
       } catch (error) { showMessage(error.message); }
       finally { submit.disabled = false; }

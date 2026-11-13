@@ -1,12 +1,12 @@
 const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { createJob, stopJob, resumeJob } = require('../services/admin-jobs');
 const { listStudentAccounts } = require('../services/student-auth');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+router.use(authenticate);
 
 function accessClause(req) { return req.user.role === 'admin' ? '' : ' AND created_by=@owner'; }
 function addOwner(request, req) {
@@ -14,7 +14,7 @@ function addOwner(request, req) {
   return request;
 }
 
-router.get('/', async (req, res, next) => {
+router.get('/', requirePermission('activity.view'), async (req, res, next) => {
   try {
     const request = addOwner(pool.request(), req);
     const result = await request.query(`SELECT TOP (30) job_id,job_type,status,created_by,created_by_role,total_items,processed_items,
@@ -46,7 +46,58 @@ const recordDeleteSchema = z.object({
   ])).min(1).max(5000)
 }).strict();
 
-router.post('/records/delete', allowRoles('admin'), async (req, res, next) => {
+const enrollmentJobSchema = z.object({
+  items: z.array(z.object({
+    requestId: z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+    action: z.enum(['approved', 'rejected']),
+    note: z.string().trim().max(1000).optional().default(''),
+    label: z.string().trim().min(1).max(300).optional()
+  }).strict()).min(1).max(5000)
+}).strict();
+
+const notificationJobSchema = z.object({
+  items: z.array(z.object({
+    title: z.string().trim().min(1).max(180),
+    message: z.string().trim().min(1).max(2000),
+    category: z.string().trim().max(30).optional().default('general'),
+    priority: z.enum(['urgent', 'important', 'normal']).optional().default('normal'),
+    role: z.enum(['student', 'teacher', 'admin']).optional().default('student'),
+    npk: z.string().trim().max(50).optional().nullable(),
+    email: z.string().trim().email().max(254).optional().nullable(),
+    fullname: z.string().trim().max(150).optional().nullable(),
+    sendEmail: z.boolean().optional().default(false),
+    showPopup: z.boolean().optional().default(false),
+    label: z.string().trim().min(1).max(300).optional()
+  }).strict()).min(1).max(5000)
+}).strict();
+
+router.post('/enrollments', requirePermission('enrollments.decide'), async (req, res, next) => {
+  const parsed = enrollmentJobSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data antrean persetujuan enrollment tidak valid.' } });
+  try {
+    const items = parsed.data.items.map(item => ({
+      ...item,
+      label: item.label || `Permintaan #${item.requestId} (${item.action === 'approved' ? 'Setujui' : 'Tolak'})`
+    }));
+    const jobId = await createJob({ ownerNpk: req.user.sub, ownerRole: req.user.role, type: 'enrollments_decision', items });
+    res.status(202).json({ jobId, status: 'queued', total: items.length });
+  } catch (error) { next(error); }
+});
+
+router.post('/notifications', requirePermission('notifications.send'), async (req, res, next) => {
+  const parsed = notificationJobSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data antrean notifikasi broadcast tidak valid.' } });
+  try {
+    const items = parsed.data.items.map(item => ({
+      ...item,
+      label: item.label || `${item.fullname || item.npk || item.role}: ${item.title.slice(0, 40)}`
+    }));
+    const jobId = await createJob({ ownerNpk: req.user.sub, ownerRole: req.user.role, type: 'notifications_broadcast', items });
+    res.status(202).json({ jobId, status: 'queued', total: items.length });
+  } catch (error) { next(error); }
+});
+
+router.post('/records/delete', requirePermission('users.manage', 'materials.delete'), async (req, res, next) => {
   const parsed = recordDeleteSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data penghapusan massal tidak valid.' } });
   try {
@@ -55,7 +106,7 @@ router.post('/records/delete', allowRoles('admin'), async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/users', async (req, res, next) => {
+router.post('/users', requirePermission('users.manage'), async (req, res, next) => {
   const parsed = inputSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_JOB', message: 'Data job pengguna tidak valid.' } });
   try {

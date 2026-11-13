@@ -7,7 +7,7 @@
  */
 $active_tab = 'riwayat'; ?>
 <!DOCTYPE html>
-<html lang="id" style="">
+<html lang="id">
 
 <head>
     <?php
@@ -35,35 +35,35 @@ $active_tab = 'riwayat'; ?>
     <main class="dls-main flex-1 pt-[72px] pb-32 lg:ml-[240px] transition-all duration-300">
         <!-- Header & Stats Section -->
         <section class="px-container-margin py-6">
-            <h1 class="font-headline-lg text-headline-lg text-on-background mb-1">Riwayat Belajar</h1>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-6">Pantau pencapaian dan unduh sertifikat pelatihan Anda.</p>
+            <h1 class="fd-h1 text-[#171717] mb-[6px]">Riwayat Belajar</h1>
+            <p class="fd-body text-[#525252] mb-[18px]">Pantau pencapaian dan unduh sertifikat pelatihan Anda.</p>
             <!-- Stats Card -->
-            <div class="bg-surface-container-lowest rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8 flex flex-col items-center justify-center mb-10 border border-surface-container-low transition-all duration-300 hover:shadow-[0_8px_40px_rgb(0,0,0,0.1)]">
-                <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em] mb-3 opacity-80">Total Kursus Selesai</span>
-                <div class="flex items-center gap-3">
-                    <span class="font-headline-lg text-[48px] leading-[48px] text-tertiary font-bold tracking-tight"><?= e(
+            <div class="fd-card-elevated rounded-[12px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.12)] p-[24px] flex flex-col items-center justify-center mb-[24px]">
+                <span class="rounded-full bg-[#DCFCE7] px-3 py-1 text-[11px] font-semibold text-[#16A34A] uppercase tracking-wider mb-[12px]">Total Kursus Selesai</span>
+                <div class="flex items-center gap-[12px]">
+                    <span class="fd-mono text-[42px] leading-[44px] text-[#171717] font-bold tracking-tight"><?= e(
                         (string) $stats['completed_count'],
                     ) ?></span>
-                    <span class="material-symbols-outlined text-tertiary text-[32px]" style='font-variation-settings: "FILL" 1;'>verified</span>
+                    <span class="material-symbols-outlined text-[#16A34A] text-[32px]" style='font-variation-settings: "FILL" 1;'>verified</span>
                 </div>
             </div>
             <!-- Search Bar -->
-            <div class="relative pb-4">
-                <span class="absolute left-4 top-[14px] material-symbols-outlined text-on-surface-variant">search</span>
-                <input type="text" id="searchInput" class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-full py-3 pl-12 pr-4 font-body-md shadow-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Cari riwayat course...">
+            <div class="relative pb-[12px]">
+                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-[11px] text-[#737373]">search</span>
+                <input type="text" id="searchInput" class="fd-input fd-search-input w-full" placeholder="Cari riwayat course...">
             </div>
 
             <!-- Filter Tabs -->
-            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div class="flex gap-[6px] overflow-x-auto pb-2 scrollbar-hide">
             </div>
         </section>
         <!-- Course List -->
-        <section id="course-results" class="px-container-margin grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2">
+        <section id="course-results" class="px-container-margin grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px] pt-2">
             <?php foreach ($completedCourses as $c): ?>
-            <div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(
+            <div class="course-card fd-card flex flex-col h-full bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden" data-filters="<?= htmlspecialchars(
                 json_encode($c['filters'] ?? []),
             ) ?>">
-                <div class="h-32 bg-surface-container-high relative shrink-0">
+                <div class="course-card-cover aspect-video relative shrink-0 bg-[#171717]">
                     <?php if ($c['thumbnail']): ?>
                     <img alt="<?= e(
                         $c['title'],
@@ -72,70 +72,54 @@ $active_tab = 'riwayat'; ?>
 ) ?>">
                     <?php endif; ?>
                     <?php
-                    $iconGradients = [
-                        'build' => 'from-orange-400 to-orange-600',
-                        'health_and_safety' => 'from-green-400 to-emerald-600',
-                        'cleaning_services' => 'from-teal-400 to-cyan-600',
-                        'precision_manufacturing' => 'from-blue-400 to-blue-600',
-                        'trending_up' => 'from-violet-400 to-purple-600',
-                        'verified' => 'from-sky-400 to-indigo-600',
-                        'forum' => 'from-pink-400 to-rose-600',
-                        'groups' => 'from-amber-400 to-yellow-600',
-                        'gavel' => 'from-red-400 to-rose-700',
-                        'eco' => 'from-lime-400 to-green-600',
-                        'school' => 'from-primary/70 to-primary',
-                    ];
                     $icon = $c['thumbnail_icon'] ?? 'school';
-                    $grad = $iconGradients[$icon] ?? 'from-primary/70 to-primary';
                     $showFallback = empty($c['thumbnail']) ? 'flex' : 'none';
                     ?>
-                    <div class="w-full h-full bg-[#1e252d] border-b border-slate-700/60 relative items-center justify-center<?= $c[
-     'thumbnail'
- ]
-     ? ' hidden'
-     : '' ?>" style="display:<?= $showFallback ?>">
-                        <span class="material-symbols-outlined text-white/80" style="font-size: 56px; font-variation-settings: 'FILL' 1;"><?= e(
-                            $icon,
-                        ) ?></span>
+                    <div class="fd-cover-fallback<?= $c['thumbnail'] ? ' hidden' : '' ?>" style="display:<?= $showFallback ?>">
+                        <span class="fd-cover-icon-badge">
+                            <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;"><?= e(
+                                $icon,
+                            ) ?></span>
+                        </span>
                     </div>
-                    <div class="absolute top-2 right-2 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-sm text-label-sm shadow-sm backdrop-blur-sm flex items-center gap-1">
+                    <div class="fd-chip fd-chip-success absolute top-3 right-3 shadow-sm">
                         <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
                     </div>
                 </div>
-                <div class="p-stack-md flex flex-col flex-1">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="p-[18px] flex flex-col flex-1">
+                    <div class="flex justify-between items-start mb-[6px]">
                         <div>
-                            <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title"><?= e(
+                            <h3 class="fd-h4 text-[#171717] leading-tight course-title"><?= e(
                                 $c['title'],
                             ) ?></h3>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block"><?= e(
+                            <span class="text-[12px] font-medium text-[#737373] mt-1 block"><strong class="fd-mono text-[#171717]"><?= e(
                                 (string) $c['modules_count'],
-                            ) ?> Modul</span>
+                            ) ?></strong> Modul</span>
                         </div>
                     </div>
-                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3"><?= e(
+                    <p class="fd-body text-[#525252] line-clamp-2 mb-[12px]"><?= e(
                         $c['description'],
                     ) ?></p>
 
-                    <div class="flex gap-1.5 flex-wrap">
+                    <div class="flex gap-[6px] flex-wrap">
                         <?php foreach ($c['filters'] ?? [] as $f): ?>
-                        <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase"><?= e(
+                        <span class="bg-[#F5F5F5] text-[#525252] text-[11px] px-2.5 py-0.5 rounded-full font-medium"><?= e(
                             $f,
                         ) ?></span>
                         <?php endforeach; ?>
                     </div>
 
-                    <div class="mt-auto pt-4 space-y-2">
-                        <div class="flex justify-between font-label-sm text-label-sm">
-                            <span class="text-on-surface-variant">Selesai</span>
-                            <span class="text-tertiary font-bold">100%</span>
+                    <div class="mt-auto pt-[18px] space-y-[6px]">
+                        <div class="flex justify-between text-[12px]">
+                            <span class="text-[#525252]">Selesai</span>
+                            <span class="fd-mono text-[#16A34A] font-bold">100%</span>
                         </div>
-                        <div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
-                            <div class="bg-tertiary h-2 rounded-full" style="width: 100%"></div>
+                        <div class="w-full bg-[#F5F5F5] rounded-full h-[6px] overflow-hidden">
+                            <div class="bg-[#16A34A] h-[6px] rounded-full" style="width: 100%"></div>
                         </div>
                         <button onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e(
                             $c['id'],
-                        ) ?>'" class="w-full mt-3 border border-outline-variant text-on-surface-variant bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-surface-container-low flex items-center justify-center gap-2">
+                        ) ?>'" class="fd-btn fd-btn-secondary fd-btn-md w-full mt-[12px]">
                             Lihat Riwayat
                         </button>
                     </div>

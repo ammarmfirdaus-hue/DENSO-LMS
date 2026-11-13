@@ -1,16 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  CheckCircle2,
+  File,
+  FileBadge,
+  FilePlus2,
+  FileText,
+  Film,
+  Headphones,
+  Image,
+  Link2,
+  PlayCircle,
+  PlusCircle,
+  Send,
+  UploadCloud,
+  X
+} from 'lucide-react';
 import { api } from '../../api/client';
+import Button from '../../components/Button';
 import TinyEditor from '../../components/TinyEditor';
 import showAlert from '../../utils/alert';
 
 const MATERIAL_TYPES = [
-  { value: 'text',     label: 'Materi Teks',           icon: 'article',     desc: 'Artikel / modul teks dengan format TinyMCE' },
-  { value: 'video',    label: 'Video YouTube / File',  icon: 'play_circle', desc: 'Link YouTube atau unggah file video (MP4/WebM)' },
-  { value: 'pdf',      label: 'Dokumen PDF',           icon: 'picture_as_pdf', desc: 'Unggah file PDF materi' },
-  { value: 'image',    label: 'Gambar / Infografis',   icon: 'image',       desc: 'Unggah gambar (PNG, JPG, WebP, GIF)' },
-  { value: 'document', label: 'Dokumen Office / ODF',  icon: 'description', desc: 'Unggah file Word, Excel, PowerPoint, atau ODF' },
-  { value: 'audio',    label: 'Audio',                 icon: 'audiotrack',  desc: 'Unggah file audio (MP3, WAV, OGG, M4A)' },
-  { value: 'link',     label: 'Tautan HTTPS',          icon: 'link',        desc: 'Tautan eksternal / referensi web' },
+  { value: 'text', label: 'Materi Teks', Icon: FileText },
+  { value: 'video', label: 'Video / YouTube', Icon: PlayCircle },
+  { value: 'pdf', label: 'Dokumen PDF', Icon: FileBadge },
+  { value: 'image', label: 'Gambar', Icon: Image },
+  { value: 'document', label: 'Dokumen Office', Icon: File },
+  { value: 'audio', label: 'Audio', Icon: Headphones },
+  { value: 'link', label: 'Tautan HTTPS', Icon: Link2 }
 ];
 
 const ACCEPT_MAP = {
@@ -18,31 +35,35 @@ const ACCEPT_MAP = {
   image: '.png,.jpg,.jpeg,.gif,.webp',
   video: '.mp4,.webm,.mov,.ogv',
   audio: '.mp3,.wav,.ogg,.m4a',
-  document: '.doc,.docx,.ppt,.pptx,.xls,.xlsx,.odt,.ods,.odp',
+  document: '.doc,.docx,.ppt,.pptx,.xls,.xlsx,.odt,.ods,.odp'
 };
 
+const FIELD_CLASS =
+  'h-10 w-full rounded-md border border-outline bg-surface-lowest px-3 text-xs font-medium text-on-surface outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
+
+/**
+ * Modal untuk menambahkan & mengajukan satu atau lebih materi baru ke antrean persetujuan Admin.
+ */
 export default function SubmitMaterialModal({ onClose, onSuccess }) {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [selectedCourseId, setSelectedCourseId] = useState('');
-  
+
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState('');
-  
-  // New session inline creation
+
   const [showNewSessionInput, setShowNewSessionInput] = useState(false);
   const [newSessionTitle, setNewSessionTitle] = useState('');
   const [creatingSession, setCreatingSession] = useState(false);
 
-  // Material Form State
   const [title, setTitle] = useState('');
   const [type, setType] = useState('text');
-  const [videoSource, setVideoSource] = useState('youtube'); // 'youtube' | 'file'
+  const [videoSource, setVideoSource] = useState('youtube');
   const [htmlContent, setHtmlContent] = useState('');
   const [urlInput, setUrlInput] = useState('');
   const [file, setFile] = useState(null);
-  
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -52,7 +73,6 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
   const fileInputRef = useRef(null);
   const titleInputRef = useRef(null);
 
-  // Load active courses on mount
   useEffect(() => {
     let active = true;
     async function loadCourses() {
@@ -67,16 +87,21 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
           }
         }
       } catch (err) {
-        if (active) setError(err.message || 'Gagal memuat daftar course.');
+        if (active) {
+          const msg = err.message || 'Gagal memuat daftar course.';
+          setError(msg);
+          showAlert.error('Gagal Memuat Course', msg);
+        }
       } finally {
         if (active) setLoadingCourses(false);
       }
     }
     loadCourses();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // When course changes, load its sessions
   useEffect(() => {
     if (!selectedCourseId) {
       setSessions([]);
@@ -100,13 +125,19 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
           }
         }
       } catch (err) {
-        if (active) setError(err.message || 'Gagal memuat sesi course.');
+        if (active) {
+          const msg = err.message || 'Gagal memuat sesi course.';
+          setError(msg);
+          showAlert.error('Gagal Memuat Sesi', msg);
+        }
       } finally {
         if (active) setLoadingSessions(false);
       }
     }
     loadSessions();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [selectedCourseId]);
 
   async function handleCreateSession(e) {
@@ -118,11 +149,11 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         method: 'POST',
         body: JSON.stringify({ title: newSessionTitle.trim() })
       });
-      // reload sessions
       const res = await api(`/courses/${selectedCourseId}/detail`);
       const sessList = res.sessions || [];
       setSessions(sessList);
-      const created = sessList.find(s => s.title === newSessionTitle.trim()) || sessList[sessList.length - 1];
+      const created =
+        sessList.find((s) => s.title === newSessionTitle.trim()) || sessList[sessList.length - 1];
       if (created) setSelectedSessionId(String(created.session_id));
       setNewSessionTitle('');
       setShowNewSessionInput(false);
@@ -136,7 +167,9 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
 
   const isText = type === 'text';
   const needsUrl = type === 'link' || (type === 'video' && videoSource === 'youtube');
-  const needsFile = ['pdf', 'image', 'document', 'audio'].includes(type) || (type === 'video' && videoSource === 'file');
+  const needsFile =
+    ['pdf', 'image', 'document', 'audio'].includes(type) ||
+    (type === 'video' && videoSource === 'file');
 
   async function handleSubmit(e, continueAdding = false) {
     e.preventDefault();
@@ -156,7 +189,10 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
     }
 
     if (isText && !htmlContent.trim()) {
-      showAlert.warning('Isi Materi Diperlukan', 'Silakan ketikkan konten materi pada editor teks TinyMCE.');
+      showAlert.warning(
+        'Isi Materi Diperlukan',
+        'Silakan ketikkan konten materi pada editor teks TinyMCE.'
+      );
       return;
     }
 
@@ -166,7 +202,10 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
       if (videoSource === 'youtube') {
         let normalized = urlInput.trim();
         if (!normalized) {
-          showAlert.warning('Tautan YouTube Diperlukan', 'Silakan masukkan URL YouTube yang valid (diawali https://).');
+          showAlert.warning(
+            'Tautan YouTube Diperlukan',
+            'Silakan masukkan URL YouTube yang valid (diawali https://).'
+          );
           return;
         }
         if (!/^https?:\/\//i.test(normalized)) {
@@ -175,9 +214,19 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
         }
         try {
           const parsed = new URL(normalized);
-          const validHosts = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'www.youtube-nocookie.com', 'youtube-nocookie.com'];
+          const validHosts = [
+            'youtube.com',
+            'www.youtube.com',
+            'm.youtube.com',
+            'youtu.be',
+            'www.youtube-nocookie.com',
+            'youtube-nocookie.com'
+          ];
           if (!validHosts.includes(parsed.hostname.toLowerCase())) {
-            showAlert.warning('URL YouTube Tidak Valid', 'Pastikan URL berasal dari YouTube (youtube.com atau youtu.be).');
+            showAlert.warning(
+              'URL YouTube Tidak Valid',
+              'Pastikan URL berasal dari YouTube (youtube.com atau youtu.be).'
+            );
             return;
           }
         } catch {
@@ -185,11 +234,9 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
           return;
         }
         finalContent = normalized;
-      } else if (videoSource === 'file') {
-        if (!file) {
-          showAlert.warning('File Video Diperlukan', 'Silakan pilih file video (MP4/WebM) dari komputer.');
-          return;
-        }
+      } else if (videoSource === 'file' && !file) {
+        showAlert.warning('File Video Diperlukan', 'Silakan pilih file video (MP4/WebM) dari komputer.');
+        return;
       }
     }
 
@@ -226,7 +273,7 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
 
       await api(`/material-workflow/sessions/${selectedSessionId}/submissions`, {
         method: 'POST',
-        body: formData,
+        body: formData
       });
 
       const nextCount = submittedCount + 1;
@@ -234,19 +281,26 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
       onSuccess?.();
 
       if (continueAdding || keepOpenAfterSave) {
-        // Reset only the material fields, keep selected course and session intact
         setTitle('');
         setHtmlContent('');
         setUrlInput('');
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
-        setNotice(`Materi "${trimmedTitle}" berhasil diajukan (${nextCount} materi tersimpan). Form telah siap untuk materi berikutnya.`);
-        showAlert.success('Materi Berhasil Diajukan', `"${trimmedTitle}" telah diajukan. Silakan isi materi berikutnya.`);
+        setNotice(
+          `Materi "${trimmedTitle}" berhasil diajukan (${nextCount} materi tersimpan). Form siap untuk materi berikutnya.`
+        );
+        showAlert.success(
+          'Materi Berhasil Diajukan',
+          `"${trimmedTitle}" telah diajukan. Silakan isi materi berikutnya.`
+        );
         setTimeout(() => {
           titleInputRef.current?.focus();
         }, 100);
       } else {
-        showAlert.success('Materi Berhasil Diajukan', `Materi "${trimmedTitle}" telah berhasil dikirimkan ke antrean persetujuan Admin.`);
+        showAlert.success(
+          'Materi Berhasil Diajukan',
+          `Materi "${trimmedTitle}" telah berhasil dikirimkan ke antrean persetujuan Admin.`
+        );
         onClose();
       }
     } catch (err) {
@@ -258,66 +312,71 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Tambah materi pembelajaran">
-      {/* Backdrop — closes modal when clicked */}
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={onClose} aria-hidden="true" />
+    <div
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tambah materi pembelajaran"
+    >
+      <div
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      {/*
-        Mobile  → bottom sheet (rounded-t-3xl, slides from bottom, max-h 92dvh)
-        Desktop → centered modal (sm:rounded-3xl, sm:max-w-5xl, max-h 90dvh)
-      */}
-      <div className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] w-full flex-col rounded-t-3xl border-t border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:inset-0 sm:m-auto sm:max-h-[90dvh] sm:max-w-5xl sm:rounded-3xl sm:border lg:max-w-6xl xl:max-w-7xl">
-        
-        {/* Drag handle pill — visible only on mobile (hidden on sm+) */}
-        <div className="flex shrink-0 justify-center pt-2.5 pb-1 sm:hidden" aria-hidden="true">
-          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
+      <div className="dls-card-surface absolute inset-x-0 bottom-0 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-2xl sm:inset-0 sm:m-auto sm:max-h-[90dvh] sm:max-w-5xl sm:rounded-xl lg:max-w-6xl">
+        <div className="flex shrink-0 justify-center pb-1 pt-2.5 sm:hidden" aria-hidden="true">
+          <div className="h-1 w-10 rounded-full bg-outline" />
         </div>
 
-        {/* Header Modal */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/70 dark:bg-slate-900">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-outline/40 bg-surface-low/60 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800 dark:bg-slate-800/60">
           <div className="flex items-center gap-3.5">
-            <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xs">
-              <span className="material-symbol text-2xl">post_add</span>
+            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300">
+              <FilePlus2 className="size-5" />
             </span>
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-base font-bold text-on-surface sm:text-lg">
                   Tambah &amp; Ajukan Materi Pembelajaran
                 </h3>
                 {submittedCount > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    <span className="material-symbol text-xs">check_circle</span>
+                    <CheckCircle2 className="size-3.5" />
                     {submittedCount} materi tersimpan
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Pilih course &amp; sesi untuk menambahkan satu atau beberapa materi ke antrean persetujuan Admin
+              <p className="text-xs text-muted">
+                Pilih course &amp; sesi untuk mengajukan satu atau beberapa materi ke antrean persetujuan Admin.
               </p>
             </div>
           </div>
+
           <button
             type="button"
+            data-dls-action-ignore="true"
             onClick={onClose}
-            className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition cursor-pointer"
+            className="grid size-8 place-items-center rounded-lg text-muted transition hover:bg-surface-container hover:text-on-surface dark:hover:bg-slate-700"
             aria-label="Tutup modal"
           >
-            <span className="material-symbol text-xl">close</span>
+            <X className="size-4" />
           </button>
         </div>
 
-        {/* Body — scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 sm:px-6 sm:py-5">
+        {/* Body */}
+        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           {notice && (
-            <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/90 p-3.5 text-xs text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-xs animate-fade-in">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="material-symbol text-emerald-600 text-lg shrink-0">check_circle</span>
-                <span className="font-semibold break-words">{notice}</span>
+            <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
+              <div className="flex min-w-0 items-center gap-2">
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+                <span className="break-words font-semibold">{notice}</span>
               </div>
               <button
                 type="button"
+                data-dls-action-ignore="true"
                 onClick={() => setNotice('')}
-                className="shrink-0 rounded-lg text-emerald-700 hover:bg-emerald-100 px-2 py-1 font-bold text-xs cursor-pointer dark:hover:bg-emerald-900"
+                className="shrink-0 rounded-md px-2 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
               >
                 Tutup
               </button>
@@ -325,26 +384,28 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
           )}
 
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
               {error}
             </div>
           )}
 
-          {/* 1. Pilih Course & Sesi - Grid 2 Kolom di Desktop */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-800/40">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Pilih Course & Sesi */}
+          <div className="rounded-xl border border-outline/40 bg-surface-low/50 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
                   Pilih Course Pembelajaran <span className="text-primary">*</span>
                 </label>
                 <select
                   value={selectedCourseId}
-                  onChange={e => setSelectedCourseId(e.target.value)}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
                   disabled={loadingCourses || busy}
-                  className="mt-1.5 h-10.5 w-full rounded-xl border border-slate-300 bg-white px-3 text-xs font-medium text-slate-800 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 disabled:opacity-50"
+                  className={FIELD_CLASS}
                 >
-                  <option value="">{loadingCourses ? 'Memuat daftar course...' : '-- Pilih Course Pembelajaran --'}</option>
-                  {courses.map(c => (
+                  <option value="">
+                    {loadingCourses ? 'Memuat daftar course...' : '-- Pilih Course Pembelajaran --'}
+                  </option>
+                  {courses.map((c) => (
                     <option key={c.course_id} value={c.course_id}>
                       [{c.course_code}] {c.title}
                     </option>
@@ -353,15 +414,16 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
               </div>
 
               <div>
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="block text-xs font-bold text-on-surface-variant">
                     Pilih Sesi Pembelajaran <span className="text-primary">*</span>
                   </label>
                   {selectedCourseId && !showNewSessionInput && (
                     <button
                       type="button"
+                      data-dls-action-ignore="true"
                       onClick={() => setShowNewSessionInput(true)}
-                      className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                      className="text-[11px] font-bold text-primary hover:underline"
                     >
                       + Buat Sesi Baru
                     </button>
@@ -369,49 +431,54 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
                 </div>
 
                 {!selectedCourseId ? (
-                  <div className="mt-1.5 flex h-10.5 items-center rounded-xl border border-dashed border-slate-300 bg-white/60 px-3 text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-900">
+                  <div className="flex h-10 items-center rounded-md border border-dashed border-outline bg-surface-lowest px-3 text-xs text-muted dark:border-slate-700 dark:bg-slate-900">
                     Pilih course terlebih dahulu
                   </div>
                 ) : !showNewSessionInput ? (
                   <select
                     value={selectedSessionId}
-                    onChange={e => setSelectedSessionId(e.target.value)}
+                    onChange={(e) => setSelectedSessionId(e.target.value)}
                     disabled={loadingSessions || busy}
-                    className="mt-1.5 h-10.5 w-full rounded-xl border border-slate-300 bg-white px-3 text-xs font-medium text-slate-800 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 disabled:opacity-50"
+                    className={FIELD_CLASS}
                   >
-                    <option value="">{loadingSessions ? 'Memuat sesi...' : '-- Pilih Sesi Pembelajaran --'}</option>
-                    {sessions.map(s => (
+                    <option value="">
+                      {loadingSessions ? 'Memuat sesi...' : '-- Pilih Sesi Pembelajaran --'}
+                    </option>
+                    {sessions.map((s) => (
                       <option key={s.session_id} value={s.session_id}>
                         {s.title}
                       </option>
                     ))}
                   </select>
                 ) : (
-                  <div className="mt-1.5 flex gap-2">
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       placeholder="Nama sesi baru, misal: Sesi 1 - Pengantar Kualitas"
                       value={newSessionTitle}
-                      onChange={e => setNewSessionTitle(e.target.value)}
+                      onChange={(e) => setNewSessionTitle(e.target.value)}
                       maxLength={200}
-                      className="h-10.5 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-xs text-slate-800 outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      className={FIELD_CLASS}
                     />
-                    <button
+                    <Button
                       type="button"
+                      size="sm"
+                      variant="secondary"
                       disabled={creatingSession || !newSessionTitle.trim()}
+                      loading={creatingSession}
                       onClick={handleCreateSession}
-                      className="rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-50 cursor-pointer"
                     >
-                      {creatingSession ? 'Menyimpan...' : 'Simpan Sesi'}
-                    </button>
+                      Simpan Sesi
+                    </Button>
                     {sessions.length > 0 && (
-                      <button
+                      <Button
                         type="button"
+                        size="sm"
+                        variant="outline"
                         onClick={() => setShowNewSessionInput(false)}
-                        className="rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 cursor-pointer"
                       >
                         Batal
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
@@ -419,9 +486,9 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* 2. Judul Materi */}
+          {/* Judul Materi */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
               Judul Materi Pembelajaran <span className="text-primary">*</span>
             </label>
             <input
@@ -431,79 +498,85 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
               maxLength={200}
               placeholder="Contoh: Pengenalan Standar Kualitas 5S di Area Produksi"
               value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs text-slate-800 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              onChange={(e) => setTitle(e.target.value)}
+              className="h-10 w-full rounded-md border border-outline bg-surface-lowest px-3.5 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
-          {/* 3. Tipe Materi Grid Responsif Luas */}
+          {/* Pilihan Tipe Materi */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
               Pilih Tipe Materi <span className="text-primary">*</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
-              {MATERIAL_TYPES.map(t => {
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7">
+              {MATERIAL_TYPES.map((t) => {
                 const isSelected = type === t.value;
+                const IconComp = t.Icon;
                 return (
                   <button
                     key={t.value}
                     type="button"
+                    data-dls-action-ignore="true"
                     onClick={() => setType(t.value)}
-                    className={`flex flex-col items-center justify-center gap-1.5 rounded-xl p-3 text-center text-xs transition cursor-pointer border ${
+                    className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border p-3 text-center text-xs transition ${
                       isSelected
-                        ? 'border-primary bg-primary/10 text-primary font-bold ring-2 ring-primary/20'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'
+                        ? 'border-primary bg-primary/10 font-bold text-primary ring-2 ring-primary/20 dark:bg-red-950/40 dark:text-red-300'
+                        : 'border-outline/50 bg-surface-lowest text-on-surface-variant hover:border-outline-strong hover:bg-surface-low dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
                     }`}
                   >
-                    <span className="material-symbol text-xl shrink-0">{t.icon}</span>
-                    <span className="text-[11px] leading-tight line-clamp-2">{t.label}</span>
+                    <IconComp className="size-4 shrink-0" />
+                    <span className="line-clamp-2 text-[11px] leading-tight">{t.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* 4. Tipe Video: Sumber Video (YouTube / MP4) */}
+          {/* Sumber Video */}
           {type === 'video' && (
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 dark:border-primary/30 dark:bg-primary/10">
-              <p className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <p className="mb-2 text-xs font-bold text-on-surface-variant">
                 Pilih Sumber Video <span className="text-primary">*</span>
               </p>
-              <div className="grid grid-cols-2 gap-2.5 max-w-md">
+              <div className="grid max-w-md grid-cols-2 gap-2.5">
                 <button
                   type="button"
+                  data-dls-action-ignore="true"
                   onClick={() => setVideoSource('youtube')}
-                  className={`flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-bold transition cursor-pointer ${
+                  className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
                     videoSource === 'youtube'
                       ? 'bg-primary text-white shadow-xs'
-                      : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border border-outline bg-surface-lowest text-on-surface-variant hover:bg-surface-low dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   }`}
                 >
-                  <span className="material-symbol text-sm">smart_display</span>
+                  <PlayCircle className="size-4" />
                   Link YouTube (HTTPS)
                 </button>
                 <button
                   type="button"
+                  data-dls-action-ignore="true"
                   onClick={() => setVideoSource('file')}
-                  className={`flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-bold transition cursor-pointer ${
+                  className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
                     videoSource === 'file'
                       ? 'bg-primary text-white shadow-xs'
-                      : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border border-outline bg-surface-lowest text-on-surface-variant hover:bg-surface-low dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   }`}
                 >
-                  <span className="material-symbol text-sm">movie</span>
+                  <Film className="size-4" />
                   Unggah File Video (MP4)
                 </button>
               </div>
             </div>
           )}
 
-          {/* 5. Konten Teks TinyMCE Luas */}
+          {/* Editor Teks */}
           {isText && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
                 Isi Materi Teks Pembelajaran <span className="text-primary">*</span>
-                <span className="ml-1 text-[11px] font-normal text-slate-500">(Gunakan TinyMCE untuk heading, tabel, format teks, dan gambar)</span>
+                <span className="ml-1 font-normal text-muted">
+                  (Mendukung heading, tabel, format teks, dan gambar)
+                </span>
               </label>
               <div className="min-h-[300px]">
                 <TinyEditor value={htmlContent} onChange={setHtmlContent} />
@@ -511,10 +584,10 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
             </div>
           )}
 
-          {/* 6. URL Input (Link atau Video YouTube) */}
+          {/* Input URL */}
           {needsUrl && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
                 {type === 'link' ? 'URL Tautan HTTPS *' : 'Link Video YouTube HTTPS *'}
               </label>
               <input
@@ -522,11 +595,15 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
                 required
                 maxLength={2000}
                 value={urlInput}
-                onChange={e => setUrlInput(e.target.value)}
-                placeholder={type === 'link' ? 'https://contoh.com/materi' : 'https://www.youtube.com/watch?v=... atau https://youtu.be/...'}
-                className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs text-slate-800 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                onChange={(e) => setUrlInput(e.target.value)}
+                placeholder={
+                  type === 'link'
+                    ? 'https://contoh.com/materi'
+                    : 'https://www.youtube.com/watch?v=... atau https://youtu.be/...'
+                }
+                className={FIELD_CLASS}
               />
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-[11px] text-muted">
                 {type === 'video'
                   ? 'Video YouTube akan disematkan langsung untuk dapat diputar oleh student.'
                   : 'Tautan eksternal yang dapat diakses langsung oleh student.'}
@@ -534,96 +611,84 @@ export default function SubmitMaterialModal({ onClose, onSuccess }) {
             </div>
           )}
 
-          {/* 7. File Upload (PDF, Dokumen, Gambar, Audio, Video MP4) */}
+          {/* Input Upload File */}
           {needsFile && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Unggah File {type === 'video' ? 'Video (MP4/WebM)' : type.toUpperCase()} <span className="text-primary">*</span>
+              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
+                Unggah File {type === 'video' ? 'Video (MP4/WebM)' : type.toUpperCase()}{' '}
+                <span className="text-primary">*</span>
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-1.5 flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-5 hover:border-primary/50 dark:border-slate-700 dark:bg-slate-800/40 transition"
+                className="flex cursor-pointer items-center gap-3.5 rounded-xl border-2 border-dashed border-outline bg-surface-low/50 p-5 transition hover:border-primary/60 dark:border-slate-700 dark:bg-slate-800/40"
               >
                 <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <span className="material-symbol text-2xl">upload_file</span>
+                  <UploadCloud className="size-6" />
                 </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-on-surface sm:text-sm">
                     {file ? file.name : 'Klik untuk memilih file materi'}
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : `Format didukung: ${ACCEPT_MAP[type] || '*'} · Maksimal 50 MB`}
+                  <p className="mt-0.5 text-[11px] text-muted">
+                    {file
+                      ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+                      : `Format didukung: ${ACCEPT_MAP[type] || '*'} · Maksimal 50 MB`}
                   </p>
                 </div>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept={ACCEPT_MAP[type] || ''}
-                  onChange={e => setFile(e.target.files?.[0] || null)}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                   className="hidden"
                 />
               </div>
             </div>
           )}
-
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex shrink-0 flex-col-reverse items-stretch gap-2.5 border-t border-slate-200 dark:border-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4 bg-slate-50/70 dark:bg-slate-900">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={keepOpenAfterSave}
-                onChange={e => setKeepOpenAfterSave(e.target.checked)}
-                className="size-4 rounded accent-primary cursor-pointer"
-              />
-              <span>Tetap buka modal untuk isi materi berikutnya</span>
-            </label>
-          </div>
+        {/* Footer */}
+        <div className="flex shrink-0 flex-col-reverse items-stretch gap-2.5 border-t border-outline/40 bg-surface-low/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4 dark:border-slate-800 dark:bg-slate-800/60">
+          <label className="inline-flex cursor-pointer select-none items-center gap-2 text-xs font-semibold text-on-surface-variant">
+            <input
+              type="checkbox"
+              checked={keepOpenAfterSave}
+              onChange={(e) => setKeepOpenAfterSave(e.target.checked)}
+              className="size-4 rounded accent-primary"
+            />
+            <span>Tetap buka modal untuk isi materi berikutnya</span>
+          </label>
 
-          <div className="flex flex-wrap items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={busy}
-              className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
-            >
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={busy}>
               {submittedCount > 0 ? 'Selesai & Tutup' : 'Batal'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
-              onClick={e => handleSubmit(e, true)}
+              variant="secondary"
+              size="sm"
               disabled={busy || !selectedCourseId || !selectedSessionId || !title.trim()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-bold text-primary hover:bg-primary/20 active:scale-95 disabled:opacity-50 transition cursor-pointer"
-              title="Simpan materi ini dan bersihkan form untuk langsung menambah materi baru di sesi ini"
+              icon={<PlusCircle className="size-4" />}
+              onClick={(e) => handleSubmit(e, true)}
+              title="Simpan materi ini dan bersihkan form untuk langsung menambah materi baru"
             >
-              <span className="material-symbol text-base">add_circle</span>
               Simpan &amp; Tambah Lagi
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
-              onClick={e => handleSubmit(e, false)}
+              variant="primary"
+              size="sm"
+              loading={busy}
               disabled={busy || !selectedCourseId || !selectedSessionId || !title.trim()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 active:scale-95 disabled:opacity-50 transition cursor-pointer"
+              icon={<Send className="size-4" />}
+              onClick={(e) => handleSubmit(e, false)}
             >
-              {busy ? (
-                <>
-                  <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Mengajukan...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbol text-base">send</span>
-                  Simpan &amp; Selesai
-                </>
-              )}
-            </button>
+              Simpan &amp; Selesai
+            </Button>
           </div>
         </div>
-
       </div>
     </div>
   );

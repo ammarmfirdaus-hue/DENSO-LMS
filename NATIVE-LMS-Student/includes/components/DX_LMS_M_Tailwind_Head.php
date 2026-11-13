@@ -93,14 +93,20 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
      Tailwind CSS - Dimuat secara SYNCHRONOUS
      Mencegah FOUC (Flash of Unstyled Content) secara alami
      ===================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Poppins:wght@500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Tokens.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Layout.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Dls_Components.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Tailwind_Output.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Responsive_Redesign.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Coursera_Theme.css">
-<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Action_Controls.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Student_Experience.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_FoodDash_Theme.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/vendor/driverjs/driver.css">
+<script src="<?= $base_path ?>assets/vendor/driverjs/driver.js.iife.js" defer></script>
+<script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_User_Guide.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Network.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_Api.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>

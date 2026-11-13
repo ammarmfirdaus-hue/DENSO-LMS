@@ -16,11 +16,11 @@ $grades = is_array($grades ?? null) ? $grades : [];
             $page_eyebrow = 'PEMBELAJARAN';
             $page_title_heading = 'Nilai Saya';
             $page_description = 'Lihat rekapitulasi nilai Quiz Course dan progres belajar Anda.';
-            $page_actions_html = '<span class="inline-flex min-h-9 items-center rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-3.5 text-xs font-semibold text-on-surface-variant">' . count($grades) . ' course terdata</span>';
+            $page_actions_html = '<span class="inline-flex min-h-9 items-center rounded-full bg-[#F5F5F5] px-3.5 text-xs font-semibold text-[#525252]"><strong class="fd-mono mr-1 text-[#171717]">' . count($grades) . '</strong> course terdata</span>';
             include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
             ?>
-            <?php if (!empty($grade_error)): ?><p role="alert" class="mb-4 rounded-xl border border-error/30 bg-error-container/50 p-4 text-sm text-on-error-container"><?= e($grade_error) ?></p><?php endif; ?>
-            <div class="dls-grade-table-scroll max-w-full overflow-x-auto rounded-xl border border-outline-variant/50 bg-surface-container-lowest" role="region" aria-label="Tabel nilai saya" tabindex="0"<?= $grades ? ' aria-describedby="grade-table-scroll-hint"' : '' ?>>
+            <?php if (!empty($grade_error)): ?><p role="alert" class="mb-4 rounded-[12px] bg-[#FEE2E2] p-4 text-sm font-medium text-[#B91C1C]"><?= e($grade_error) ?></p><?php endif; ?>
+            <div class="dls-grade-table-scroll max-w-full overflow-x-auto rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]" role="region" aria-label="Tabel nilai saya" tabindex="0"<?= $grades ? ' aria-describedby="grade-table-scroll-hint"' : '' ?>>
                 <?php if ($grades): ?><p id="grade-table-scroll-hint" class="dls-grade-table-hint"><span class="material-symbols-outlined" aria-hidden="true">swipe</span><span>Geser tabel ke samping untuk melihat semua kolom.</span></p><?php endif; ?>
                 <table class="dls-grade-table w-full min-w-[640px] text-left text-sm">
                     <thead class="bg-surface-container-low text-on-surface-variant"><tr>

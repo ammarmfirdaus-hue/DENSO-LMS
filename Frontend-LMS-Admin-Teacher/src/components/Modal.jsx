@@ -1,17 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 
 /**
- * Accessible Modal Dialog component.
- *
- * @param {Object} props
- * @param {boolean} props.isOpen - Controls visibility.
- * @param {() => void} props.onClose - Dismiss callback.
- * @param {string} props.title - Dialog title heading.
- * @param {string} [props.subtitle] - Contextual subtitle.
- * @param {'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'} [props.maxWidth='md'] - Max width breakpoint.
- * @param {React.ReactNode} props.children - Dialog content.
- * @param {boolean} [props.closeOnBackdrop=true]
- * @param {string} [props.className]
+ * Accessible Modal Dialog component (design.md dialog shadow + 12px radius + clean hairline header).
  */
 export default function Modal({
   isOpen,
@@ -25,22 +16,18 @@ export default function Modal({
 }) {
   const dialogRef = useRef(null);
 
-  // Close on Escape key press
   useEffect(() => {
     if (!isOpen) return;
-
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
         onClose();
       }
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return;
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -69,7 +56,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-xs transition-opacity duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/55 p-4 backdrop-blur-xs transition-opacity duration-200"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -77,38 +64,40 @@ export default function Modal({
     >
       <div
         ref={dialogRef}
-        className={`w-full overflow-hidden rounded-2xl border border-outline/50 bg-white shadow-2xl transition-all dark:border-slate-800 dark:bg-[#1e293b] ${maxWidthClasses[maxWidth] || maxWidthClasses.md} ${className}`}
+        className={`w-full overflow-hidden rounded-xl border border-outline bg-white text-on-surface shadow-[0_20px_25px_rgba(0,0,0,0.12),0_8px_10px_rgba(0,0,0,0.06)] transition-all dark:border-slate-700/80 dark:bg-[#171e29] dark:text-slate-100 ${
+          maxWidthClasses[maxWidth] || maxWidthClasses.md
+        } ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-outline/40 p-5 sm:p-6 dark:border-slate-800">
+        <div className="flex items-start justify-between border-b border-outline/60 px-6 py-4 dark:border-slate-700/70">
           <div className="min-w-0 pr-4">
             <h2
               id="modal-headline-title"
-              className="text-lg font-bold tracking-tight text-on-surface sm:text-xl"
+              className="text-lg font-bold tracking-tight text-on-surface dark:text-slate-100"
             >
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-1 text-xs text-muted sm:text-sm">
+              <p className="mt-1 text-xs text-muted sm:text-sm dark:text-slate-400">
                 {subtitle}
               </p>
             )}
           </div>
           <button
             type="button"
+            data-dls-action-ignore="true"
             onClick={onClose}
-            className="grid size-9 shrink-0 place-items-center rounded-xl border border-outline/50 text-muted transition hover:bg-surface-low hover:text-on-surface dark:border-slate-700 dark:hover:bg-slate-800"
+            className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg border border-outline/80 text-muted transition hover:bg-surface-low hover:text-on-surface dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
             aria-label="Tutup dialog"
           >
-            <span className="material-symbol text-lg" aria-hidden="true">close</span>
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="max-h-[calc(90vh-140px)] overflow-y-auto p-5 sm:p-6">
+        <div className="max-h-[calc(90vh-140px)] overflow-y-auto p-6">
           {children}
         </div>
       </div>
     </div>
   );
 }
-

@@ -2,15 +2,15 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { createStudentAccount, listStudentAccounts, updateStudentAccount, getStudentAccountState, deleteStudentAccount,
   getStudentAccountForPromotion, promoteStudentAccountToTeacherShadow } = require('../services/student-auth');
 const { sendAccountCredentials } = require('../services/account-mail');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
-router.get('/', async (req, res, next) => {
+router.use(authenticate);
+router.get('/', requirePermission('users.view'), async (req, res, next) => {
   try {
     const students = await listStudentAccounts();
     const employees = req.user.role === 'admin'
@@ -31,7 +31,7 @@ const userUpdateSchema = z.object({
   sendEmail: z.boolean().optional().default(false)
 }).strict();
 
-router.put('/:npk', async (req, res, next) => {
+router.put('/:npk', requirePermission('users.manage'), async (req, res, next) => {
   const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
   const parsed = userUpdateSchema.safeParse(req.body);
   if (!npk.success || !parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Data akun tidak valid. Kata sandi baru minimal 12 karakter.' } });
@@ -125,7 +125,7 @@ router.put('/:npk', async (req, res, next) => {
 });
 
 // Permanently remove accounts only when their history/relations do not block deletion.
-router.delete('/:npk', async (req, res, next) => {
+router.delete('/:npk', requirePermission('users.manage'), async (req, res, next) => {
   const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
   if (!npk.success) return res.status(400).json({ error: { code: 'INVALID_NPK', message: 'NPK tidak valid.' } });
   if (npk.data === req.user.sub) return res.status(409).json({ error: { code: 'CANNOT_DISABLE_SELF', message: 'Anda tidak dapat menghapus akun yang sedang digunakan.' } });
@@ -160,7 +160,7 @@ router.delete('/:npk', async (req, res, next) => {
   }
 });
 
-router.post('/', allowRoles('admin'), async (req, res, next) => {
+router.post('/', requirePermission('users.manage'), async (req, res, next) => {
   const parsed = z.object({ npk: z.string().trim().min(1).max(50), fullname: z.string().trim().min(2).max(150),
     email: z.string().trim().email().max(254), password: z.string().min(12).max(200), role: z.enum(['student','admin','teacher','reviewer']),
     sendEmail: z.boolean().optional().default(false) }).safeParse(req.body);

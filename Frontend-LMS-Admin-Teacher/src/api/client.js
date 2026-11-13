@@ -11,6 +11,17 @@ try { API_BASE = localStorage.getItem(API_BASE_KEY) || defaultApiBase; } catch {
 // do not depend on CORS or whether the page was opened via localhost/127.0.0.1.
 export { API_BASE };
 
+/**
+ * Mengubah path sampul course relatif (/courses/thumbnails/...) menjadi URL lengkap siap pakai untuk tag <img>.
+ */
+export function resolveCourseThumbnailUrl(thumbnailPath, apiBase = API_BASE) {
+  const value = String(thumbnailPath || '').trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  const base = String(apiBase || '').replace(/\/+$/, '');
+  return `${base}${value.startsWith('/') ? value : `/${value}`}`;
+}
+
 export function storeApiBaseUrl(value) {
   const normalized = String(value || '').replace(/\/+$/, '');
   API_BASE = normalized;

@@ -14,12 +14,28 @@ class DX_LMS_M_Student_Data
         $studentId = (int) ($_SESSION['student_id'] ?? 0);
         if ($studentId < 1) return null;
         require_once dirname(__DIR__, 2) . '/includes/Database.php';
-        $statement = db()->prepare("SELECT SUM(CASE WHEN enrollment_status='active' THEN 1 ELSE 0 END) AS active_count,
-            SUM(CASE WHEN enrollment_status='completed' THEN 1 ELSE 0 END) AS completed_count
+        $statement = db()->prepare("SELECT 
+            SUM(CASE WHEN enrollment_status='active' THEN 1 ELSE 0 END) AS active_count,
+            SUM(CASE WHEN enrollment_status='completed' THEN 1 ELSE 0 END) AS completed_count,
+            AVG(CASE WHEN enrollment_status='completed' THEN COALESCE(quiz_score, score, 0) ELSE NULL END) AS avg_score,
+            SUM(CASE WHEN enrollment_status='completed' THEN 1 ELSE 0 END) AS total_certificates
             FROM course_enrollments WHERE student_id=:student_id");
         $statement->execute(['student_id' => $studentId]);
         $row = $statement->fetch() ?: [];
-        return ['active_count' => (int) ($row['active_count'] ?? 0), 'completed_count' => (int) ($row['completed_count'] ?? 0)];
+        $active = (int) ($row['active_count'] ?? 0);
+        $completed = (int) ($row['completed_count'] ?? 0);
+        $avgScore = round((float) ($row['avg_score'] ?? 0));
+        $certs = (int) ($row['total_certificates'] ?? $completed);
+
+        return [
+            'active_count' => $active,
+            'completed_count' => $completed,
+            'avg_score' => $avgScore,
+            'total_certificates' => $certs,
+            'active_courses' => $active,
+            'completed_courses' => $completed,
+            'certificates' => $certs,
+        ];
     }
 
     private static $courses = null;
@@ -933,8 +949,11 @@ class DX_LMS_M_Student_Data
             return [
                 'active_count' => $databaseStats['active_count'],
                 'completed_count' => $databaseStats['completed_count'],
-                'avg_score' => 0,
-                'total_certificates' => $databaseStats['completed_count'],
+                'avg_score' => $databaseStats['avg_score'],
+                'total_certificates' => $databaseStats['total_certificates'],
+                'active_courses' => $databaseStats['active_count'],
+                'completed_courses' => $databaseStats['completed_count'],
+                'certificates' => $databaseStats['total_certificates'],
                 'unread_notifs' => 0,
             ];
         }
@@ -954,11 +973,19 @@ class DX_LMS_M_Student_Data
             }),
         );
 
+        $activeCount = count($active);
+        $completedCount = count($completed);
+        $roundedAvg = round($avgScore);
+        $totalCerts = count($completed);
+
         return [
-            'active_count' => count($active),
-            'completed_count' => count($completed),
-            'avg_score' => round($avgScore),
-            'total_certificates' => count($completed),
+            'active_count' => $activeCount,
+            'completed_count' => $completedCount,
+            'avg_score' => $roundedAvg,
+            'total_certificates' => $totalCerts,
+            'active_courses' => $activeCount,
+            'completed_courses' => $completedCount,
+            'certificates' => $totalCerts,
             'unread_notifs' => $unreadNotifs,
         ];
     }

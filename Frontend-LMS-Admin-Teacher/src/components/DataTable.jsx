@@ -1,17 +1,9 @@
 import React from 'react';
+import { FolderOpen } from 'lucide-react';
 
 /**
- * Standard DataTable component with accessible horizontal scroll container and consistent theming.
- *
- * @param {Object} props
- * @param {Array<{ key: string, label: React.ReactNode, align?: 'left'|'center'|'right', className?: string }>} props.columns
- * @param {React.ReactNode} props.children - Table body rows (<tr> elements).
- * @param {boolean} [props.loading=false]
- * @param {boolean} [props.empty=false]
- * @param {string} [props.emptyMessage='Belum ada data untuk ditampilkan.']
- * @param {React.ReactNode} [props.emptyAction]
- * @param {string} [props.ariaLabel='Tabel data']
- * @param {string} [props.className]
+ * Standard DataTable component aligned with design.md neutral operational table specs:
+ * 48px high header, uppercase tracked labels, clean horizontal row dividers, no heavy gridlines.
  */
 export default function DataTable({
   columns = [],
@@ -24,26 +16,29 @@ export default function DataTable({
   className = ''
 }) {
   return (
-    <div
-      className={`overflow-hidden rounded-2xl border border-outline/50 bg-white shadow-xs dark:border-slate-800 dark:bg-[#1e293b] ${className}`}
-    >
+    <div className={`dls-table-wrap overflow-hidden rounded-xl border border-[#d5dce4] bg-surface-elevated shadow-xs dark:border-[#2f3c4f] ${className}`}>
       <div
         className="max-w-full overflow-x-auto overscroll-x-contain"
         role="region"
         aria-label={ariaLabel}
         tabIndex={0}
       >
-        <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[700px] border-collapse text-left text-sm">
           {columns.length > 0 && (
-            <thead className="border-b border-outline/50 bg-surface-low text-xs font-semibold uppercase tracking-wider text-muted dark:border-slate-800 dark:bg-slate-900/60">
+            <thead>
               <tr>
                 {columns.map((col, index) => {
-                  const alignClass = col.align === 'right' ? 'text-right' : col.align === 'left' ? 'text-left' : 'text-center';
+                  const alignClass =
+                    col.align === 'right'
+                      ? 'text-right'
+                      : col.align === 'center'
+                        ? 'text-center'
+                        : 'text-left';
                   return (
                     <th
                       key={col.key || index}
                       scope="col"
-                      className={`px-4 py-3.5 ${alignClass} ${col.className || ''}`}
+                      className={`${alignClass} ${col.className || ''}`}
                     >
                       {col.label}
                     </th>
@@ -53,29 +48,26 @@ export default function DataTable({
             </thead>
           )}
 
-          <tbody className="divide-y divide-outline/40 dark:divide-slate-800/80">
+          <tbody>
             {loading ? (
               Array.from({ length: 5 }).map((_, idx) => (
                 <tr key={idx} className="animate-pulse">
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx} className="px-4 py-4">
-                      <div className="h-4 w-3/4 rounded bg-surface-low dark:bg-slate-800" />
+                    <td key={colIdx} className="px-4 py-3.5">
+                      <div className="h-4 w-3/4 rounded bg-surface-container" />
                     </td>
                   ))}
                 </tr>
               ))
             ) : empty ? (
               <tr>
-                <td
-                  colSpan={columns.length || 1}
-                  className="px-6 py-12 text-center"
-                >
+                <td colSpan={columns.length || 1} className="px-6 py-12 text-center">
                   <div className="mx-auto flex max-w-sm flex-col items-center justify-center text-center">
                     <span
-                      className="grid size-12 place-items-center rounded-2xl bg-surface-low text-muted dark:bg-slate-800"
+                      className="grid size-12 place-items-center rounded-xl bg-surface-low text-muted"
                       aria-hidden="true"
                     >
-                      <span className="material-symbol text-2xl">folder_off</span>
+                      <FolderOpen className="h-6 w-6 stroke-[1.75]" />
                     </span>
                     <p className="mt-3 text-sm font-medium text-muted">
                       {emptyMessage}
@@ -93,4 +85,3 @@ export default function DataTable({
     </div>
   );
 }
-

@@ -44,7 +44,11 @@ Module._load = function loadWithJobMocks(request, parent, isMain) {
     return { sql: fakeSql, pool: fakePool };
   }
   if (request === '../middleware/auth' && parent?.filename.endsWith(`${path.sep}routes${path.sep}jobs.js`)) {
-    return { authenticate: (_req, _res, next) => next(), allowRoles: () => (_req, _res, next) => next() };
+    return {
+      authenticate: (_req, _res, next) => next(),
+      allowRoles: () => (_req, _res, next) => next(),
+      requirePermission: () => (_req, _res, next) => next()
+    };
   }
   if (request === '../services/admin-jobs' && parent?.filename.endsWith(`${path.sep}routes${path.sep}jobs.js`)) {
     return { createJob: async job => { createdJob = job; return 700; }, stopJob() {}, resumeJob() {} };
@@ -57,8 +61,8 @@ Module._load = function loadWithJobMocks(request, parent, isMain) {
 const router = require('../../src/routes/jobs');
 Module._load = originalLoad;
 
-const streamHandler = router.stack.find(layer => layer.route?.path === '/:id/stream').route.stack[0].handle;
-const createUsersHandler = router.stack.find(layer => layer.route?.path === '/users').route.stack[0].handle;
+const streamHandler = router.stack.find(layer => layer.route?.path === '/:id/stream').route.stack.at(-1).handle;
+const createUsersHandler = router.stack.find(layer => layer.route?.path === '/users').route.stack.at(-1).handle;
 
 function makeResponse() {
   const chunks = [];

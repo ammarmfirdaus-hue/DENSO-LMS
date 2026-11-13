@@ -6,12 +6,16 @@ import Swal from 'sweetalert2';
  */
 const dlsSwal = Swal.mixin({
   customClass: {
-    popup: 'rounded-3xl border border-outline/40 bg-white p-6 shadow-2xl font-sans max-w-md w-full',
-    title: 'text-lg sm:text-xl font-bold text-on-surface',
-    htmlContainer: 'text-xs sm:text-sm text-secondary leading-relaxed mt-2',
-    confirmButton: 'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
-    cancelButton: 'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary hover:bg-surface-low active:scale-95 transition cursor-pointer mx-1.5',
-    denyButton: 'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5',
+    popup:
+      'rounded-3xl border border-outline/40 bg-white dark:border-slate-700 dark:bg-[#171e29] p-6 shadow-2xl font-sans max-w-md w-full',
+    title: 'text-lg sm:text-xl font-bold text-on-surface dark:text-slate-100',
+    htmlContainer: 'text-xs sm:text-sm text-secondary dark:text-slate-300 leading-relaxed mt-2',
+    confirmButton:
+      'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
+    cancelButton:
+      'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
+    denyButton:
+      'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5',
   },
   buttonsStyling: false,
 });
@@ -108,13 +112,17 @@ export const showAlert = {
       reverseButtons: true,
       iconColor: danger ? '#dc2626' : '#d71920',
       customClass: {
-        popup: 'rounded-3xl border border-outline/40 bg-white p-6 shadow-2xl font-sans max-w-md w-full',
-        title: `text-lg sm:text-xl font-bold ${danger ? 'text-red-700' : 'text-on-surface'}`,
-        htmlContainer: 'text-xs sm:text-sm text-secondary leading-relaxed mt-2',
+        popup:
+          'rounded-3xl border border-outline/40 bg-white dark:border-slate-700 dark:bg-[#171e29] p-6 shadow-2xl font-sans max-w-md w-full',
+        title: `text-lg sm:text-xl font-bold ${
+          danger ? 'text-red-700 dark:text-red-400' : 'text-on-surface dark:text-slate-100'
+        }`,
+        htmlContainer: 'text-xs sm:text-sm text-secondary dark:text-slate-300 leading-relaxed mt-2',
         confirmButton: danger
           ? 'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5'
           : 'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
-        cancelButton: 'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary hover:bg-surface-low active:scale-95 transition cursor-pointer mx-1.5',
+        cancelButton:
+          'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
       },
     });
     return result.isConfirmed;
@@ -162,14 +170,19 @@ export const showAlert = {
         }
       },
       customClass: {
-        popup: 'rounded-3xl border border-outline/40 bg-white p-6 shadow-2xl font-sans max-w-lg w-full',
-        title: `text-lg sm:text-xl font-bold ${danger ? 'text-red-700' : 'text-on-surface'}`,
-        htmlContainer: 'text-xs sm:text-sm text-secondary leading-relaxed mt-2',
-        input: 'rounded-xl border border-outline p-3 text-sm font-sans w-full outline-none focus:border-primary mt-3',
+        popup:
+          'rounded-3xl border border-outline/40 bg-white dark:border-slate-700 dark:bg-[#171e29] p-6 shadow-2xl font-sans max-w-lg w-full',
+        title: `text-lg sm:text-xl font-bold ${
+          danger ? 'text-red-700 dark:text-red-400' : 'text-on-surface dark:text-slate-100'
+        }`,
+        htmlContainer: 'text-xs sm:text-sm text-secondary dark:text-slate-300 leading-relaxed mt-2',
+        input:
+          'rounded-xl border border-outline dark:border-slate-600 bg-white dark:bg-slate-800 text-on-surface dark:text-slate-100 p-3 text-sm font-sans w-full outline-none focus:border-primary mt-3',
         confirmButton: danger
           ? 'inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition cursor-pointer mx-1.5'
           : 'inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer mx-1.5',
-        cancelButton: 'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary hover:bg-surface-low active:scale-95 transition cursor-pointer mx-1.5',
+        cancelButton:
+          'inline-flex items-center justify-center rounded-xl border border-outline/70 bg-white dark:border-slate-600 dark:bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-secondary dark:text-slate-200 hover:bg-surface-low dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer mx-1.5',
       },
     });
     if (result.isConfirmed) {
@@ -194,7 +207,9 @@ export const showAlert = {
       timerProgressBar: true,
       iconColor: icon === 'success' ? '#10b981' : icon === 'error' ? '#ef4444' : '#3b82f6',
       customClass: {
-        popup: 'rounded-2xl border border-outline/50 bg-white shadow-xl p-3.5 text-xs sm:text-sm font-sans',
+        popup:
+          'rounded-2xl border border-outline/50 bg-white dark:border-slate-700 dark:bg-[#171e29] shadow-xl p-3.5 text-xs sm:text-sm font-sans text-on-surface dark:text-slate-100',
+        title: 'text-xs sm:text-sm font-semibold text-on-surface dark:text-slate-100',
       },
     });
   },

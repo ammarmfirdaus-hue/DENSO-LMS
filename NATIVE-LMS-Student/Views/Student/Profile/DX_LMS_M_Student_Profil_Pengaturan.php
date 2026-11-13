@@ -10,7 +10,7 @@ $p = $profile ?? [];
 $lh = $loginHistory ?? [];
 ?>
 <!DOCTYPE html>
-<html lang="id" style="">
+<html lang="id">
 
 <head>
     <?php
@@ -26,32 +26,22 @@ $lh = $loginHistory ?? [];
             padding-top: env(safe-area-inset-top, 44px);
         }
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-        }
-
-        body *,
-        body *::before,
-        body *::after {
-            font-family: inherit;
-        }
-
         /* Custom toggle */
         .toggle-track {
             width: 44px;
             height: 24px;
-            border-radius: 12px;
+            border-radius: 9999px;
             position: relative;
             cursor: pointer;
             transition: background-color 0.2s;
         }
 
         .toggle-track.active {
-            background-color: var(--color-primary, #b4000b);
+            background-color: #DC2626;
         }
 
         .toggle-track:not(.active) {
-            background-color: var(--color-outline-variant, #e9bcb6);
+            background-color: #D4D4D4;
         }
 
         .toggle-thumb {
@@ -221,7 +211,7 @@ $lh = $loginHistory ?? [];
                         </div>
                         <div class="toggle-track <?= $np['default']
                             ? 'active'
-                            : '' ?> shrink-0 ml-3" onclick="this.classList.toggle('active')" role="switch" aria-label="<?= $np[
+                            : '' ?> shrink-0 ml-3" data-notif-pref="<?= e($np['label']) ?>" onclick="this.classList.toggle('active'); if (window.DLS && window.DLS.toast) { window.DLS.toast(this.dataset.notifPref + (this.classList.contains('active') ? ' diaktifkan' : ' dinonaktifkan'), 'info'); }" role="switch" aria-label="<?= $np[
      'label'
  ] ?>">
                             <div class="toggle-thumb"></div>

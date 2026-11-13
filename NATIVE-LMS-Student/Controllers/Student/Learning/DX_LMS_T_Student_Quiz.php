@@ -58,7 +58,7 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
                         exit('Permintaan tidak valid. Muat ulang halaman lalu coba kembali.');
                     }
                     apiSubmitStudentCourseQuiz($id, (int) ($_SESSION['student_id'] ?? 0), $submittedAnswers);
-                    header('Location: ?route=/student/quiz&id=' . rawurlencode($id) . '&type=quiz', true, 303);
+                    header('Location: ?route=/student/quiz&id=' . rawurlencode($id) . '&type=quiz&submitted=1', true, 303);
                     exit();
                 }
                 $realQuiz = apiStudentCourseQuizDetails($id, (int) ($_SESSION['student_id'] ?? 0));

@@ -1,27 +1,85 @@
 const express = require('express');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const crypto = require('node:crypto');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission, requestHasPermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
+const { courseCoverUpload } = require('../middleware/forum-upload');
+const { uploadLimiter } = require('../middleware/rate-limit');
+const { parseImageBuffer } = require('../services/forum-image');
+const { syncStudentNow } = require('../services/student-sync');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+const courseUploadDir = path.resolve(__dirname, '../../uploads/courses');
+const THUMBNAIL_PATH_PREFIX = '/courses/thumbnails/';
+const THUMBNAIL_FILENAME_REGEX = /^[0-9a-f-]{36}\.(jpg|png|gif|webp)$/i;
+
+/**
+ * Memastikan path file sampul yang disimpan berada di dalam direktori uploads/courses.
+ */
+function resolveStoredThumbnailPath(publicPath) {
+  if (typeof publicPath !== 'string' || !publicPath.startsWith(THUMBNAIL_PATH_PREFIX)) return null;
+  const filename = publicPath.slice(THUMBNAIL_PATH_PREFIX.length);
+  if (!THUMBNAIL_FILENAME_REGEX.test(filename)) return null;
+  const resolved = path.resolve(courseUploadDir, filename);
+  return resolved.startsWith(`${courseUploadDir}${path.sep}`) ? resolved : null;
+}
+
+/**
+ * Menyajikan file gambar sampul course aktif untuk portal Admin/Teacher maupun Native Student.
+ * Dipasang sebelum middleware role admin/teacher agar tag <img> lintas portal dapat memuat sampul dengan aman.
+ */
+router.get('/thumbnails/:filename', async (req, res, next) => {
+  const filename = z.string().regex(THUMBNAIL_FILENAME_REGEX).safeParse(req.params.filename);
+  if (!filename.success) return res.sendStatus(404);
+  try {
+    const publicPath = `${THUMBNAIL_PATH_PREFIX}${filename.data}`;
+    const found = await pool.request()
+      .input('path', sql.NVarChar(500), publicPath)
+      .query(`SELECT TOP 1 course_id FROM dbo.courses WHERE thumbnail_path=@path AND status='active'`);
+    if (!found.recordset[0]) return res.sendStatus(404);
+    const filePath = resolveStoredThumbnailPath(publicPath);
+    if (!filePath) return res.sendStatus(404);
+    await fs.access(filePath);
+    res.set({
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cache-Control': 'public, max-age=300',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    res.type(path.extname(filePath));
+    res.sendFile(filePath, error => { if (error && !res.headersSent) next(error); });
+  } catch (error) {
+    if (error.code === 'ENOENT') return res.sendStatus(404);
+    next(error);
+  }
+});
+
+router.use(authenticate);
+
 async function courseAccess(courseId, user) {
+  const isWideScope = user.role !== 'teacher';
   const request = pool.request().input('id', sql.BigInt, courseId).input('npk', sql.VarChar(50), user.sub)
-    .input('isAdmin', sql.Bit, user.role === 'admin');
+    .input('isAdmin', sql.Bit, isWideScope);
   const result = await request.query('SELECT 1 AS allowed FROM dbo.courses WHERE course_id=@id AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)');
   return result.recordset.length > 0;
 }
-const courseInput = z.object({ courseCode: z.string().trim().min(2).max(30), title: z.string().trim().min(2).max(200),
-  description: z.string().trim().max(4000).default(''), category: z.enum(['Wajib', 'Pilihan']).default('Wajib'),
-  trainerNpk: z.string().trim().max(50).optional().default('') });
 
-router.get('/', async (req, res, next) => {
+const courseInput = z.object({
+  courseCode: z.string().trim().min(2).max(30),
+  title: z.string().trim().min(2).max(200),
+  description: z.string().trim().max(4000).default(''),
+  category: z.enum(['Wajib', 'Pilihan']).default('Wajib'),
+  trainerNpk: z.string().trim().max(50).optional().default('')
+});
+
+router.get('/', requirePermission('courses.view'), async (req, res, next) => {
   try {
     const result = await pool.request()
       .input('npk', sql.VarChar(50), req.user.sub)
-      .input('isAdmin', sql.Bit, req.user.role === 'admin')
-      .query(`SELECT course_id,course_code,title,description,category,status,assigned_trainer_npk
+      .input('isAdmin', sql.Bit, req.user.role !== 'teacher')
+      .query(`SELECT course_id,course_code,title,description,category,thumbnail_path,status,assigned_trainer_npk
         FROM dbo.courses
         WHERE status='active' AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)
         ORDER BY title`);
@@ -30,12 +88,14 @@ router.get('/', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/', allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.post('/', requirePermission('courses.create'), async (req, res, next) => {
   const parsed = courseInput.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Periksa kode, judul, deskripsi, dan kategori course.' } });
   try {
     const { courseCode, title, description, category, trainerNpk } = parsed.data;
-    if (trainerNpk && req.user.role !== 'admin') return res.status(403).json({ error: { code: 'ADMIN_REQUIRED', message: 'Hanya Admin yang dapat menugaskan trainer.' } });
+    if (trainerNpk && !(await requestHasPermission(req, 'courses.assign_trainer'))) {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Peran Anda tidak memiliki hak untuk menugaskan trainer.' } });
+    }
     if (trainerNpk) {
       const trainer = await pool.request().input('npk', sql.VarChar(50), trainerNpk)
         .query(`SELECT 1 AS valid FROM dbo.employee_accounts WHERE employee_npk=@npk AND role='teacher' AND status='active'`);
@@ -45,14 +105,100 @@ router.post('/', allowRoles('admin', 'teacher'), async (req, res, next) => {
       .input('description', sql.NVarChar(4000), description).input('category', sql.VarChar(20), category)
       .input('creator', sql.VarChar(50), req.user.sub).input('trainer', sql.VarChar(50), trainerNpk || null)
       .query(`INSERT INTO dbo.courses(course_code,title,description,category,status,created_by,updated_by,assigned_trainer_npk)
-              OUTPUT INSERTED.course_id, INSERTED.course_code, INSERTED.title VALUES(@code,@title,@description,@category,'active',@creator,@creator,@trainer);
+              OUTPUT INSERTED.course_id, INSERTED.course_code, INSERTED.title, INSERTED.thumbnail_path VALUES(@code,@title,@description,@category,'active',@creator,@creator,@trainer);
               INSERT INTO dbo.activity_logs(employee_npk,activity_type,description)
               VALUES(@creator,'course_created',CONCAT(N'Membuat course ',@code));`);
+    await syncStudentNow().catch(() => {});
     res.status(201).json({ course: result.recordset[0] });
   } catch (error) { if (error.number === 2627 || error.number === 2601) error.status = 409; next(error); }
 });
 
-router.put('/:id/trainer', allowRoles('admin'), async (req, res, next) => {
+/**
+ * Mengunggah atau memperbarui foto sampul course (JPG, PNG, GIF, WebP maks. 5 MB)
+ * dan menyinkronkannya langsung ke database portal Student.
+ */
+router.post('/:id/thumbnail', requirePermission('courses.manage_cover'), uploadLimiter, courseCoverUpload.single('thumbnail'), async (req, res, next) => {
+  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
+  let savedPath = null;
+  try {
+    if (!(await courseAccess(id.data, req.user))) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih file gambar sampul course terlebih dahulu.' } });
+    }
+    const parsed = parseImageBuffer(req.file.mimetype, req.file.buffer);
+    if (!parsed) {
+      return res.status(415).json({ error: { code: 'INVALID_IMAGE', message: 'Isi file tidak sesuai dengan format gambar yang diizinkan (JPG, PNG, GIF, atau WebP).' } });
+    }
+    const existing = await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .query(`SELECT course_code, thumbnail_path FROM dbo.courses WHERE course_id=@id`);
+    const courseRow = existing.recordset[0];
+    if (!courseRow) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
+
+    const filename = `${crypto.randomUUID()}${parsed.extension}`;
+    const publicPath = `${THUMBNAIL_PATH_PREFIX}${filename}`;
+    savedPath = path.join(courseUploadDir, filename);
+    await fs.mkdir(courseUploadDir, { recursive: true });
+    await fs.writeFile(savedPath, req.file.buffer, { flag: 'wx', mode: 0o640 });
+
+    await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .input('path', sql.NVarChar(500), publicPath)
+      .input('updater', sql.VarChar(50), req.user.sub)
+      .input('code', sql.VarChar(30), courseRow.course_code)
+      .query(`UPDATE dbo.courses SET thumbnail_path=@path, updated_by=@updater, updated_at=SYSUTCDATETIME() WHERE course_id=@id;
+              INSERT INTO dbo.activity_logs(employee_npk,activity_type,description)
+              VALUES(@updater,'course_thumbnail_updated',CONCAT(N'Memperbarui foto sampul course ',@code));`);
+
+    const previousFile = resolveStoredThumbnailPath(courseRow.thumbnail_path);
+    if (previousFile && previousFile !== savedPath) {
+      await fs.unlink(previousFile).catch(() => {});
+    }
+    await syncStudentNow().catch(() => {});
+    res.json({ thumbnail_path: publicPath, course: { course_id: id.data, thumbnail_path: publicPath } });
+  } catch (error) {
+    if (savedPath) await fs.unlink(savedPath).catch(() => {});
+    next(error);
+  }
+});
+
+/**
+ * Menghapus foto sampul course sehingga kembali ke tampilan ikon bawaan.
+ */
+router.delete('/:id/thumbnail', requirePermission('courses.manage_cover'), async (req, res, next) => {
+  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
+  try {
+    if (!(await courseAccess(id.data, req.user))) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
+    }
+    const existing = await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .query(`SELECT course_code, thumbnail_path FROM dbo.courses WHERE course_id=@id`);
+    const courseRow = existing.recordset[0];
+    if (!courseRow) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
+
+    await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .input('updater', sql.VarChar(50), req.user.sub)
+      .input('code', sql.VarChar(30), courseRow.course_code)
+      .query(`UPDATE dbo.courses SET thumbnail_path=NULL, updated_by=@updater, updated_at=SYSUTCDATETIME() WHERE course_id=@id;
+              INSERT INTO dbo.activity_logs(employee_npk,activity_type,description)
+              VALUES(@updater,'course_thumbnail_removed',CONCAT(N'Menghapus foto sampul course ',@code));`);
+
+    const previousFile = resolveStoredThumbnailPath(courseRow.thumbnail_path);
+    if (previousFile) {
+      await fs.unlink(previousFile).catch(() => {});
+    }
+    await syncStudentNow().catch(() => {});
+    res.json({ thumbnail_path: null, course: { course_id: id.data, thumbnail_path: null } });
+  } catch (error) { next(error); }
+});
+
+router.put('/:id/trainer', requirePermission('courses.assign_trainer'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const input = z.object({ trainerNpk: z.string().trim().max(50).optional().default('') }).safeParse(req.body);
   if (!id.success || !input.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih trainer yang valid.' } });
@@ -70,7 +216,7 @@ router.put('/:id/trainer', allowRoles('admin'), async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/:id/sessions', async (req, res, next) => {
+router.get('/:id/sessions', requirePermission('courses.view'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   try {
@@ -84,13 +230,13 @@ router.get('/:id/sessions', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/:id/detail', async (req, res, next) => {
+router.get('/:id/detail', requirePermission('courses.view'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   try {
     if (!(await courseAccess(id.data, req.user))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan atau tidak ditugaskan kepada Anda.' } });
     const courseResult = await pool.request().input('id', sql.BigInt, id.data)
-      .query(`SELECT c.course_id,c.course_code,c.title,c.description,c.category,c.status,c.created_at,c.updated_at,
+      .query(`SELECT c.course_id,c.course_code,c.title,c.description,c.category,c.thumbnail_path,c.status,c.created_at,c.updated_at,
         c.assigned_trainer_npk,trainer.fullname AS assigned_trainer_name,creator.fullname AS created_by_name
         FROM dbo.courses c LEFT JOIN dbo.employee_accounts trainer ON trainer.employee_npk=c.assigned_trainer_npk
         JOIN dbo.employee_accounts creator ON creator.employee_npk=c.created_by WHERE c.course_id=@id`);
@@ -128,7 +274,7 @@ router.get('/:id/detail', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/:id/sessions', async (req, res, next) => {
+router.post('/:id/sessions', requirePermission('courses.manage_sessions'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const input = z.object({ title: z.string().trim().min(2).max(200), sortOrder: z.number().int().min(0).max(10000).default(0) }).safeParse(req.body);
   if (!id.success || !input.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Data sesi tidak valid.' } });
@@ -141,8 +287,9 @@ router.post('/:id/sessions', async (req, res, next) => {
   } catch (error) { if (error.number === 547) error.status = 404; next(error); }
 });
 
-router.post('/sessions/:sessionId/materials', async (req, res, next) => {
+router.post('/sessions/:sessionId/materials', async (_req, res) => {
   return res.status(410).json({ error: { code: 'APPROVAL_REQUIRED', message: 'Pengajuan materi langsung ke course telah dinonaktifkan. Kirim materi melalui /material-workflow agar disetujui reviewer terlebih dahulu.' } });
 });
 
 module.exports = router;
+module.exports.resolveStoredThumbnailPath = resolveStoredThumbnailPath;

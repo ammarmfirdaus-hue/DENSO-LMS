@@ -139,39 +139,45 @@ $base_path = '';
             <form class="w-full max-w-sm space-y-4" method="POST" action="?route=/auth/process" id="loginForm">
                 <input type="hidden" name="_csrf" value="<?= e($csrf_token ?? '') ?>">
                 <?php if (isset($_GET['error'])): ?>
-                <div class="flex items-center gap-2 p-3 rounded-xl bg-error-container/30 text-on-error-container">
-                    <span class="material-symbols-outlined" style="font-size:20px;">error</span>
-                    <span class="text-label-md"><?= ($_GET['error'] ?? '') === 'sso' ? 'Layanan masuk tunggal tidak tersedia. Coba lagi beberapa saat.' : 'NPK/email atau password salah.' ?></span>
+                <div class="flex items-center gap-[12px] rounded-[12px] bg-[#FEE2E2] p-[12px] text-[#EF4444]">
+                    <span class="material-symbols-outlined shrink-0" style="font-size:20px;">error</span>
+                    <span class="text-[13px] font-medium leading-[18px]"><?= ($_GET['error'] ?? '') === 'sso' ? 'Layanan masuk tunggal tidak tersedia. Coba lagi beberapa saat.' : 'NPK/email atau password salah.' ?></span>
                 </div>
                 <?php endif; ?>
 
                 <!-- NPK / Email Input -->
-                <div class="relative w-full">
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">person</span>
-                    <input type="text" class="w-full h-[52px] pl-12 pr-4 bg-surface-container-lowest border border-outline-variant rounded-xl font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all" name="npk" id="inputNpk" placeholder="NPK atau Email" value="<?= e((string) ($_POST['npk'] ?? '')) ?>" autocomplete="username" required>
+                <div class="w-full">
+                    <label for="inputNpk" class="fd-label">NPK atau Email</label>
+                    <div class="relative w-full">
+                        <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-[#737373] dark:text-slate-400" style="font-size:20px;" aria-hidden="true">person</span>
+                        <input type="text" class="fd-input w-full h-[46px] pl-11 pr-4 rounded-[12px] border border-[#E5E5E5] bg-white text-[14px] text-[#171717] placeholder:text-[#737373] shadow-[0_1px_3px_rgba(0,0,0,0.08)]" style="padding-left:44px;padding-right:16px;" name="npk" id="inputNpk" placeholder="Contoh: 123456 atau nama@denso.co.id" value="<?= e((string) ($_POST['npk'] ?? '')) ?>" autocomplete="username" required>
+                    </div>
                 </div>
 
                 <!-- Password Input -->
-                <div class="relative w-full">
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
-                    <input type="password" class="w-full h-[52px] pl-12 pr-12 bg-surface-container-lowest border border-outline-variant rounded-xl font-sans text-body-lg text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all" name="password" id="inputPassword" placeholder="Password" value="" autocomplete="current-password" required>
-                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-on-surface-variant hover:bg-surface-container-low p-1 rounded-full transition-colors" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
-                        <span class="material-symbols-outlined" style="font-size:20px;">visibility_off</span>
-                    </button>
+                <div class="w-full">
+                    <label for="inputPassword" class="fd-label">Kata Sandi</label>
+                    <div class="relative w-full">
+                        <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-[#737373] dark:text-slate-400" style="font-size:20px;" aria-hidden="true">lock</span>
+                        <input type="password" class="fd-input w-full h-[46px] pl-11 pr-12 rounded-[12px] border border-[#E5E5E5] bg-white text-[14px] text-[#171717] placeholder:text-[#737373] shadow-[0_1px_3px_rgba(0,0,0,0.08)]" style="padding-left:44px;padding-right:48px;" name="password" id="inputPassword" placeholder="Masukkan kata sandi" value="" autocomplete="current-password" required>
+                        <button type="button" class="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-[#737373] hover:bg-[#F5F5F5] dark:text-slate-300 dark:hover:bg-neutral-700 p-1.5 rounded-full transition-colors" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
+                            <span class="material-symbols-outlined" style="font-size:20px;">visibility_off</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Forgot Password Link -->
-                <p class="login-help-note">Perlu reset password? Hubungi Admin LMS.</p>
+                <p class="text-[12px] leading-[18px] text-[#737373]">Perlu reset password? Hubungi Admin LMS.</p>
 
-                <!-- Submit Button -->
-                <button type="submit" class="w-full h-12 bg-primary text-on-primary font-label-md font-semibold rounded-xl shadow-[0_8px_20px_rgba(215,25,32,0.18)] hover:bg-primary-container active:scale-[0.99] transition-all" id="btnLogin">
-                    Masuk
+                <!-- Submit Button (FoodDash Pill LG CTA) -->
+                <button type="submit" class="fd-btn fd-btn-primary fd-btn-lg w-full h-[50px] rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-[16px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]" id="btnLogin">
+                    Masuk ke Portal Belajar
                 </button>
             </form>
 
             <!-- Footer -->
-            <div class="mt-8 text-center">
-                <p class="text-body-md text-on-surface-variant">Belum punya akun? Hubungi Admin LMS untuk pembuatan akses.</p>
+            <div class="mt-[24px] text-center">
+                <p class="text-[13px] leading-[18px] text-[#525252]">Belum punya akun? Hubungi Admin LMS untuk pembuatan akses.</p>
             </div>
         </div>
     </div>
@@ -232,9 +238,27 @@ $base_path = '';
                 if (submitButton) {
                     submitButton.disabled = false;
                     submitButton.removeAttribute('aria-busy');
-                    submitButton.textContent = 'Masuk';
+                    submitButton.textContent = 'Masuk ke Portal Belajar';
                 }
             });
+
+            <?php if (isset($_GET['error']) || isset($_GET['logged_out'])): ?>
+            (function showAuthModal() {
+                var run = function(DLS) {
+                    if (!DLS) return;
+                    <?php if (isset($_GET['error'])): ?>
+                    DLS.error(
+                        'Login Gagal',
+                        <?= json_encode(($_GET['error'] ?? '') === 'sso' ? 'Layanan masuk tunggal tidak tersedia. Coba lagi beberapa saat.' : 'NPK/email atau password salah.', JSON_UNESCAPED_UNICODE) ?>
+                    );
+                    <?php elseif (isset($_GET['logged_out'])): ?>
+                    DLS.success('Berhasil Keluar', 'Sesi pembelajaran Anda telah diakhiri.');
+                    <?php endif; ?>
+                };
+                if (window.DLS) run(window.DLS);
+                else window.addEventListener('DLSReady', function() { run(window.DLS); }, { once: true });
+            })();
+            <?php endif; ?>
         });
     </script>
 

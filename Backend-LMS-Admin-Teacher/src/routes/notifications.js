@@ -2,7 +2,7 @@ const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { buildLimiter } = require('../middleware/rate-limit');
 const { listActiveStudentRecipients } = require('../services/student-auth');
 const { isMailConfigured } = require('../services/notification-mail');
@@ -29,15 +29,16 @@ function trustedWriteOrigin(req, res, next) {
   next();
 }
 
-router.use(authenticate, allowRoles(...permittedRoles));
+router.use(authenticate);
 
-router.get('/unread-count', async (req, res, next) => {
+router.get('/unread-count', requirePermission('notifications.view'), async (req, res, next) => {
   try {
-    const result = await pool.request().input('role', sql.VarChar(20), req.user.role)
+    const result = await pool.request()
+      .input('role', sql.VarChar(20), req.user.role)
       .input('npk', sql.VarChar(50), req.user.sub)
-      .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n
+      .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n WITH (NOLOCK)
         WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk) AND NOT EXISTS (
-          SELECT 1 FROM dbo.lms_notification_reads r
+          SELECT 1 FROM dbo.lms_notification_reads r WITH (NOLOCK)
           WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
         )`);
     res.set('Cache-Control', 'private, no-store');
@@ -46,7 +47,7 @@ router.get('/unread-count', async (req, res, next) => {
 });
 
 const activeStreams = new Map();
-router.get('/events', (req, res) => {
+router.get('/events', requirePermission('notifications.view'), (req, res) => {
   const streamKey = `${req.user.role}:${req.user.sub}`;
   const current = activeStreams.get(streamKey) || 0;
   if (current >= 3) return res.status(429).json({ error: { code: 'STREAM_LIMIT', message: 'Batas koneksi realtime tercapai.' } });
@@ -78,36 +79,49 @@ router.get('/events', (req, res) => {
   });
 });
 
-router.get('/', async (req, res, next) => {
+router.get('/', requirePermission('notifications.view'), async (req, res, next) => {
   const parsed = z.coerce.number().int().min(1).max(100).default(50).safeParse(req.query.limit ?? 50);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Batas notifikasi tidak valid.' } });
   try {
-    const [items, count] = await Promise.all([
-      pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
-        .input('limit', sql.Int, parsed.data)
-        .query(`SELECT TOP (@limit) n.notification_id,n.title,n.message,n.category,n.priority,
-            n.sender_npk,n.sender_name,n.sender_role,n.created_at,
+    const singleQuery = await pool.request()
+      .input('role', sql.VarChar(20), req.user.role)
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .input('limit', sql.Int, parsed.data)
+      .query(`
+        SELECT TOP (@limit) n.notification_id, n.title, n.message, n.category, n.priority,
+            n.sender_npk, n.sender_name, n.sender_role, n.created_at,
             CAST(ISNULL(n.show_popup, 0) AS BIT) AS show_popup,
             CAST(CASE WHEN r.notification_id IS NULL THEN 0 ELSE 1 END AS BIT) AS is_read
-          FROM dbo.lms_notifications n
-          LEFT JOIN dbo.lms_notification_reads r ON r.notification_id=n.notification_id
-            AND r.recipient_role=@role AND r.recipient_npk=@npk
-          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
-          ORDER BY n.created_at DESC,n.notification_id DESC`),
-      pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
-        .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n
-          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk) AND NOT EXISTS (
-            SELECT 1 FROM dbo.lms_notification_reads r
-            WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
-          )`)
-    ]);
+        FROM dbo.lms_notifications n WITH (NOLOCK)
+        LEFT JOIN dbo.lms_notification_reads r WITH (NOLOCK)
+          ON r.notification_id = n.notification_id
+          AND r.recipient_role = @role
+          AND r.recipient_npk = @npk
+        WHERE n.audience_role = @role
+          AND (n.recipient_npk IS NULL OR n.recipient_npk = @npk)
+        ORDER BY n.created_at DESC, n.notification_id DESC;
+
+        SELECT COUNT_BIG(*) AS unread_count
+        FROM dbo.lms_notifications n WITH (NOLOCK)
+        WHERE n.audience_role = @role
+          AND (n.recipient_npk IS NULL OR n.recipient_npk = @npk)
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_reads r WITH (NOLOCK)
+            WHERE r.notification_id = n.notification_id
+              AND r.recipient_role = @role
+              AND r.recipient_npk = @npk
+          );
+      `);
+
+    const items = singleQuery.recordsets[0] || [];
+    const count = singleQuery.recordsets[1] || [];
     res.set('Cache-Control', 'private, no-store');
-    const page = paginateCollection(req, items.recordset);
-    res.json({ notifications: page.data, unreadCount: Number(count.recordset[0]?.unread_count || 0), pagination: page.pagination });
+    const page = paginateCollection(req, items);
+    res.json({ notifications: page.data, unreadCount: Number(count[0]?.unread_count || 0), pagination: page.pagination });
   } catch (error) { next(error); }
 });
 
-router.post('/', allowRoles('admin', 'teacher'), trustedWriteOrigin, sendLimiter, async (req, res, next) => {
+router.post('/', requirePermission('notifications.send'), trustedWriteOrigin, sendLimiter, async (req, res, next) => {
   const parsed = notificationInputSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Lengkapi judul, isi, kategori, dan penerima notifikasi.' } });
   const input = parsed.data;
@@ -190,7 +204,7 @@ router.post('/', allowRoles('admin', 'teacher'), trustedWriteOrigin, sendLimiter
   } catch (error) { next(error); }
 });
 
-router.post('/read-all', trustedWriteOrigin, async (req, res, next) => {
+router.post('/read-all', requirePermission('notifications.view'), trustedWriteOrigin, async (req, res, next) => {
   try {
     await pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
       .query(`MERGE dbo.lms_notification_reads WITH (HOLDLOCK) AS target
@@ -204,7 +218,7 @@ router.post('/read-all', trustedWriteOrigin, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/:id/read', trustedWriteOrigin, async (req, res, next) => {
+router.post('/:id/read', requirePermission('notifications.view'), trustedWriteOrigin, async (req, res, next) => {
   const id = z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'ID notifikasi tidak valid.' } });
   try {

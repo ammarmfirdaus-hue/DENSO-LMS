@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @source "../";
 
 @font-face { font-family: Inter; src: url('/assets/fonts/DX_LMS_M_Inter_Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
@@ -7,54 +8,77 @@
 @font-face { font-family: 'Material Symbols Outlined'; src: url('/assets/fonts/DX_LMS_M_MaterialSymbolsOutlined.ttf') format('truetype'); font-weight: 100 700; font-style: normal; font-display: block; }
 
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* DENSO Brand Color Theme on Warm Operational Surfaces (design.md Hybrid) */
   --color-primary: #d71920;
   --color-primary-container: #b9141b;
-  --color-secondary: #333d47;
-  --color-secondary-container: #e6e9ed;
+  --color-primary-soft: #fff1f2;
+  --color-secondary: #173e67;
+  --color-secondary-container: #e8eef5;
   --color-tertiary: #26734d;
-  --color-surface: #f7f8fa;
-  --color-surface-low: #f0f2f5;
-  --color-surface-container: #e8ebef;
-  --color-on-surface: #20252b;
-  --color-muted: #68727d;
-  --color-outline: #d9dee4;
+
+  --color-surface: #f8f7f5;
+  --color-surface-low: #f1efec;
+  --color-surface-container: #e9e6e2;
+  --color-surface-elevated: #ffffff;
+  --color-surface-lowest: #ffffff;
+  --color-on-surface: #25292e;
+  --color-on-surface-variant: #475569;
+  --color-muted: #666d75;
+  --color-outline: #e2dfda;
+  --color-outline-strong: #cfd5dc;
+
+  /* Dark Frosted Application Shell */
+  --color-shell-bg: rgba(16, 20, 26, 0.88);
+  --color-shell-bg-strong: rgba(14, 18, 24, 0.94);
+  --color-shell-border: rgba(255, 255, 255, 0.11);
+  --color-shell-text: #ffffff;
+  --color-shell-muted: rgba(255, 255, 255, 0.72);
+  --color-shell-input: rgba(255, 255, 255, 0.10);
 }
 
 /* ============================================================
-   TEMA GELAP (DARK MODE) SISTEMIK
-   Berlaku secara detail pada seluruh halaman, kartu, tabel, dan form
+   TEMA GELAP (DARK MODE) — Workspace Cards & Forms
+   Chrome shell tetap dark frosted-glass agar konsisten antar tema
    ============================================================ */
 :root.dark, html.dark {
-  --color-surface: #0f172a;
-  --color-surface-low: #1e293b;
-  --color-surface-container: #334155;
+  --color-surface: #0f141c;
+  --color-surface-low: #171e29;
+  --color-surface-container: #222c3c;
+  --color-surface-elevated: #171e29;
+  --color-surface-lowest: #171e29;
   --color-on-surface: #f1f5f9;
+  --color-on-surface-variant: #cbd5e1;
   --color-secondary: #cbd5e1;
   --color-secondary-container: #1e293b;
   --color-muted: #94a3b8;
-  --color-outline: #334155;
+  --color-outline: #293445;
+  --color-outline-strong: #3a475c;
+  --color-shell-bg: rgba(11, 15, 21, 0.92);
+  --color-shell-bg-strong: rgba(9, 12, 18, 0.96);
+  --color-shell-border: rgba(255, 255, 255, 0.10);
   color-scheme: dark;
 }
 
 html.dark body {
-  background-color: #0f172a !important;
-  color: #f1f5f9 !important;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
 }
 
-html.dark aside,
-html.dark header,
-html.dark .bg-white {
-  background-color: #1e293b !important;
-  color: #f1f5f9;
+html.dark .bg-white:not(.dls-keep-white) {
+  background-color: var(--color-surface-elevated) !important;
+  color: var(--color-on-surface);
 }
 
+html.dark .bg-surface-lowest,
 html.dark .bg-surface-low,
 html.dark .bg-surface-low\/50,
 html.dark .bg-surface-low\/70,
 html.dark .bg-surface-low\/40,
 html.dark .bg-surface-low\/30 {
-  background-color: #0f172a !important;
+  background-color: #121822 !important;
 }
 
 html.dark .border-outline,
@@ -63,24 +87,25 @@ html.dark .border-outline\/40,
 html.dark .border-outline\/50,
 html.dark .border-outline\/60,
 html.dark .border-outline\/70 {
-  border-color: #334155 !important;
+  border-color: var(--color-outline) !important;
 }
 
 html.dark .text-secondary,
 html.dark .text-on-surface {
-  color: #f1f5f9 !important;
+  color: var(--color-on-surface) !important;
 }
 
+html.dark .text-on-surface-variant,
 html.dark .text-muted {
-  color: #94a3b8 !important;
+  color: var(--color-muted) !important;
 }
 
-html.dark input,
-html.dark select,
-html.dark textarea {
-  background-color: #0f172a !important;
+html.dark input:not(.dls-shell-input):not(.dls-keep-white),
+html.dark select:not(.dls-shell-input),
+html.dark textarea:not(.dls-shell-input) {
+  background-color: #11161f !important;
   color: #f1f5f9 !important;
-  border-color: #334155 !important;
+  border-color: #2f3b4e !important;
 }
 
 html.dark input::placeholder,
@@ -88,45 +113,62 @@ html.dark textarea::placeholder {
   color: #64748b !important;
 }
 
-html.dark table thead {
-  background-color: #0f172a !important;
+html.dark .dls-shell-input::placeholder {
+  color: rgba(255, 255, 255, 0.50) !important;
 }
 
-html.dark tr:hover {
-  background-color: rgba(51, 65, 85, 0.4) !important;
+/* ============================================================
+   APPLICATION CHROME (Dark Frosted Glass Shell - design.md)
+   ============================================================ */
+.dls-shell-chrome {
+  background-color: var(--color-shell-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: var(--color-shell-border);
+  color: var(--color-shell-text);
 }
 
-html.dark .swal2-popup {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
+.dls-shell-chrome-strong {
+  background-color: var(--color-shell-bg-strong);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-color: var(--color-shell-border);
+  color: var(--color-shell-text);
 }
 
-html.dark .swal2-title {
-  color: #f1f5f9 !important;
+.dls-shell-input {
+  background-color: var(--color-shell-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
 }
 
-html.dark .swal2-html-container {
-  color: #94a3b8 !important;
-}
-
-html.dark .swal2-cancel {
-  background-color: #0f172a !important;
-  color: #cbd5e1 !important;
-  border-color: #334155 !important;
-}
-html.dark .swal2-cancel:hover {
-  background-color: #334155 !important;
+.dls-shell-input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(215, 25, 32, 0.35);
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--color-surface); color: var(--color-on-surface); font-family: Inter, sans-serif; transition: background-color 0.2s ease, color 0.2s ease; }
-button, input { font: inherit; }
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button, input, select, textarea { font: inherit; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary) 38%, transparent); outline-offset: 2px; }
-::selection { background: #f8dadd; color: #401014; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+::selection { background: #fce7ea; color: #7f1015; }
+
 @layer base {
-  .material-symbol {
+  .material-symbol,
+  .material-symbols-outlined {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
@@ -135,7 +177,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     font-family: 'Material Symbols Outlined';
     font-weight: normal;
     font-style: normal;
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
     letter-spacing: normal;
     white-space: nowrap;
@@ -146,8 +188,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
 }
 
-/* Keep the mobile drawer fully outside the page when closed. The explicit
-   state also prevents a stale/off-canvas panel from intercepting page taps. */
+/* Mobile drawer visibility outside off-canvas */
 @media (max-width: 1023px) {
   aside[data-mobile-open="false"] {
     transform: translateX(calc(-100% - 2px)) !important;
@@ -162,79 +203,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
 }
 
-.dls-action-control { gap: .45rem; }
-.dls-action-icon { flex: 0 0 auto; font-size: 1.1em; }
-.dls-action-solid-neutral { background-color: #fff !important; border: 1px solid #d9dee4 !important; }
-.dls-action-solid-neutral:hover:not(:disabled) { background-color: #f0f2f5 !important; }
-.dls-action-solid-primary { background-color: #d71920 !important; border: 1px solid #b9141b !important; color: #fff !important; }
-.dls-action-solid-primary:hover:not(:disabled) { background-color: #b9141b !important; }
+/* Subtle scrollbar styling for shell and tables */
+.dls-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.dls-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.dls-scrollbar::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.25); border-radius: 9999px; }
+.dls-shell-chrome .dls-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); }
+
+/* Action Control Helper Overrides (scoped to avoid overriding frosted chrome) */
+.dls-action-control { gap: 0.45rem; }
+.dls-action-icon { flex: 0 0 auto; font-size: 1.05em; }
+.dls-action-solid-neutral {
+  background-color: #ffffff;
+  border: 1px solid var(--color-outline);
+}
+.dls-action-solid-neutral:hover:not(:disabled) { background-color: var(--color-surface-low); }
+.dls-action-solid-primary {
+  background-color: var(--color-primary) !important;
+  border: 1px solid var(--color-primary-container) !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-primary:hover:not(:disabled) { background-color: var(--color-primary-container) !important; }
 .dls-action-control[hidden] { display: none !important; }
-.dls-action-solid-neutral.bg-primary, .dls-action-solid-neutral.bg-error, .dls-action-solid-neutral.bg-tertiary { background-color: #d71920 !important; border-color: #b9141b !important; color: #fff !important; }
-html.dark .dls-action-solid-neutral { background-color: #1e293b !important; border-color: #475569 !important; }
-html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #334155 !important; }
-
-
-/* ============================================================
-   SweetAlert2 DLS Theme Override - Admin & Teacher Portal
-   Membuat modal popup profesional, rapi, responsif, dan modern
-   ============================================================ */
-.swal2-container {
-  backdrop-filter: blur(5px);
-  background-color: rgba(15, 23, 42, 0.45) !important;
-  z-index: 99999 !important;
+.dls-action-solid-neutral.bg-primary,
+.dls-action-solid-neutral.bg-error,
+.dls-action-solid-neutral.bg-tertiary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary-container) !important;
+  color: #ffffff !important;
 }
-
-.swal2-popup {
-  font-family: var(--font-sans) !important;
-  border-radius: 24px !important;
-  padding: 28px 24px 24px !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid var(--color-outline) !important;
-  background: #ffffff !important;
-  width: 92% !important;
-  max-width: 440px !important;
+html.dark .dls-action-solid-neutral {
+  background-color: #1e2633;
+  border-color: #334155;
+  color: #e2e8f0;
 }
+html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #293548; }
 
-.swal2-title {
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  color: var(--color-on-surface) !important;
-  padding: 0 !important;
-  margin-top: 8px !important;
-  line-height: 1.35 !important;
-}
-
-.swal2-html-container {
-  font-size: 0.875rem !important;
-  line-height: 1.6 !important;
-  color: var(--color-muted) !important;
-  margin: 10px 0 0 !important;
-  padding: 0 !important;
-}
-
-.swal2-actions {
-  margin: 24px 0 0 !important;
-  gap: 10px !important;
-  width: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-wrap: wrap !important;
-}
-
-.swal2-actions > .swal2-styled {
-  min-width: 132px !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-}
-
-@media (max-width: 480px) {
-  .swal2-popup { padding: 22px 16px 18px !important; }
-  .swal2-actions { gap: 8px !important; margin-top: 20px !important; }
-  .swal2-actions > .swal2-styled { flex: 1 1 100% !important; width: 100% !important; }
-}
-
-/* Four sibling action buttons stay in a compact, responsive two-by-two grid. */
 .dls-action-grid-2x2 {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -243,7 +246,6 @@ html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #33
   gap: 0.5rem;
   min-width: 0;
 }
-
 .dls-action-grid-2x2 > .dls-action-control {
   display: inline-flex !important;
   width: 100% !important;
@@ -264,42 +266,225 @@ html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #33
   }
 }
 
-.swal2-confirm {
-  background-color: var(--color-primary) !important;
-  border-radius: 12px !important;
-  font-family: var(--font-sans) !important;
-  font-weight: 700 !important;
-  font-size: 0.875rem !important;
-  padding: 10px 20px !important;
-  box-shadow: 0 2px 8px rgba(215, 25, 32, 0.25) !important;
-  color: #ffffff !important;
-  transition: all 0.15s ease !important;
-  cursor: pointer !important;
-  border: none !important;
-}
-.swal2-confirm:hover {
-  filter: brightness(1.1) !important;
-  transform: translateY(-1px);
-}
-.swal2-confirm:active {
-  transform: scale(0.97);
+/* ============================================================
+   OPERATIONAL LIST DATA TABLES (Bordered Cells & Clean Header)
+   ============================================================ */
+.dls-table-wrap table,
+div[role="region"] > table,
+.overflow-x-auto > table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
 }
 
-.swal2-cancel {
-  background-color: #ffffff !important;
-  color: var(--color-secondary) !important;
+.dls-table-wrap table thead th,
+div[role="region"] > table thead th,
+.overflow-x-auto > table thead th {
+  height: 46px;
+  padding: 0.625rem 1rem;
+  background-color: rgba(215, 25, 32, 0.055);
+  border-bottom: 1.5px solid #c4cdd8;
+  border-right: 1px solid #d5dce4;
+  color: #8f1419;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dls-table-wrap table tbody td,
+div[role="region"] > table tbody td,
+.overflow-x-auto > table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d5dce4;
+  border-right: 1px solid #d5dce4;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+
+.dls-table-wrap table thead th:first-child:has(input[type="checkbox"]),
+.dls-table-wrap table tbody td:first-child:has(input[type="checkbox"]) {
+  width: 44px;
+  max-width: 44px;
+  text-align: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.dls-table-wrap table tbody td.text-right > div,
+.dls-table-wrap table tbody td > .inline-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.dls-table-wrap table thead th:last-child,
+.dls-table-wrap table tbody td:last-child,
+div[role="region"] > table thead th:last-child,
+div[role="region"] > table tbody td:last-child,
+.overflow-x-auto > table thead th:last-child,
+.overflow-x-auto > table tbody td:last-child {
+  border-right: none;
+}
+
+.dls-table-wrap table tbody tr:last-child td,
+div[role="region"] > table tbody tr:last-child td,
+.overflow-x-auto > table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dls-table-wrap table tbody tr:hover td,
+div[role="region"] > table tbody tr:hover td,
+.overflow-x-auto > table tbody tr:hover td {
+  background-color: rgba(215, 25, 32, 0.025);
+}
+
+html.dark .dls-table-wrap table thead th,
+html.dark div[role="region"] > table thead th,
+html.dark .overflow-x-auto > table thead th {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom-color: #415169;
+  border-right-color: #2f3c4f;
+  color: #fca5a5;
+}
+
+html.dark .dls-table-wrap table tbody td,
+html.dark div[role="region"] > table tbody td,
+html.dark .overflow-x-auto > table tbody td {
+  border-bottom-color: #2f3c4f;
+  border-right-color: #2f3c4f;
+  color: #e2e8f0;
+}
+
+html.dark .dls-table-wrap table tbody tr:hover td,
+html.dark div[role="region"] > table tbody tr:hover td,
+html.dark .overflow-x-auto > table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Explicit opt-in spreadsheet cells (if ever used on export preview) */
+.excel-table th,
+.excel-table td {
+  border: 1px solid var(--color-outline);
+}
+
+/* ============================================================
+   RESTRAINED WORKSPACE CARD SURFACES (design.md)
+   ============================================================ */
+.dls-card-surface,
+.dls-card-solid {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-outline);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html.dark .dls-card-surface,
+html.dark .dls-card-solid {
+  background-color: var(--color-surface-elevated);
+  border-color: var(--color-outline);
+}
+
+/* ============================================================
+   SweetAlert2 DLS Theme Override - Admin & Teacher Portal
+   ============================================================ */
+.swal2-container {
+  backdrop-filter: blur(5px);
+  background-color: rgba(15, 20, 26, 0.50) !important;
+  z-index: 99999 !important;
+}
+
+.swal2-popup {
+  font-family: var(--font-sans) !important;
+  border-radius: 16px !important;
+  padding: 28px 24px 24px !important;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.14), 0 8px 10px rgba(0, 0, 0, 0.06) !important;
   border: 1px solid var(--color-outline) !important;
-  border-radius: 12px !important;
+  background: #ffffff !important;
+  width: 92% !important;
+  max-width: 440px !important;
+}
+
+html.dark .swal2-popup {
+  background: #171e29 !important;
+  border-color: var(--color-outline) !important;
+  color: #f1f5f9 !important;
+}
+
+.swal2-title {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--color-on-surface) !important;
+  padding: 0 !important;
+  margin-top: 8px !important;
+  line-height: 1.35 !important;
+}
+
+html.dark .swal2-title { color: #f1f5f9 !important; }
+
+.swal2-html-container {
+  font-size: 0.875rem !important;
+  line-height: 1.55 !important;
+  color: var(--color-muted) !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+}
+
+html.dark .swal2-html-container { color: #94a3b8 !important; }
+
+.swal2-actions {
+  margin: 22px 0 0 !important;
+  gap: 10px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+}
+
+.swal2-actions > .swal2-styled {
+  min-width: 132px !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+.swal2-confirm {
+  background-color: var(--color-primary) !important;
+  border-radius: 8px !important;
   font-family: var(--font-sans) !important;
   font-weight: 600 !important;
   font-size: 0.875rem !important;
-  padding: 10px 18px !important;
-  transition: all 0.15s ease !important;
+  padding: 9px 18px !important;
+  color: #ffffff !important;
+  transition: background-color 0.15s ease !important;
   cursor: pointer !important;
+  border: none !important;
 }
-.swal2-cancel:hover {
-  background-color: var(--color-surface-low) !important;
+.swal2-confirm:hover { background-color: var(--color-primary-container) !important; }
+
+.swal2-cancel {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  padding: 9px 18px !important;
+  transition: background-color 0.15s ease !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
+.swal2-cancel:hover { background-color: #e2e8f0 !important; }
+
+html.dark .swal2-cancel {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+html.dark .swal2-cancel:hover { background-color: #334155 !important; }
 
 .swal2-icon {
   margin: 0 auto 8px !important;
@@ -307,10 +492,10 @@ html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #33
 }
 
 .swal2-popup.swal2-toast {
-  border-radius: 14px !important;
-  padding: 12px 18px !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
   border: 1px solid var(--color-outline) !important;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
   width: auto !important;
   max-width: 360px !important;
 }
@@ -319,90 +504,134 @@ html.dark .dls-action-solid-neutral:hover:not(:disabled) { background-color: #33
   margin: 0 !important;
 }
 
-/* ============================================================
-   CARD LIST DATA STYLING
-   Solid non-white, non-gradient card surface across all list pages
-   ============================================================ */
-.dls-card-surface,
-.dls-card-solid {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-}
-
-html.dark .dls-card-surface,
-html.dark .dls-card-solid {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
+@media (max-width: 480px) {
+  .swal2-popup { padding: 20px 16px 18px !important; }
+  .swal2-actions { gap: 8px !important; margin-top: 18px !important; }
+  .swal2-actions > .swal2-styled { flex: 1 1 100% !important; width: 100% !important; }
 }
 
 /* ============================================================
-   EXCEL-STYLE TABLE GRID & CELL BORDERS
-   Menampilkan border kolom dan sel rapi presisi seperti spreadsheet Excel
+   Driver.js DENSO Theme & Custom Popover Layout
    ============================================================ */
-.excel-table,
-.dls-table,
-div[role="region"] > table,
-.overflow-x-auto > table {
-  border-collapse: collapse !important;
-  border-spacing: 0 !important;
-  width: 100% !important;
-}
-
-div[role="region"] > table th,
-.overflow-x-auto > table th,
-.excel-table th,
-.dls-table th,
-table th {
+.driver-popover {
+  border-radius: 14px !important;
+  padding: 18px 20px 16px !important;
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.22), 0 8px 12px rgba(0, 0, 0, 0.1) !important;
   border: 1px solid #cbd5e1 !important;
-  background-color: #f1f5f9 !important;
+  background-color: #ffffff !important;
   color: #1e293b !important;
-  font-weight: 700 !important;
-  padding: 0.75rem 1rem !important;
-  white-space: nowrap !important;
-  text-align: center !important;
+  max-width: 360px !important;
+  font-family: var(--font-sans) !important;
 }
 
-div[role="region"] > table td,
-.overflow-x-auto > table td,
-.excel-table td {
-  border: 1px solid #e2e8f0 !important;
-  padding: 0.75rem 1rem !important;
-  vertical-align: middle !important;
-}
-
-div[role="region"] > table tbody tr:nth-child(even) td,
-.overflow-x-auto > table tbody tr:nth-child(even) td {
-  background-color: #f8fafc;
-}
-
-div[role="region"] > table tbody tr:hover td,
-.overflow-x-auto > table tbody tr:hover td {
-  background-color: #eff6ff !important;
-}
-
-/* Dark Mode Excel Table Gridlines */
-html.dark div[role="region"] > table th,
-html.dark .overflow-x-auto > table th,
-html.dark .excel-table th {
+html.dark .driver-popover {
+  background-color: #182232 !important;
   border-color: #334155 !important;
-  background-color: #1e293b !important;
   color: #f1f5f9 !important;
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5) !important;
 }
 
-html.dark div[role="region"] > table td,
-html.dark .overflow-x-auto > table td,
-html.dark .excel-table td {
-  border-color: #334155 !important;
+.driver-popover-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin-bottom: 6px !important;
+  line-height: 1.35 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+html.dark .driver-popover-title {
+  color: #f8fafc !important;
+}
+
+.driver-popover-description {
+  font-size: 0.8125rem !important;
+  line-height: 1.55 !important;
+  color: #475569 !important;
+  margin-bottom: 14px !important;
+}
+
+html.dark .driver-popover-description {
+  color: #94a3b8 !important;
+}
+
+.driver-popover-footer {
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #e2e8f0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+html.dark .driver-popover-footer {
+  border-top-color: #334155 !important;
+}
+
+.driver-popover-progress-text {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+html.dark .driver-popover-progress-text {
+  color: #94a3b8 !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-prev-btn,
+.driver-popover-close-btn {
+  border-radius: 8px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+.driver-popover-next-btn {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: 0 2px 4px rgba(226, 6, 19, 0.25) !important;
+}
+
+.driver-popover-next-btn:hover {
+  background-color: var(--color-primary-container) !important;
+}
+
+.driver-popover-prev-btn {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.driver-popover-prev-btn:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.dark .driver-popover-prev-btn {
+  background-color: #1e293b !important;
   color: #e2e8f0 !important;
+  border-color: #475569 !important;
 }
 
-html.dark div[role="region"] > table tbody tr:nth-child(even) td,
-html.dark .overflow-x-auto > table tbody tr:nth-child(even) td {
-  background-color: rgba(30, 41, 59, 0.4) !important;
+html.dark .driver-popover-prev-btn:hover {
+  background-color: #334155 !important;
 }
 
-html.dark div[role="region"] > table tbody tr:hover td,
-html.dark .overflow-x-auto > table tbody tr:hover td {
-  background-color: rgba(51, 65, 85, 0.6) !important;
+.driver-popover-close-btn {
+  color: #94a3b8 !important;
+}
+
+.driver-popover-close-btn:hover {
+  color: #0f172a !important;
+}
+
+html.dark .driver-popover-close-btn:hover {
+  color: #f8fafc !important;
 }
 

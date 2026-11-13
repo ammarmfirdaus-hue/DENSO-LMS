@@ -233,15 +233,22 @@ async function main() {
     }
     for (let index = 0; index < activities.length; index += 1) {
       const [type, description, npk = staff[1].npk] = activities[index];
+      const dayOffset = index % 21;
+      const createdAt = new Date(Date.now() - (dayOffset * 86400000 + (index % 8) * 3600000));
       await transaction.request().input('npk', sql.VarChar(50), npk)
         .input('type', sql.VarChar(50), type).input('description', sql.NVarChar(500), description)
+        .input('createdAt', sql.DateTime2, createdAt)
         .query(`IF NOT EXISTS (SELECT 1 FROM dbo.activity_logs WHERE employee_npk=@npk AND activity_type=@type AND description=@description)
-          INSERT INTO dbo.activity_logs(employee_npk,activity_type,description) VALUES(@npk,@type,@description);`);
+            INSERT INTO dbo.activity_logs(employee_npk,activity_type,description,created_at) VALUES(@npk,@type,@description,@createdAt);
+          ELSE
+            UPDATE dbo.activity_logs SET created_at=@createdAt WHERE employee_npk=@npk AND activity_type=@type AND description=@description;`);
     }
 
     for (const learner of learners) {
-      const updatedAt = new Date(Date.now() - (learners.indexOf(learner) + 1) * 3600000);
-      const score = learner.progress >= 50 ? Math.min(100, 60 + ((learners.indexOf(learner) * 11) % 41)) : null;
+      const idx = learners.indexOf(learner);
+      const dayOffset = idx % 14;
+      const updatedAt = new Date(Date.now() - (dayOffset * 86400000 + (idx % 12) * 3600000));
+      const score = learner.progress >= 50 ? Math.min(100, 60 + ((idx * 11) % 41)) : null;
       const quizScore = learner.status === 'completed' && learner.courseIndex !== 6 && learner.courseIndex !== 7
         ? (2 + ((learner.seedIndex + learner.courseIndex) % 4)) * 20 : null;
       await transaction.request().input('npk', sql.VarChar(50), learner.npk)
@@ -315,6 +322,7 @@ async function main() {
     }
 
     const submissionStatuses = ['pending_admin', 'pending_review', 'rejected', 'approved', 'published'];
+    const submissionTypes = ['text', 'video', 'pdf', 'document', 'image', 'link', 'audio'];
     for (let index = 0; index < 200; index += 1) {
       const course = courses[index % courses.length];
       const courseIndex = index % courses.length;
@@ -322,19 +330,25 @@ async function main() {
       const sessionId = sessionIdByCodeAndTitle.get(`${course.code}|${session.title}`);
       const title = `Data demo submission ${String(index + 1).padStart(3, '0')} - ${course.title}`;
       const status = index < 100 ? submissionStatuses[index % submissionStatuses.length] : 'pending_review';
+      const materialType = submissionTypes[index % submissionTypes.length];
       const submitter = staff[1 + (courseIndex % 6)];
       const reviewer = staff[7 + (index % 2)];
+      const submissionCreatedAt = new Date(Date.now() - ((index % 14) * 86400000 + (index % 6) * 3600000));
       const result = await transaction.request().input('sessionId', sql.BigInt, sessionId)
-        .input('title', sql.NVarChar(200), title).input('submitter', sql.VarChar(50), submitter.npk)
+        .input('title', sql.NVarChar(200), title).input('materialType', sql.VarChar(20), materialType)
+        .input('submitter', sql.VarChar(50), submitter.npk)
         .input('reviewer', sql.VarChar(50), status === 'pending_admin' ? null : reviewer.npk)
         .input('status', sql.VarChar(24), status)
-        .input('reviewedAt', sql.DateTime2, status === 'pending_admin' || status === 'pending_review' ? null : new Date(Date.now() - index * 3600000))
+        .input('createdAt', sql.DateTime2, submissionCreatedAt)
+        .input('reviewedAt', sql.DateTime2, status === 'pending_admin' || status === 'pending_review' ? null : new Date(submissionCreatedAt.getTime() + 1800000))
         .input('reviewerComment', sql.NVarChar(2000), status === 'rejected' ? 'Data demo: perlu perbaikan sebelum dipublikasikan.' : null)
         .input('publishedMaterialId', sql.BigInt, status === 'published' ? materialIdByCodeAndTitle.get(`${course.code}|${session.materials[0].title}`) : null)
         .query(`IF NOT EXISTS (SELECT 1 FROM dbo.material_submissions WHERE session_id=@sessionId AND title=@title AND submitted_by=@submitter)
-            INSERT INTO dbo.material_submissions(session_id,title,material_type,content,sort_order,status,submitted_by,reviewer_npk,reviewer_comment,admin_comment,reviewed_at,published_material_id)
-            VALUES(@sessionId,@title,'text',N'Data dummy untuk menguji alur moderasi materi.',90,@status,@submitter,@reviewer,@reviewerComment,
-              CASE WHEN @status IN ('approved','published') THEN N'Data demo disetujui.' ELSE NULL END,@reviewedAt,@publishedMaterialId);
+            INSERT INTO dbo.material_submissions(session_id,title,material_type,content,sort_order,status,submitted_by,reviewer_npk,reviewer_comment,admin_comment,reviewed_at,published_material_id,created_at,updated_at)
+            VALUES(@sessionId,@title,@materialType,N'Data dummy untuk menguji alur moderasi materi.',90,@status,@submitter,@reviewer,@reviewerComment,
+              CASE WHEN @status IN ('approved','published') THEN N'Data demo disetujui.' ELSE NULL END,@reviewedAt,@publishedMaterialId,@createdAt,@createdAt);
+          ELSE
+            UPDATE dbo.material_submissions SET material_type=@materialType,created_at=@createdAt WHERE session_id=@sessionId AND title=@title AND submitted_by=@submitter;
           SELECT TOP (1) submission_id FROM dbo.material_submissions WHERE session_id=@sessionId AND title=@title AND submitted_by=@submitter ORDER BY submission_id;`);
       const submissionId = result.recordset[0]?.submission_id;
       if (submissionId && status === 'pending_review') {
@@ -448,6 +462,51 @@ async function main() {
             INSERT INTO dbo.lms_admin_job_events(job_id,item_no,item_label,item_status,message) VALUES(@jobId,@itemNo,@label,@itemStatus,@message);`);
       }
     }
+
+    await transaction.request().query(`
+      IF OBJECT_ID(N'dbo.dashboard_daily_snapshots', N'U') IS NOT NULL
+      BEGIN
+        DECLARE @dayOffset INT = 29;
+        DECLARE @baseCourses INT = (SELECT COUNT(*) FROM dbo.courses WHERE status='active');
+        DECLARE @baseEmployees INT = (SELECT COUNT(*) FROM dbo.employee_accounts WHERE status='active');
+        DECLARE @baseStudents INT = (SELECT COUNT(DISTINCT student_npk) FROM dbo.student_progress_snapshots);
+        DECLARE @baseSessions INT = (SELECT COUNT(*) FROM dbo.course_sessions WHERE status='active');
+        DECLARE @baseMaterials INT = (SELECT COUNT(*) FROM dbo.course_materials);
+        DECLARE @basePending INT = (SELECT COUNT(*) FROM dbo.material_submissions WHERE status IN ('pending_admin','pending_review'));
+        DECLARE @baseCompleted INT = (SELECT COUNT(*) FROM dbo.student_progress_snapshots WHERE enrollment_status='completed');
+        DECLARE @baseAvgProg DECIMAL(5,2) = (SELECT COALESCE(AVG(CAST(progress AS DECIMAL(5,2))), 0) FROM dbo.student_progress_snapshots);
+        DECLARE @baseAvgQuiz DECIMAL(5,2) = (SELECT AVG(CAST(quiz_score AS DECIMAL(5,2))) FROM dbo.student_progress_snapshots WHERE quiz_score IS NOT NULL);
+
+        WHILE @dayOffset >= 0
+        BEGIN
+          DECLARE @snapDate DATE = DATEADD(day, -@dayOffset, CAST(SYSUTCDATETIME() AS DATE));
+          DECLARE @dayAct INT = (SELECT COUNT(*) FROM dbo.activity_logs WHERE CAST(created_at AS DATE) = @snapDate);
+          DECLARE @ratio FLOAT = CAST(30 - @dayOffset AS FLOAT) / 30.0;
+          DECLARE @dCourses INT = CASE WHEN @baseCourses = 0 THEN 0 ELSE CAST(ROUND(@baseCourses * (0.72 + 0.28 * @ratio), 0) AS INT) END;
+          DECLARE @dEmp INT = CASE WHEN @baseEmployees = 0 THEN 0 ELSE CAST(ROUND(@baseEmployees * (0.85 + 0.15 * @ratio), 0) AS INT) END;
+          DECLARE @dStu INT = CASE WHEN @baseStudents = 0 THEN 0 ELSE CAST(ROUND(@baseStudents * (0.68 + 0.32 * @ratio), 0) AS INT) END;
+          DECLARE @dSes INT = CASE WHEN @baseSessions = 0 THEN 0 ELSE CAST(ROUND(@baseSessions * (0.72 + 0.28 * @ratio), 0) AS INT) END;
+          DECLARE @dMat INT = CASE WHEN @baseMaterials = 0 THEN 0 ELSE CAST(ROUND(@baseMaterials * (0.70 + 0.30 * @ratio), 0) AS INT) END;
+          DECLARE @dComp INT = CASE WHEN @baseCompleted = 0 THEN 0 ELSE CAST(ROUND(@baseCompleted * (0.55 + 0.45 * @ratio), 0) AS INT) END;
+
+          MERGE dbo.dashboard_daily_snapshots AS target
+          USING (SELECT @snapDate AS snapshot_date, 'global' AS scope_key) AS src
+          ON target.snapshot_date = src.snapshot_date AND target.scope_key = src.scope_key
+          WHEN MATCHED THEN
+            UPDATE SET active_courses = @dCourses, active_employees = @dEmp, active_students = @dStu,
+                       active_sessions = @dSes, published_materials = @dMat, pending_submissions = @basePending,
+                       completed_enrollments = @dComp, daily_activities = @dayAct,
+                       avg_progress = @baseAvgProg, avg_quiz_score = @baseAvgQuiz, updated_at = SYSUTCDATETIME()
+          WHEN NOT MATCHED THEN
+            INSERT(snapshot_date, scope_key, active_courses, active_employees, active_students,
+                   active_sessions, published_materials, pending_submissions, completed_enrollments,
+                   daily_activities, avg_progress, avg_quiz_score)
+            VALUES(@snapDate, 'global', @dCourses, @dEmp, @dStu, @dSes, @dMat, @basePending, @dComp, @dayAct, @baseAvgProg, @baseAvgQuiz);
+
+          SET @dayOffset = @dayOffset - 1;
+        END;
+      END;
+    `);
 
     await transaction.commit();
     console.log(`Demo data seeded: ${staff.length} staff (1 admin, 100 teachers, 100 reviewers), ${courses.length} courses, ${demoLearners.length} students, ${learners.length} progress/grade snapshots, 100 forum threads, 400 student/teacher replies, 100 likes, 200 material submissions, 100 in-app notifications, 100 simulated email records, 100 queue-history jobs, and activity history.`);

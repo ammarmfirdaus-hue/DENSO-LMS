@@ -685,6 +685,7 @@ html.dark ::selection { background: #1a3a60; color: var(--crs-text); }
     #bottomNavBar.dls-sidebar-collapsed {
         width: 76px !important;
         padding-inline: 10px !important;
+        overflow-x: hidden !important;
     }
     #bottomNavBar.dls-sidebar-collapsed > .dls-nav-brand {
         justify-content: center;
@@ -692,16 +693,46 @@ html.dark ::selection { background: #1a3a60; color: var(--crs-text); }
         padding-inline: 0;
     }
     #bottomNavBar.dls-sidebar-collapsed .dls-sidebar-text,
-    #bottomNavBar.dls-sidebar-collapsed a span:last-child,
+    #bottomNavBar.dls-sidebar-collapsed .dls-nav-label,
+    #bottomNavBar.dls-sidebar-collapsed a span:not(.material-symbols-outlined):not([data-notification-count]),
+    #bottomNavBar.dls-sidebar-collapsed a span:last-child:not([data-notification-count]),
     #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button > div:nth-child(2),
     #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button > span {
         display: none !important;
+        width: 0 !important;
+        overflow: hidden !important;
     }
     #bottomNavBar.dls-sidebar-collapsed a {
         justify-content: center !important;
         padding-inline: 0 !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 56px !important;
+        margin-inline: auto !important;
     }
-    #bottomNavBar.dls-sidebar-collapsed a .material-symbols-outlined { margin: 0 !important; }
+    #bottomNavBar.dls-sidebar-collapsed a .material-symbols-outlined {
+        margin: 0 !important;
+        font-size: 22px !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed a .dls-bottom-notification-count {
+        position: absolute !important;
+        top: 6px !important;
+        right: 8px !important;
+        left: auto !important;
+        min-width: 16px !important;
+        height: 16px !important;
+        font-size: 9px !important;
+        padding: 0 4px !important;
+        border-radius: 999px !important;
+        line-height: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 10 !important;
+    }
+    #bottomNavBar.dls-sidebar-collapsed a .dls-bottom-notification-count[hidden] {
+        display: none !important;
+    }
     #bottomNavBar.dls-sidebar-collapsed > div.hidden.lg\:block > button {
         justify-content: center;
         padding-inline: 0;
@@ -712,10 +743,22 @@ html.dark ::selection { background: #1a3a60; color: var(--crs-text); }
         box-shadow: 12px 0 34px rgba(24, 36, 51, .14);
     }
     #bottomNavBar.dls-sidebar-hover-expand .dls-sidebar-text,
+    #bottomNavBar.dls-sidebar-hover-expand .dls-nav-label,
+    #bottomNavBar.dls-sidebar-hover-expand a span:not(.material-symbols-outlined):not([data-notification-count]),
     #bottomNavBar.dls-sidebar-hover-expand a span:last-child,
     #bottomNavBar.dls-sidebar-hover-expand > div.hidden.lg\:block > button > div:nth-child(2),
     #bottomNavBar.dls-sidebar-hover-expand > div.hidden.lg\:block > button > span {
         display: initial !important;
+        width: auto !important;
+        overflow: visible !important;
+    }
+    #bottomNavBar.dls-sidebar-hover-expand a {
+        max-width: none !important;
+    }
+    #bottomNavBar.dls-sidebar-hover-expand .dls-bottom-notification-count {
+        top: 9px !important;
+        right: 12px !important;
+        left: auto !important;
     }
     #bottomNavBar.dls-sidebar-hover-expand .dls-nav-brand-copy { display: flex !important; }
     #bottomNavBar.dls-sidebar-hover-expand > .dls-nav-section-label { display: block !important; }
@@ -727,6 +770,16 @@ html.dark ::selection { background: #1a3a60; color: var(--crs-text); }
     .dls-main-sub.dls-main-sidebar-mini {
         width: calc(100% - 76px) !important;
         margin-left: 76px !important;
+    }
+    #learningProgressBar.dls-learning-progress-track {
+        left: 240px;
+        width: calc(100% - 240px);
+    }
+    #bottomNavBar.dls-sidebar-collapsed ~ #learningProgressBar.dls-learning-progress-track,
+    .dls-sidebar-collapsed ~ * #learningProgressBar.dls-learning-progress-track,
+    #learningProgressBar.dls-progress-sidebar-mini {
+        left: 76px !important;
+        width: calc(100% - 76px) !important;
     }
 }
 

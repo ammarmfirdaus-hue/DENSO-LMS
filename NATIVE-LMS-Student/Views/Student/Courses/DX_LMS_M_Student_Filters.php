@@ -17,36 +17,40 @@
     ?>
 
     <main class="dls-main filter-page flex flex-col pt-[72px] pb-32 lg:ml-[240px] px-container-margin transition-all duration-300" data-course-filter-page>
-        <section class="flex-none pt-4">
-            <div class="filter-page-intro">
-                <div>
-                    <p class="filter-eyebrow">KATALOG PEMBELAJARAN</p>
-                    <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Temukan course yang tepat</h1>
-                    <p class="font-body-md text-body-md text-on-surface-variant mb-4">Pilih kategori untuk menyaring course. Semua course ditampilkan secara otomatis.</p>
+        <section class="flex-none pt-[12px]">
+            <div class="fd-card mb-[18px] p-[18px] sm:p-[24px]">
+                <div class="filter-page-intro flex flex-col gap-[12px] sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="inline-block rounded-full bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#525252]">KATALOG PEMBELAJARAN</p>
+                        <h1 class="fd-h1 mt-[6px] text-[#171717]">Temukan course yang tepat</h1>
+                        <p class="mt-[6px] text-[14px] leading-[22px] text-[#525252]">Pilih kategori untuk menyaring course secara cepat dan akurat.</p>
+                    </div>
+                    <a class="fd-btn fd-btn-ghost fd-btn-sm rounded-full shrink-0" href="?route=/student/courses"><span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span><span>Kembali ke Course</span></a>
                 </div>
-                <a class="filter-back-link" href="?route=/student/courses"><span class="material-symbols-outlined">arrow_back</span><span>Kembali ke Course</span></a>
-            </div>
 
-            <label class="relative mb-4 block"><span class="material-symbols-outlined absolute left-4 top-3 text-on-surface-variant">search</span><input id="courseSearch" type="search" class="w-full rounded-full border border-outline-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface" placeholder="Cari judul, kode, atau deskripsi course..." aria-label="Cari course"></label>
-            <div class="filter-toolbar flex justify-between items-center mb-3">
-                <span class="font-label-md text-label-md text-on-surface-variant font-medium"><span id="active-count">0</span> Filter Aktif</span>
-                <button id="reset-btn" class="font-label-md text-label-md text-primary font-bold hidden transition-opacity active:opacity-50">Reset Semua</button>
-            </div>
+                <label class="relative mt-[18px] mb-[12px] block">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#737373]" style="font-size:20px;">search</span>
+                    <input id="courseSearch" type="search" class="fd-input fd-search-input w-full pl-11 pr-4" placeholder="Cari judul, kode, atau deskripsi course..." aria-label="Cari course">
+                </label>
 
-            <!-- Filter Chips -->
-            <div class="filter-chip-list flex flex-wrap gap-2 pb-2 relative" role="group" aria-label="Filter kategori course">
-                <button type="button" class="filter-chip px-5 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-lg whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="Semua" aria-pressed="true">Semua</button>
-                <?php foreach ($categories as $cat): ?>
-                <button type="button" class="filter-chip px-5 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-lg whitespace-nowrap transition-all duration-200 active:scale-95" data-filter="<?= e(
-                    $cat,
-                ) ?>" aria-pressed="false"><?= e($cat) ?></button>
-                <?php endforeach; ?>
+                <div class="filter-toolbar flex justify-between items-center mb-[12px]">
+                    <span class="text-[13px] font-medium text-[#525252]"><span id="active-count" class="fd-mono font-semibold text-[#171717]">0</span> Filter Aktif</span>
+                    <button id="reset-btn" class="fd-btn fd-btn-ghost fd-btn-sm text-[#DC2626] font-semibold hidden">Reset Semua</button>
+                </div>
+
+                <!-- Filter Chips -->
+                <div class="filter-chip-list flex flex-wrap gap-[6px] pb-[6px] relative" role="group" aria-label="Filter kategori course">
+                    <button type="button" class="filter-chip" data-filter="Semua" aria-pressed="true">Semua</button>
+                    <?php foreach ($categories as $cat): ?>
+                    <button type="button" class="filter-chip" data-filter="<?= e($cat) ?>" aria-pressed="false"><?= e($cat) ?></button>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
             <!-- Sorting & Results Summary -->
-            <div class="filter-results-toolbar flex justify-between items-center mt-4 border-b border-outline-variant pb-3 mb-2">
-                <div><h2 class="font-headline-sm text-headline-sm font-bold text-on-surface"><span id="result-count"><?= count($courses) ?></span> Course</h2><p class="filter-results-caption">Course yang tersedia untuk Anda</p></div>
-                <select id="sort-select" class="bg-surface border border-outline-variant text-on-surface text-label-md rounded-lg px-2 py-1 focus:outline-none focus:border-primary">
+            <div class="filter-results-toolbar flex justify-between items-center pb-[12px] mb-[12px] border-b border-[#F5F5F5]">
+                <div><h2 class="fd-h2 text-[#171717]"><span id="result-count"><?= count($courses) ?></span> Course</h2><p class="text-[13px] text-[#525252]">Course yang tersedia untuk Anda</p></div>
+                <select id="sort-select" class="fd-select min-h-[38px] text-[13px]">
                     <option value="relevance">Relevansi</option>
                     <option value="newest">Terbaru</option>
                     <option value="progress">Progress Tertinggi</option>
@@ -55,31 +59,45 @@
         </section>
 
         <!-- Hasil Course dinamis -->
-        <section id="course-results" class="filter-course-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2 content-start pb-4" aria-live="polite" aria-label="Daftar course">
+        <section id="course-results" class="filter-course-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px] pt-[6px] content-start pb-[24px]" aria-live="polite" aria-label="Daftar course">
             <?php foreach ($courses as $course): ?>
             <?php
-                $filterIcons = [
-                    'build' => 'from-orange-400 to-orange-600', 'health_and_safety' => 'from-emerald-400 to-green-600',
-                    'cleaning_services' => 'from-teal-400 to-cyan-600', 'precision_manufacturing' => 'from-blue-400 to-indigo-600',
-                    'trending_up' => 'from-violet-400 to-purple-600', 'verified' => 'from-sky-400 to-indigo-600',
-                    'forum' => 'from-pink-400 to-rose-600', 'groups' => 'from-amber-400 to-yellow-600',
-                    'gavel' => 'from-red-400 to-rose-700', 'eco' => 'from-lime-400 to-green-600',
-                ];
                 $courseIcon = $course['thumbnail_icon'] ?? 'school';
-                $courseGradient = $filterIcons[$courseIcon] ?? 'from-blue-500 to-indigo-600';
+                $progress = max(0, min(100, (int) ($course['progress'] ?? 0)));
+                $isInProgress = ($course['status'] ?? '') === 'sedang_dipelajari';
+                $isCompleted = ($course['status'] ?? '') === 'selesai';
             ?>
-            <article class="filter-course-card course-card" data-filters="<?= e(json_encode($course['filters'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP)) ?>" data-course-status="<?= e($course['status']) ?>" data-progress="<?= (int) $course['progress'] ?>">
-                <a class="filter-course-media bg-[#1e252d] border-b border-slate-700/60" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>" aria-label="Buka course <?= e($course['title']) ?>">
-                    <span class="filter-course-icon material-symbols-outlined"><?= e($courseIcon) ?></span>
-                    <?php if ($course['status'] !== 'selesai'): ?><span class="filter-course-required">Wajib</span><?php endif; ?>
+            <article class="filter-course-card course-card fd-card flex flex-col overflow-hidden" data-filters="<?= e(json_encode($course['filters'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP)) ?>" data-course-status="<?= e($course['status']) ?>" data-progress="<?= $progress ?>">
+                <a class="course-card-cover group relative flex items-center justify-center overflow-hidden" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>" aria-label="Buka course <?= e($course['title']) ?>">
+                    <?php if (!empty($course['thumbnail'])): ?>
+                    <img alt="<?= e($course['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="<?= e($course['thumbnail']) ?>">
+                    <?php endif; ?>
+                    <span class="fd-cover-icon-badge transition-transform duration-200 group-hover:scale-110" style="display:<?= empty($course['thumbnail']) ? 'inline-flex' : 'none' ?>">
+                        <span class="material-symbols-outlined" style="font-size:32px; font-variation-settings: 'FILL' 1;"><?= e($courseIcon) ?></span>
+                    </span>
+                    <?php if (!$isCompleted): ?><span class="fd-chip fd-chip-promo absolute top-[12px] left-[12px] text-[11px]">Wajib</span><?php endif; ?>
+                    <span class="fd-chip absolute bottom-[12px] right-[12px] bg-white/95 text-[#171717] shadow-sm">
+                        <span class="material-symbols-outlined text-[#EA580C]" style="font-size:15px;">menu_book</span>
+                        <span class="font-medium"><?= (int) $course['modules_count'] ?> Modul</span>
+                    </span>
                 </a>
-                <div class="filter-course-body">
-                    <div class="filter-course-meta"><span><?= (int) $course['modules_count'] ?> Modul</span><span class="filter-course-status"><?= $course['status'] === 'sedang_dipelajari' ? 'Sedang dipelajari' : 'Belum dimulai' ?></span></div>
-                    <h3 class="filter-course-title"><?= e($course['title']) ?></h3>
-                    <p class="filter-course-description"><?= e($course['description']) ?></p>
-                    <div class="filter-course-tags"><?php foreach ($course['filters'] ?? [] as $filter): ?><span><?= e($filter) ?></span><?php endforeach; ?></div>
-                    <div class="filter-course-progress"><div><span><?= $course['status'] === 'sedang_dipelajari' ? 'Progress belajar' : 'Progress' ?></span><strong><?= (int) $course['progress'] ?>%</strong></div><span class="filter-progress-track"><span style="width: <?= max(0, min(100, (int) $course['progress'])) ?>%"></span></span></div>
-                    <a class="filter-course-action" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>"><?= $course['status'] === 'sedang_dipelajari' ? 'Lanjutkan belajar' : 'Mulai course' ?><span class="material-symbols-outlined">arrow_forward</span></a>
+                <div class="flex flex-1 flex-col p-[18px]">
+                    <div class="mb-[6px] flex items-center justify-between gap-[6px]">
+                        <span class="fd-chip <?= $isCompleted ? 'fd-chip-success' : ($isInProgress ? 'fd-chip-info' : 'fd-chip-neutral') ?>">
+                            <?= $isCompleted ? 'Selesai' : ($isInProgress ? 'Sedang dipelajari' : 'Belum dimulai') ?>
+                        </span>
+                        <span class="fd-mono text-[13px] font-semibold text-[#171717]"><?= $progress ?>%</span>
+                    </div>
+                    <h3 class="fd-h3 line-clamp-2 text-[#171717]"><?= e($course['title']) ?></h3>
+                    <p class="mt-[6px] line-clamp-2 flex-1 text-[14px] leading-[22px] text-[#525252]"><?= e($course['description']) ?></p>
+                    <div class="mt-[12px] flex flex-wrap gap-[6px]"><?php foreach ($course['filters'] ?? [] as $filter): ?><span class="rounded-[6px] bg-[#F5F5F5] px-2 py-0.5 text-[11px] font-medium text-[#525252]"><?= e($filter) ?></span><?php endforeach; ?></div>
+                    <div class="mt-[12px]">
+                        <div class="h-[6px] w-full overflow-hidden rounded-full bg-[#F5F5F5]"><span class="block h-full rounded-full <?= $isCompleted ? 'bg-[#16A34A]' : 'bg-[#DC2626]' ?>" style="width: <?= $progress ?>%"></span></div>
+                    </div>
+                    <a class="fd-btn fd-btn-primary fd-btn-md mt-[18px] w-full rounded-full" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>">
+                        <span><?= $isInProgress ? 'Lanjutkan Belajar' : 'Mulai Course' ?></span>
+                        <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                    </a>
                 </div>
             </article>
             <?php endforeach; ?>
@@ -155,10 +173,12 @@
                 if (filtered.length === 0) {
                     document.getElementById('paginationContainer').classList.add('hidden');
                     resultsContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-64 text-center px-4">
-                        <span class="material-symbols-outlined text-[64px] text-on-surface-variant opacity-30 mb-4">search_off</span>
-                        <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 font-bold">Course Tidak Ditemukan</h3>
-                        <p class="font-body-md text-body-md text-on-surface-variant max-w-[280px]">Coba ubah atau kurangi filter yang dipilih untuk melihat hasil.</p>
+                    <div class="col-span-full fd-card rounded-[12px] bg-white px-[24px] py-[48px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                        <span class="mx-auto mb-[12px] inline-flex size-16 items-center justify-center rounded-full bg-[#F5F5F5] text-[#737373]">
+                            <span class="material-symbols-outlined" style="font-size:34px;">search_off</span>
+                        </span>
+                        <h3 class="fd-h3 text-[#171717] mb-[6px]">Course Tidak Ditemukan</h3>
+                        <p class="fd-body text-[#525252] max-w-[320px] mx-auto">Coba ubah atau kurangi filter yang dipilih untuk melihat hasil.</p>
                     </div>
                 `;
                     return;
@@ -180,81 +200,53 @@
 
                 const resultsContainer = document.getElementById('course-results');
                 resultsContainer.innerHTML = paginated.map(c => {
-                    const badgeText = 'Wajib';
-                    const badgeClass = 'bg-error text-on-error';
-
-                    const iconGradients = {
-                        'build': 'from-orange-400 to-orange-600',
-                        'health_and_safety': 'from-green-400 to-emerald-600',
-                        'cleaning_services': 'from-teal-400 to-cyan-600',
-                        'precision_manufacturing': 'from-blue-400 to-blue-600',
-                        'trending_up': 'from-violet-400 to-purple-600',
-                        'verified': 'from-sky-400 to-indigo-600',
-                        'forum': 'from-pink-400 to-rose-600',
-                        'groups': 'from-amber-400 to-yellow-600',
-                        'gavel': 'from-red-400 to-rose-700',
-                        'eco': 'from-lime-400 to-green-600',
-                        'school': 'from-primary/70 to-primary'
-                    };
                     const icon = c.thumbnail_icon || 'school';
-                    const grad = iconGradients[icon] || 'from-primary/70 to-primary';
+                    const progress = Math.max(0, Math.min(100, Number(c.progress || 0)));
+                    const isInProgress = c.status === 'sedang_dipelajari';
+                    const isCompleted = c.status === 'selesai';
+                    const targetUrl = isCompleted ? `?route=/student/riwayat/detail&id=${c.id}` : `?route=/student/course/detail&id=${c.id}`;
 
-                    let mediaHtml = c.thumbnail ?
+                    const mediaHtml = c.thumbnail ?
                         `<img alt="${c.title}" class="w-full h-full object-cover" src="${c.thumbnail}">` :
-                        `<div class="w-full h-full bg-[#1e252d] border-b border-slate-700/60 relative flex items-center justify-center">
-                           <span class="material-symbols-outlined text-white/80" style="font-size: 56px; font-variation-settings: 'FILL' 1;">${icon}</span>
+                        `<div class="fd-cover-fallback">
+                           <span class="fd-cover-icon-badge">
+                               <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;">${icon}</span>
+                           </span>
                        </div>`;
 
-                    let statusBadge = '';
-                    let progressHtml = '';
-                    if (c.status === 'sedang_dipelajari') {
-                        progressHtml = `
-                    <div class="flex justify-between font-label-sm text-label-sm">
-                        <span class="text-on-surface-variant">Progress</span>
-                        <span class="text-tertiary font-bold">${c.progress}%</span>
-                    </div>
-                    <div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden mt-1">
-                        <div class="bg-tertiary h-2 rounded-full" style="width: ${c.progress}%"></div>
-                    </div>`;
-                    } else {
-                        progressHtml = `<div class="font-label-sm text-label-sm text-on-surface-variant mt-2">Belum dimulai</div>`;
-                    }
-
-                    let btnHtml = '';
-                    if (c.status === 'sedang_dipelajari') {
-                        btnHtml = `<button onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" class="w-full mt-stack-md bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded-lg shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] active:scale-95 transition-transform">Lanjutkan Belajar</button>`;
-                    } else if (c.status === 'belum_dimulai') {
-                        btnHtml = `<button onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" class="w-full mt-stack-md border-2 border-secondary text-secondary bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-secondary-container/10">Mulai Course</button>`;
-                    } else {
-                        btnHtml = `<button onclick="window.location.href='?route=/student/riwayat/detail&id=${c.id}'" class="w-full mt-stack-md border border-outline-variant text-on-surface-variant bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-surface-container-low">Lihat Detail</button>`;
-                    }
-
-                    const tagsHtml = (c.filters || []).map(f => `<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase">${f}</span>`).join('');
+                    const statusLabel = isCompleted ? 'Selesai' : (isInProgress ? 'Sedang dipelajari' : 'Belum dimulai');
+                    const statusChipClass = isCompleted ? 'fd-chip-success' : (isInProgress ? 'fd-chip-info' : 'fd-chip-neutral');
+                    const btnLabel = isCompleted ? 'Lihat Detail' : (isInProgress ? 'Lanjutkan Belajar' : 'Mulai Course');
+                    const btnClass = isCompleted ? 'fd-btn-secondary' : 'fd-btn-primary';
+                    const tagsHtml = (c.filters || []).map(f => `<span class="rounded-[6px] bg-[#F5F5F5] px-2 py-0.5 text-[11px] font-medium text-[#525252]">${f}</span>`).join('');
 
                     return `
-                <div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden cursor-pointer group" onclick="window.location.href='?route=/student/course/detail&id=${c.id}'" data-filters='${JSON.stringify(c.filters||[])}'>
-                    <div class="h-32 bg-surface-container-high relative">
+                <article class="filter-course-card course-card fd-card flex flex-col overflow-hidden" data-filters='${JSON.stringify(c.filters||[])}' data-course-status="${c.status || ''}" data-progress="${progress}">
+                    <a class="course-card-cover group flex items-center justify-center" href="${targetUrl}" aria-label="Buka course ${c.title}">
                         ${mediaHtml}
-                        ${c.status !== 'selesai' ? `<div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>` : ''}
+                        ${!isCompleted ? `<span class="fd-chip fd-chip-promo absolute top-[12px] left-[12px] text-[11px]">Wajib</span>` : ''}
+                        <span class="fd-chip absolute bottom-[12px] right-[12px] bg-white/95 text-[#171717] shadow-sm">
+                            <span class="material-symbols-outlined text-[#EA580C]" style="font-size:15px;">menu_book</span>
+                            <span class="font-medium">${c.modules_count} Modul</span>
+                        </span>
+                    </a>
+                    <div class="flex flex-1 flex-col p-[18px]">
+                        <div class="mb-[6px] flex items-center justify-between gap-[6px]">
+                            <span class="fd-chip ${statusChipClass}">${statusLabel}</span>
+                            <span class="fd-mono text-[13px] font-semibold text-[#171717]">${progress}%</span>
+                        </div>
+                        <h3 class="fd-h3 line-clamp-2 text-[#171717]">${c.title}</h3>
+                        <p class="mt-[6px] line-clamp-2 flex-1 text-[14px] leading-[22px] text-[#525252]">${c.description || ''}</p>
+                        <div class="mt-[12px] flex flex-wrap gap-[6px]">${tagsHtml}</div>
+                        <div class="mt-[12px]">
+                            <div class="h-[6px] w-full overflow-hidden rounded-full bg-[#F5F5F5]"><span class="block h-full rounded-full ${isCompleted ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}" style="width: ${progress}%"></span></div>
+                        </div>
+                        <a class="fd-btn ${btnClass} fd-btn-md mt-[18px] w-full rounded-full" href="${targetUrl}">
+                            <span>${btnLabel}</span>
+                            <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                        </a>
                     </div>
-                    <div class="p-stack-md space-y-stack-sm flex flex-col flex-1">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight group-hover:text-primary transition-colors">${c.title}</h3>
-                                <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block">${c.modules_count} Modul</span>
-                            </div>
-                        </div>
-                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">${c.description}</p>
-                        <div class="flex gap-1.5 flex-wrap pt-2 mt-auto">
-                            ${tagsHtml}
-                        </div>
-                        <div class="pt-stack-sm space-y-2">
-                            ${progressHtml}
-                            ${btnHtml}
-                        </div>
-                    </div>
-                </div>
-                `;
+                </article>`;
                 }).join('');
 
                 /** Mengatur komponen visual untuk fitur pembagian halaman. */

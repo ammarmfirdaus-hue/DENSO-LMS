@@ -50,7 +50,7 @@ if (!function_exists('formatMonthYear')) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="id" style="">
+<html lang="id">
 
 <head>
     <?php
@@ -64,16 +64,6 @@ if (!function_exists('formatMonthYear')) {
 
         .pt-safe {
             padding-top: env(safe-area-inset-top, 44px);
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-        }
-
-        body *,
-        body *::before,
-        body *::after {
-            font-family: inherit;
         }
 
         .timeline-line {
@@ -479,7 +469,7 @@ if (!function_exists('formatMonthYear')) {
                         <span class="material-symbols-outlined text-on-surface-variant/60 group-hover:text-primary transition-colors">chevron_right</span>
                     </a>
 
-                    <button class="flex items-center justify-between w-full p-3 bg-surface-container/30 rounded-xl hover:bg-surface-container/50 transition-colors group text-left">
+                    <button type="button" id="btnProfilHubungiAdmin" class="flex items-center justify-between w-full p-3 bg-surface-container/30 rounded-xl hover:bg-surface-container/50 transition-colors group text-left">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined text-[20px] text-on-surface-variant" style="font-variation-settings:'FILL' 0;">contact_support</span>
                             <div>
@@ -494,6 +484,16 @@ if (!function_exists('formatMonthYear')) {
 
         </div><!-- /max-w-3xl -->
     </main>
+
+    <script>
+        document.getElementById('btnProfilHubungiAdmin')?.addEventListener('click', function() {
+            var show = function(DLS) {
+                DLS && DLS.info('Pusat Bantuan Admin LMS', 'Silakan hubungi tim Admin LMS atau HRD melalui kanal komunikasi internal DENSO untuk mengajukan koreksi data profil.');
+            };
+            if (window.DLS) show(window.DLS);
+            else window.addEventListener('DLSReady', function() { show(window.DLS); }, { once: true });
+        });
+    </script>
 
     <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>

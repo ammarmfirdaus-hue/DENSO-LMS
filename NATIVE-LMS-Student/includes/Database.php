@@ -2,6 +2,11 @@
 declare(strict_types=1);
 require_once __DIR__ . '/Config.php';
 
+/**
+ * Menginisialisasi dan mengembalikan koneksi database PDO (MySQL) ke database DX_LMS.
+ *
+ * @return PDO Objek koneksi PDO yang siap digunakan.
+ */
 function db(): PDO
 {
     static $pdo = null;

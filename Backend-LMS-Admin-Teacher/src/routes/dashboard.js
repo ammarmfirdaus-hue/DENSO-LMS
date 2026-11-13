@@ -1,15 +1,26 @@
 const express = require('express');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { getActivityFeed } = require('../services/activity-feed');
+const { getDashboardAnalytics } = require('../services/dashboard-analytics');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+router.use(authenticate);
 
-router.get('/summary', async (req, res, next) => {
+router.get('/analytics', requirePermission('dashboard.view'), async (req, res, next) => {
   try {
-    const result = await pool.request().input('isAdmin', sql.Bit, req.user.role === 'admin').input('npk', sql.VarChar(50), req.user.sub)
+    const scopeUser = req.user.role === 'teacher' ? req.user : { ...req.user, role: 'admin' };
+    const analytics = await getDashboardAnalytics({ user: scopeUser, days: req.query.days });
+    res.set('Cache-Control', 'private, no-store');
+    res.json(analytics);
+  } catch (error) { next(error); }
+});
+
+router.get('/summary', requirePermission('dashboard.view'), async (req, res, next) => {
+  try {
+    const isWideReader = req.user.role !== 'teacher';
+    const result = await pool.request().input('isAdmin', sql.Bit, isWideReader).input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT (SELECT COUNT_BIG(*) FROM dbo.courses c WHERE c.status = 'active' AND (@isAdmin=1 OR c.created_by=@npk OR c.assigned_trainer_npk=@npk)) AS active_courses,
                      CASE WHEN @isAdmin=1 THEN (SELECT COUNT_BIG(*) FROM dbo.employee_accounts WHERE status='active')
                        ELSE (SELECT COUNT_BIG(DISTINCT p.student_npk) FROM dbo.student_progress_snapshots p
@@ -20,10 +31,11 @@ router.get('/summary', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/courses', async (_req, res, next) => {
+router.get('/courses', requirePermission('courses.view'), async (_req, res, next) => {
   try {
-    const request = pool.request().input('isAdmin', sql.Bit, _req.user.role === 'admin').input('npk', sql.VarChar(50), _req.user.sub);
-    const result = await request.query(`SELECT c.course_id, c.course_code, c.title, c.description, c.category,c.assigned_trainer_npk,
+    const isWideReader = _req.user.role !== 'teacher';
+    const request = pool.request().input('isAdmin', sql.Bit, isWideReader).input('npk', sql.VarChar(50), _req.user.sub);
+    const result = await request.query(`SELECT c.course_id, c.course_code, c.title, c.description, c.category, c.thumbnail_path, c.assigned_trainer_npk,
       trainer.fullname AS assigned_trainer_name,
       c.status, c.updated_at, COUNT(DISTINCT s.session_id) AS session_count,
       COUNT(DISTINCT m.material_id) AS material_count
@@ -31,7 +43,7 @@ router.get('/courses', async (_req, res, next) => {
       LEFT JOIN dbo.course_materials m ON m.session_id = s.session_id
       LEFT JOIN dbo.employee_accounts trainer ON trainer.employee_npk=c.assigned_trainer_npk
       WHERE (@isAdmin=1 OR c.created_by=@npk OR c.assigned_trainer_npk=@npk)
-      GROUP BY c.course_id, c.course_code, c.title, c.description, c.category,c.assigned_trainer_npk,trainer.fullname,c.status,c.updated_at
+      GROUP BY c.course_id, c.course_code, c.title, c.description, c.category, c.thumbnail_path, c.assigned_trainer_npk,trainer.fullname,c.status,c.updated_at
       ORDER BY c.updated_at DESC`);
     const page = paginateCollection(_req, result.recordset);
     res.json({ courses: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
@@ -39,7 +51,7 @@ router.get('/courses', async (_req, res, next) => {
 });
 
 const activeActivityStreams = new Map();
-router.get('/activity/events', async (req, res, next) => {
+router.get('/activity/events', requirePermission('activity.view'), async (req, res, next) => {
   const streamKey = `${req.user.role}:${req.user.sub}`;
   const current = activeActivityStreams.get(streamKey) || 0;
   if (current >= 2) return res.status(429).json({ error: { code: 'STREAM_LIMIT', message: 'Batas koneksi aktivitas realtime tercapai.' } });
@@ -85,7 +97,7 @@ router.get('/activity/events', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/activity', async (_req, res, next) => {
+router.get('/activity', requirePermission('activity.view'), async (_req, res, next) => {
   try {
     const activities = await getActivityFeed(_req.user.role, 100);
     const page = paginateCollection(_req, activities);

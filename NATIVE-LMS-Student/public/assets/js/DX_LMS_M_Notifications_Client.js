@@ -61,35 +61,37 @@
 
   function renderCard(item) {
     const read = isRead(item);
-    const card = make('article', `min-w-0 rounded-xl border bg-surface-container-lowest p-4 sm:p-5 ${read ? 'border-outline-variant/40' : 'border-primary/30 bg-primary/[0.02]'}`);
-    const row = make('div', 'flex min-w-0 items-start gap-3');
-    const icon = make('span', `material-symbols-outlined mt-0.5 text-[22px] ${read ? 'text-on-surface-variant' : 'text-primary'}`, icons[item.category] || 'notifications');
+    const card = make('article', `fd-list-row min-w-0 rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] !border-0 ${read ? '' : 'is-selected !border-l-[3px] !border-l-[#DC2626]'}`);
+    const row = make('div', 'flex min-w-0 w-full items-start gap-[12px]');
+    const thumb = make('div', `fd-list-thumb shrink-0 ${read ? 'bg-[#F5F5F5] text-[#525252]' : 'bg-[#FEF2F2] text-[#DC2626]'}`);
+    const icon = make('span', 'material-symbols-outlined text-[22px]', icons[item.category] || 'notifications');
     icon.setAttribute('aria-hidden', 'true');
-    row.append(icon);
+    thumb.append(icon);
+    row.append(thumb);
     const body = make('div', 'min-w-0 flex-1');
-    const heading = make('div', 'flex min-w-0 flex-wrap items-start justify-between gap-2');
+    const heading = make('div', 'flex min-w-0 flex-wrap items-start justify-between gap-[8px]');
     const titleGroup = make('div', 'min-w-0');
-    const titleLine = make('div', 'flex min-w-0 flex-wrap items-center gap-2');
-    titleLine.append(make('h2', 'break-words text-sm font-semibold text-on-surface sm:text-base', item.title || 'Notifikasi'));
-    if (item.priority === 'important') titleLine.append(make('span', 'shrink-0 rounded bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase text-primary', 'Penting'));
+    const titleLine = make('div', 'flex min-w-0 flex-wrap items-center gap-[8px]');
+    titleLine.append(make('h2', 'fd-h4 break-words text-[#171717]', item.title || 'Notifikasi'));
+    if (item.priority === 'important') titleLine.append(make('span', 'fd-chip fd-chip-promo shrink-0 text-[10px] uppercase', 'Penting'));
     titleGroup.append(titleLine);
     const sender = item.sender_name ? `Dari ${item.sender_name} · ` : '';
     const date = new Date(item.created_at);
-    titleGroup.append(make('p', 'mt-1 break-words text-xs text-on-surface-variant', sender + (Number.isNaN(date.valueOf()) ? '' : date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }))));
+    titleGroup.append(make('p', 'fd-mono mt-[3px] break-words text-[12px] text-[#737373]', sender + (Number.isNaN(date.valueOf()) ? '' : date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }))));
     heading.append(titleGroup);
-    if (!read) heading.append(make('span', 'mt-1 size-2 shrink-0 rounded-full bg-primary'));
+    if (!read) heading.append(make('span', 'mt-1 size-2.5 shrink-0 rounded-full bg-[#DC2626]'));
     body.append(heading);
-    body.append(make('p', 'mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-on-surface-variant', item.message || ''));
-    const footer = make('div', 'mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/30 pt-3');
-    const footerLeft = make('div', 'flex items-center gap-2');
-    footerLeft.append(make('span', 'rounded-md bg-surface-container-low px-2 py-1 text-xs text-on-surface-variant', labels[item.category] || 'Notifikasi'));
+    body.append(make('p', 'mt-[10px] whitespace-pre-wrap break-words text-[14px] leading-[22px] text-[#525252]', item.message || ''));
+    const footer = make('div', 'mt-[12px] flex flex-wrap items-center justify-between gap-[8px] border-t border-[#F5F5F5] pt-[10px]');
+    const footerLeft = make('div', 'flex items-center gap-[6px]');
+    footerLeft.append(make('span', 'fd-chip fd-chip-neutral text-[11px]', labels[item.category] || 'Notifikasi'));
     if (item.show_popup === true || item.show_popup === 1) {
-      const popupBadge = make('span', 'inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700', 'Popup Modal');
+      const popupBadge = make('span', 'fd-chip fd-chip-warning text-[11px]', 'Popup Modal');
       footerLeft.append(popupBadge);
     }
     footer.append(footerLeft);
     if (!read) {
-      const readButton = make('button', 'min-h-9 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/5', 'Tandai dibaca');
+      const readButton = make('button', 'fd-btn fd-btn-ghost fd-btn-sm rounded-full text-[#DC2626] font-semibold hover:bg-[#FEF2F2]', 'Tandai dibaca');
       readButton.type = 'button';
       readButton.addEventListener('click', () => markRead(item.notification_id));
       footer.append(readButton);
@@ -127,12 +129,19 @@
     } catch (error) {
       showMessage(error.message, true);
       list.replaceChildren(make('div', 'rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-800', error.message));
+      if (window.DLS?.error) window.DLS.error('Gagal Memuat Notifikasi', error.message);
     }
   }
 
   async function markRead(id) {
-    try { await request(`/notifications/${encodeURIComponent(id)}/read`, { method: 'POST', body: '{}' }); await refresh(); }
-    catch (error) { showMessage(error.message, true); }
+    try {
+      await request(`/notifications/${encodeURIComponent(id)}/read`, { method: 'POST', body: '{}' });
+      if (window.DLS?.toast) window.DLS.toast('Notifikasi ditandai sudah dibaca', 'success');
+      await refresh();
+    } catch (error) {
+      showMessage(error.message, true);
+      if (window.DLS?.error) window.DLS.error('Gagal Memperbarui Notifikasi', error.message);
+    }
   }
 
   tabs.forEach(tab => tab.addEventListener('click', () => {
@@ -153,8 +162,14 @@
   moreButton?.addEventListener('click', () => { limit += 20; render(); });
   markAll?.addEventListener('click', async () => {
     busy = true; render();
-    try { await request('/notifications/read-all', { method: 'POST', body: '{}' }); await refresh(); }
-    catch (error) { showMessage(error.message, true); }
+    try {
+      await request('/notifications/read-all', { method: 'POST', body: '{}' });
+      if (window.DLS?.success) window.DLS.success('Semua Dibaca', 'Seluruh notifikasi Anda telah ditandai sudah dibaca.');
+      await refresh();
+    } catch (error) {
+      showMessage(error.message, true);
+      if (window.DLS?.error) window.DLS.error('Gagal Menandai Semua Dibaca', error.message);
+    }
     finally { busy = false; render(); }
   });
 

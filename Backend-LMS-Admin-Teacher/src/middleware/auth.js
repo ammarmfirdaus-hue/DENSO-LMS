@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 const { isStudentSessionActive } = require('../services/student-auth');
+const { hasRolePermission } = require('../services/role-permissions');
 
 /**
  * Membaca nilai cookie tertentu dari header request HTTP.
@@ -74,4 +75,47 @@ function allowRoles(...roles) {
     : res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Anda tidak memiliki akses.' } });
 }
 
-module.exports = { authenticate, allowRoles };
+/**
+ * Mengecek secara terprogram apakah request saat ini memenuhi minimal salah satu izin RBAC.
+ * Token magic-link reviewer portal tetap terkurung pada izin 'materials.review' saja.
+ *
+ * @param {import('express').Request} req
+ * @param {...string} permissions
+ * @returns {Promise<boolean>}
+ */
+async function requestHasPermission(req, ...permissions) {
+  const role = req.user?.role;
+  if (!role) return false;
+  if (req.user?.scope === 'reviewer_portal') {
+    return role === 'reviewer' && permissions.includes('materials.review');
+  }
+  return hasRolePermission(role, permissions);
+}
+
+/**
+ * Middleware otorisasi dinamis berbasis izin (RBAC) dari konfigurasi role di database.
+ * Lolos apabila peran pengguna aktif memiliki minimal satu dari daftar izin yang diminta.
+ *
+ * @param {...string} permissions Daftar kunci izin yang diperbolehkan.
+ * @returns {import('express').RequestHandler}
+ */
+function requirePermission(...permissions) {
+  return async (req, res, next) => {
+    try {
+      const allowed = await requestHasPermission(req, ...permissions);
+      if (!allowed) {
+        return res.status(403).json({
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Peran akun Anda tidak memiliki hak akses untuk melakukan tindakan ini.'
+          }
+        });
+      }
+      return next();
+    } catch (error) {
+      return next(error);
+    }
+  };
+}
+
+module.exports = { authenticate, allowRoles, requirePermission, requestHasPermission };

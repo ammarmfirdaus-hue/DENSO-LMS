@@ -22,4 +22,4 @@ function parseForumImageBuffer(mimeType, buffer) {
   return valid ? { extension } : null;
 }
 
-module.exports = { parseForumImageBuffer };
+module.exports = { parseForumImageBuffer, parseImageBuffer: parseForumImageBuffer };

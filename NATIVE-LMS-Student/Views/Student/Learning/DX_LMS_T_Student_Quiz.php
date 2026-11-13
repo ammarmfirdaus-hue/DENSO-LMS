@@ -81,34 +81,34 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
         <a href="<?= $backUrl ?>" class="text-primary transition-all duration-200 active:scale-95 hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
-        <h1 class="font-headline-sm text-headline-sm font-bold text-primary tracking-tight leading-tight px-2 text-center flex-1"><?= e(
+        <h1 class="fd-h3 font-bold text-[#171717] tracking-tight leading-tight px-2 text-center flex-1"><?= e(
             $title,
         ) ?></h1>
         <div class="w-10"></div> <!-- Spacer -->
     </header>
 
     <main class="dls-main dls-quiz-main flex-1 w-full bg-surface-container-low p-container-margin">
-        <div class="max-w-3xl mx-auto mt-4 mb-8">
+        <div class="w-full max-w-3xl mx-auto mt-[18px] mb-[24px]">
             <?php if ($isRealCourseQuiz): ?>
-            <div class="mb-5 rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-7">
-                <div class="flex items-start gap-4"><span class="material-symbols-outlined grid size-12 shrink-0 place-items-center rounded-xl bg-primary text-2xl text-white">quiz</span><div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wide text-primary"><?= e($course['title']) ?></p><h2 class="mt-1 text-2xl font-bold text-on-surface"><?= e($realQuiz['title'] ?? 'Quiz Course') ?></h2><p class="mt-2 text-sm leading-6 text-on-surface-variant"><?= e($realQuiz['description'] ?? '') ?></p></div></div>
-                <?php if (!empty($realQuiz['has_quiz'])): ?><div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-outline-variant/40 pt-4 text-sm text-on-surface-variant"><span><strong class="text-on-surface"><?= (int) ($realQuiz['question_count'] ?? 0) ?></strong> pertanyaan</span><span>Nilai kelulusan <strong class="text-on-surface"><?= e($realQuiz['passing_score'] ?? 75) ?></strong></span><span>Satu kali pengerjaan</span></div><?php endif; ?>
+            <div class="fd-card-elevated mb-[18px] rounded-[12px] bg-white p-[18px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:p-[24px]">
+                <div class="flex items-start gap-[12px]"><span class="material-symbols-outlined grid size-12 shrink-0 place-items-center rounded-[12px] bg-[#FEF2F2] text-[24px] text-[#DC2626]">quiz</span><div class="min-w-0"><p class="inline-block rounded-full bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#525252]"><?= e($course['title']) ?></p><h2 class="fd-h2 mt-[6px] text-[#171717]"><?= e($realQuiz['title'] ?? 'Quiz Course') ?></h2><p class="mt-[6px] text-[14px] leading-[22px] text-[#525252]"><?= e($realQuiz['description'] ?? '') ?></p></div></div>
+                <?php if (!empty($realQuiz['has_quiz'])): ?><div class="mt-[18px] flex flex-wrap gap-x-[18px] gap-y-[6px] border-t border-[#F5F5F5] pt-[12px] text-[13px] text-[#525252]"><span><strong class="fd-mono text-[#171717]"><?= (int) ($realQuiz['question_count'] ?? 0) ?></strong> pertanyaan</span><span>Nilai kelulusan <strong class="fd-mono text-[#171717]"><?= e((string) ($realQuiz['passing_score'] ?? 75)) ?></strong></span><span>Satu kali pengerjaan</span></div><?php endif; ?>
             </div>
-            <?php if ($quizError !== ''): ?><p role="alert" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><?= e($quizError) ?></p><?php endif; ?>
+            <?php if (($quizError ?? '') !== ''): ?><p role="alert" class="mb-[18px] rounded-[12px] bg-[#FEE2E2] p-[12px] text-[14px] font-medium text-[#EF4444]"><?= e((string) $quizError) ?></p><?php endif; ?>
             <?php if (empty($realQuiz['has_quiz'])): ?>
-            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-7 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">assignment_late</span><h3 class="mt-2 text-lg font-bold">Quiz belum tersedia</h3><p class="mt-1 text-sm text-on-surface-variant">Pengajar belum menerbitkan quiz untuk course ini.</p></section>
+            <section class="fd-card rounded-[12px] bg-white p-[24px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]"><span class="material-symbols-outlined text-4xl text-[#737373]">assignment_late</span><h3 class="fd-h3 mt-[6px] text-[#171717]">Quiz belum tersedia</h3><p class="mt-[6px] text-[14px] text-[#525252]">Pengajar belum menerbitkan quiz untuk course ini.</p></section>
             <?php elseif (!empty($realQuiz['attempt'])): ?>
             <?php $attempt = $realQuiz['attempt']; $passed = (float) $attempt['score'] >= (float) ($realQuiz['passing_score'] ?? 75); ?>
-            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-7"><div class="flex flex-col items-center gap-3 text-center"><span class="material-symbols-outlined grid size-16 place-items-center rounded-full <?= $passed ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface' ?> text-3xl"><?= $passed ? 'task_alt' : 'fact_check' ?></span><div><p class="text-sm font-semibold text-on-surface-variant">Quiz sudah dikirim</p><p class="mt-1 text-4xl font-bold text-primary"><?= e(number_format((float) $attempt['score'], 2, ',', '.')) ?></p><p class="mt-1 text-sm font-bold <?= $passed ? 'text-primary' : 'text-on-surface-variant' ?>"><?= $passed ? 'Memenuhi nilai kelulusan' : 'Belum mencapai nilai kelulusan' ?></p></div></div><div class="mt-6 grid gap-3 border-t border-outline-variant/40 pt-5 text-center sm:grid-cols-2"><p class="rounded-xl bg-surface-container-low p-3 text-sm"><strong class="block text-lg text-on-surface"><?= (int) $attempt['correct_count'] ?> / <?= (int) $attempt['total_questions'] ?></strong>Jawaban benar</p><p class="rounded-xl bg-surface-container-low p-3 text-sm"><strong class="block text-lg text-on-surface"><?= e(date('d M Y H:i', strtotime((string) $attempt['submitted_at']))) ?></strong>Waktu pengiriman</p></div><p class="mt-4 text-center text-sm text-on-surface-variant">Percobaan quiz sudah digunakan dan tidak dapat diulang.</p><div class="mt-5 flex justify-center"><a href="<?= e($backUrl) ?>" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white"><span class="material-symbols-outlined">arrow_back</span>Kembali ke Course</a></div></section>
+            <section class="fd-card rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] sm:p-[24px]"><div class="flex flex-col items-center gap-[12px] text-center"><span class="material-symbols-outlined grid size-16 place-items-center rounded-full <?= $passed ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#F5F5F5] text-[#171717]' ?> text-3xl"><?= $passed ? 'task_alt' : 'fact_check' ?></span><div><p class="text-[13px] font-medium text-[#525252]">Quiz sudah dikirim</p><p class="fd-h1 mt-[6px] text-[32px] font-bold <?= $passed ? 'text-[#16A34A]' : 'text-[#DC2626]' ?>"><?= e(number_format((float) $attempt['score'], 2, ',', '.')) ?></p><p class="mt-[6px]"><span class="fd-chip <?= $passed ? 'fd-chip-success' : 'fd-chip-error' ?>"><?= $passed ? 'Memenuhi nilai kelulusan' : 'Belum mencapai nilai kelulusan' ?></span></p></div></div><div class="mt-[18px] grid gap-[12px] border-t border-[#F5F5F5] pt-[18px] text-center sm:grid-cols-2"><p class="rounded-[12px] bg-[#FAFAFA] p-[12px] text-[13px] text-[#525252]"><strong class="fd-h3 fd-mono block text-[#171717]"><?= (int) $attempt['correct_count'] ?> / <?= (int) $attempt['total_questions'] ?></strong>Jawaban benar</p><p class="rounded-[12px] bg-[#FAFAFA] p-[12px] text-[13px] text-[#525252]"><strong class="fd-mono block text-[15px] font-semibold text-[#171717]"><?= e(date('d M Y H:i', strtotime((string) $attempt['submitted_at']))) ?></strong>Waktu pengiriman</p></div><p class="mt-[12px] text-center text-[13px] text-[#737373]">Percobaan quiz sudah digunakan dan tidak dapat diulang.</p><div class="mt-[18px] flex justify-center"><a href="<?= e($backUrl) ?>" class="fd-btn fd-btn-primary fd-btn-md rounded-full"><span class="material-symbols-outlined">arrow_back</span>Kembali ke Course</a></div></section>
             <?php elseif (($realQuiz['status'] ?? 'terkunci') !== 'belum_dimulai'): ?>
-            <section class="rounded-2xl border border-outline-variant/50 bg-surface p-7 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">lock</span><h3 class="mt-2 text-lg font-bold"><?= in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true) ? 'Quiz belum dapat dikerjakan' : 'Quiz masih terkunci' ?></h3><p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-on-surface-variant"><?php if (in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true)): ?>Pengajar belum menerbitkan quiz ini.<?php else: ?>Selesaikan dan tandai seluruh <?= (int) ($realQuiz['total_materials'] ?? 0) ?> materi course sebagai selesai. Saat ini <?= (int) ($realQuiz['completed_materials'] ?? 0) ?> materi sudah selesai.<?php endif; ?></p><a href="<?= e($backUrl) ?>" class="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-outline/60 bg-white px-5 font-semibold text-on-surface hover:bg-surface-container-low"><span class="material-symbols-outlined">menu_book</span>Kembali ke Materi</a></section>
+            <section class="fd-card rounded-[12px] bg-white p-[24px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]"><span class="material-symbols-outlined text-4xl text-[#737373]">lock</span><h3 class="fd-h3 mt-[6px] text-[#171717]"><?= in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true) ? 'Quiz belum dapat dikerjakan' : 'Quiz masih terkunci' ?></h3><p class="mx-auto mt-[6px] max-w-xl text-[14px] leading-[22px] text-[#525252]"><?php if (in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true)): ?>Pengajar belum menerbitkan quiz ini.<?php else: ?>Selesaikan dan tandai seluruh <?= (int) ($realQuiz['total_materials'] ?? 0) ?> materi course sebagai selesai. Saat ini <?= (int) ($realQuiz['completed_materials'] ?? 0) ?> materi sudah selesai.<?php endif; ?></p><a href="<?= e($backUrl) ?>" class="fd-btn fd-btn-secondary fd-btn-md mt-[18px] rounded-full"><span class="material-symbols-outlined">menu_book</span>Kembali ke Materi</a></section>
             <?php else: ?>
-            <form id="courseQuizForm" method="post" action="?route=/student/quiz&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;type=quiz" class="space-y-4">
+            <form id="courseQuizForm" method="post" action="?route=/student/quiz&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;type=quiz" class="space-y-[18px]">
                 <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
                 <?php foreach ($realQuiz['questions'] as $index => $question): ?>
-                <fieldset class="rounded-2xl border border-outline-variant/50 bg-surface p-5 shadow-sm sm:p-6"><legend class="sr-only">Pertanyaan <?= $index + 1 ?></legend><div class="mb-4 flex items-start gap-3"><span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white"><?= $index + 1 ?></span><p class="pt-1 font-semibold leading-6 text-on-surface"><?= e($question['question']) ?><span class="ml-1 text-primary" aria-label="Wajib diisi">*</span></p></div><div class="space-y-2 pl-0 sm:pl-11"><?php foreach ($question['options'] as $optionIndex => $option): ?><label class="flex cursor-pointer items-start gap-3 rounded-xl border border-outline-variant/50 p-3 transition hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5"><input type="radio" name="answers[<?= (int) $question['id'] ?>]" value="<?= (int) $optionIndex ?>" required class="mt-1 size-4 shrink-0 accent-primary" <?= (string) ($submittedAnswers[(string) $question['id']] ?? '') === (string) $optionIndex ? 'checked' : '' ?>><span class="text-sm leading-6 text-on-surface"><?= e($option) ?></span></label><?php endforeach; ?></div></fieldset>
+                <fieldset class="fd-card rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] sm:p-[24px]"><legend class="sr-only">Pertanyaan <?= $index + 1 ?></legend><div class="mb-[12px] flex items-start gap-[12px]"><span class="fd-mono grid size-8 shrink-0 place-items-center rounded-full bg-[#FEF2F2] text-[13px] font-bold text-[#DC2626]"><?= $index + 1 ?></span><p class="fd-h4 pt-1 text-[#171717]"><?= e($question['question']) ?><span class="ml-1 text-[#DC2626]" aria-label="Wajib diisi">*</span></p></div><div class="space-y-[10px] pl-0 sm:pl-11"><?php foreach ($question['options'] as $optionIndex => $option): ?><label class="flex cursor-pointer items-center gap-[12px] rounded-[12px] border border-[#E5E5E5] bg-white p-[14px] transition hover:border-[#A3A3A3] hover:bg-[#FAFAFA] has-[:checked]:border-[#DC2626] has-[:checked]:bg-[#FEF2F2]"><input type="radio" name="answers[<?= (int) $question['id'] ?>]" value="<?= (int) $optionIndex ?>" required class="fd-radio shrink-0" <?= (string) ($submittedAnswers[(string) $question['id']] ?? '') === (string) $optionIndex ? 'checked' : '' ?>><span class="fd-body text-[#171717]"><?= e($option) ?></span></label><?php endforeach; ?></div></fieldset>
                 <?php endforeach; ?>
-                <div class="sticky bottom-2 flex flex-col gap-3 rounded-2xl border border-outline-variant/50 bg-surface p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between"><p class="text-xs leading-5 text-on-surface-variant">Periksa kembali jawaban sebelum dikirim. Quiz hanya dapat dikerjakan satu kali.</p><button type="submit" class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-white hover:bg-primary/90"><span class="material-symbols-outlined">send</span>Kirim Jawaban</button></div>
+                <div class="fd-sticky-bottom-bar flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between"><p class="text-[12px] leading-[18px] text-[#525252]">Periksa kembali jawaban sebelum dikirim. Quiz hanya dapat dikerjakan satu kali.</p><button type="submit" class="fd-btn fd-btn-primary fd-btn-lg shrink-0 rounded-full w-full sm:w-auto"><span class="material-symbols-outlined">send</span>Kirim Jawaban</button></div>
             </form>
             <?php endif; ?>
             <?php else: ?>
@@ -141,22 +141,22 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
                 <?php endif; ?>
             </div>
             <?php elseif ($totalQuestions > 0): ?>
-            <!-- Active Quiz Header -->
-            <div class="bg-surface rounded-2xl p-6 shadow-sm border border-outline-variant/30 mb-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 rounded-full <?= $type === 'final_assessment'
-                        ? 'bg-tertiary text-white'
-                        : 'bg-primary text-white' ?> flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px]">
+            <!-- Active Quiz Header (FoodDash Elevated Surface) -->
+            <div class="fd-card-elevated bg-white rounded-[12px] p-[18px] sm:p-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] mb-[24px]">
+                <div class="flex items-center gap-[12px] mb-[18px]">
+                    <div class="w-12 h-12 rounded-[12px] <?= $type === 'final_assessment'
+                        ? 'bg-[#DCFCE7] text-[#16A34A]'
+                        : 'bg-[#FEF2F2] text-[#DC2626]' ?> flex shrink-0 items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">
                             <?= $type === 'final_assessment' ? 'military_tech' : 'assignment' ?>
                         </span>
                     </div>
                     <div>
-                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Kerjakan Ujian</h2>
-                        <p class="font-label-sm text-on-surface-variant mt-1">Total <?= $totalQuestions ?> Pertanyaan &bull; Bobot Maks: 100</p>
+                        <h2 class="fd-h2 text-[#171717]">Kerjakan Ujian</h2>
+                        <p class="fd-mono text-[13px] text-[#525252] mt-[3px]">Total <?= $totalQuestions ?> Pertanyaan &bull; Bobot Maks: 100</p>
                     </div>
                 </div>
-                <div class="bg-secondary-container/20 border-l-4 border-secondary p-4 rounded-r-lg font-body-md text-on-surface-variant">
+                <div class="bg-[#DBEAFE] border-l-[3px] border-[#2563EB] p-[12px] sm:p-[18px] rounded-r-[12px] text-[14px] leading-[22px] text-[#1E3A8A]">
                     <?php if ($type === 'final_assessment'): ?>
                     <p>Pilih atau tuliskan jawaban yang paling tepat untuk setiap pertanyaan. Nilai minimal 75 diwajibkan untuk lulus dari course ini. Selamat mengerjakan dan semoga sukses!</p>
                     <?php else: ?>
@@ -187,46 +187,46 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
                     $isCorrect = $userAnswer === $q['correct_answer'];
                 }
                 ?>
-                <div class="bg-surface rounded-xl p-5 shadow-[0_4px_12px_0_rgba(0,0,0,0.02)] border <?= $isHistoryMode &&
+                <div class="fd-card bg-white rounded-[12px] p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] <?= $isHistoryMode &&
                 $isPg
                     ? ($isCorrect
-                        ? 'border-green-300'
-                        : 'border-red-300')
-                    : 'border-outline-variant/50' ?>">
+                        ? 'ring-1 ring-[#16A34A]/40'
+                        : 'ring-1 ring-[#EF4444]/40')
+                    : '' ?>">
 
                     <!-- Header Soal -->
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-surface-container text-on-surface-variant text-xs font-bold px-2 py-1 rounded-md">Soal <?= $index +
+                    <div class="flex justify-between items-center mb-[12px] gap-[12px]">
+                        <div class="flex gap-[6px] items-center flex-wrap">
+                            <span class="fd-mono bg-[#F5F5F5] text-[#171717] text-[12px] font-semibold px-[10px] py-[4px] rounded-[6px]">Soal <?= $index +
                                 1 ?></span>
                             <?php if ($isPg): ?>
-                            <span class="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded-md border border-blue-200">Pilihan Ganda</span>
+                            <span class="fd-chip fd-chip-info">Pilihan Ganda</span>
                             <?php else: ?>
-                            <span class="bg-purple-50 text-purple-700 text-xs font-bold px-2 py-1 rounded-md border border-purple-200">Essay</span>
+                            <span class="fd-chip bg-[#F5F5F5] text-[#525252]">Essay</span>
                             <?php endif; ?>
                         </div>
-                        <div class="text-on-surface-variant text-xs font-bold px-2 py-1 rounded-md bg-surface-container-low border border-outline-variant">
+                        <div class="fd-mono text-[#525252] text-[12px] font-semibold px-[10px] py-[4px] rounded-[6px] bg-[#FAFAFA]">
                             Bobot: <?= $q['weight'] ?>
                         </div>
                     </div>
 
                     <!-- Pertanyaan -->
-                    <p class="font-headline-sm text-on-surface mb-4 leading-relaxed">
+                    <p class="fd-h3 text-[16px] leading-[24px] text-[#171717] mb-[18px]">
                         <?= e($q['question']) ?>
                     </p>
 
                     <!-- Gambar Soal -->
                     <?php if ($hasImage && !empty($q['image_url'])): ?>
-                    <div class="mb-5 rounded-lg overflow-hidden border border-outline-variant bg-surface-container-lowest">
+                    <div class="mb-[18px] rounded-[12px] overflow-hidden bg-[#FAFAFA]">
                         <img src="<?= e(
                             $q['image_url'],
                         ) ?>" alt="Ilustrasi Soal" class="w-full h-auto object-cover max-h-[300px]">
                     </div>
                     <?php endif; ?>
 
-                    <!-- Opsi Jawaban (PG) -->
+                    <!-- Opsi Jawaban (FoodDash 20px Radio Buttons) -->
                     <?php if ($isPg && !empty($q['options'])): ?>
-                    <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-[12px]">
                         <?php foreach ($q['options'] as $optKey => $option): ?>
                         <?php
                         $checked = $userAnswer === $optKey;
@@ -251,35 +251,33 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
      ? 'disabled'
      : 'required' ?>>
                             <div class="w-full flex <?= $isImageOption
-                                ? 'flex-col items-start gap-3'
-                                : 'items-center' ?> p-4 border border-outline-variant rounded-lg transition-all duration-200 <?= !$isHistoryMode
-     ? 'hover:bg-surface-container-lowest'
+                                ? 'flex-col items-start gap-[12px]'
+                                : 'items-center' ?> p-[14px] bg-white border border-[#E5E5E5] rounded-[12px] transition-all duration-150 <?= !$isHistoryMode
+     ? 'hover:bg-[#FAFAFA] hover:border-[#A3A3A3]'
      : '' ?>">
-                                <div class="flex items-center w-full">
-                                    <div class="w-5 h-5 rounded-full border-2 border-outline-variant mr-3 flex items-center justify-center shrink-0 transition-colors <?= !$isHistoryMode
-                                        ? 'group-hover:border-primary peer-checked:border-primary'
-                                        : '' ?>">
-                                        <div class="radio-inner w-2.5 h-2.5 rounded-full bg-transparent transform scale-0 transition-transform duration-200"></div>
+                                <div class="flex items-center w-full gap-[8px]">
+                                    <div class="radio-outer w-[20px] h-[20px] rounded-full border-2 border-[#D4D4D4] bg-white flex items-center justify-center shrink-0 transition-colors">
+                                        <div class="radio-inner w-[12px] h-[12px] rounded-full bg-transparent transform scale-0 transition-transform duration-150"></div>
                                     </div>
-                                    <span class="font-body-md text-on-surface <?= $isImageOption ? '' : 'flex-1' ?>">
-                                        <span class="font-bold mr-2"><?= e($optKey) ?>.</span>
+                                    <span class="fd-body text-[#171717] <?= $isImageOption ? '' : 'flex-1' ?>">
+                                        <span class="font-semibold mr-[6px]"><?= e($optKey) ?>.</span>
                                         <?php if (!$isImageOption): ?>
                                         <?= e($option) ?>
                                         <?php endif; ?>
                                     </span>
 
                                     <?php if ($isHistoryMode && $optKey === $q['correct_answer']): ?>
-                                    <span class="material-symbols-outlined text-green-600 shrink-0 ml-auto">check_circle</span>
+                                    <span class="material-symbols-outlined text-[#16A34A] shrink-0 ml-auto">check_circle</span>
                                     <?php elseif ($isHistoryMode && $checked && !$isCorrect): ?>
-                                    <span class="material-symbols-outlined text-red-600 shrink-0 ml-auto">cancel</span>
+                                    <span class="material-symbols-outlined text-[#EF4444] shrink-0 ml-auto">cancel</span>
                                     <?php endif; ?>
                                 </div>
 
                                 <?php if ($isImageOption): ?>
-                                <div class="pl-8 w-full mt-1">
+                                <div class="pl-[28px] w-full mt-[6px]">
                                     <img src="<?= e($option) ?>" alt="Opsi <?= e(
     $optKey,
-) ?>" class="w-full max-w-[200px] h-auto object-cover rounded-md border border-outline-variant shadow-sm transition-transform duration-200 <?= !$isHistoryMode
+) ?>" class="w-full max-w-[200px] h-auto object-cover rounded-[8px] shadow-sm transition-transform duration-200 <?= !$isHistoryMode
     ? 'group-hover:scale-[1.02]'
     : '' ?>">
                                 </div>
@@ -292,24 +290,25 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
 
                     <!-- Opsi Jawaban (Essay) -->
                     <?php if ($isEssay): ?>
-                    <div class="mt-2">
+                    <div class="mt-[6px]">
                         <textarea name="q_<?= e(
                             $qId,
-                        ) ?>" rows="4" class="w-full p-4 border border-outline-variant rounded-lg bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-on-surface resize-y" placeholder="Ketik jawaban essay Anda di sini..." <?= $isHistoryMode
+                        ) ?>" rows="4" class="fd-textarea w-full resize-y" placeholder="Ketik jawaban essay Anda di sini..." <?= $isHistoryMode
     ? 'disabled'
     : 'required' ?>><?= e($userAnswer ?? '') ?></textarea>
 
                         <?php if ($isHistoryMode && isset($historyAttempt['review_status'])): ?>
-                        <div class="mt-3 flex items-center gap-2 text-sm <?= $historyAttempt['review_status'] ===
-                        'under_review'
-                            ? 'text-orange-600'
-                            : 'text-green-600' ?>">
-                            <span class="material-symbols-outlined text-[18px]">
-                                <?= $historyAttempt['review_status'] === 'under_review' ? 'schedule' : 'verified' ?>
+                        <div class="mt-[12px]">
+                            <span class="fd-chip <?= $historyAttempt['review_status'] === 'under_review'
+                                ? 'fd-chip-warning'
+                                : 'fd-chip-success' ?>">
+                                <span class="material-symbols-outlined text-[16px]">
+                                    <?= $historyAttempt['review_status'] === 'under_review' ? 'schedule' : 'verified' ?>
+                                </span>
+                                <span>Status: <?= $historyAttempt['review_status'] === 'under_review'
+                                    ? 'Menunggu Penilaian (Under Review)'
+                                    : 'Sudah Dinilai' ?></span>
                             </span>
-                            <span>Status: <?= $historyAttempt['review_status'] === 'under_review'
-                                ? 'Menunggu Penilaian (Under Review)'
-                                : 'Sudah Dinilai' ?></span>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -319,12 +318,12 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
                 <?php endforeach; ?>
 
                 <?php if (!$isHistoryMode): ?>
-                <div class="pt-6 pb-10">
-                    <p class="dls-feature-note" role="status">Pengiriman dan penyimpanan jawaban belum tersedia. Jawaban pada halaman ini tidak akan tersimpan.</p>
+                <div class="pt-[12px] pb-[24px]">
+                    <p class="dls-feature-note rounded-[12px] bg-[#FEF3C7] p-[14px] text-[13px] font-medium text-[#92400E]" role="status">Pengiriman dan penyimpanan jawaban belum tersedia. Jawaban pada halaman ini tidak akan tersimpan.</p>
                 </div>
                 <?php else: ?>
-                <div class="pt-6 pb-10 flex justify-center">
-                    <a href="<?= $backUrl ?>" class="px-6 py-3 border border-outline text-on-surface rounded-xl font-label-lg font-bold hover:bg-surface-container transition-all flex items-center gap-2">
+                <div class="pt-[12px] pb-[24px] flex justify-center">
+                    <a href="<?= $backUrl ?>" class="fd-btn fd-btn-secondary fd-btn-lg rounded-full">
                         <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                         <span>Kembali ke Riwayat</span>
                     </a>
@@ -417,6 +416,63 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
     <?php endif; ?>
 
     <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script>
+        (function() {
+            function onDlsReady(fn) {
+                if (window.DLS) fn(window.DLS);
+                else window.addEventListener('DLSReady', function() { fn(window.DLS); }, { once: true });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var courseQuizForm = document.getElementById('courseQuizForm');
+                if (courseQuizForm) {
+                    var confirmedSubmit = false;
+                    courseQuizForm.addEventListener('submit', function(e) {
+                        if (confirmedSubmit) return;
+                        e.preventDefault();
+                        onDlsReady(function(DLS) {
+                            DLS.confirm({
+                                title: 'Kirim Jawaban Quiz?',
+                                text: 'Pastikan seluruh jawaban sudah diperiksa. Quiz hanya dapat dikerjakan satu kali.',
+                                confirmText: 'Ya, Kirim Sekarang',
+                                cancelText: 'Periksa Lagi',
+                                icon: 'question'
+                            }).then(function(ok) {
+                                if (ok) {
+                                    confirmedSubmit = true;
+                                    if (typeof courseQuizForm.requestSubmit === 'function') courseQuizForm.requestSubmit();
+                                    else courseQuizForm.submit();
+                                }
+                            });
+                        });
+                    });
+                }
+
+                <?php if (($quizError ?? '') !== ''): ?>
+                onDlsReady(function(DLS) {
+                    DLS.error('Gagal Memproses Quiz', <?= json_encode((string) $quizError, JSON_UNESCAPED_UNICODE) ?>);
+                });
+                <?php elseif (($_GET['submitted'] ?? '') === '1' && !empty($realQuiz['attempt'])): ?>
+                onDlsReady(function(DLS) {
+                    <?php
+                    $att = $realQuiz['attempt'];
+                    $passedFlag = (float) $att['score'] >= (float) ($realQuiz['passing_score'] ?? 75);
+                    $scoreFormatted = number_format((float) $att['score'], 2, ',', '.');
+                    ?>
+                    DLS.<?= $passedFlag ? 'success' : 'info' ?>(
+                        <?= json_encode($passedFlag ? 'Selamat! Quiz Lulus' : 'Quiz Berhasil Dikirim', JSON_UNESCAPED_UNICODE) ?>,
+                        <?= json_encode("Skor Anda: {$scoreFormatted} ({$att['correct_count']}/{$att['total_questions']} benar). " . ($passedFlag ? 'Nilai memenuhi standar kelulusan.' : 'Belum mencapai nilai kelulusan.'), JSON_UNESCAPED_UNICODE) ?>
+                    );
+                    try {
+                        var url = new URL(window.location.href);
+                        url.searchParams.delete('submitted');
+                        window.history.replaceState({}, '', url.toString());
+                    } catch (_) {}
+                });
+                <?php endif; ?>
+            });
+        })();
+    </script>
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
     <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
 

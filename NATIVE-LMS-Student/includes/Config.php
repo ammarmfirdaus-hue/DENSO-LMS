@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * Mengambil nilai konfigurasi dari environment file (.env).
+ *
+ * @param string $key Kunci konfigurasi yang dicari.
+ * @param string|null $default Nilai bawaan jika kunci tidak ditemukan.
+ * @return string|null
+ */
 function envValue(string $key, ?string $default = null): ?string
 {
     static $loaded = false;

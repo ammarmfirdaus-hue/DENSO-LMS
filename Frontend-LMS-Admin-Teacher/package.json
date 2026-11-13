@@ -15,8 +15,11 @@
   "dependencies": {
     "@tinymce/tinymce-react": "^6.3.1",
     "@vitejs/plugin-react": "^5.0.4",
+    "chart.js": "^4.6.1",
+    "driver.js": "^1.12.1",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.4",
     "sweetalert2": "^11.26.25",

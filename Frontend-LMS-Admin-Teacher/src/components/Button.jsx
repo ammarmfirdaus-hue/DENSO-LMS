@@ -1,100 +1,64 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 /**
- * Standard Button component for DENSO LMS Admin & Teacher portal.
- * Enforces unified styling, focus rings, loading states, and accessibility across all views.
- *
- * @param {Object} props
- * @param {'primary' | 'secondary' | 'outline' | 'danger' | 'danger-outline' | 'success' | 'ghost'} [props.variant='primary']
- * @param {'xs' | 'sm' | 'md' | 'lg'} [props.size='md']
- * @param {string | React.ReactNode} [props.icon] - Material Symbol icon name or custom element.
- * @param {'start' | 'end'} [props.iconPosition='start']
- * @param {boolean} [props.loading=false]
- * @param {boolean} [props.disabled=false]
- * @param {React.ReactNode} props.children
- * @param {string} [props.className]
+ * Button Component (design.md 8px radius, compact operational heights, DENSO red primary CTA).
  */
 export default function Button({
   variant = 'primary',
   size = 'md',
-  icon,
-  iconPosition = 'start',
   loading = false,
-  disabled = false,
-  children,
+  icon,
+  iconRight,
+  disabled,
   className = '',
-  type = 'button',
-  ...rest
+  children,
+  ...props
 }) {
-  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-xl transition duration-150 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
-
-  const sizeClasses = {
-    xs: 'min-h-7 px-2.5 py-1 text-xs gap-1.5',
-    sm: 'min-h-8 px-3 py-1.5 text-xs gap-1.5',
-    md: 'min-h-10 px-4 py-2 text-sm gap-2',
-    lg: 'min-h-11 px-5 py-2.5 text-sm sm:text-base gap-2.5'
+  const variants = {
+    primary: 'bg-primary text-white hover:bg-primary-container shadow-xs border border-primary/20',
+    secondary: 'border border-slate-300/80 bg-slate-100 text-slate-800 hover:bg-slate-200/90 hover:text-slate-900 shadow-2xs dark:bg-slate-800/90 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700',
+    outline: 'border border-primary/40 bg-red-50/80 text-primary font-semibold hover:bg-red-100/90 shadow-2xs dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/50 dark:hover:bg-red-900/50',
+    ghost: 'bg-slate-100/60 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-xs border border-red-700/30',
+    success: 'bg-tertiary text-white hover:opacity-90 shadow-xs border border-tertiary/30'
   };
 
-  const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-[#b9141b] shadow-xs focus-visible:ring-primary/40 dark:bg-red-600 dark:hover:bg-red-700',
-    secondary: 'bg-[#173e67] text-white hover:bg-[#112d4d] shadow-xs focus-visible:ring-secondary/40',
-    outline: 'border border-outline/70 bg-white text-secondary hover:bg-surface-low hover:border-outline focus-visible:ring-primary/20 dark:border-slate-700 dark:bg-slate-850 dark:text-slate-200 dark:hover:bg-slate-800',
-    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-xs focus-visible:ring-red-500/40',
-    'danger-outline': 'border border-red-200 bg-white text-red-700 hover:bg-red-50 focus-visible:ring-red-400/30 dark:border-red-900/60 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40',
-    success: 'border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 focus-visible:ring-emerald-400/30 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60',
-    ghost: 'text-secondary hover:bg-surface-low hover:text-on-surface focus-visible:ring-primary/20 dark:text-slate-300 dark:hover:bg-slate-800'
-  };
-
-  const currentSize = sizeClasses[size] || sizeClasses.md;
-  const currentVariant = variantClasses[variant] || variantClasses.primary;
-
-  const renderIcon = () => {
-    if (loading) {
-      return (
-        <svg
-          className="size-4 animate-spin text-current"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          />
-        </svg>
-      );
-    }
-
-    if (!icon) return null;
-
-    if (typeof icon === 'string') {
-      return <span className="material-symbol text-base sm:text-lg leading-none" aria-hidden="true">{icon}</span>;
-    }
-
-    return icon;
+  const sizes = {
+    xs: 'h-7 px-2.5 text-xs gap-1.5 rounded-md',
+    sm: 'h-8 px-3 text-xs gap-1.5 rounded-lg',
+    md: 'h-10 px-4 text-sm gap-2 rounded-lg',
+    lg: 'h-11 px-5 text-sm gap-2 rounded-lg'
   };
 
   return (
     <button
-      type={type}
+      type={props.type || 'button'}
       disabled={disabled || loading}
-      className={`${baseClasses} ${currentSize} ${currentVariant} ${className}`}
-      {...rest}
+      className={`inline-flex shrink-0 cursor-pointer items-center justify-center font-medium transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 ${
+        variants[variant] || variants.primary
+      } ${sizes[size] || sizes.md} ${className}`}
+      {...props}
     >
-      {iconPosition === 'start' && renderIcon()}
-      {children}
-      {iconPosition === 'end' && renderIcon()}
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : icon ? (
+        typeof icon === 'string' ? (
+          <span className="material-symbol text-[18px] leading-none">{icon}</span>
+        ) : (
+          <span className="inline-flex shrink-0 items-center">{icon}</span>
+        )
+      ) : null}
+
+      {children && <span>{children}</span>}
+
+      {iconRight && !loading && (
+        typeof iconRight === 'string' ? (
+          <span className="material-symbol text-[18px] leading-none">{iconRight}</span>
+        ) : (
+          <span className="inline-flex shrink-0 items-center">{iconRight}</span>
+        )
+      )}
     </button>
   );
 }
-

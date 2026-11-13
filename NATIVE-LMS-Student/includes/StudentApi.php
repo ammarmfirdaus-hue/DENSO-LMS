@@ -3,6 +3,21 @@ declare(strict_types=1);
 require_once __DIR__ . '/Database.php';
 
 /**
+ * Mengubah nilai thumbnail_path course dari MySQL menjadi URL gambar lengkap yang dapat dimuat browser.
+ */
+function resolveCourseThumbnailUrl(?string $thumbnailPath): ?string
+{
+    $value = trim((string) $thumbnailPath);
+    if ($value === '') return null;
+    if (preg_match('/^https?:\/\//i', $value) === 1) {
+        return $value;
+    }
+    $apiBase = defined('SSO_API_URL') ? rtrim((string) SSO_API_URL, '/') : '';
+    if ($apiBase === '') return null;
+    return $apiBase . (str_starts_with($value, '/') ? $value : '/' . $value);
+}
+
+/**
  * Mengambil daftar katalog kursus aktif beserta progres enrollment student dari MySQL.
  *
  * @param int $studentId ID unik student.
@@ -23,7 +38,12 @@ function apiCourses(int $studentId): array
       )
       WHERE c.status='active' ORDER BY c.updated_at DESC");
     $query->execute(['account_student_id' => $studentId, 'enrollment_student_id' => $studentId, 'request_student_id' => $studentId]);
-    return $query->fetchAll();
+    return array_map(static function (array $row): array {
+        $resolved = resolveCourseThumbnailUrl($row['thumbnail_path'] ?? null);
+        $row['thumbnail_path'] = $resolved;
+        $row['thumbnail'] = $resolved;
+        return $row;
+    }, $query->fetchAll());
 }
 
 /**
@@ -70,7 +90,7 @@ function apiStudentGrades(int $studentId): array
 function publishedStudentCourse(string $courseCode, int $studentId): ?array
 {
     if ($studentId < 1) return null;
-    $query = db()->prepare("SELECT c.course_id,c.course_code,c.title,c.description,c.category,
+    $query = db()->prepare("SELECT c.course_id,c.course_code,c.title,c.description,c.category,c.thumbnail_path,
       COALESCE(e.progress,0) AS progress,COALESCE(e.enrollment_status,'available') AS enrollment_status,e.quiz_score,
       CASE WHEN e.enrollment_status IN ('active','completed') THEN 1 ELSE 0 END AS has_access,
       access_request.status AS access_status,access_request.request_type,access_request.request_note,access_request.decision_note
@@ -85,11 +105,12 @@ function publishedStudentCourse(string $courseCode, int $studentId): ?array
     $row = $query->fetch();
     if (!$row) return null;
 
+    $thumbnailUrl = resolveCourseThumbnailUrl($row['thumbnail_path'] ?? null);
     $accessStatus = (string) ($row['access_status'] ?? 'not_requested');
     if ((int) $row['has_access'] !== 1) {
         return [
             'id' => $row['course_code'], 'title' => $row['title'], 'description' => $row['description'] ?? '',
-            'thumbnail' => null, 'thumbnail_icon' => 'school', 'category' => $row['category'],
+            'thumbnail' => $thumbnailUrl, 'thumbnail_icon' => 'school', 'category' => $row['category'],
             'filters' => [$row['category']], 'modules_count' => 0, 'status' => 'belum_dimulai',
             'progress' => 0, 'last_accessed' => null, 'sessions' => [], 'is_live' => true,
             'has_access' => false, 'access_status' => $accessStatus,
@@ -170,7 +191,7 @@ function publishedStudentCourse(string $courseCode, int $studentId): ?array
     $quiz = apiStudentCourseQuizSummary((string) $row['course_code'], $studentId, $allMaterialsCompleted);
     return [
         'id' => $row['course_code'], 'title' => $row['title'], 'description' => $row['description'] ?? '',
-        'thumbnail' => null, 'thumbnail_icon' => 'school', 'category' => $row['category'],
+        'thumbnail' => $thumbnailUrl, 'thumbnail_icon' => 'school', 'category' => $row['category'],
         'filters' => [$row['category']], 'modules_count' => count($sessions), 'status' => $status,
         'progress' => $progress, 'last_accessed' => date('Y-m-d H:i:s'), 'sessions' => $sessions, 'is_live' => true,
         'has_access' => true, 'access_status' => $accessStatus,

@@ -78,13 +78,8 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         </button>
     </div>
 
-    <!-- Date & Search Box untuk Sidebar Desktop -->
+    <!-- Search Box untuk Sidebar Desktop (Tanggal sudah dipindah ke Header) -->
     <div class="hidden lg:flex flex-col gap-2 my-2 w-full dls-sidebar-text">
-        <div class="p-2.5 rounded-xl border border-outline-variant/60 bg-slate-50 dark:bg-slate-800/60 text-center">
-            <p class="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                <?= $current_date_str ?>
-            </p>
-        </div>
         <div class="relative w-full">
             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none" aria-hidden="true">search</span>
             <input
@@ -115,7 +110,7 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
     <?php foreach ($tabs as $tab): ?>
     <?php
     $is_active = $active_tab === $tab['id'];
-    $is_mobile_profile_active = $tab['id'] === 'profil' && in_array($active_tab, ['profil', 'notifikasi'], true);
+    $is_mobile_profile_active = $tab['id'] === 'profil' && $active_tab === 'profil';
     $active_class = $is_active
         ? 'text-primary dark:text-primary-fixed bg-primary-container-light lg:bg-primary-container-light font-semibold'
         : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
@@ -125,31 +120,34 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
        class="dls-mobile-profile-trigger flex-1 flex flex-col items-center justify-center rounded-xl py-2 transition-transform duration-200 active:scale-95 relative <?= $is_mobile_profile_active ? 'text-primary bg-primary-container-light font-semibold' : 'text-on-surface-variant' ?>"
        id="nav-profil"
        onclick="window.toggleStudentMobileProfileMenu()"
+       title="Profil"
        aria-label="Menu Profil"
        aria-haspopup="true"
        aria-expanded="false"
        aria-controls="studentMobileProfileDropup">
         <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' <?= $is_mobile_profile_active ? '1' : '0' ?>;">person</span>
-        <span class="font-label-sm text-label-sm">Profil</span>
+        <span class="dls-nav-label font-label-sm text-label-sm">Profil</span>
     </button>
     <a href="<?= $tab['href'] ?>"
        class="dls-desktop-profile-link flex-1 lg:flex-none hidden lg:flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
        id="nav-profil-desktop"
+       title="Profil"
        aria-label="Profil"<?= $is_active ? ' aria-current="page"' : '' ?>>
         <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3" style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;">person</span>
-        <span class="font-label-sm text-label-sm lg:text-body-md">Profil</span>
+        <span class="dls-nav-label font-label-sm text-label-sm lg:text-body-md">Profil</span>
     </a>
     <?php else: ?>
     <a href="<?= $tab['href'] ?>" 
        class="<?= $tab['id'] === 'notifikasi' ? 'dls-mobile-nav-notifications ' : '' ?>flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
        id="nav-<?= $tab['id'] ?>"
+       title="<?= htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8') ?>"
        aria-label="<?= $tab['label'] ?>"<?= $is_active ? ' aria-current="page"' : '' ?>>
         
         <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3"
               style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;"
         ><?= $tab['icon'] ?></span>
         
-        <span class="font-label-sm text-label-sm lg:text-body-md"><?= $tab['label'] ?></span>
+        <span class="dls-nav-label font-label-sm text-label-sm lg:text-body-md"><?= $tab['label'] ?></span>
 
         <?php if ($tab['id'] === 'notifikasi'): ?>
         <span data-notification-count class="dls-bottom-notification-count" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
@@ -246,6 +244,8 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         mains.forEach(function(m) {
             m.classList.toggle('dls-main-sidebar-mini', collapsed);
         });
+        var progressTrack = document.getElementById('learningProgressBar');
+        if (progressTrack) progressTrack.classList.toggle('dls-progress-sidebar-mini', collapsed);
         // Update top app bar left offset
         var header = document.getElementById('topAppBar');
         if (header) header.classList.toggle('dls-header-sidebar-mini', collapsed);
@@ -405,7 +405,9 @@ window.confirmStudentLogout = function() {
             if (r.isConfirmed) window.submitStudentLogout();
         });
     } else {
-        if (confirm('Apakah Anda yakin ingin keluar?')) window.submitStudentLogout();
+        window.addEventListener('DLSReady', function() {
+            window.confirmStudentLogout();
+        }, { once: true });
     }
 };
 

@@ -1,0 +1,1341 @@
+/**
+ * DX_LMS_M_FoodDash_Theme.css
+ * FoodDash Design System layer for DENSO LMS Native Student Portal.
+ * Enforces speed, clarity, white borderless elevation surfaces,
+ * Poppins/DM Sans/Roboto Mono typography, 6px spacing scale,
+ * and mobile-first one-thumb ergonomics.
+ */
+
+:root {
+  /* === FoodDash Core Tokens === */
+  --fd-primary: #DC2626;
+  --fd-primary-hover: #B91C1C;
+  --fd-primary-soft: #FEF2F2;
+  --fd-secondary: #EA580C;
+  --fd-secondary-soft: #FFF7ED;
+  --fd-tertiary: #16A34A;
+  --fd-success: #16A34A;
+  --fd-success-bg: #DCFCE7;
+  --fd-warning: #D97706;
+  --fd-warning-bg: #FEF3C7;
+  --fd-error: #EF4444;
+  --fd-error-bg: #FEE2E2;
+  --fd-info: #2563EB;
+  --fd-info-bg: #DBEAFE;
+
+  --fd-bg: #FFFFFF;
+  --fd-surface: #FFFFFF;
+  --fd-surface-hover: #FAFAFA;
+  --fd-surface-muted: #F5F5F5;
+
+  --fd-text-primary: #171717;
+  --fd-text-secondary: #525252;
+  --fd-text-tertiary: #737373;
+  --fd-text-inverse: #FFFFFF;
+
+  --fd-border: #E5E5E5;
+  --fd-border-hover: #A3A3A3;
+  --fd-border-control: #D4D4D4;
+  --fd-divider: #F5F5F5;
+
+  /* 6px Base Spacing Scale */
+  --fd-space-xs: 3px;
+  --fd-space-sm: 6px;
+  --fd-space-md: 12px;
+  --fd-space-lg: 18px;
+  --fd-space-xl: 24px;
+  --fd-space-2xl: 36px;
+  --fd-space-3xl: 48px;
+
+  /* Radii */
+  --fd-radius-sm: 6px;
+  --fd-radius-md: 12px;
+  --fd-radius-lg: 16px;
+  --fd-radius-pill: 9999px;
+
+  /* Material Elevation Shadows */
+  --fd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --fd-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --fd-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --fd-shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.20);
+  --fd-shadow-focus: 0 0 0 3px rgba(220, 38, 38, 0.25);
+
+  /* Typography */
+  --fd-font-display: 'Poppins', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --fd-font-body: 'DM Sans', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --fd-font-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Map existing --dls-* & --student-* variables into FoodDash palette */
+  --dls-primary: var(--fd-primary);
+  --dls-primary-container: var(--fd-primary-hover);
+  --dls-on-primary: var(--fd-text-inverse);
+  --dls-secondary: var(--fd-secondary);
+  --dls-tertiary: var(--fd-tertiary);
+  --dls-surface: var(--fd-surface);
+  --dls-surface-container-lowest: var(--fd-surface);
+  --dls-surface-container-low: var(--fd-surface-hover);
+  --dls-surface-container: var(--fd-surface-muted);
+  --dls-on-surface: var(--fd-text-primary);
+  --dls-on-surface-variant: var(--fd-text-secondary);
+  --dls-outline: var(--fd-border-hover);
+  --dls-outline-variant: var(--fd-border);
+  --dls-shadow-sm: var(--fd-shadow-sm);
+  --dls-shadow-md: var(--fd-shadow-md);
+  --dls-shadow-lg: var(--fd-shadow-lg);
+  --dls-shadow-card: var(--fd-shadow-sm);
+  --dls-radius-sm: var(--fd-radius-sm);
+  --dls-radius-md: var(--fd-radius-md);
+  --dls-radius-lg: var(--fd-radius-lg);
+  --dls-radius-card: var(--fd-radius-md);
+  --dls-radius-pill: var(--fd-radius-pill);
+  --dls-font-family: var(--fd-font-body);
+  --dls-font-display: var(--fd-font-display);
+  --dls-container-margin: 18px;
+  --dls-topbar-height: 60px;
+  --dls-bottomnav-height: 76px;
+
+  --student-canvas: #FFFFFF;
+  --student-surface: #FFFFFF;
+  --student-surface-muted: #FAFAFA;
+  --student-ink: #171717;
+  --student-muted: #525252;
+  --student-brand: #DC2626;
+  --student-navy: #171717;
+
+  /* Override lingering Coursera variables */
+  --crs-bg: #FFFFFF;
+  --crs-surface: #FFFFFF;
+  --crs-surface-muted: #FAFAFA;
+  --crs-border: #E5E5E5;
+  --crs-border-strong: #A3A3A3;
+  --crs-blue: #DC2626;
+  --crs-blue-hover: #B91C1C;
+  --crs-blue-soft: #FEF2F2;
+  --crs-navy: #171717;
+  --crs-ink: #171717;
+  --crs-muted: #525252;
+}
+
+/* === Base Page Canvas & Typography === */
+html,
+body {
+  background-color: var(--fd-bg) !important;
+  color: var(--fd-text-primary) !important;
+  font-family: var(--fd-font-body) !important;
+  font-size: 14px;
+  line-height: 22px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.dls-app-shell {
+  background-color: var(--fd-bg) !important;
+  color: var(--fd-text-primary) !important;
+}
+
+.fd-h1, .fd-h2, .fd-h3, .fd-h4 {
+  color: inherit;
+}
+
+h1, h2, h3, h4,
+.fd-h1, .fd-h2, .fd-h3, .fd-h4,
+.font-headline-lg, .font-headline-md, .font-headline-sm,
+.dls-page-banner__title, .crs-hero-title {
+  font-family: var(--fd-font-display) !important;
+  letter-spacing: -0.015em;
+}
+
+.fd-h1 {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+}
+
+.fd-h2 {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.fd-h3 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.fd-h4 {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.fd-body {
+  font-family: var(--fd-font-body);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+.fd-small {
+  font-family: var(--fd-font-body);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.fd-mono,
+code,
+kbd,
+.font-mono {
+  font-family: var(--fd-font-mono) !important;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* === App Shell Geometry (Mobile-First + Desktop Rail) === */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.dls-main,
+.dls-main-sub {
+  background: var(--fd-bg) !important;
+  padding: calc(var(--dls-topbar-height) + var(--fd-space-lg)) var(--fd-space-lg) calc(var(--dls-bottomnav-height) + var(--fd-space-3xl)) !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+.dls-stat-card-featured::after,
+.dls-stat-card::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.dls-app-shell main .dls-stat-card,
+body.dls-app-shell main .dls-stat-card-featured,
+body.dls-app-shell main .dls-welcome-hero,
+body.dls-app-shell main .dls-course-list-heading,
+body.dls-app-shell main .dls-page-banner,
+body.dls-app-shell main .course-card,
+body.dls-app-shell main .dls-card,
+body.dls-app-shell main .fd-card,
+body.dls-app-shell main .fd-card-elevated {
+  min-width: 0 !important;
+  max-width: 100%;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+}
+
+body.dls-app-shell main .dls-welcome-hero,
+body.dls-app-shell main .fd-card-elevated {
+  box-shadow: var(--fd-shadow-md) !important;
+}
+
+body.dls-app-shell main .dls-stat-card:hover,
+body.dls-app-shell main .course-card:hover {
+  border-color: transparent !important;
+  box-shadow: var(--fd-shadow-md) !important;
+}
+
+.course-card-cover,
+.fd-list-thumb {
+  overflow: hidden !important;
+}
+
+.course-card-cover .material-symbols-outlined,
+.dls-course-hero-fallback .material-symbols-outlined {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.dls-main-sub {
+  padding-top: var(--fd-space-lg) !important;
+}
+
+body.dls-fullscreen-quiz main.dls-quiz-main {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: var(--fd-space-xl) var(--fd-space-lg) 96px !important;
+}
+
+@media (min-width: 1024px) {
+  .dls-main,
+  .dls-main-sub {
+    margin-left: 248px !important;
+    width: calc(100% - 248px) !important;
+    padding: calc(var(--dls-topbar-height) + var(--fd-space-xl)) var(--fd-space-xl) var(--fd-space-3xl) !important;
+  }
+
+  .dls-main-sub {
+    padding-top: var(--fd-space-xl) !important;
+  }
+
+  body.dls-fullscreen-quiz main.dls-quiz-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: var(--fd-space-2xl) var(--fd-space-xl) 96px !important;
+  }
+
+  body.dls-sidebar-collapsed .dls-main,
+  body.dls-sidebar-collapsed .dls-main-sub {
+    margin-left: 78px !important;
+    width: calc(100% - 78px) !important;
+  }
+}
+
+.dls-content-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* === FoodDash Header (#topAppBar) === */
+#topAppBar.dls-topbar,
+#topAppBar.dls-app-header,
+.dls-topbar {
+  background: var(--fd-surface) !important;
+  border-bottom: 1px solid var(--fd-divider) !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+  height: var(--dls-topbar-height);
+}
+
+#topAppBar .dls-header-title {
+  font-family: var(--fd-font-display) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  color: var(--fd-text-primary) !important;
+}
+
+@media (max-width: 1023px) {
+  #topAppBar .dls-app-header-inner:has(.dls-mobile-brand) .dls-header-title-group {
+    display: none !important;
+  }
+}
+
+#topAppBar .dls-desktop-sidebar-toggle,
+#topAppBar .dls-header-back {
+  background: var(--fd-surface-muted) !important;
+  color: var(--fd-text-primary) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+#topAppBar .dls-desktop-sidebar-toggle:hover,
+#topAppBar .dls-header-back:hover {
+  background: var(--fd-primary-soft) !important;
+  color: var(--fd-primary) !important;
+}
+
+#topAppBar .dls-header-teacher-mode {
+  background: var(--fd-primary-soft) !important;
+  color: var(--fd-primary) !important;
+  border: 1.5px solid var(--fd-primary) !important;
+  border-radius: var(--fd-radius-pill) !important;
+  font-weight: 600 !important;
+}
+
+#topAppBar .dls-notification-count {
+  background-color: var(--fd-primary) !important;
+  color: #FFFFFF !important;
+  font-family: var(--fd-font-mono) !important;
+}
+
+#topAppBar a,
+#topAppBar button {
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.dls-header-notifications {
+  background: var(--fd-surface-muted) !important;
+  color: var(--fd-text-primary) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+.dls-header-notifications:hover {
+  background: var(--fd-primary-soft) !important;
+  color: var(--fd-primary) !important;
+}
+
+/* === FoodDash Sidebar (Desktop) & Bottom Sheet Nav (Mobile) === */
+#bottomNavBar,
+#bottomNavBar.dls-bottomnav,
+body.dls-app-shell #bottomNavBar.dls-bottomnav {
+  background: var(--fd-surface) !important;
+  background-color: #FFFFFF !important;
+  border-top: none !important;
+  border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0 !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.10) !important;
+}
+
+@media (min-width: 1024px) {
+  #bottomNavBar,
+  #bottomNavBar.dls-bottomnav,
+  body.dls-app-shell #bottomNavBar.dls-bottomnav {
+    width: 248px !important;
+    border-radius: 0 !important;
+    border-right: 1px solid var(--fd-divider) !important;
+    box-shadow: var(--fd-shadow-sm) !important;
+    background: var(--fd-surface) !important;
+    background-color: #FFFFFF !important;
+  }
+
+  body.dls-sidebar-collapsed #bottomNavBar.dls-bottomnav {
+    width: 78px !important;
+  }
+}
+
+.dls-nav-item {
+  border-radius: var(--fd-radius-md) !important;
+  color: var(--fd-text-secondary) !important;
+  font-family: var(--fd-font-body) !important;
+  font-weight: 500 !important;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+
+.dls-nav-item:hover {
+  background: var(--fd-surface-hover) !important;
+  color: var(--fd-text-primary) !important;
+}
+
+.dls-nav-item.is-active,
+.dls-nav-item.text-primary {
+  background: var(--fd-primary-soft) !important;
+  color: var(--fd-primary) !important;
+  font-weight: 700 !important;
+}
+
+@media (min-width: 1024px) {
+  .dls-nav-item.is-active,
+  .dls-nav-item.text-primary {
+    box-shadow: inset 3px 0 0 var(--fd-primary);
+  }
+}
+
+/* === FoodDash Cards (Borderless, White, Sm/Md Material Shadows, 12px Radius) === */
+.fd-card,
+.dls-card,
+.course-card,
+.crs-surface-card,
+.dls-stat-card,
+.dls-course-summary,
+.dls-page-banner {
+  background-color: var(--fd-surface) !important;
+  color: var(--fd-text-primary) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.fd-card-elevated {
+  background-color: var(--fd-surface) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-md) !important;
+}
+
+.course-card:hover,
+.fd-card-interactive:hover {
+  box-shadow: var(--fd-shadow-md) !important;
+  transform: translateY(-2px);
+}
+
+.course-card:active,
+.fd-card-interactive:active {
+  box-shadow: var(--fd-shadow-lg) !important;
+  transform: translateY(0);
+}
+
+.fd-card-cover,
+.course-card-cover {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 12px 12px 0 0 !important;
+  overflow: hidden;
+  position: relative;
+  background-color: #171717;
+  background-image:
+    radial-gradient(circle at 82% 20%, rgba(220, 38, 38, 0.24), transparent 55%),
+    radial-gradient(circle at 18% 85%, rgba(234, 88, 12, 0.14), transparent 50%),
+    linear-gradient(135deg, #262626 0%, #171717 100%);
+}
+
+.fd-cover-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #171717;
+  background-image:
+    radial-gradient(circle at 82% 20%, rgba(220, 38, 38, 0.24), transparent 55%),
+    radial-gradient(circle at 18% 85%, rgba(234, 88, 12, 0.14), transparent 50%),
+    linear-gradient(135deg, #262626 0%, #171717 100%);
+}
+
+.fd-cover-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* === FoodDash Buttons (Pill Primary CTAs + Tactile Shadows) === */
+.fd-btn,
+.dls-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fd-space-sm);
+  font-family: var(--fd-font-body);
+  font-weight: 600;
+  border-radius: var(--fd-radius-pill);
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+  text-decoration: none;
+  border: none;
+}
+
+.fd-btn:active:not(:disabled),
+.dls-btn:active:not(:disabled) {
+  box-shadow: var(--fd-shadow-md);
+  transform: scale(0.985);
+}
+
+.fd-btn:disabled,
+.dls-btn:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.fd-btn-sm { padding: 6px 14px; font-size: 12px; line-height: 18px; min-height: 32px; }
+.fd-btn-md { padding: 8px 20px; font-size: 14px; line-height: 20px; min-height: 42px; }
+.fd-btn-lg { padding: 12px 28px; font-size: 16px; line-height: 22px; min-height: 50px; }
+
+.fd-btn-primary,
+.dls-btn-primary,
+.dls-btn--primary {
+  background-color: var(--fd-primary) !important;
+  color: var(--fd-text-inverse) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+  box-shadow: var(--fd-shadow-sm);
+}
+
+.fd-btn-primary:hover:not(:disabled),
+.dls-btn-primary:hover:not(:disabled),
+.dls-btn--primary:hover:not(:disabled) {
+  background-color: var(--fd-primary-hover) !important;
+  box-shadow: var(--fd-shadow-md);
+}
+
+.fd-btn-secondary,
+.dls-btn-secondary,
+.dls-btn--outline {
+  background-color: transparent !important;
+  color: var(--fd-primary) !important;
+  border: 1.5px solid var(--fd-primary) !important;
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+.fd-btn-secondary:hover:not(:disabled),
+.dls-btn-secondary:hover:not(:disabled),
+.dls-btn--outline:hover:not(:disabled) {
+  background-color: var(--fd-primary-soft) !important;
+}
+
+.fd-btn-ghost,
+.dls-btn-ghost {
+  background-color: transparent !important;
+  color: var(--fd-text-secondary) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+.fd-btn-ghost:hover:not(:disabled),
+.dls-btn-ghost:hover:not(:disabled) {
+  background-color: var(--fd-surface-muted) !important;
+  color: var(--fd-text-primary) !important;
+}
+
+.fd-btn-destructive,
+.dls-btn-danger {
+  background-color: #171717 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+.fd-btn-destructive:hover:not(:disabled),
+.dls-btn-danger:hover:not(:disabled) {
+  background-color: #404040 !important;
+}
+
+/* === FoodDash Inputs (42px, 12px Radius, #E5E5E5 -> #DC2626 + Focus Ring) === */
+.fd-input,
+.fd-select,
+.fd-textarea,
+.dls-input,
+.dls-select,
+.dls-textarea,
+#pageSizeSelect {
+  background-color: var(--fd-surface) !important;
+  color: var(--fd-text-primary) !important;
+  border: 1px solid var(--fd-border) !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+  min-height: 42px;
+  padding: 10px 14px;
+  font-family: var(--fd-font-body) !important;
+  font-size: 14px;
+  line-height: 20px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+/* Preserve utility spacing when an .fd-input includes leading or trailing icons */
+.fd-input.pl-10,
+.dls-input.pl-10 {
+  padding-left: 40px !important;
+}
+
+.fd-input.pl-11,
+.dls-input.pl-11 {
+  padding-left: 44px !important;
+}
+
+.fd-input.pl-12,
+.dls-input.pl-12 {
+  padding-left: 48px !important;
+}
+
+.fd-input.pr-10,
+.dls-input.pr-10 {
+  padding-right: 40px !important;
+}
+
+.fd-input.pr-11,
+.dls-input.pr-11 {
+  padding-right: 44px !important;
+}
+
+.fd-input.pr-12,
+.dls-input.pr-12 {
+  padding-right: 48px !important;
+}
+
+.fd-search-input,
+#dashboardCourseSearch,
+#searchInput,
+#notificationSearch,
+#courseSearch,
+#courseMaterialSearch,
+#faqSearch {
+  border-radius: var(--fd-radius-pill) !important;
+  padding: 10px 16px 10px 44px !important;
+}
+
+#studentMenuSearch {
+  border-radius: var(--fd-radius-pill) !important;
+  padding: 8px 14px 8px 36px !important;
+}
+
+.fd-textarea,
+.dls-textarea {
+  min-height: 108px;
+}
+
+.fd-input:hover:not(:disabled),
+.fd-select:hover:not(:disabled),
+.fd-textarea:hover:not(:disabled),
+.dls-input:hover:not(:disabled),
+.dls-select:hover:not(:disabled),
+.dls-textarea:hover:not(:disabled) {
+  border-color: var(--fd-border-hover) !important;
+}
+
+.fd-input:focus,
+.fd-select:focus,
+.fd-textarea:focus,
+.dls-input:focus,
+.dls-select:focus,
+.dls-textarea:focus {
+  border-color: var(--fd-primary) !important;
+  background-color: var(--fd-surface) !important;
+  box-shadow: var(--fd-shadow-focus) !important;
+  outline: none !important;
+}
+
+.fd-input.is-error,
+.fd-input[aria-invalid="true"] {
+  border-color: var(--fd-error) !important;
+  background-color: var(--fd-primary-soft) !important;
+  box-shadow: none !important;
+}
+
+.fd-input:disabled,
+.fd-select:disabled,
+.fd-textarea:disabled {
+  border-color: var(--fd-border) !important;
+  background-color: var(--fd-surface-hover) !important;
+  box-shadow: none !important;
+}
+
+.fd-search-input,
+#dashboardCourseSearch,
+#searchInput,
+#notificationSearch,
+#studentMenuSearch {
+  border-radius: var(--fd-radius-pill) !important;
+}
+
+.fd-label {
+  display: block;
+  font-family: var(--fd-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fd-text-primary);
+  margin-bottom: 4px;
+}
+
+.fd-helper {
+  font-family: var(--fd-font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--fd-text-tertiary);
+  margin-top: 4px;
+}
+
+/* === FoodDash Chips (Filter Chips + Semantic Status Chips) === */
+.fd-filter-chip,
+.filter-chip,
+.notification-filter {
+  background-color: var(--fd-surface-muted) !important;
+  color: var(--fd-text-primary) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+  font-family: var(--fd-font-body) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 7px 14px !important;
+  box-shadow: none !important;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+
+.fd-filter-chip:hover,
+.filter-chip:hover,
+.notification-filter:hover {
+  background-color: #EAEAEA !important;
+}
+
+.fd-filter-chip.is-active,
+.filter-chip.bg-primary,
+.filter-chip.is-active,
+.notification-filter.bg-primary,
+.notification-filter[aria-selected="true"] {
+  background-color: var(--fd-primary) !important;
+  color: var(--fd-text-inverse) !important;
+  font-weight: 600 !important;
+}
+
+.fd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+  font-family: var(--fd-font-body);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.fd-chip-success { background-color: var(--fd-success-bg) !important; color: var(--fd-success) !important; }
+.fd-chip-warning { background-color: var(--fd-warning-bg) !important; color: var(--fd-warning) !important; }
+.fd-chip-error   { background-color: var(--fd-error-bg) !important;   color: var(--fd-error) !important; }
+.fd-chip-info    { background-color: var(--fd-info-bg) !important;    color: var(--fd-info) !important; }
+.fd-chip-promo   { background-color: var(--fd-secondary) !important;  color: #FFFFFF !important; border-radius: var(--fd-radius-sm) !important; }
+.fd-chip-neutral { background-color: var(--fd-surface-muted) !important; color: var(--fd-text-secondary) !important; }
+
+/* === FoodDash 64px List Rows === */
+.fd-list {
+  background: var(--fd-surface);
+  border-radius: var(--fd-radius-md);
+  box-shadow: var(--fd-shadow-sm);
+  overflow: hidden;
+}
+
+.fd-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-md);
+  min-height: 64px;
+  padding: 12px 18px !important;
+  background-color: var(--fd-surface) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--fd-divider) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--fd-font-body);
+  font-size: 14px;
+  transition: background-color 150ms ease;
+}
+
+.course-session-card {
+  display: block;
+  background-color: var(--fd-surface) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+  padding: 18px !important;
+}
+
+.fd-list-row:last-child {
+  border-bottom: none !important;
+}
+
+.fd-list-row:hover {
+  background-color: var(--fd-surface-hover) !important;
+}
+
+.fd-list-row.is-selected {
+  background-color: var(--fd-primary-soft) !important;
+  border-left: 3px solid var(--fd-primary) !important;
+}
+
+/* FoodDash Quiz Radio Peer States */
+input.peer:checked + div {
+  background-color: var(--fd-primary-soft) !important;
+  border-color: var(--fd-primary) !important;
+}
+
+input.peer:checked + div .radio-outer {
+  border-color: var(--fd-primary) !important;
+}
+
+input.peer:checked + div .radio-inner {
+  transform: scale(1) !important;
+  background-color: var(--fd-primary) !important;
+}
+
+input.radio-correct:checked + div {
+  background-color: var(--fd-success-bg) !important;
+  border-color: var(--fd-success) !important;
+}
+
+input.radio-wrong:checked + div {
+  background-color: var(--fd-error-bg) !important;
+  border-color: var(--fd-error) !important;
+}
+
+.fd-list-thumb {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--fd-surface-muted);
+  color: var(--fd-text-secondary);
+}
+
+/* === FoodDash Checkboxes (20px square, 6px radius) & Radios (20px circle, 12px dot) === */
+.fd-checkbox,
+input[type="checkbox"].fd-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--fd-border-control);
+  background-color: #FFFFFF;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.fd-checkbox::before,
+input[type="checkbox"].fd-checkbox::before {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2.2px solid #FFFFFF;
+  border-bottom: 2.2px solid #FFFFFF;
+  transform: rotate(-45deg) scale(0);
+  margin-top: -2px;
+  transition: transform 120ms ease;
+}
+
+.fd-checkbox:checked,
+input[type="checkbox"].fd-checkbox:checked {
+  background-color: var(--fd-primary);
+  border-color: var(--fd-primary);
+}
+
+.fd-checkbox:checked::before,
+input[type="checkbox"].fd-checkbox:checked::before {
+  transform: rotate(-45deg) scale(1);
+}
+
+.fd-checkbox:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fd-radio,
+input[type="radio"].fd-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 9999px;
+  border: 2px solid var(--fd-border-control);
+  background-color: #FFFFFF;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.fd-radio::before,
+input[type="radio"].fd-radio::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background-color: var(--fd-primary);
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+
+.fd-radio:checked,
+input[type="radio"].fd-radio:checked {
+  border-color: var(--fd-primary);
+}
+
+.fd-radio:checked::before,
+input[type="radio"].fd-radio:checked::before {
+  transform: scale(1);
+}
+
+.fd-radio:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === FoodDash Tooltips === */
+.fd-tooltip {
+  background-color: #171717;
+  color: #FFFFFF;
+  font-family: var(--fd-font-body);
+  font-size: 12px;
+  line-height: 16px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: var(--fd-shadow-md);
+  max-width: 200px;
+}
+
+/* === Course Detail Hero & Tabs === */
+body.dls-app-shell main .dls-course-hero,
+main .dls-course-hero {
+  background: linear-gradient(135deg, #171717 0%, #262626 100%) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-md) !important;
+  box-shadow: var(--fd-shadow-md) !important;
+  color: #FFFFFF !important;
+  height: clamp(240px, 24vw, 320px) !important;
+  min-height: 240px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+body.dls-app-shell main .dls-course-hero-fallback,
+main .dls-course-hero-fallback {
+  background: linear-gradient(135deg, #171717 0%, #262626 100%) !important;
+  z-index: 0 !important;
+}
+
+body.dls-app-shell main .dls-course-hero-fallback .material-symbols-outlined,
+main .dls-course-hero-fallback .material-symbols-outlined {
+  position: absolute !important;
+  top: 16% !important;
+  right: 6% !important;
+  width: auto !important;
+  height: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.14) !important;
+  font-size: clamp(96px, 11vw, 150px) !important;
+  pointer-events: none;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+body.dls-app-shell main .dls-course-hero-overlay,
+main .dls-course-hero-overlay {
+  background: linear-gradient(180deg, rgba(23, 23, 23, 0.20) 0%, rgba(23, 23, 23, 0.88) 100%) !important;
+  z-index: 1 !important;
+}
+
+body.dls-app-shell main .dls-course-hero > div:last-child,
+main .dls-course-hero > div:last-child {
+  z-index: 2 !important;
+  padding: clamp(20px, 3vw, 36px) !important;
+}
+
+body.dls-app-shell main .fd-on-dark :is(h1, h2, h3, h4, .fd-h1, .fd-h2, .fd-h3, .fd-h4) {
+  color: #FFFFFF !important;
+}
+
+body.dls-app-shell main .dls-course-hero h1,
+body.dls-app-shell main .dls-course-hero h2,
+body.dls-app-shell main .dls-course-hero h3,
+body.dls-app-shell main .dls-course-hero p,
+body.dls-app-shell main .dls-course-hero span:not(.fd-chip):not(.fd-chip *),
+main .dls-course-hero h1,
+main .dls-course-hero h2,
+main .dls-course-hero h3,
+main .dls-course-hero p,
+main .dls-course-hero span:not(.fd-chip):not(.fd-chip *) {
+  color: #FFFFFF !important;
+}
+
+body.dls-app-shell main .dls-course-hero h2,
+main .dls-course-hero h2 {
+  font-family: var(--fd-font-display) !important;
+  font-size: clamp(24px, 3vw, 34px) !important;
+  line-height: 1.18 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dls-app-shell main .dls-course-hero > div:last-child > div > div:last-child {
+  border: none !important;
+  height: 8px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+body.dls-app-shell main .dls-course-hero > div:last-child > div > div:last-child > div {
+  background: #DC2626 !important;
+  box-shadow: none !important;
+}
+
+body.dls-app-shell main .dls-course-tabs,
+main .dls-course-tabs {
+  background: var(--fd-surface-muted) !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+  padding: 6px !important;
+  box-shadow: none !important;
+}
+
+body.dls-app-shell main .dls-course-tabs nav,
+main .dls-course-tabs nav {
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--fd-radius-pill) !important;
+  box-shadow: none !important;
+}
+
+.dls-course-tab {
+  border-radius: var(--fd-radius-pill) !important;
+  color: var(--fd-text-secondary) !important;
+  font-weight: 500 !important;
+  border: none !important;
+}
+
+.dls-course-tab.is-active,
+body.dls-app-shell main .dls-course-tabs .dls-course-tab.is-active {
+  background: var(--fd-primary) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--fd-shadow-sm) !important;
+}
+
+.dls-grade-table {
+  border: none !important;
+}
+
+.dls-grade-table thead th {
+  background-color: var(--fd-surface-hover) !important;
+  color: var(--fd-text-secondary) !important;
+  border-bottom: 1px solid var(--fd-divider) !important;
+  font-family: var(--fd-font-body);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dls-grade-table tbody td {
+  border-bottom: 1px solid var(--fd-divider) !important;
+  background-color: var(--fd-surface) !important;
+  padding: 14px 18px !important;
+}
+
+.dls-grade-table tbody tr:hover td {
+  background-color: var(--fd-surface-hover) !important;
+}
+
+/* === Persistent Floating One-Thumb Quick Action === */
+.fd-sticky-bottom-bar {
+  position: sticky;
+  bottom: calc(var(--dls-bottomnav-height) + 12px);
+  z-index: 35;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-radius: var(--fd-radius-lg);
+  box-shadow: var(--fd-shadow-lg);
+  padding: 12px 18px;
+}
+
+@media (min-width: 1024px) {
+  .fd-sticky-bottom-bar {
+    bottom: 18px;
+  }
+}
+
+.fd-floating-cta {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--dls-bottomnav-height) + 14px);
+  z-index: 38;
+  box-shadow: var(--fd-shadow-lg) !important;
+}
+
+@media (min-width: 1024px) {
+  .fd-floating-cta {
+    display: none !important;
+  }
+}
+
+/* === Dark Mode Coherence === */
+html.dark body,
+html.dark .dls-main,
+html.dark .dls-main-sub,
+html.dls-dark body,
+html.dls-dark .dls-main,
+html.dls-dark .dls-main-sub {
+  background-color: #111111 !important;
+  color: #F5F5F5 !important;
+}
+
+html.dark body.dls-app-shell main :is(.fd-card, .fd-card-elevated, .dls-card, .course-card, .dls-stat-card, .dls-stat-card-featured, .dls-welcome-hero, .dls-course-list-heading, .dls-course-summary, .dls-page-banner, .fd-list, .fd-list-row, .course-session-card, .fd-sticky-bottom-bar),
+html.dark #topAppBar.dls-topbar,
+html.dark #bottomNavBar.dls-bottomnav,
+html.dls-dark .fd-card,
+html.dls-dark .fd-card-elevated,
+html.dls-dark .dls-card,
+html.dls-dark .course-card,
+html.dls-dark #topAppBar.dls-topbar,
+html.dls-dark #bottomNavBar.dls-bottomnav,
+html.dls-dark .dls-stat-card,
+html.dls-dark .dls-course-hero,
+html.dls-dark .dls-course-summary,
+html.dls-dark .dls-page-banner,
+html.dls-dark .fd-list,
+html.dls-dark .fd-list-row,
+html.dls-dark .course-session-card,
+html.dls-dark .fd-sticky-bottom-bar {
+  background-color: #1C1C1E !important;
+  color: #F5F5F5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .fd-h1,
+html.dark .fd-h2,
+html.dark .fd-h3,
+html.dark .fd-h4,
+html.dark body.dls-app-shell main :is(h1, h2, h3, h4),
+html.dls-dark .fd-h1,
+html.dls-dark .fd-h2,
+html.dls-dark .fd-h3,
+html.dls-dark .fd-h4,
+html.dls-dark h1,
+html.dls-dark h2,
+html.dls-dark h3 {
+  color: #F5F5F5 !important;
+}
+
+html.dark .fd-input,
+html.dark .fd-select,
+html.dark .fd-textarea,
+html.dark .dls-input,
+html.dark .dls-select,
+html.dark .dls-textarea,
+html.dls-dark .fd-input,
+html.dls-dark .fd-select,
+html.dls-dark .fd-textarea,
+html.dls-dark .dls-input,
+html.dls-dark .dls-select,
+html.dls-dark .dls-textarea {
+  background-color: #262626 !important;
+  border-color: #404040 !important;
+  color: #F5F5F5 !important;
+}
+
+html.dark .fd-filter-chip,
+html.dark .filter-chip,
+html.dls-dark .fd-filter-chip,
+html.dls-dark .filter-chip {
+  background-color: #262626 !important;
+  color: #E5E5E5 !important;
+}
+
+html.dark .fd-filter-chip.is-active,
+html.dark .filter-chip.bg-primary,
+html.dls-dark .fd-filter-chip.is-active,
+html.dls-dark .filter-chip.bg-primary {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+/* ============================================================
+   DARK MODE COMPREHENSIVE FIX: Surfaces, Borders, Text & Hover
+   ============================================================ */
+html.dark {
+  --fd-bg: #0f172a;
+  --fd-surface: #1e293b;
+  --fd-surface-hover: #334155;
+  --fd-surface-muted: #1e293b;
+  --fd-text-primary: #f8fafc;
+  --fd-text-secondary: #cbd5e1;
+  --fd-text-tertiary: #94a3b8;
+  --fd-border: #334155;
+  --fd-border-hover: #475569;
+  --fd-border-control: #475569;
+  --fd-divider: #334155;
+  --dls-surface: #1e293b;
+  --dls-surface-container-lowest: #0f172a;
+  --dls-surface-container-low: #1e293b;
+  --dls-surface-container: #334155;
+  --dls-on-surface: #f8fafc;
+  --dls-on-surface-variant: #cbd5e1;
+}
+
+/* Hardcoded hex color overrides when html.dark is present */
+html.dark .text-\[\#171717\],
+html.dark [class*="text-[#171717]"] {
+  color: #f8fafc !important;
+}
+
+html.dark .text-\[\#525252\],
+html.dark [class*="text-[#525252]"] {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-\[\#737373\],
+html.dark [class*="text-[#737373]"] {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-\[\#262626\],
+html.dark [class*="text-[#262626]"] {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-\[\#404040\],
+html.dark [class*="text-[#404040]"] {
+  color: #e2e8f0 !important;
+}
+
+/* Hardcoded white backgrounds in cards / lists / rows */
+html.dark .bg-white,
+html.dark [class*="bg-white"] {
+  background-color: #1e293b !important;
+}
+
+html.dark .bg-\[\#fcfcfc\],
+html.dark .bg-\[\#fafafa\],
+html.dark .bg-\[\#f8fafc\],
+html.dark [class*="bg-[#fcfcfc]"],
+html.dark [class*="bg-[#fafafa]"] {
+  background-color: #0f172a !important;
+}
+
+/* List rows & hover */
+html.dark .fd-list-row {
+  background-color: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .fd-list-row:hover {
+  background-color: #334155 !important;
+}
+
+/* Badges and soft icon containers in dark mode */
+html.dark .bg-\[\#F5F5F5\],
+html.dark [class*="bg-[#F5F5F5]"] {
+  background-color: #334155 !important;
+}
+
+html.dark .bg-\[\#FEF2F2\],
+html.dark [class*="bg-[#FEF2F2]"] {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+}
+
+html.dark .bg-\[\#DCFCE7\],
+html.dark [class*="bg-[#DCFCE7]"] {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+}
+
+html.dark .bg-\[\#DBEAFE\],
+html.dark [class*="bg-[#DBEAFE]"] {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+html.dark .bg-\[\#FFF7ED\],
+html.dark [class*="bg-[#FFF7ED]"] {
+  background-color: rgba(234, 88, 12, 0.2) !important;
+}
+
+html.dark .bg-\[\#FEE2E2\],
+html.dark [class*="bg-[#FEE2E2]"] {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+html.dark .bg-\[\#e8f5e9\],
+html.dark [class*="bg-[#e8f5e9]"] {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+}
+
+/* SweetAlert popup dark mode */
+html.dark .swal2-popup {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+html.dark .swal2-title,
+html.dark .swal2-html-container {
+  color: #f8fafc !important;
+}
+

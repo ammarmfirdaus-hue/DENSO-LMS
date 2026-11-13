@@ -2,12 +2,12 @@ const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { getQuizStore } = require('../services/quiz-store');
 const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+router.use(authenticate);
 
 const courseCodeSchema = z.string().trim().min(2).max(30).regex(/^[A-Za-z0-9._-]+$/);
 const questionSchema = z.object({
@@ -38,18 +38,18 @@ async function accessibleCourse(courseCode, user) {
   const result = await pool.request()
     .input('code', sql.VarChar(30), courseCode)
     .input('npk', sql.VarChar(50), user.sub)
-    .input('isAdmin', sql.Bit, user.role === 'admin')
+    .input('isAdmin', sql.Bit, user.role !== 'teacher')
     .query(`SELECT course_id,course_code,title FROM dbo.courses
       WHERE course_code=@code AND status='active'
         AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)`);
   return result.recordset[0] || null;
 }
 
-router.get('/', async (req, res, next) => {
+router.get('/', requirePermission('quizzes.view'), async (req, res, next) => {
   try {
     const result = await pool.request()
       .input('npk', sql.VarChar(50), req.user.sub)
-      .input('isAdmin', sql.Bit, req.user.role === 'admin')
+      .input('isAdmin', sql.Bit, req.user.role !== 'teacher')
       .query(`SELECT course_code,title FROM dbo.courses
         WHERE status='active' AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)
         ORDER BY title`);
@@ -82,7 +82,7 @@ router.get('/', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/:courseCode', async (req, res, next) => {
+router.get('/:courseCode', requirePermission('quizzes.view'), async (req, res, next) => {
   const parsedCode = courseCodeSchema.safeParse(req.params.courseCode);
   if (!parsedCode.success) return res.status(400).json({ error: { code: 'INVALID_COURSE', message: 'Kode course tidak valid.' } });
   try {
@@ -152,10 +152,10 @@ async function saveQuiz(req, res, next) {
   } catch (error) { next(error); }
 }
 
-router.post('/:courseCode', trustedWriteOrigin, saveQuiz);
-router.put('/:courseCode', trustedWriteOrigin, saveQuiz);
+router.post('/:courseCode', requirePermission('quizzes.manage'), trustedWriteOrigin, saveQuiz);
+router.put('/:courseCode', requirePermission('quizzes.manage'), trustedWriteOrigin, saveQuiz);
 
-router.delete('/:courseCode', trustedWriteOrigin, async (req, res, next) => {
+router.delete('/:courseCode', requirePermission('quizzes.manage'), trustedWriteOrigin, async (req, res, next) => {
   const parsedCode = courseCodeSchema.safeParse(req.params.courseCode);
   if (!parsedCode.success) return res.status(400).json({ error: { code: 'INVALID_COURSE', message: 'Kode course tidak valid.' } });
   try {

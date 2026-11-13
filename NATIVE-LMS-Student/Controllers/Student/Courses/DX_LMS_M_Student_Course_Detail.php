@@ -54,7 +54,7 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
                             trim($requestNote),
                             $requesterRole,
                         );
-                        header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['id']), true, 303);
+                        header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['id']) . '&requested=1', true, 303);
                         exit();
                     } catch (PDOException $error) {
                         error_log('Student course access request failed: ' . $error->getMessage());

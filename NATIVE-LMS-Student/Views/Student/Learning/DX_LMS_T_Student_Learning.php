@@ -152,7 +152,7 @@ $isVideoEmbed = $materialType === 'video'
     </style>
 </head>
 
-<body class="dls-app-shell bg-slate-50 text-slate-800 antialiased h-screen flex flex-col pt-safe overflow-hidden">
+<body class="dls-app-shell bg-[#FAFAFA] text-[#171717] antialiased h-screen flex flex-col pt-safe overflow-hidden">
     <!-- TopAppBar Shared Component -->
     <?php
     $header_title = (string) $material['title'];
@@ -173,21 +173,21 @@ $isVideoEmbed = $materialType === 'video'
     ?>
 
     <!-- Progress Indicator (Di bawah header standar) -->
-    <div class="fixed top-14 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] bg-slate-100 h-1 z-30 transition-all duration-300">
+    <div id="learningProgressBar" class="dls-learning-progress-track fixed top-14 left-0 w-full lg:left-[240px] lg:w-[calc(100%-240px)] bg-[#F5F5F5] dark:bg-slate-800 h-1.5 z-30 transition-all duration-300">
         <?php $progressPercent = !empty($isLiveCourse)
             ? max(0, min(100, (int) ($course['progress'] ?? 0)))
             : ((($displayMaterialIndex ?? ($materialIndex + 1)) / max(1, ($totalCourseMaterials ?? $totalMaterials))) * 100); ?>
-        <div class="bg-primary h-full transition-all duration-500 ease-out" style="width: <?= $progressPercent ?>%;"></div>
+        <div class="bg-[#DC2626] h-full rounded-r-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(220,38,38,0.5)]" style="width: <?= $progressPercent ?>%;"></div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 w-full lg:w-[calc(100%-240px)] lg:ml-[240px] mt-[60px] mb-[72px] sm:mb-[80px] bg-slate-50 overflow-y-auto content-scroll relative flex flex-col items-center transition-all duration-300">
+    <main class="dls-main flex-1 w-full bg-[#FAFAFA] dark:bg-slate-900 overflow-y-auto content-scroll relative flex flex-col items-center transition-all duration-300 pt-[68px] pb-[88px]">
         <div class="w-full xl:max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col fade-in pb-10">
-            <?php if (!empty($completionError)): ?><p role="alert" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><?= e($completionError) ?></p><?php endif; ?>
-            <?php if (($_GET['completed'] ?? '') === '1'): ?><p role="status" class="mt-4 rounded-xl border border-outline/50 bg-white p-3 text-sm text-on-surface"><span class="material-symbols-outlined mr-1 align-middle text-primary">check_circle</span>Materi ditandai selesai. Lanjutkan ke materi berikutnya.</p><?php endif; ?>
+            <?php if (!empty($completionError)): ?><p role="alert" class="mt-[18px] rounded-[12px] bg-[#FEE2E2] p-[14px] text-[14px] font-medium text-[#B91C1C]"><?= e($completionError) ?></p><?php endif; ?>
+            <?php if (($_GET['completed'] ?? '') === '1'): ?><p role="status" class="mt-[18px] rounded-[12px] bg-[#DCFCE7] p-[14px] text-[14px] font-medium text-[#15803D]"><span class="material-symbols-outlined mr-1.5 align-middle text-[#16A34A]">check_circle</span>Materi ditandai selesai. Lanjutkan ke materi berikutnya.</p><?php endif; ?>
             <?php if ($materialType === 'video'): ?>
             <!-- Video Container -->
-            <div class="w-full aspect-video bg-slate-900 sm:rounded-b-2xl shadow-xl overflow-hidden">
+            <div class="w-full aspect-video bg-[#171717] sm:rounded-[12px] sm:mt-[18px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] overflow-hidden">
                 <?php if ($materialUrl !== '' && $isVideoEmbed): ?>
                 <iframe src="<?= e($materialUrl) ?>" title="<?= e($material['title']) ?>" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
                 <?php elseif ($materialUrl !== ''): ?>
@@ -196,39 +196,33 @@ $isVideoEmbed = $materialType === 'video'
                     Browser Anda tidak mendukung pemutar video. <a href="<?= e($materialUrl) ?>">Buka video</a>.
                 </video>
                 <?php else: ?>
-                <div class="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center text-white">
-                    <span class="material-symbols-outlined text-5xl">video_file</span>
-                    <p>File video belum ditambahkan pada materi ini.</p>
+                <div class="fd-cover-fallback flex-col gap-3 p-6 text-center text-white">
+                    <span class="fd-cover-icon-badge"><span class="material-symbols-outlined text-[32px]">video_file</span></span>
+                    <p class="text-white/85">File video belum ditambahkan pada materi ini.</p>
                 </div>
                 <?php endif; ?>
             </div>
 
-            <div class="p-5 sm:p-10 flex-1 w-full mx-auto bg-white sm:mt-6 sm:rounded-2xl border border-slate-100 shadow-sm">
-                <div class="flex items-center gap-3 mb-5">
-                    <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-semibold text-xs flex items-center gap-1.5 border border-indigo-100/50">
-                        <span class="material-symbols-outlined text-[16px]">smart_display</span> Video Pembelajaran
+            <div class="fd-card-elevated p-[18px] sm:p-[32px] flex-1 w-full mx-auto bg-white sm:mt-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                <div class="flex flex-wrap items-center gap-[10px] mb-[16px]">
+                    <span class="fd-chip fd-chip-promo">
+                        <span class="material-symbols-outlined text-[15px]">smart_display</span> Video Pembelajaran
                     </span>
-                    <span class="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg font-medium text-xs flex items-center gap-1.5 border border-slate-200">
-                        <span class="material-symbols-outlined text-[16px]">schedule</span> <?= e(
-                            $material['duration'],
-                        ) ?>
+                    <span class="fd-chip bg-[#F5F5F5] text-[#171717] font-semibold">
+                        <span class="material-symbols-outlined text-[15px] text-[#EA580C]">schedule</span> <span class="fd-mono"><?= e($material['duration']) ?></span>
                     </span>
                 </div>
 
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-6 tracking-tight leading-tight"><?= e(
-                    $material['title'],
-                ) ?></h2>
+                <h2 class="fd-h1 text-[24px] sm:text-[28px] text-[#171717] mb-[18px] leading-tight"><?= e($material['title']) ?></h2>
 
-                <div class="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed font-body-md border-t border-slate-100 pt-6 !text-justify">
-                    <p class="text-[17px] text-slate-700">Simak video pembelajaran berikut untuk memahami materi <strong><?= e(
-                        $material['title'],
-                    ) ?></strong> secara visual. Pastikan Anda memperhatikan setiap detail agar materi dapat dipahami dengan baik.</p>
+                <div class="space-y-[18px] text-[#525252] leading-[24px] fd-body border-t border-[#F5F5F5] pt-[18px]">
+                    <p class="text-[16px] text-[#171717]">Simak video pembelajaran berikut untuk memahami materi <strong><?= e($material['title']) ?></strong> secara visual. Pastikan Anda memperhatikan setiap detail agar materi dapat dipahami dengan baik.</p>
 
-                    <div class="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
-                        <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-amber-500">lightbulb</span> Poin Utama Pembahasan
+                    <div class="bg-[#FAFAFA] p-[18px] rounded-[12px]">
+                        <h4 class="fd-h4 text-[#171717] mb-[12px] flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#EA580C]">lightbulb</span> Poin Utama Pembahasan
                         </h4>
-                        <ul class="space-y-3 text-[15px] text-slate-600 list-disc list-inside marker:text-primary">
+                        <ul class="space-y-2.5 text-[14px] text-[#525252] list-disc list-inside marker:text-[#DC2626]">
                             <li>Pemahaman mendasar terkait fungsi dan tujuan.</li>
                             <li>Langkah-langkah operasional yang sesuai standar keselamatan perusahaan.</li>
                             <li>Bagaimana mengidentifikasi anomali mesin atau proses sejak dini.</li>
@@ -238,105 +232,103 @@ $isVideoEmbed = $materialType === 'video'
             </div>
 
             <?php elseif ($materialType === 'pdf'): ?>
-            <div class="p-6 sm:p-10 border-b border-slate-100 bg-white sm:mt-8 sm:rounded-t-2xl shadow-sm z-10 relative w-full">
-                <div class="flex items-center gap-3 mb-5">
-                    <span class="px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg font-semibold text-xs flex items-center gap-1.5 border border-rose-100/50">
-                        <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> Dokumen PDF
+            <div class="fd-card rounded-t-[12px] p-[18px] sm:p-[28px] border-b border-[#F5F5F5] bg-white sm:mt-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] w-full">
+                <div class="flex flex-wrap items-center gap-[10px] mb-[14px]">
+                    <span class="fd-chip fd-chip-error">
+                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> Dokumen PDF
                     </span>
-                    <?php if ($materialFilename !== ''): ?><span class="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg font-medium text-xs border border-slate-200 truncate max-w-[45vw]"><?= e($materialFilename) ?></span><?php endif; ?>
+                    <?php if ($materialFilename !== ''): ?><span class="fd-mono rounded-full bg-[#F5F5F5] px-3 py-1 text-[12px] font-medium text-[#525252] truncate max-w-[45vw]"><?= e($materialFilename) ?></span><?php endif; ?>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-3 tracking-tight"><?= e(
-                    $material['title'],
-                ) ?></h2>
-                <p class="font-body-md text-slate-500 text-[17px]">Silakan baca dan pelajari dokumen standar operasional di bawah ini secara saksama.</p>
+                <h2 class="fd-h1 text-[24px] sm:text-[28px] text-[#171717] mb-[8px]"><?= e($material['title']) ?></h2>
+                <p class="fd-body text-[#525252]">Silakan baca dan pelajari dokumen standar operasional di bawah ini secara saksama.</p>
             </div>
 
-            <div class="w-full bg-slate-100 p-3 sm:p-6 sm:rounded-b-2xl shadow-inner">
+            <div class="w-full bg-[#F5F5F5] p-[14px] sm:p-[24px] rounded-b-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <?php if ($materialUrl !== ''): ?>
-                <div class="flex justify-end gap-2 mb-3">
-                    <a href="<?= e($materialUrl) ?>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
-                        <span class="material-symbols-outlined text-[18px]">open_in_new</span> Buka di tab baru
+                <div class="flex flex-wrap justify-end gap-[10px] mb-[12px]">
+                    <a href="<?= e($materialUrl) ?>" target="_blank" rel="noopener noreferrer" class="fd-btn fd-btn-primary fd-btn-sm rounded-full">
+                        <span class="material-symbols-outlined text-[16px]">open_in_new</span> Buka di tab baru
                     </a>
-                    <a href="<?= e($materialUrl) ?>" download class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                        <span class="material-symbols-outlined text-[18px]">download</span> Unduh
+                    <a href="<?= e($materialUrl) ?>" download class="fd-btn fd-btn-secondary fd-btn-sm rounded-full">
+                        <span class="material-symbols-outlined text-[16px]">download</span> Unduh
                     </a>
                 </div>
-                <iframe src="<?= e($materialUrl) ?>#toolbar=1&navpanes=0&view=FitH" title="Pratinjau PDF: <?= e($material['title']) ?>" class="w-full h-[75vh] min-h-[520px] rounded-xl border border-slate-300 bg-white" loading="lazy">
+                <iframe src="<?= e($materialUrl) ?>#toolbar=1&navpanes=0&view=FitH" title="Pratinjau PDF: <?= e($material['title']) ?>" class="w-full h-[75vh] min-h-[520px] rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]" loading="lazy">
                     Browser tidak dapat menampilkan PDF. <a href="<?= e($materialUrl) ?>">Unduh PDF</a>.
                 </iframe>
                 <?php else: ?>
-                <div class="mx-auto flex min-h-[320px] max-w-3xl flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                    <span class="material-symbols-outlined mb-3 text-5xl text-rose-500">picture_as_pdf</span>
-                    <h3 class="text-lg font-bold text-slate-800">File PDF belum tersedia</h3>
-                    <p class="mt-2 max-w-lg text-sm leading-relaxed text-slate-500">Viewer siap menampilkan PDF. Tambahkan URL file pada <code>file_path</code>, <code>file_url</code>, atau lampiran materi agar dokumen dapat dibuka di sini.</p>
-                    <?php if ($materialFilename !== ''): ?><p class="mt-3 text-sm font-medium text-slate-600">Nama lampiran: <?= e($materialFilename) ?></p><?php endif; ?>
+                <div class="mx-auto flex min-h-[300px] max-w-3xl flex-col items-center justify-center rounded-[12px] bg-white p-[32px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                    <span class="inline-flex size-14 items-center justify-center rounded-full bg-[#FEE2E2] text-[#DC2626] mb-3">
+                        <span class="material-symbols-outlined text-[28px]">picture_as_pdf</span>
+                    </span>
+                    <h3 class="fd-h3 text-[#171717]">File PDF belum tersedia</h3>
+                    <p class="mt-2 max-w-lg text-[14px] leading-relaxed text-[#525252]">Viewer siap menampilkan PDF. Tambahkan URL file pada <code>file_path</code>, <code>file_url</code>, atau lampiran materi agar dokumen dapat dibuka di sini.</p>
+                    <?php if ($materialFilename !== ''): ?><p class="fd-mono mt-3 text-[12px] font-medium text-[#737373]">Nama lampiran: <?= e($materialFilename) ?></p><?php endif; ?>
                 </div>
                 <?php endif; ?>
             </div>
 
             <?php elseif ($materialType === 'image'): ?>
-            <div class="p-6 sm:p-10 border-b border-slate-100 bg-white sm:mt-8 sm:rounded-t-2xl shadow-sm w-full">
-                <div class="flex items-center gap-3 mb-5">
-                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg font-semibold text-xs flex items-center gap-1.5 border border-emerald-100/50">
-                        <span class="material-symbols-outlined text-[16px]">image</span> Infografis / Gambar
+            <div class="fd-card rounded-t-[12px] p-[18px] sm:p-[28px] border-b border-[#F5F5F5] bg-white sm:mt-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] w-full">
+                <div class="flex items-center gap-[10px] mb-[14px]">
+                    <span class="fd-chip fd-chip-success">
+                        <span class="material-symbols-outlined text-[15px]">image</span> Infografis / Gambar
                     </span>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight leading-tight"><?= e(
-                    $material['title'],
-                ) ?></h2>
-                <p class="font-body-md text-slate-500 mt-3 text-[17px]">Perhatikan infografis berikut untuk panduan visual.</p>
+                <h2 class="fd-h1 text-[24px] sm:text-[28px] text-[#171717]"><?= e($material['title']) ?></h2>
+                <p class="fd-body text-[#525252] mt-2">Perhatikan infografis berikut untuk panduan visual.</p>
             </div>
-            <div class="w-full bg-slate-100 p-4 sm:p-8 sm:rounded-b-2xl shadow-inner">
+            <div class="w-full bg-[#F5F5F5] p-[14px] sm:p-[24px] rounded-b-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <?php if ($materialUrl !== ''): ?>
-                <div class="rounded-2xl border border-slate-200 bg-white p-2 sm:p-4 shadow-xl"><img src="<?= e($materialUrl) ?>" loading="lazy" decoding="async" class="mx-auto max-h-[78vh] w-full rounded-xl object-contain" alt="<?= e($materialFilename ?: $material['title']) ?>"></div>
+                <div class="rounded-[12px] bg-white p-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.12)]"><img src="<?= e($materialUrl) ?>" loading="lazy" decoding="async" class="mx-auto max-h-[78vh] w-full rounded-[10px] object-contain" alt="<?= e($materialFilename ?: $material['title']) ?>"></div>
                 <?php else: ?>
-                <div class="mx-auto flex min-h-[300px] max-w-3xl flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                    <span class="material-symbols-outlined mb-3 text-5xl text-emerald-600">image</span>
-                    <h3 class="text-lg font-bold text-slate-800">File gambar belum tersedia</h3>
-                    <p class="mt-2 text-sm text-slate-500">Tambahkan URL gambar pada data materi agar gambar ditampilkan di sini.</p>
+                <div class="mx-auto flex min-h-[280px] max-w-3xl flex-col items-center justify-center rounded-[12px] bg-white p-[32px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                    <span class="inline-flex size-14 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A] mb-3">
+                        <span class="material-symbols-outlined text-[28px]">image</span>
+                    </span>
+                    <h3 class="fd-h3 text-[#171717]">File gambar belum tersedia</h3>
+                    <p class="mt-2 text-[14px] text-[#525252]">Tambahkan URL gambar pada data materi agar gambar ditampilkan di sini.</p>
                 </div>
                 <?php endif; ?>
             </div>
 
             <?php elseif ($materialType === 'audio'): ?>
-            <section class="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:mt-8 sm:p-10">
-                <span class="inline-flex items-center gap-2 rounded-lg border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700"><span class="material-symbols-outlined text-[16px]">audio_file</span> Audio Pembelajaran</span>
-                <h2 class="mt-4 text-2xl font-bold text-slate-800"><?= e($material['title']) ?></h2>
-                <?php if ($materialUrl !== ''): ?><audio class="mt-6 w-full" controls preload="metadata"><source src="<?= e($materialUrl) ?>"<?= $materialExtension !== '' ? ' type="audio/' . e($materialExtension === 'm4a' ? 'mp4' : $materialExtension) . '"' : '' ?>>Browser Anda tidak mendukung pemutar audio. <a href="<?= e($materialUrl) ?>">Buka file audio</a>.</audio><?php else: ?><p class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">File audio belum ditambahkan pada materi ini.</p><?php endif; ?>
+            <section class="fd-card-elevated w-full rounded-[12px] bg-white p-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:mt-[18px] sm:p-[32px]">
+                <span class="fd-chip fd-chip-promo"><span class="material-symbols-outlined text-[15px]">audio_file</span> Audio Pembelajaran</span>
+                <h2 class="fd-h1 mt-[14px] text-[24px] sm:text-[28px] text-[#171717]"><?= e($material['title']) ?></h2>
+                <?php if ($materialUrl !== ''): ?><audio class="mt-[18px] w-full" controls preload="metadata"><source src="<?= e($materialUrl) ?>"<?= $materialExtension !== '' ? ' type="audio/' . e($materialExtension === 'm4a' ? 'mp4' : $materialExtension) . '"' : '' ?>>Browser Anda tidak mendukung pemutar audio. <a href="<?= e($materialUrl) ?>">Buka file audio</a>.</audio><?php else: ?><p class="mt-[14px] rounded-[12px] bg-[#FAFAFA] p-[16px] text-[14px] text-[#525252]">File audio belum ditambahkan pada materi ini.</p><?php endif; ?>
             </section>
 
             <?php elseif ($materialType === 'office'): ?>
-            <section class="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:mt-8 sm:p-10">
-                <span class="inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700"><span class="material-symbols-outlined text-[16px]">draft</span> Dokumen / Presentasi</span>
-                <h2 class="mt-4 text-2xl font-bold text-slate-800"><?= e($material['title']) ?></h2>
-                <p class="mt-2 text-slate-600">File Office dapat dibuka dengan aplikasi yang sesuai atau diunduh ke perangkat Anda.</p>
+            <section class="fd-card-elevated w-full rounded-[12px] bg-white p-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:mt-[18px] sm:p-[32px]">
+                <span class="fd-chip fd-chip-info"><span class="material-symbols-outlined text-[15px]">draft</span> Dokumen / Presentasi</span>
+                <h2 class="fd-h1 mt-[14px] text-[24px] sm:text-[28px] text-[#171717]"><?= e($material['title']) ?></h2>
+                <p class="fd-body mt-[8px] text-[#525252]">File Office dapat dibuka dengan aplikasi yang sesuai atau diunduh ke perangkat Anda.</p>
                 <?php if ($materialUrl !== ''): ?>
-                <div class="mt-6 flex flex-wrap gap-3"><a href="<?= e($materialUrl) ?>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 font-semibold text-white"><span class="material-symbols-outlined">open_in_new</span> Buka file</a><a href="<?= e($materialUrl) ?>" download class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-3 font-semibold text-slate-700"><span class="material-symbols-outlined">download</span> Unduh file</a></div>
-                <?php else: ?><p class="mt-5 rounded-lg bg-amber-50 p-4 text-sm text-amber-800">File belum tersedia. Tambahkan URL atau path file pada materi agar dapat dibuka atau diunduh.</p><?php endif; ?>
-                <?php if ($materialFilename !== ''): ?><p class="mt-4 text-sm text-slate-500">Nama file: <?= e($materialFilename) ?></p><?php endif; ?>
+                <div class="mt-[18px] flex flex-wrap gap-[12px]"><a href="<?= e($materialUrl) ?>" target="_blank" rel="noopener noreferrer" class="fd-btn fd-btn-primary fd-btn-md rounded-full"><span class="material-symbols-outlined text-[18px]">open_in_new</span> Buka file</a><a href="<?= e($materialUrl) ?>" download class="fd-btn fd-btn-secondary fd-btn-md rounded-full"><span class="material-symbols-outlined text-[18px]">download</span> Unduh file</a></div>
+                <?php else: ?><p class="mt-[16px] rounded-[12px] bg-[#FEF3C7] p-[16px] text-[14px] font-medium text-[#B45309]">File belum tersedia. Tambahkan URL atau path file pada materi agar dapat dibuka atau diunduh.</p><?php endif; ?>
+                <?php if ($materialFilename !== ''): ?><p class="fd-mono mt-[14px] text-[12px] text-[#737373]">Nama file: <?= e($materialFilename) ?></p><?php endif; ?>
             </section>
 
             <?php else: ?>
-            <!-- Text / Article -->
-            <div class="pt-6 pb-2 px-6 sm:p-14 w-full mx-auto bg-white sm:mt-8 sm:mb-4 sm:rounded-2xl sm:shadow-lg sm:border border-slate-100 relative overflow-hidden">
-                <div class="absolute top-0 left-0 right-0 h-1.5 bg-primary"></div>
-
-                <div class="flex items-center gap-3 mb-8 mt-2">
-                    <span class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg font-semibold text-xs flex items-center gap-1.5 border border-primary/20">
-                        <span class="material-symbols-outlined text-[16px]">article</span> Materi Bacaan
+            <!-- Text / Article (FoodDash Elevated Surface) -->
+            <div class="fd-card-elevated pt-[24px] pb-[24px] px-[18px] sm:p-[36px] w-full mx-auto bg-white sm:mt-[18px] sm:mb-[18px] rounded-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] relative overflow-hidden">
+                <div class="flex flex-wrap items-center gap-[12px] mb-[18px]">
+                    <span class="fd-chip fd-chip-info">
+                        <span class="material-symbols-outlined text-[15px]">article</span> Materi Bacaan
                     </span>
-                    <span class="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg font-medium text-xs flex items-center gap-1.5 border border-slate-200">
-                        <span class="material-symbols-outlined text-[16px]">schedule</span> <?= e(
+                    <span class="fd-chip bg-[#F5F5F5] text-[#171717] font-semibold">
+                        <span class="material-symbols-outlined text-[15px] text-[#EA580C]">schedule</span> <?= e(
                             $material['duration'],
                         ) ?> Est. Waktu
                     </span>
                 </div>
 
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-8 tracking-tight leading-[1.25]"><?= e(
+                <h2 class="fd-h1 text-[24px] sm:text-[28px] text-[#171717] mb-[24px]"><?= e(
                     $material['title'],
                 ) ?></h2>
 
-                <div class="space-y-6 text-slate-700 leading-relaxed font-body-md">
+                <div class="space-y-[18px] text-[#525252] leading-[24px] fd-body">
                     <?php if (!$contentBlocks): ?>
                     <p class="text-slate-500">Belum ada konten materi yang ditambahkan.</p>
                     <?php endif; ?>
@@ -414,20 +406,20 @@ $isVideoEmbed = $materialType === 'video'
             </div>
             <?php endif; ?>
 
-            <!-- Bottom Navigation Card (Placed at the end of the page) -->
+            <!-- Bottom Navigation Card (FoodDash Sticky One-Thumb Reachable Bar) -->
             <?php $isCompleted = $course['status'] === 'selesai'; ?>
-            <div class="mt-2 sm:mt-4 mb-6 mx-4 sm:mx-0">
-                <div class="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 rounded-2xl p-3 sm:p-5 flex items-center justify-between transition-all hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
+            <div class="mt-[18px] mb-[24px] mx-[12px] sm:mx-0">
+                <div class="fd-sticky-bottom-bar flex items-center justify-between gap-[12px]">
 
                     <?php if (($isFirstCourseMaterial ?? ($materialIndex === 0)) && !$isCompleted): ?>
-                    <a href="<?= e($prevUrl) ?>" class="group flex items-center justify-center px-3 py-2.5 sm:px-5 sm:py-2.5 rounded-xl hover:bg-slate-50 transition-all duration-300 active:scale-95 text-slate-600 font-semibold opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">
-                        <span class="material-symbols-outlined text-[20px] mr-1.5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    <a href="<?= e($prevUrl) ?>" class="fd-btn fd-btn-ghost fd-btn-md rounded-full opacity-40 pointer-events-none" aria-disabled="true" tabindex="-1">
+                        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                         <span class="hidden sm:inline">Materi Sebelumnya</span>
                         <span class="sm:hidden">Kembali</span>
                     </a>
                     <?php else: ?>
-                    <a href="<?= e($prevUrl) ?>" class="group flex items-center justify-center px-3 py-2.5 sm:px-5 sm:py-2.5 rounded-xl hover:bg-slate-50 transition-all duration-300 active:scale-95 text-slate-600 font-semibold">
-                        <span class="material-symbols-outlined text-[20px] mr-1.5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    <a href="<?= e($prevUrl) ?>" class="fd-btn fd-btn-ghost fd-btn-md rounded-full">
+                        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                         <?php if (($isFirstCourseMaterial ?? ($materialIndex === 0)) && $isCompleted): ?>
                         <span class="hidden sm:inline">Kembali ke Riwayat</span>
                         <span class="sm:hidden">Riwayat</span>
@@ -439,36 +431,35 @@ $isVideoEmbed = $materialType === 'video'
                     <?php endif; ?>
 
                     <div class="flex items-center justify-center px-2">
-                        <div class="font-bold text-slate-800 text-[14px] sm:text-[15px] whitespace-nowrap bg-slate-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-slate-100">
-                            <span class="hidden sm:inline">Materi </span><span class="text-primary text-[16px] sm:text-[18px] mx-0.5"><?= $displayMaterialIndex ?? ($materialIndex + 1) ?></span>
-                            <span class="text-slate-400 font-medium text-[13px] sm:text-[14px] mx-1">/</span> <?= $totalCourseMaterials ?? $totalMaterials ?>
+                        <div class="fd-mono rounded-full bg-[#F5F5F5] px-[14px] py-[6px] text-[13px] font-semibold text-[#171717] whitespace-nowrap">
+                            <span class="hidden sm:inline font-sans font-medium text-[#525252]">Materi </span><span class="text-[#DC2626]"><?= $displayMaterialIndex ?? ($materialIndex + 1) ?></span> / <?= $totalCourseMaterials ?? $totalMaterials ?>
                         </div>
                     </div>
 
                     <?php if (!empty($isLiveCourse) && !$materialIsCompleted && !$isCompleted): ?>
                     <form method="post" action="?route=/student/learning&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;session_id=<?= rawurlencode((string) $session['id']) ?>&amp;material_index=<?= (int) $materialIndex ?>">
                         <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
-                        <button type="submit" class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-semibold text-white transition-all hover:bg-primary/90 active:scale-95 sm:px-6"><span class="material-symbols-outlined text-[20px]">task_alt</span><span>Tandai selesai</span></button>
+                        <button type="submit" class="fd-btn fd-btn-primary fd-btn-md rounded-full"><span class="material-symbols-outlined text-[20px]">task_alt</span><span>Tandai Selesai</span></button>
                     </form>
                     <?php else: ?>
-                    <a href="<?= e($nextUrl) ?>" class="group flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 active:scale-95 font-semibold">
+                    <a href="<?= e($nextUrl) ?>" class="fd-btn fd-btn-primary fd-btn-md rounded-full">
                         <?php if (($isLastCourseMaterial ?? ($materialIndex === $totalMaterials - 1))): ?>
                         <?php if ($isCompleted): ?>
                         <span class="hidden sm:inline">Kembali ke Riwayat</span>
                         <span class="sm:hidden">Riwayat</span>
-                        <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">history</span>
+                        <span class="material-symbols-outlined text-[20px]">history</span>
                         <?php elseif (!empty($isLiveCourse)): ?>
                         <span>Lanjut ke Quiz</span>
-                        <span class="material-symbols-outlined text-[20px] ml-1.5">quiz</span>
+                        <span class="material-symbols-outlined text-[20px]">quiz</span>
                         <?php else: ?>
                         <span class="hidden sm:inline">Kembali ke Course</span>
                         <span class="sm:hidden">Course</span>
-                        <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                         <?php endif; ?>
                         <?php else: ?>
                         <span class="hidden sm:inline">Materi Selanjutnya</span>
                         <span class="sm:hidden">Lanjut</span>
-                        <span class="material-symbols-outlined text-[20px] ml-1.5 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                         <?php endif; ?>
                     </a>
                     <?php endif; ?>
@@ -480,6 +471,28 @@ $isVideoEmbed = $materialType === 'video'
     </main>
 
     <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
+    <script>
+        (function() {
+            function onDlsReady(fn) {
+                if (window.DLS) fn(window.DLS);
+                else window.addEventListener('DLSReady', function() { fn(window.DLS); }, { once: true });
+            }
+            <?php if (!empty($completionError)): ?>
+            onDlsReady(function(DLS) {
+                DLS.error('Gagal Menyimpan Progres', <?= json_encode((string) $completionError, JSON_UNESCAPED_UNICODE) ?>);
+            });
+            <?php elseif (($_GET['completed'] ?? '') === '1'): ?>
+            onDlsReady(function(DLS) {
+                DLS.success('Materi Selesai!', 'Materi berhasil ditandai selesai. Silakan lanjutkan ke materi berikutnya.');
+                try {
+                    var url = new URL(window.location.href);
+                    url.searchParams.delete('completed');
+                    window.history.replaceState({}, '', url.toString());
+                } catch (_) {}
+            });
+            <?php endif; ?>
+        })();
+    </script>
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
     <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
 

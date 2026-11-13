@@ -32,6 +32,7 @@ function iconFor(label) {
 
 function decorateAction(control) {
   if (control.dataset.dlsActionIgnore === 'true') return;
+  if (control.closest('.dls-shell-chrome, .dls-shell-chrome-strong')) return;
   if (control.dataset.dlsActionDecorated === 'true') return;
   control.dataset.dlsActionDecorated = 'true';
   control.classList.add('dls-action-control');

@@ -5,7 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { forumImageUpload } = require('../middleware/forum-upload');
 const { forumUploadLimiter } = require('../middleware/rate-limit');
 const { studentHasCourseAccess, studentHasSessionAccess, getStudentIdentity } = require('../services/student-auth');
@@ -19,7 +19,8 @@ const activeForumStreams = new Map();
 const courseCodeSchema = z.string().trim().min(2).max(30);
 const sessionCodeSchema = z.string().trim().min(1).max(50);
 const roleOf = req => req.user?.role;
-const isEmployee = req => ['admin', 'teacher'].includes(roleOf(req));
+const isEmployee = req => ['admin', 'teacher', 'reviewer'].includes(roleOf(req));
+const hasWideForumVisibility = req => ['admin', 'reviewer'].includes(roleOf(req));
 const studentAccountType = req => req.user?.mode === 'teacher_student' && req.user?.source_role === 'teacher'
   ? 'teacher_shadow'
   : 'student';
@@ -39,7 +40,7 @@ async function canAccessCourse(req, courseCode) {
       .input('code', sql.VarChar(30), courseCode)
       .input('npk', sql.VarChar(50), req.user.sub)
       .input('role', sql.VarChar(20), roleOf(req))
-      .input('isAdmin', sql.Bit, roleOf(req) === 'admin')
+      .input('isAdmin', sql.Bit, hasWideForumVisibility(req))
       .query(`SELECT 1 AS allowed FROM dbo.courses WHERE course_code=@code AND status='active'
         AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)
         AND EXISTS(SELECT 1 FROM dbo.employee_accounts ea WHERE ea.employee_npk=@npk AND ea.role=@role AND ea.status='active')`);
@@ -55,7 +56,7 @@ async function canAccessSession(req, courseCode, sessionCode) {
   const result = await pool.request().input('course', sql.VarChar(30), courseCode)
     .input('session', sql.VarChar(50), sessionCode)
     .input('npk', sql.VarChar(50), req.user.sub).input('role', sql.VarChar(20), roleOf(req))
-    .input('isAdmin', sql.Bit, roleOf(req) === 'admin')
+    .input('isAdmin', sql.Bit, hasWideForumVisibility(req))
     .query(`SELECT 1 AS allowed FROM dbo.course_sessions s JOIN dbo.courses c ON c.course_id=s.course_id
       WHERE c.course_code=@course AND CONVERT(VARCHAR(50),s.session_id)=@session
       AND s.status='active' AND (@isAdmin=1 OR c.created_by=@npk OR c.assigned_trainer_npk=@npk)
@@ -72,7 +73,7 @@ async function getIdentity(req) {
   if (isEmployee(req)) {
     const result = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT employee_npk AS npk,fullname AS name,role FROM dbo.employee_accounts
-        WHERE employee_npk=@npk AND status='active' AND role IN ('admin','teacher')`);
+        WHERE employee_npk=@npk AND status='active' AND role IN ('admin','teacher','reviewer')`);
     return result.recordset[0] || null;
   }
   return null;
@@ -126,7 +127,7 @@ const threadSummarySql = `SELECT t.thread_id,t.course_code,t.session_code,t.titl
   CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.forum_likes l WHERE l.target_type='thread' AND l.target_id=t.thread_id AND l.author_npk=@viewer) THEN 1 ELSE 0 END AS BIT) AS liked_by_me
   FROM dbo.forum_threads t`;
 
-router.get('/events', async (req, res) => {
+router.get('/events', requirePermission('forum.view'), async (req, res) => {
   const parsed = z.object({ courseCode: courseCodeSchema, sessionCode: sessionCodeSchema }).safeParse(req.query);
   if (!parsed.success || !(await canAccessSession(req, parsed.data.courseCode, parsed.data.sessionCode))) {
     return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Sesi forum tidak ditemukan.' } });
@@ -157,12 +158,12 @@ router.get('/events', async (req, res) => {
   });
 });
 
-router.get('/management/courses', async (req, res, next) => {
-  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk admin dan teacher.' } });
+router.get('/management/courses', requirePermission('forum.view'), async (req, res, next) => {
+  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk staf portal.' } });
   try {
     const result = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
       .input('role', sql.VarChar(20), roleOf(req))
-      .input('isAdmin', sql.Bit, roleOf(req) === 'admin')
+      .input('isAdmin', sql.Bit, hasWideForumVisibility(req))
       .query(`SELECT c.course_code,c.title AS course_title,s.session_id AS session_code,s.title AS session_title,
         CAST(COALESCE(fs.is_open,1) AS BIT) AS is_open
         FROM dbo.courses c JOIN dbo.course_sessions s ON s.course_id=c.course_id
@@ -174,8 +175,8 @@ router.get('/management/courses', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/management/threads', async (req, res, next) => {
-  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk admin dan teacher.' } });
+router.get('/management/threads', requirePermission('forum.view'), async (req, res, next) => {
+  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk staf portal.' } });
   const parsed = z.object({ courseCode: courseCodeSchema, sessionCode: sessionCodeSchema }).safeParse(req.query);
   if (!parsed.success) return inputError(res, 'Pilih course dan sesi terlebih dahulu.');
   try {
@@ -187,7 +188,7 @@ router.get('/management/threads', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/courses/:courseCode/sessions/:sessionCode', sessionInput, async (req, res, next) => {
+router.get('/courses/:courseCode/sessions/:sessionCode', requirePermission('forum.view'), sessionInput, async (req, res, next) => {
   try {
     const { courseCode, sessionCode } = req.forumContext;
     if (!(await canAccessSession(req, courseCode, sessionCode))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Sesi forum tidak ditemukan.' } });
@@ -201,8 +202,8 @@ router.get('/courses/:courseCode/sessions/:sessionCode', sessionInput, async (re
   } catch (error) { next(error); }
 });
 
-router.patch('/management/sessions/:courseCode/:sessionCode', trustedWriteOrigin, sessionInput, async (req, res, next) => {
-  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk admin dan teacher.' } });
+router.patch('/management/sessions/:courseCode/:sessionCode', trustedWriteOrigin, requirePermission('forum.moderate'), sessionInput, async (req, res, next) => {
+  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk staf portal.' } });
   const parsed = z.object({ isOpen: z.boolean() }).safeParse(req.body);
   if (!parsed.success) return inputError(res, 'Status forum tidak valid.');
   try {
@@ -223,8 +224,8 @@ router.patch('/management/sessions/:courseCode/:sessionCode', trustedWriteOrigin
   } catch (error) { next(error); }
 });
 
-router.post('/management/threads', trustedWriteOrigin, forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
-  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk admin dan teacher.' } });
+router.post('/management/threads', trustedWriteOrigin, requirePermission('forum.participate'), forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
+  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk staf portal.' } });
   const input = z.object({ courseCode: courseCodeSchema, sessionCode: sessionCodeSchema, title: z.string().trim().min(3).max(200), body: z.string().trim().min(1).max(2000) }).safeParse(req.body);
   if (!input.success) return inputError(res, 'Judul dan isi topik wajib diisi.');
   let imagePath;
@@ -244,7 +245,7 @@ router.post('/management/threads', trustedWriteOrigin, forumUploadLimiter, forum
   } catch (error) { if (imagePath) await fs.unlink(path.join(uploadDirectory, path.basename(imagePath))).catch(() => {}); next(error); }
 });
 
-router.post('/courses/:courseCode/sessions/:sessionCode/threads', trustedWriteOrigin, sessionInput, forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
+router.post('/courses/:courseCode/sessions/:sessionCode/threads', trustedWriteOrigin, requirePermission('forum.participate'), sessionInput, forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
   if (roleOf(req) !== 'student') return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Endpoint ini hanya untuk student.' } });
   const input = z.object({ title: z.string().trim().min(3).max(200), body: z.string().trim().min(1).max(2000) }).safeParse(req.body);
   if (!input.success) return inputError(res, 'Judul dan isi diskusi wajib diisi.');
@@ -268,8 +269,8 @@ router.post('/courses/:courseCode/sessions/:sessionCode/threads', trustedWriteOr
   } catch (error) { if (imagePath) await fs.unlink(path.join(uploadDirectory, path.basename(imagePath))).catch(() => {}); next(error); }
 });
 
-router.patch('/:id/status', trustedWriteOrigin, async (req, res, next) => {
-  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk admin dan teacher.' } });
+router.patch('/:id/status', trustedWriteOrigin, requirePermission('forum.moderate'), async (req, res, next) => {
+  if (!isEmployee(req)) return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Akses hanya untuk staf portal.' } });
   const id = z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(req.params.id);
   const parsed = z.object({ status: z.enum(['visible', 'hidden', 'locked']) }).safeParse(req.body);
   if (!id.success || !parsed.success) return inputError(res, 'ID atau status topik tidak valid.');
@@ -283,7 +284,7 @@ router.patch('/:id/status', trustedWriteOrigin, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/threads/:id', async (req, res, next) => {
+router.get('/threads/:id', requirePermission('forum.view'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(req.params.id);
   if (!id.success) return inputError(res, 'ID diskusi tidak valid.');
   try {
@@ -303,14 +304,14 @@ router.get('/threads/:id', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/threads/:id/replies', trustedWriteOrigin, forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
+router.post('/threads/:id/replies', trustedWriteOrigin, requirePermission('forum.participate'), forumUploadLimiter, forumImageUpload.single('image'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(req.params.id);
   const input = z.object({ body: z.string().trim().min(1).max(2000) }).safeParse(req.body);
   if (!id.success || !input.success) return inputError(res, 'Isi balasan wajib diisi dan maksimal 2.000 karakter.');
   let imagePath;
   try {
     const thread = await getThreadContext(req, id.data);
-    if (!thread || !['student', 'admin', 'teacher'].includes(roleOf(req))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Diskusi tidak ditemukan.' } });
+    if (!thread || !['student', 'admin', 'teacher', 'reviewer'].includes(roleOf(req))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Diskusi tidak ditemukan.' } });
     if (thread.status !== 'visible') return res.status(423).json({ error: { code: 'THREAD_CLOSED', message: 'Diskusi ini sudah ditutup untuk balasan.' } });
     const open = await pool.request().input('course', sql.VarChar(30), thread.course_code).input('session', sql.VarChar(50), thread.session_code || '')
       .query(`SELECT COALESCE((SELECT TOP 1 is_open FROM dbo.forum_session_settings WHERE course_code=@course AND session_code=@session),1) AS is_open`);
@@ -328,9 +329,9 @@ router.post('/threads/:id/replies', trustedWriteOrigin, forumUploadLimiter, foru
   } catch (error) { if (imagePath) await fs.unlink(path.join(uploadDirectory, path.basename(imagePath))).catch(() => {}); next(error); }
 });
 
-router.post('/likes', trustedWriteOrigin, async (req, res, next) => {
+router.post('/likes', trustedWriteOrigin, requirePermission('forum.participate'), async (req, res, next) => {
   const input = z.object({ targetType: z.enum(['thread', 'reply']), targetId: z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER) }).safeParse(req.body);
-  if (!input.success || !['student', 'admin', 'teacher'].includes(roleOf(req))) return inputError(res, 'Data like tidak valid.');
+  if (!input.success || !['student', 'admin', 'teacher', 'reviewer'].includes(roleOf(req))) return inputError(res, 'Data like tidak valid.');
   try {
     let threadId = input.data.targetId;
     if (input.data.targetType === 'reply') {
@@ -359,7 +360,7 @@ router.post('/likes', trustedWriteOrigin, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/uploads/:filename', async (req, res, next) => {
+router.get('/uploads/:filename', requirePermission('forum.view'), async (req, res, next) => {
   const filename = z.string().regex(/^[0-9a-f-]{36}\.(jpg|png|gif|webp)$/i).safeParse(req.params.filename);
   if (!filename.success) return res.sendStatus(404);
   try {

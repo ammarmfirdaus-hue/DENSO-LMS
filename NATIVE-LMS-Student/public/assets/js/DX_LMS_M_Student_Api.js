@@ -30,6 +30,17 @@
       const card = document.createElement('article');
       card.className = 'course-card flex flex-col rounded-xl border border-surface-variant bg-surface-container-lowest p-5 shadow-sm';
       card.dataset.filters = JSON.stringify([course.category || '']);
+      const thumbUrl = course.thumbnail || course.thumbnail_path;
+      if (thumbUrl) {
+        const img = document.createElement('img');
+        img.src = thumbUrl;
+        img.alt = course.title || 'Sampul course';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.className = 'mb-3 aspect-video w-full rounded-lg object-cover bg-slate-900';
+        img.addEventListener('error', () => { img.hidden = true; });
+        card.append(img);
+      }
       const badge = document.createElement('span');
       badge.className = 'w-fit rounded-full bg-secondary-container px-3 py-1 text-xs font-semibold text-on-secondary-container';
       badge.textContent = course.category;
@@ -77,6 +88,13 @@
     } catch (error) {
       const status = document.querySelector('[data-api-status]');
       if (status) { status.textContent = error.message; status.hidden = false; }
+      if (window.DLS?.error) {
+        window.DLS.error('Gagal Memuat Data Course', error.message);
+      } else {
+        window.addEventListener('DLSReady', function () {
+          window.DLS?.error('Gagal Memuat Data Course', error.message);
+        }, { once: true });
+      }
     }
   });
 })();

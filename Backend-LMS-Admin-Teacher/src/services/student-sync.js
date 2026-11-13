@@ -9,18 +9,28 @@ let inFlight = false;
 let lastSyncAt = null;
 let lastSyncError = null;
 
+function resolveStudentThumbnailUrl(thumbnailPath, publicApiUrl) {
+  const value = String(thumbnailPath || '').trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  const base = String(publicApiUrl || '').replace(/\/+$/, '');
+  return `${base}${value.startsWith('/') ? value : `/${value}`}`;
+}
+
 async function syncOnce() {
   if (!studentPool) return;
-  const mssqlCourses = await pool.request().query(`SELECT course_code,title,description,category,status,updated_at FROM dbo.courses`);
+  const publicApiUrl = (getApiBaseUrl() || env.STUDENT_PUBLIC_API_URL).replace(/\/+$/, '');
+  const mssqlCourses = await pool.request().query(`SELECT course_code,title,description,category,thumbnail_path,status,updated_at FROM dbo.courses`);
   const mysqlConn = await studentPool.getConnection();
   try {
     await mysqlConn.beginTransaction();
-    const upsertCourse = `INSERT INTO courses(course_code,title,description,category,status,updated_at)
-      VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE title=VALUES(title),description=VALUES(description),
-      category=VALUES(category),status=VALUES(status),updated_at=VALUES(updated_at)`;
+    const upsertCourse = `INSERT INTO courses(course_code,title,description,category,thumbnail_path,status,updated_at)
+      VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE title=VALUES(title),description=VALUES(description),
+      category=VALUES(category),thumbnail_path=VALUES(thumbnail_path),status=VALUES(status),updated_at=VALUES(updated_at)`;
     for (const course of mssqlCourses.recordset) {
+      const thumbnailUrl = resolveStudentThumbnailUrl(course.thumbnail_path, publicApiUrl);
       await mysqlConn.execute(upsertCourse, [course.course_code, course.title, course.description || '',
-        ['Wajib', 'Pilihan'].includes(course.category) ? course.category : 'Wajib', course.status === 'active' ? 'active' : 'inactive', course.updated_at]);
+        ['Wajib', 'Pilihan'].includes(course.category) ? course.category : 'Wajib', thumbnailUrl, course.status === 'active' ? 'active' : 'inactive', course.updated_at]);
     }
     const [courseRows] = await mysqlConn.query('SELECT course_id,course_code FROM courses');
     const courseIds = new Map(courseRows.map(course => [course.course_code, course.course_id]));
@@ -159,19 +169,25 @@ function getStudentSyncStatus() {
 /** Push one edited grade to Student immediately, even when periodic catalog sync is off. */
 async function syncStudentGradeNow(studentNpk, courseCode) {
   let connection;
+  let shouldClose = false;
   try {
-    connection = await mysql.createConnection({
-      host: env.STUDENT_DB_HOST, port: env.STUDENT_DB_PORT, database: env.STUDENT_DB_NAME,
-      user: env.STUDENT_DB_USER, password: env.STUDENT_DB_PASSWORD,
-      charset: 'utf8mb4', decimalNumbers: true, timezone: 'Z'
-    });
-    const [grades] = await pool.request()
+    if (studentPool) {
+      connection = studentPool;
+    } else {
+      connection = await mysql.createConnection({
+        host: env.STUDENT_DB_HOST, port: env.STUDENT_DB_PORT, database: env.STUDENT_DB_NAME,
+        user: env.STUDENT_DB_USER, password: env.STUDENT_DB_PASSWORD,
+        charset: 'utf8mb4', decimalNumbers: true, timezone: 'Z'
+      });
+      shouldClose = true;
+    }
+    const gradesResult = await pool.request()
       .input('npk', sql.VarChar(50), studentNpk)
       .input('code', sql.VarChar(30), courseCode)
       .query(`SELECT score,grade_feedback,graded_at FROM dbo.student_progress_snapshots
         WHERE student_npk=@npk AND course_code=@code`);
-    if (!grades.recordset.length) return false;
-    const grade = grades.recordset[0];
+    if (!gradesResult.recordset.length) return false;
+    const grade = gradesResult.recordset[0];
     const [result] = await connection.execute(`UPDATE course_enrollments e
       JOIN student_accounts s ON s.student_id=e.student_id
       JOIN courses c ON c.course_id=e.course_id
@@ -180,7 +196,7 @@ async function syncStudentGradeNow(studentNpk, courseCode) {
     [grade.score, grade.grade_feedback, grade.graded_at, studentNpk, courseCode]);
     return result.affectedRows > 0;
   } finally {
-    if (connection) await connection.end();
+    if (shouldClose && connection) await connection.end().catch(() => {});
   }
 }
 
@@ -200,4 +216,4 @@ async function deleteStudentMaterial(sourceMaterialId) {
   }
 }
 
-module.exports = { startStudentSync, syncStudentNow, syncStudentGradeNow, deleteStudentMaterial, getStudentSyncStatus };
+module.exports = { startStudentSync, syncStudentNow, syncStudentGradeNow, deleteStudentMaterial, getStudentSyncStatus, resolveStudentThumbnailUrl };

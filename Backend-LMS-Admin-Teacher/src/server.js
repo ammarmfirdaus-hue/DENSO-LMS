@@ -15,8 +15,9 @@ const notificationRoutes = require('./routes/notifications');
 const materialWorkflowRoutes = require('./routes/material-workflow');
 const jobRoutes = require('./routes/jobs');
 const quizRoutes = require('./routes/quizzes');
-const enrollmentRoutes = require('./routes/enrollments');
+const enrollmentsRoutes = require('./routes/enrollments');
 const settingsRoutes = require('./routes/settings');
+const roleRoutes = require('./routes/roles');
 const { notFound, errorHandler } = require('./middleware/errors');
 const { apiLimiter, writeLimiter } = require('./middleware/rate-limit');
 const { paginationMiddleware } = require('./middleware/pagination');
@@ -26,6 +27,8 @@ const { startNotificationMailWorker } = require('./services/notification-mail');
 const { registerJobHandler, startAdminJobWorker } = require('./services/admin-jobs');
 const { registerUserJobHandler } = require('./services/user-job-handler');
 const { registerRecordDeleteJobHandler } = require('./services/record-delete-job-handler');
+const { registerEnrollmentJobHandler } = require('./services/enrollment-job-handler');
+const { registerNotificationJobHandler } = require('./services/notification-job-handler');
 const { loadSystemSettings } = require('./services/system-settings');
 const { closeQuizStore } = require('./services/quiz-store');
 
@@ -77,8 +80,9 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/material-workflow', materialWorkflowRoutes);
 app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/v1/quizzes', quizRoutes);
-app.use('/api/v1/enrollments', enrollmentRoutes);
+app.use('/api/v1/enrollments', enrollmentsRoutes);
 app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/roles', roleRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
@@ -100,6 +104,8 @@ async function start() {
   stopNotificationMail = startNotificationMailWorker();
   registerUserJobHandler(registerJobHandler);
   registerRecordDeleteJobHandler(registerJobHandler);
+  registerEnrollmentJobHandler(registerJobHandler);
+  registerNotificationJobHandler(registerJobHandler);
   stopAdminJobs = await startAdminJobWorker();
 
   // Student sync is an optional integration. A missing Student DB credential

@@ -7,13 +7,13 @@
  */
 
 /** Menyiapkan status dan nilai awal variabel sistem yang dibutuhkan. */
-$userName = $_SESSION['user']['name'] ?? 'Budi Santoso';
+$userName = $userName ?? ($_SESSION['student_name'] ?? ($_SESSION['user']['name'] ?? 'Siswa DENSO'));
 $userRole = 'Peserta DENSO';
 
 /** Hak akses atau peranan bawaan yang berlaku untuk antarmuka terkait. */
 ?>
 <!DOCTYPE html>
-<html class="light" lang="id" style="">
+<html lang="id">
 
 <head>
     <?php
@@ -40,13 +40,37 @@ $userRole = 'Peserta DENSO';
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 overflow-y-auto space-y-stack-lg pt-[72px] px-container-margin pb-[88px]" data-student-dashboard>
-        <p data-api-status hidden role="status" class="rounded-xl bg-error-container/40 p-3 text-on-error-container"></p>
-        <!-- Greeting Section -->
-        <section class="dls-welcome-hero space-y-stack-sm min-w-0">
-            <p class="dls-section-kicker">RUANG BELAJAR KARYAWAN</p>
-            <h1 class="font-headline-lg font-bold text-[clamp(22px,5.5vw,34px)] tracking-tight leading-tight sm:text-headline-lg text-on-surface">Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?></h1>
-            <p class="font-body-md text-body-md text-on-surface-variant"><?= e($userRole) ?> · Akses materi, course, dan progres belajar Anda.</p>
+    <main class="dls-main flex-1 overflow-y-auto space-y-[24px] pt-[72px] px-[18px] pb-[96px]" data-student-dashboard>
+        <p data-api-status hidden role="status" class="rounded-[12px] bg-[#FEE2E2] p-[12px] text-[14px] font-medium text-[#EF4444]"></p>
+        <?php
+        $quickResumeCourse = null;
+        foreach ($courses as $candidateCourse) {
+            if (($candidateCourse['status'] ?? '') === 'sedang_dipelajari') {
+                $quickResumeCourse = $candidateCourse;
+                break;
+            }
+        }
+        if ($quickResumeCourse === null && !empty($courses)) {
+            $quickResumeCourse = $courses[0];
+        }
+        ?>
+        <!-- FoodDash Hero Banner (Single Clean Banner, Poppins h1) -->
+        <section class="dls-welcome-hero fd-card-elevated rounded-[12px] bg-white p-[18px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:p-[24px] min-w-0">
+            <div class="flex flex-col gap-[18px] sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0 flex-1 space-y-[6px]">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#F5F5F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#525252]">RUANG BELAJAR KARYAWAN</span>
+                    <h1 class="fd-h1 text-[26px] font-bold leading-[32px] text-[#171717] sm:text-[28px] sm:leading-[34px]">Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?></h1>
+                    <p class="fd-body text-[#525252]"><?= e($userRole) ?> · Akses materi, course, dan progres belajar Anda dengan cepat.</p>
+                </div>
+                <?php if ($quickResumeCourse): ?>
+                <div class="shrink-0">
+                    <a href="?route=/student/course/detail&amp;id=<?= urlencode((string) $quickResumeCourse['id']) ?>" class="fd-btn fd-btn-primary fd-btn-md rounded-full w-full sm:w-auto">
+                        <span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span>
+                        <span><?= ($quickResumeCourse['status'] ?? '') === 'sedang_dipelajari' ? 'Lanjutkan Belajar' : 'Mulai Belajar' ?></span>
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
         </section>
 
         <script>
@@ -64,125 +88,117 @@ $userRole = 'Peserta DENSO';
             });
         </script>
 
-        <!-- Summary Cards (Bento Grid Style) -->
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
-            <div class="dls-stat-card dls-stat-card-featured col-span-2 bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant flex items-center space-x-stack-md">
-                <div class="w-12 h-12 bg-secondary-container rounded-full flex shrink-0 items-center justify-center text-on-secondary-container">
+        <!-- Summary Cards (FoodDash 6px Grid, Borderless White Cards) -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-[12px] sm:gap-[18px]">
+            <div class="dls-stat-card dls-stat-card-featured fd-card col-span-2 bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-center gap-[12px]">
+                <div class="w-12 h-12 bg-[#FEF2F2] rounded-[12px] flex shrink-0 items-center justify-center text-[#DC2626]">
                     <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">play_lesson</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="font-label-sm text-label-sm text-on-surface-variant truncate">Sedang Dipelajari</p>
-                    <p data-api-active-courses class="font-headline-sm text-headline-sm text-on-surface truncate"><?= e(
+                    <p class="text-[12px] font-medium leading-[18px] text-[#525252] truncate">Sedang Dipelajari</p>
+                    <p data-api-active-courses class="fd-h2 text-[20px] font-semibold leading-[26px] text-[#171717] truncate"><?= e(
                         (string) $stats['active_count'],
                     ) ?> Course Aktif</p>
                 </div>
             </div>
-            <div class="dls-stat-card bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant flex flex-col justify-center items-center text-center space-y-stack-sm">
-                <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: &quot;FILL&quot; 1;">verified</span>
+            <div class="dls-stat-card fd-card bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center gap-[6px]">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">verified</span>
+                </span>
                 <div>
-                    <p data-api-completed-courses class="font-headline-sm text-headline-sm text-on-surface"><?= e(
+                    <p data-api-completed-courses class="fd-h2 text-[22px] font-semibold text-[#171717]"><?= e(
                         (string) $stats['completed_count'],
                     ) ?></p>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">Selesai</p>
+                    <p class="text-[12px] font-medium text-[#525252]">Course Selesai</p>
                 </div>
             </div>
-            <div class="dls-stat-card bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant flex flex-col justify-center items-center text-center space-y-stack-sm">
-                <span class="material-symbols-outlined text-secondary" style="font-variation-settings: &quot;FILL&quot; 1;">analytics</span>
+            <div class="dls-stat-card fd-card bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center gap-[6px]">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">analytics</span>
+                </span>
                 <div>
-                    <p class="font-headline-sm text-headline-sm text-on-surface"><?= e(
+                    <p class="fd-h2 text-[22px] font-semibold text-[#171717]"><?= e(
                         (string) $stats['avg_score'],
                     ) ?>%</p>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">Skor Rata-rata</p>
+                    <p class="text-[12px] font-medium text-[#525252]">Skor Rata-rata</p>
                 </div>
             </div>
         </section>
         <!-- Lanjutkan Belajar Section -->
-        <section class="space-y-stack-md">
-            <div class="flex justify-between items-center">
-                <h2 class="font-headline-sm text-headline-sm text-on-surface">Lanjutkan Belajar</h2>
-                <a class="font-label-md text-label-md text-secondary" href="?route=/student/courses">Lihat Semua</a>
+        <section class="space-y-[12px]">
+            <div class="flex justify-between items-center gap-[12px]">
+                <h2 class="fd-h2 text-[#171717]">Lanjutkan Belajar</h2>
+                <a class="fd-btn fd-btn-ghost fd-btn-sm rounded-full text-[13px] font-semibold text-[#525252] hover:text-[#171717]" href="?route=/student/courses">Lihat Semua <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></a>
             </div>
-            <label class="relative block"><span class="material-symbols-outlined absolute left-4 top-3 text-on-surface-variant">search</span><input id="dashboardCourseSearch" type="search" class="w-full rounded-full border border-outline-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface" placeholder="Cari course yang sedang dipelajari..." aria-label="Cari course di dashboard"></label>
+            <label class="relative block"><span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#737373]" style="font-size:20px;">search</span><input id="dashboardCourseSearch" type="search" class="fd-input fd-search-input w-full rounded-full pl-11 pr-4" placeholder="Cari course yang sedang dipelajari..." aria-label="Cari course di dashboard"></label>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pt-2" id="course-results" data-api-course-list>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px] pt-[6px]" id="course-results" data-api-course-list>
                 <?php foreach ($courses as $c): ?>
-                <div class="course-card flex flex-col h-full bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border border-surface-variant overflow-hidden" data-filters="<?= htmlspecialchars(
+                <div class="course-card fd-card flex flex-col h-full bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden" data-filters="<?= htmlspecialchars(
                     json_encode($c['filters'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
                 ) ?>">
-                    <div class="h-32 bg-surface-container-high relative">
-                        <?php if ($c['thumbnail']): ?>
-                        <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" src="<?= e(
+                    <div class="course-card-cover aspect-video bg-[#171717] relative overflow-hidden rounded-t-[12px]">
+                        <?php if (!empty($c['thumbnail'])): ?>
+                        <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="<?= e(
     $c['thumbnail'],
 ) ?>">
-                        <?php else: ?>
-                        <?php
-                             $iconGradients = [
-                                 'build' => 'from-orange-400 to-orange-600',
-                                 'health_and_safety' => 'from-green-400 to-emerald-600',
-                                 'cleaning_services' => 'from-teal-400 to-cyan-600',
-                                 'precision_manufacturing' => 'from-blue-400 to-blue-600',
-                                 'trending_up' => 'from-violet-400 to-purple-600',
-                                 'verified' => 'from-sky-400 to-indigo-600',
-                                 'forum' => 'from-pink-400 to-rose-600',
-                                 'groups' => 'from-amber-400 to-yellow-600',
-                                 'gavel' => 'from-red-400 to-rose-700',
-                                 'eco' => 'from-lime-400 to-green-600',
-                                 'school' => 'from-primary/70 to-primary',
-                             ];
-                             $icon = $c['thumbnail_icon'] ?? 'school';
-                             $grad = $iconGradients[$icon] ?? 'from-primary/70 to-primary';
-                        ?>
-                        <div class="w-full h-full bg-[#1e252d] border-b border-slate-700/60 relative flex items-center justify-center">
-                            <span class="material-symbols-outlined text-white/80" style="font-size: 56px; font-variation-settings: 'FILL' 1;"><?= e(
-                                $icon,
-                            ) ?></span>
-                        </div>
                         <?php endif; ?>
+                        <?php
+                        $icon = $c['thumbnail_icon'] ?? 'school';
+                        $showFallback = empty($c['thumbnail']) ? 'flex' : 'none';
+                        ?>
+                        <div class="fd-cover-fallback<?= !empty($c['thumbnail']) ? ' hidden' : '' ?>" style="display:<?= $showFallback ?>">
+                            <span class="fd-cover-icon-badge">
+                                <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;"><?= e(
+                                    $icon,
+                                ) ?></span>
+                            </span>
+                        </div>
                         <?php if ($c['status'] !== 'selesai'): ?>
-                        <div class="absolute top-2 left-2 bg-error text-on-error px-2 py-1 rounded-sm font-label-sm shadow-sm backdrop-blur-sm">Wajib</div>
+                        <div class="fd-chip fd-chip-promo absolute top-[12px] left-[12px] text-[11px]">Wajib</div>
                         <?php endif; ?>
                         <?php if ($c['status'] === 'selesai'): ?>
-                        <div class="absolute top-2 right-2 bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-full font-label-sm text-label-sm shadow-sm backdrop-blur-sm flex items-center gap-1">
+                        <div class="fd-chip fd-chip-success absolute top-[12px] right-[12px] shadow-sm">
                             <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
                         </div>
                         <?php endif; ?>
-                    </div>
-                    <div class="p-stack-md space-y-stack-sm flex flex-col flex-1">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight course-title line-clamp-2" title="<?= e(
-                                    $c['title'],
-                                ) ?>" style="min-height: 2.5rem;"><?= e($c['title']) ?></h3>
-                                <span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block"><?= e(
-                                    (string) $c['modules_count'],
-                                ) ?> Modul</span>
-                            </div>
+                        <div class="fd-chip absolute bottom-[12px] right-[12px] bg-white/95 text-[#171717] shadow-sm">
+                            <span class="material-symbols-outlined text-[#EA580C]" style="font-size:15px;">menu_book</span>
+                            <span class="font-medium"><?= e((string) $c['modules_count']) ?> Modul</span>
                         </div>
-                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2"><?= e(
+                    </div>
+                    <div class="p-[18px] space-y-[12px] flex flex-col flex-1">
+                        <div>
+                            <h3 class="fd-h3 text-[#171717] leading-[24px] course-title line-clamp-2" title="<?= e(
+                                $c['title'],
+                            ) ?>" style="min-height: 3rem;"><?= e($c['title']) ?></h3>
+                        </div>
+                        <p class="fd-body text-[#525252] line-clamp-2"><?= e(
                             $c['description'],
                         ) ?></p>
 
-                        <div class="flex gap-1.5 flex-wrap pt-2 mt-auto h-[44px] overflow-hidden items-start">
+                        <div class="flex gap-[6px] flex-wrap pt-[6px] mt-auto h-[40px] overflow-hidden items-start">
                             <?php foreach ($c['filters'] ?? [] as $f): ?>
-                            <span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-sm font-medium tracking-wide uppercase whitespace-nowrap"><?= e(
+                            <span class="bg-[#F5F5F5] text-[#525252] text-[11px] px-2.5 py-0.5 rounded-[6px] font-medium whitespace-nowrap"><?= e(
                                 $f,
                             ) ?></span>
                             <?php endforeach; ?>
                         </div>
-                        <div class="pt-stack-sm space-y-2">
-                            <div class="flex justify-between font-label-sm text-label-sm">
+                        <div class="pt-[6px] space-y-[6px]">
+                            <div class="flex justify-between items-center text-[13px]">
                                 <?php if ($c['status'] === 'sedang_dipelajari'): ?>
-                                <span class="text-on-surface-variant">Progress</span>
-                                <span class="text-tertiary font-bold"><?= e((string) $c['progress']) ?>%</span>
+                                <span class="fd-chip fd-chip-info">Sedang Dipelajari</span>
+                                <span class="fd-mono font-semibold text-[#171717]"><?= e((string) $c['progress']) ?>%</span>
                                 <?php elseif ($c['status'] === 'selesai'): ?>
-                                <span class="text-on-surface-variant">Selesai</span>
-                                <span class="text-tertiary font-bold">100%</span>
+                                <span class="fd-chip fd-chip-success">Tuntas</span>
+                                <span class="fd-mono font-semibold text-[#16A34A]">100%</span>
                                 <?php else: ?>
-                                <span class="text-on-surface-variant">Belum dimulai</span>
+                                <span class="fd-chip fd-chip-neutral">Belum dimulai</span>
+                                <span class="fd-mono font-semibold text-[#737373]">0%</span>
                                 <?php endif; ?>
                             </div>
-                            <div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
-                                <div class="bg-tertiary h-2 rounded-full" style="width: <?= (int) $c[
+                            <div class="w-full bg-[#F5F5F5] rounded-full h-[6px] overflow-hidden">
+                                <div class="<?= $c['status'] === 'selesai' ? 'bg-[#16A34A]' : 'bg-[#DC2626]' ?> h-[6px] rounded-full" style="width: <?= (int) $c[
                                     'progress'
                                 ] ?>%"></div>
                             </div>
@@ -190,19 +206,19 @@ $userRole = 'Peserta DENSO';
                         <?php if ($c['status'] === 'sedang_dipelajari'): ?>
                         <button onclick="window.location.href='?route=/student/course/detail&id=<?= e(
                             $c['id'],
-                        ) ?>'" class="w-full mt-stack-md bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded-lg shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] active:scale-95 transition-transform">
+                        ) ?>'" class="fd-btn fd-btn-primary fd-btn-md w-full mt-[6px] rounded-full">
                             Lanjutkan Belajar
                         </button>
                         <?php elseif ($c['status'] === 'belum_dimulai'): ?>
                         <button onclick="window.location.href='?route=/student/course/detail&id=<?= e(
                             $c['id'],
-                        ) ?>'" class="w-full mt-stack-md border-2 border-secondary text-secondary bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-secondary-container/10">
+                        ) ?>'" class="fd-btn fd-btn-secondary fd-btn-md w-full mt-[6px] rounded-full">
                             Mulai Course
                         </button>
                         <?php else: ?>
                         <button onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e(
                             $c['id'],
-                        ) ?>'" class="w-full mt-stack-md border border-outline-variant text-on-surface-variant bg-surface-container-lowest font-label-md text-label-md py-2.5 rounded-lg active:scale-95 transition-transform hover:bg-surface-container-low">
+                        ) ?>'" class="fd-btn fd-btn-ghost fd-btn-md w-full mt-[6px] rounded-full bg-[#F5F5F5]">
                             Lihat Detail
                         </button>
                         <?php endif; ?>
@@ -210,12 +226,18 @@ $userRole = 'Peserta DENSO';
                 </div>
                 <?php endforeach; ?>
             </div>
-            <p data-dashboard-course-empty class="hidden rounded-xl border border-dashed border-outline-variant p-6 text-center text-sm text-on-surface-variant">Tidak ada course yang cocok dengan pencarian.</p>
+            <p data-dashboard-course-empty class="hidden rounded-[12px] bg-[#FAFAFA] p-[24px] text-center text-[14px] text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Tidak ada course yang cocok dengan pencarian.</p>
         </section>
 
         <!-- Pagination Controls -->
         <?php include APP_ROOT . '/includes/components/DX_LMS_M_Pagination.php'; ?>
     </main>
+    <?php if (!empty($quickResumeCourse)): ?>
+    <a href="?route=/student/course/detail&amp;id=<?= urlencode((string) $quickResumeCourse['id']) ?>" class="fd-floating-cta fd-btn fd-btn-primary fd-btn-md rounded-full lg:hidden" aria-label="Lanjutkan course aktif">
+        <span class="material-symbols-outlined" style="font-size:18px;">bolt</span>
+        <span>Lanjut Belajar</span>
+    </a>
+    <?php endif; ?>
     <!-- BottomNavBar Shared Component -->
     <?php
     $active_tab = 'beranda';

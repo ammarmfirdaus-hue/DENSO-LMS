@@ -18,34 +18,42 @@ $backUrl = '?route=/student/course/detail&id=' . rawurlencode((string) $courseId
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto max-w-4xl">
             <?php
-            $page_eyebrow = e($course['title']) . ' / ' . e($categoryTitle);
+            $page_eyebrow = (string) ($course['title'] ?? '') . ' / ' . (string) $categoryTitle;
             $page_title_heading = 'Diskusi Sesi';
             $page_description = 'Tanya, berbagi pengalaman, dan saling berdiskusi bersama instruktur dan rekan kerja.';
-            $page_actions_html = '<span data-forum-status class="inline-flex shrink-0 items-center rounded-xl border border-outline-variant/50 bg-surface-container px-3 py-1.5 text-xs font-semibold text-on-surface-variant">Memuat status…</span>';
+            $page_actions_html = '<span data-forum-status class="fd-chip fd-chip-neutral shrink-0">Memuat status…</span>';
             include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
             ?>
-            <div class="-mt-3 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-on-surface-variant"><span data-thread-count>Memuat diskusi…</span><span aria-hidden="true">·</span><span>Sesi: <?= e($categoryTitle) ?></span></div>
+            <div class="mb-[18px] flex flex-wrap items-center gap-[12px] text-[12px] text-[#525252]"><span data-thread-count class="font-semibold text-[#171717]">Memuat diskusi…</span><span aria-hidden="true">·</span><span>Sesi: <?= e($categoryTitle) ?></span></div>
 
             <?php if ($isRiwayat): ?>
-            <div class="mb-4 rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 text-sm text-on-surface-variant">Course telah selesai. Forum ini hanya dapat dibaca.</div>
+            <div class="fd-card mb-[18px] flex items-center gap-[12px] rounded-[12px] bg-[#F5F5F5] p-[18px] text-[14px] text-[#525252]">
+                <span class="material-symbols-outlined shrink-0 text-[#737373]" style="font-size:20px;">lock_clock</span>
+                <span>Course telah selesai. Forum ini hanya dapat dibaca.</span>
+            </div>
             <?php elseif ($isLocked): ?>
-            <div class="mb-4 rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 text-sm text-on-surface-variant">Selesaikan materi sesi ini terlebih dahulu untuk berpartisipasi.</div>
+            <div class="fd-card mb-[18px] flex items-center gap-[12px] rounded-[12px] bg-[#FEF3C7] p-[18px] text-[14px] text-[#B45309]">
+                <span class="material-symbols-outlined shrink-0" style="font-size:20px;">lock</span>
+                <span>Selesaikan materi sesi ini terlebih dahulu untuk berpartisipasi.</span>
+            </div>
             <?php endif; ?>
 
-            <div data-forum-view="category"
+            <div class="space-y-[18px]"
+                 data-forum-view="category"
                  data-course-code="<?= e((string) $courseId) ?>"
                  data-session-code="<?= e((string) $sessionId) ?>"
                  data-read-only="<?= $isRiwayat ? 'true' : 'false' ?>"
                  data-locked="<?= $isLocked ? 'true' : 'false' ?>"
                  data-category-url="<?= e($categoryUrl) ?>">
-                <p data-forum-message hidden class="mb-4"></p>
-                <div class="mb-4 flex justify-end">
+                <p data-forum-message hidden class="mb-[12px]"></p>
+                <div class="flex flex-wrap items-center justify-between gap-[12px]">
+                    <p class="text-[13px] font-medium text-[#737373]">Pilih topik untuk membaca balasan atau mulai diskusi baru.</p>
                     <?php if (!$isRiwayat && !$isLocked): ?>
-                    <a data-new-topic-link href="?route=/student/forum/new&amp;course_id=<?= rawurlencode((string) $courseId) ?>&amp;category_type=<?= rawurlencode((string) $categoryType) ?>&amp;session_id=<?= rawurlencode((string) $sessionId) ?>" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 sm:w-auto"><span class="material-symbols-outlined text-lg" aria-hidden="true">add</span>Mulai diskusi</a>
+                    <a data-new-topic-link href="?route=/student/forum/new&amp;course_id=<?= rawurlencode((string) $courseId) ?>&amp;category_type=<?= rawurlencode((string) $categoryType) ?>&amp;session_id=<?= rawurlencode((string) $sessionId) ?>" class="fd-btn fd-btn-primary fd-btn-md w-full rounded-full sm:w-auto"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span>Mulai diskusi</a>
                     <?php endif; ?>
                 </div>
-                <div data-forum-list class="min-w-0 space-y-3" aria-live="polite">
-                    <div class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center text-sm text-on-surface-variant">Memuat diskusi…</div>
+                <div data-forum-list class="min-w-0 space-y-[12px]" aria-live="polite">
+                    <div class="fd-card rounded-[12px] bg-white p-[32px] text-center text-[14px] text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Memuat diskusi…</div>
                 </div>
             </div>
         </div>

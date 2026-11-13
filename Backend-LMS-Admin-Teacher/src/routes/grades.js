@@ -1,7 +1,7 @@
 const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { getActiveStudentRecipient } = require('../services/student-auth');
 const { isMailConfigured } = require('../services/notification-mail');
@@ -10,7 +10,7 @@ const { syncStudentGradeNow } = require('../services/student-sync');
 const env = require('../config/env');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+router.use(authenticate);
 
 function queueStudentGradeSync(npk, courseCode) {
   syncStudentGradeNow(npk, courseCode).catch(error => console.error('Student grade sync failed:', error.message));
@@ -42,13 +42,13 @@ const notificationSchema = z.object({
 function bindIdentity(request, npk, courseCode, user) {
   return request.input('npk', sql.VarChar(50), npk)
     .input('courseCode', sql.VarChar(30), courseCode)
-    .input('isAdmin', sql.Bit, user.role === 'admin')
+    .input('isAdmin', sql.Bit, user.role !== 'teacher')
     .input('teacher', sql.VarChar(50), user.sub);
 }
 
-router.get('/', async (req, res, next) => {
+router.get('/', requirePermission('grades.view'), async (req, res, next) => {
   try {
-    const request = pool.request().input('isAdmin', sql.Bit, req.user.role === 'admin')
+    const request = pool.request().input('isAdmin', sql.Bit, req.user.role !== 'teacher')
       .input('teacher', sql.VarChar(50), req.user.sub);
     const npk = String(req.query.npk || '').trim();
     const course = String(req.query.course || '').trim();
@@ -65,7 +65,7 @@ router.get('/', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.patch('/:npk/:courseCode', trustedWriteOrigin, async (req, res, next) => {
+router.patch('/:npk/:courseCode', requirePermission('grades.edit'), trustedWriteOrigin, async (req, res, next) => {
   const identity = identitySchema.safeParse(req.params);
   const grade = gradeSchema.safeParse(req.body);
   if (!identity.success || !grade.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Nilai harus antara 0 dan 100.' } });
@@ -86,7 +86,7 @@ router.patch('/:npk/:courseCode', trustedWriteOrigin, async (req, res, next) => 
   } catch (error) { next(error); }
 });
 
-router.delete('/:npk/:courseCode', allowRoles('admin'), trustedWriteOrigin, async (req, res, next) => {
+router.delete('/:npk/:courseCode', requirePermission('grades.edit'), trustedWriteOrigin, async (req, res, next) => {
   const identity = identitySchema.safeParse(req.params);
   if (!identity.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Identitas nilai tidak valid.' } });
   try {
@@ -100,7 +100,7 @@ router.delete('/:npk/:courseCode', allowRoles('admin'), trustedWriteOrigin, asyn
   } catch (error) { next(error); }
 });
 
-router.post('/:npk/:courseCode/notify', trustedWriteOrigin, async (req, res, next) => {
+router.post('/:npk/:courseCode/notify', requirePermission('grades.edit'), trustedWriteOrigin, async (req, res, next) => {
   const identity = identitySchema.safeParse(req.params);
   const notification = notificationSchema.safeParse(req.body);
   if (!identity.success || !notification.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Lengkapi judul dan pesan notifikasi.' } });

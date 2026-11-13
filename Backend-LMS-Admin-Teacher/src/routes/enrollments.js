@@ -2,13 +2,13 @@ const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { publishNotificationEvent } = require('../services/notification-events');
 const { listActiveStudents, createTeacherRecommendation, listEnrollmentRequests, decideEnrollmentRequest } = require('../services/course-enrollments');
 const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
-router.use(authenticate, allowRoles('admin', 'teacher'));
+router.use(authenticate);
 
 function trustedStaffOrigin(req, res, next) {
   const origin = req.get('origin');
@@ -20,7 +20,7 @@ function trustedStaffOrigin(req, res, next) {
   next();
 }
 
-router.get('/options', allowRoles('teacher'), async (req, res, next) => {
+router.get('/options', requirePermission('enrollments.recommend', 'enrollments.decide'), async (req, res, next) => {
   try {
     const courses = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT course_code,title FROM dbo.courses
@@ -31,16 +31,16 @@ router.get('/options', allowRoles('teacher'), async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/requests', async (req, res, next) => {
+router.get('/requests', requirePermission('enrollments.view'), async (req, res, next) => {
   try {
     const status = ['all', 'pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'all';
-    const requests = await listEnrollmentRequests({ isAdmin: req.user.role === 'admin', teacherNpk: req.user.sub, status });
+    const requests = await listEnrollmentRequests({ isAdmin: req.user.role !== 'teacher', teacherNpk: req.user.sub, status });
     const page = paginateCollection(req, requests);
     res.json({ requests: page.data, pagination: page.pagination });
   } catch (error) { next(error); }
 });
 
-router.post('/recommendations', allowRoles('teacher'), trustedStaffOrigin, async (req, res, next) => {
+router.post('/recommendations', requirePermission('enrollments.recommend'), trustedStaffOrigin, async (req, res, next) => {
   const parsed = z.object({
     studentNpk: z.string().trim().min(1).max(50),
     courseCode: z.string().trim().min(2).max(30),
@@ -49,17 +49,19 @@ router.post('/recommendations', allowRoles('teacher'), trustedStaffOrigin, async
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih Student dan course yang valid.' } });
   try {
     const { studentNpk, courseCode, note } = parsed.data;
+    const isAdminScope = req.user.role !== 'teacher';
     const accessible = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
       .input('code', sql.VarChar(30), courseCode)
+      .input('wide', sql.Bit, isAdminScope)
       .query(`SELECT TOP 1 course_code FROM dbo.courses
-        WHERE course_code=@code AND status='active' AND (created_by=@npk OR assigned_trainer_npk=@npk)`);
+        WHERE course_code=@code AND status='active' AND (@wide=1 OR created_by=@npk OR assigned_trainer_npk=@npk)`);
     if (!accessible.recordset.length) return res.status(404).json({ error: { code: 'COURSE_NOT_FOUND', message: 'Course tidak ditemukan atau tidak berada dalam tanggung jawab Anda.' } });
     const requestId = await createTeacherRecommendation({ studentNpk, courseCode, teacherNpk: req.user.sub, note });
     res.status(201).json({ requestId, status: 'pending' });
   } catch (error) { next(error); }
 });
 
-router.post('/:requestId/decision', allowRoles('admin'), trustedStaffOrigin, async (req, res, next) => {
+router.post('/:requestId/decision', requirePermission('enrollments.decide'), trustedStaffOrigin, async (req, res, next) => {
   const requestId = z.coerce.number().int().positive().safeParse(req.params.requestId);
   const parsed = z.object({ action: z.enum(['approved', 'rejected']), note: z.string().trim().max(1000).optional().default('') })
     .strict().safeParse(req.body);

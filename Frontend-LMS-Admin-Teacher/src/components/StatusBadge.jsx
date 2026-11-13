@@ -1,149 +1,98 @@
 import React from 'react';
 
+const STATUS_STYLE_MAP = {
+  // Amber / Yellow (Pending, Choice, Mock, Retry)
+  pending: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/60',
+  pending_admin: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/60',
+  retry: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/60',
+  warning: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/60',
+  pilihan: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800/60',
+
+  // Blue (In Review / Development / Teacher / Wajib)
+  pending_review: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/60',
+  in_review: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/60',
+  info: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/60',
+  teacher: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/60',
+  wajib: 'bg-red-50 text-primary border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+
+  // Purple / Lavender (Approved, Reviewer, Integrated)
+  approved: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-200 dark:border-purple-800/60',
+  reviewer: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-200 dark:border-purple-800/60',
+  integrated: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-200 dark:border-purple-800/60',
+
+  // Emerald Green (Active, Published, Completed, Sent, Success)
+  active: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  aktif: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  published: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  selesai: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  sent: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  success: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  visible: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+  lulus: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800/60',
+
+  // Soft Red (Rejected, Admin, Failed, Important, Locked)
+  rejected: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  failed: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  gagal: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  admin: 'bg-red-50 text-primary border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  important: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  penting: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  locked: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  error: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+  danger: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800/60',
+
+  // Gray / Neutral (Draft, Inactive, Stopped, Hidden, Dropped, Student)
+  draft: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  inactive: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  nonaktif: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  stopped: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  hidden: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  dropped: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  student: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  neutral: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  default: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+};
+
+const LABEL_MAP = {
+  pending_admin: 'Antrean Admin',
+  pending_review: 'Dalam Tinjauan',
+  approved: 'Disetujui Reviewer',
+  published: 'Dipublikasi',
+  rejected: 'Perlu Revisi',
+  pending: 'Menunggu',
+  active: 'Aktif',
+  inactive: 'Nonaktif',
+  completed: 'Selesai',
+  dropped: 'Dihentikan',
+  draft: 'Draf',
+  visible: 'Tampil',
+  hidden: 'Disembunyikan',
+  locked: 'Terkunci',
+  sent: 'Terkirim',
+  retry: 'Coba Ulang',
+  failed: 'Gagal'
+};
+
 /**
- * Standard StatusBadge for consistent state and role visualization across DENSO LMS.
- *
- * @param {Object} props
- * @param {string} props.status - Status or role key (e.g. 'active', 'pending_admin', 'student').
- * @param {string} [props.label] - Custom human-readable label override.
- * @param {'sm' | 'md'} [props.size='md']
- * @param {boolean} [props.showDot=true] - Whether to show the status indicator dot.
- * @param {string} [props.className]
+ * StatusBadge Component (design.md soft semantic pill badges).
  */
 export default function StatusBadge({
-  status = '',
+  status = 'neutral',
   label,
-  size = 'md',
-  showDot = true,
+  dot = false,
   className = ''
 }) {
-  const normalized = String(status).toLowerCase().trim();
-
-  // Status mapping with semantic badge styling and localized labels
-  const configMap = {
-    // Account / General status
-    active: {
-      text: 'Aktif',
-      dot: 'bg-emerald-500',
-      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-    },
-    inactive: {
-      text: 'Nonaktif',
-      dot: 'bg-slate-400',
-      classes: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-    },
-
-    // Workflow / Submission status
-    pending: {
-      text: 'Menunggu',
-      dot: 'bg-amber-500 animate-pulse',
-      classes: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-    },
-    pending_admin: {
-      text: 'Menunggu Admin',
-      dot: 'bg-amber-500 animate-pulse',
-      classes: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-    },
-    pending_review: {
-      text: 'Dalam Review',
-      dot: 'bg-blue-500 animate-pulse',
-      classes: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
-    },
-    approved: {
-      text: 'Disetujui',
-      dot: 'bg-emerald-500',
-      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-    },
-    published: {
-      text: 'Terbit',
-      dot: 'bg-teal-500',
-      classes: 'bg-teal-50 text-teal-800 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800'
-    },
-    rejected: {
-      text: 'Ditolak',
-      dot: 'bg-red-500',
-      classes: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
-    },
-    draft: {
-      text: 'Draf',
-      dot: 'bg-zinc-400',
-      classes: 'bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700'
-    },
-
-    // Job / Queue status
-    queued: {
-      text: 'Dalam Antrean',
-      dot: 'bg-slate-400',
-      classes: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-    },
-    running: {
-      text: 'Diproses',
-      dot: 'bg-sky-500 animate-pulse',
-      classes: 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800'
-    },
-    completed: {
-      text: 'Selesai',
-      dot: 'bg-emerald-500',
-      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-    },
-    failed: {
-      text: 'Gagal',
-      dot: 'bg-red-500',
-      classes: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
-    },
-    stopped: {
-      text: 'Dihentikan',
-      dot: 'bg-amber-500',
-      classes: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-    },
-
-    // Roles
-    admin: {
-      text: 'Admin',
-      dot: 'bg-red-600',
-      classes: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
-    },
-    teacher: {
-      text: 'Teacher',
-      dot: 'bg-blue-600',
-      classes: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
-    },
-    reviewer: {
-      text: 'Reviewer',
-      dot: 'bg-purple-600',
-      classes: 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
-    },
-    student: {
-      text: 'Student',
-      dot: 'bg-emerald-600',
-      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-    }
-  };
-
-  const current = configMap[normalized] || {
-    text: status || '—',
-    dot: 'bg-slate-400',
-    classes: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-  };
-
-  const displayText = label || current.text;
-
-  const sizeClass = size === 'sm'
-    ? 'text-[11px] px-2 py-0.5 gap-1.5'
-    : 'text-xs px-2.5 py-1 gap-1.5 font-semibold';
+  const key = String(status).toLowerCase();
+  const styleClass = STATUS_STYLE_MAP[key] || STATUS_STYLE_MAP.default;
+  const displayLabel = label ?? LABEL_MAP[key] ?? status;
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border ${sizeClass} ${current.classes} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-tight ${styleClass} ${className}`}
     >
-      {showDot && (
-        <span
-          className={`size-1.5 shrink-0 rounded-full ${current.dot}`}
-          aria-hidden="true"
-        />
-      )}
-      <span className="truncate">{displayText}</span>
+      {dot && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-85" />}
+      <span>{displayLabel}</span>
     </span>
   );
 }
-

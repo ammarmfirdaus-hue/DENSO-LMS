@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
-const { authenticate, allowRoles } = require('../middleware/auth');
+const { authenticate, requirePermission } = require('../middleware/auth');
 const { materialUpload, uploadDirectory, hasExpectedFileSignature } = require('../middleware/material-upload');
 const { uploadLimiter } = require('../middleware/rate-limit');
 const { paginateCollection } = require('../middleware/pagination');
@@ -60,7 +60,7 @@ function isReviewSession(req) {
   return req.user?.role === 'reviewer' && req.user?.scope === 'reviewer_portal';
 }
 
-router.get('/reviewers', authenticate, allowRoles('admin'), async (_req, res, next) => {
+router.get('/reviewers', authenticate, requirePermission('reviewers.view', 'materials.send_to_reviewer'), async (_req, res, next) => {
   try {
     const result = await pool.request().query(`SELECT employee_npk,fullname,email,department,position,phone_number FROM dbo.employee_accounts
       WHERE role='reviewer' AND status='active' ORDER BY fullname`);
@@ -68,7 +68,7 @@ router.get('/reviewers', authenticate, allowRoles('admin'), async (_req, res, ne
   } catch (error) { next(error); }
 });
 
-router.get('/trainers', authenticate, allowRoles('admin'), async (_req, res, next) => {
+router.get('/trainers', authenticate, requirePermission('courses.assign_trainer', 'courses.create'), async (_req, res, next) => {
   try {
     const result = await pool.request().query(`SELECT employee_npk,fullname FROM dbo.employee_accounts
       WHERE role='teacher' AND status='active' ORDER BY fullname`);
@@ -80,7 +80,7 @@ router.get('/trainers', authenticate, allowRoles('admin'), async (_req, res, nex
  * Endpoint pengajuan materi baru ke dalam sesi kursus oleh Admin atau Teacher.
  * Status awal disetel ke 'pending_admin' dan menunggu persetujuan Admin.
  */
-router.post('/sessions/:sessionId/submissions', authenticate, allowRoles('admin', 'teacher'), uploadLimiter, materialUpload.single('file'), async (req, res, next) => {
+router.post('/sessions/:sessionId/submissions', authenticate, requirePermission('materials.submit'), uploadLimiter, materialUpload.single('file'), async (req, res, next) => {
   const sessionId = z.coerce.number().int().positive().safeParse(req.params.sessionId);
   const input = z.object({
     title: z.string().trim().min(2).max(200),
@@ -150,9 +150,14 @@ router.post('/sessions/:sessionId/submissions', authenticate, allowRoles('admin'
   } catch (error) { cleanFile(req.file); next(error); }
 });
 
-router.get('/submissions', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.get('/submissions', authenticate, requirePermission('materials.view', 'materials.review'), async (req, res, next) => {
   try {
-    const request = pool.request().input('isAdmin', sql.Bit, req.user.role === 'admin').input('npk', sql.VarChar(50), req.user.sub);
+    const isAdminScope = req.user.role === 'admin' ? 1 : 0;
+    const isReviewerScope = req.user.role === 'reviewer' ? 1 : 0;
+    const request = pool.request()
+      .input('isAdmin', sql.Bit, isAdminScope)
+      .input('isReviewer', sql.Bit, isReviewerScope)
+      .input('npk', sql.VarChar(50), req.user.sub);
     const result = await request.query(`SELECT ms.submission_id,ms.title,ms.material_type,ms.content,ms.original_file_name,
         ms.status,ms.submitted_by,submitter.fullname AS submitter_name,ms.reviewer_npk,reviewer.fullname AS reviewer_name,
         ms.reviewer_comment,ms.admin_comment,ms.created_at,c.course_id,c.course_code,c.title AS course_title,
@@ -161,16 +166,17 @@ router.get('/submissions', authenticate, allowRoles('admin', 'teacher'), async (
       JOIN dbo.course_sessions s ON s.session_id=ms.session_id JOIN dbo.courses c ON c.course_id=s.course_id
       JOIN dbo.employee_accounts submitter ON submitter.employee_npk=ms.submitted_by
       LEFT JOIN dbo.employee_accounts reviewer ON reviewer.employee_npk=ms.reviewer_npk
-      WHERE (@isAdmin=1 OR ms.submitted_by=@npk) ORDER BY ms.created_at DESC`);
+      WHERE (@isAdmin=1 OR ms.submitted_by=@npk OR (@isReviewer=1 AND (ms.reviewer_npk=@npk OR ms.status='pending_review')))
+      ORDER BY ms.created_at DESC`);
     const page = paginateCollection(req, result.recordset);
     res.json({ submissions: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });
 
 /**
- * Endpoint bagi Admin untuk menolak materi saat berstatus 'pending_admin' disertai alasan perbaikan.
+ * Endpoint untuk menolak materi saat berstatus 'pending_admin' disertai alasan perbaikan.
  */
-router.post('/submissions/:id/admin-reject', authenticate, allowRoles('admin'), async (req, res, next) => {
+router.post('/submissions/:id/admin-reject', authenticate, requirePermission('materials.send_to_reviewer'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const input = z.object({
     comment: z.string().trim().min(3, 'Alasan penolakan minimal 3 karakter.').max(2000)
@@ -211,7 +217,7 @@ router.post('/submissions/:id/admin-reject', authenticate, allowRoles('admin'), 
  * Memvalidasi izin edit: Teacher hanya saat 'rejected', Admin saat 'pending_admin' atau 'rejected'.
  * Materi yang berhasil diubah akan kembali ke status 'pending_admin'.
  */
-router.put('/submissions/:id', authenticate, allowRoles('admin', 'teacher'), uploadLimiter, materialUpload.single('file'), async (req, res, next) => {
+router.put('/submissions/:id', authenticate, requirePermission('materials.submit'), uploadLimiter, materialUpload.single('file'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const input = z.object({
     title: z.string().trim().min(2).max(200),
@@ -358,7 +364,7 @@ router.put('/submissions/:id', authenticate, allowRoles('admin', 'teacher'), upl
   }
 });
 
-router.post('/submissions/:id/send-review', authenticate, allowRoles('admin'), async (req, res, next) => {
+router.post('/submissions/:id/send-review', authenticate, requirePermission('materials.send_to_reviewer'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const body = z.object({ reviewerEmail: z.string().trim().email().max(254).transform(value => value.toLowerCase()) }).safeParse(req.body);
   if (!id.success || !body.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Masukkan alamat email reviewer yang valid.' } });
@@ -435,33 +441,37 @@ router.post('/links/:token/consume', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/reviewer/submissions', authenticate, allowRoles('reviewer'), async (req, res, next) => {
-  if (!isReviewSession(req)) return res.status(403).json({ error: { code: 'REVIEW_SESSION_REQUIRED', message: 'Buka halaman dari link email reviewer.' } });
+router.get('/reviewer/submissions', authenticate, requirePermission('materials.review'), async (req, res, next) => {
   try {
-    const result = await pool.request().input('npk', sql.VarChar(50), req.user.sub)
+    const canWideReview = req.user.role === 'admin' || !isReviewSession(req);
+    const result = await pool.request()
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .input('wide', sql.Bit, canWideReview ? 1 : 0)
       .query(`SELECT ms.submission_id,ms.title,ms.material_type,ms.content,ms.original_file_name,ms.status,
         ms.reviewer_comment,ms.created_at,c.course_code,c.title AS course_title,s.title AS session_title,
         submitter.fullname AS submitter_name
         FROM dbo.material_submissions ms JOIN dbo.course_sessions s ON s.session_id=ms.session_id
         JOIN dbo.courses c ON c.course_id=s.course_id JOIN dbo.employee_accounts submitter ON submitter.employee_npk=ms.submitted_by
-        WHERE ms.reviewer_npk=@npk ORDER BY CASE WHEN ms.status='pending_review' THEN 0 ELSE 1 END,ms.created_at DESC`);
+        WHERE ms.reviewer_npk=@npk OR (@wide=1 AND ms.status='pending_review')
+        ORDER BY CASE WHEN ms.status='pending_review' THEN 0 ELSE 1 END,ms.created_at DESC`);
     const page = paginateCollection(req, result.recordset);
     res.json({ submissions: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });
 
-router.get('/reviewer/submissions/:id', authenticate, allowRoles('reviewer'), async (req, res, next) => {
-  if (!isReviewSession(req)) return res.status(403).json({ error: { code: 'REVIEW_SESSION_REQUIRED', message: 'Sesi reviewer tidak valid.' } });
+router.get('/reviewer/submissions/:id', authenticate, requirePermission('materials.review'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID materi tidak valid.' } });
   try {
+    const canWideReview = req.user.role === 'admin' || !isReviewSession(req);
     const result = await pool.request().input('id', sql.BigInt, id.data).input('npk', sql.VarChar(50), req.user.sub)
+      .input('wide', sql.Bit, canWideReview ? 1 : 0)
       .query(`SELECT ms.submission_id,ms.title,ms.material_type,ms.content,ms.file_path,ms.original_file_name,ms.status,
         ms.reviewer_comment,ms.created_at,c.course_code,c.title AS course_title,s.title AS session_title,
         submitter.fullname AS submitter_name
         FROM dbo.material_submissions ms JOIN dbo.course_sessions s ON s.session_id=ms.session_id
         JOIN dbo.courses c ON c.course_id=s.course_id JOIN dbo.employee_accounts submitter ON submitter.employee_npk=ms.submitted_by
-        WHERE ms.submission_id=@id AND ms.reviewer_npk=@npk`);
+        WHERE ms.submission_id=@id AND (ms.reviewer_npk=@npk OR @wide=1)`);
     if (!result.recordset[0]) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Materi tidak ditemukan.' } });
     const submission = result.recordset[0];
     submission.fileUrl = submission.file_path ? `/material-workflow/reviewer/submissions/${submission.submission_id}/file` : null;
@@ -470,38 +480,41 @@ router.get('/reviewer/submissions/:id', authenticate, allowRoles('reviewer'), as
   } catch (error) { next(error); }
 });
 
-router.get('/reviewer/submissions/:id/file', authenticate, allowRoles('reviewer'), async (req, res, next) => {
-  if (!isReviewSession(req)) return res.status(403).json({ error: { code: 'REVIEW_SESSION_REQUIRED', message: 'Sesi reviewer tidak valid.' } });
+router.get('/reviewer/submissions/:id/file', authenticate, requirePermission('materials.review'), async (req, res, next) => {
   try {
+    const canWideReview = req.user.role === 'admin' || !isReviewSession(req);
     const result = await pool.request().input('id', sql.BigInt, Number(req.params.id)).input('npk', sql.VarChar(50), req.user.sub)
-      .query(`SELECT file_path FROM dbo.material_submissions WHERE submission_id=@id AND reviewer_npk=@npk`);
+      .input('wide', sql.Bit, canWideReview ? 1 : 0)
+      .query(`SELECT file_path FROM dbo.material_submissions WHERE submission_id=@id AND (reviewer_npk=@npk OR @wide=1)`);
     if (!result.recordset[0]) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File tidak ditemukan.' } });
     return sendStoredFile(res, result.recordset[0]);
   } catch (error) { next(error); }
 });
 
 /**
- * Endpoint bagi Reviewer untuk memberikan keputusan: 'approved' (disetujui) atau 'rejected' (ditolak).
+ * Endpoint bagi Reviewer atau peran dengan izin materials.review untuk memberikan keputusan: 'approved' atau 'rejected'.
  */
-router.post('/reviewer/submissions/:id/decision', authenticate, allowRoles('reviewer'), async (req, res, next) => {
-  if (!isReviewSession(req)) return res.status(403).json({ error: { code: 'REVIEW_SESSION_REQUIRED', message: 'Sesi reviewer tidak valid.' } });
+router.post('/reviewer/submissions/:id/decision', authenticate, requirePermission('materials.review'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   const input = z.object({ decision: z.enum(['approved', 'rejected']), comment: z.string().trim().max(2000).optional().default('') }).safeParse(req.body);
   if (!id.success || !input.success || (input.data.decision === 'rejected' && input.data.comment.length < 3)) {
     return res.status(400).json({ error: { code: 'INVALID_DECISION', message: 'Isi alasan minimal 3 karakter saat menolak materi.' } });
   }
   try {
+    const canWideReview = req.user.role === 'admin' || !isReviewSession(req);
     const result = await pool.request().input('id', sql.BigInt, id.data).input('npk', sql.VarChar(50), req.user.sub)
+      .input('wide', sql.Bit, canWideReview ? 1 : 0)
       .input('status', sql.VarChar(24), input.data.decision).input('comment', sql.NVarChar(2000), input.data.comment || null)
       .query(`UPDATE dbo.material_submissions SET status=@status,reviewer_comment=@comment,
+        reviewer_npk=COALESCE(reviewer_npk,@npk),
         reviewed_at=SYSUTCDATETIME(),updated_at=SYSUTCDATETIME()
-        WHERE submission_id=@id AND reviewer_npk=@npk AND status='pending_review'; SELECT @@ROWCOUNT AS affected`);
+        WHERE submission_id=@id AND (reviewer_npk=@npk OR @wide=1) AND status='pending_review'; SELECT @@ROWCOUNT AS affected`);
     if (!result.recordset[0]?.affected) return res.status(409).json({ error: { code: 'ALREADY_REVIEWED', message: 'Materi sudah diputuskan atau tidak lagi menunggu review.' } });
     res.json({ updated: true, status: input.data.decision, message: input.data.decision === 'approved' ? 'Materi disetujui. Menunggu Admin mempublikasikannya ke student.' : 'Materi ditolak dan dapat diperbaiki oleh trainer.' });
   } catch (error) { next(error); }
 });
 
-router.get('/submissions/:id/file', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.get('/submissions/:id/file', authenticate, requirePermission('materials.view', 'materials.review'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID materi tidak valid.' } });
   try {
@@ -518,7 +531,7 @@ router.get('/submissions/:id/file', authenticate, allowRoles('admin', 'teacher')
  * Endpoint bagi Admin untuk mempublikasikan materi berstatus 'approved' ke tabel course_materials
  * dan memicu sinkronisasi langsung ke database MySQL student.
  */
-router.post('/submissions/:id/publish', authenticate, allowRoles('admin'), async (req, res, next) => {
+router.post('/submissions/:id/publish', authenticate, requirePermission('materials.publish'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID materi tidak valid.' } });
   const transaction = new sql.Transaction(pool);
@@ -552,7 +565,7 @@ router.post('/submissions/:id/publish', authenticate, allowRoles('admin'), async
   }
 });
 
-router.get('/published', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.get('/published', authenticate, requirePermission('materials.view', 'courses.view'), async (req, res, next) => {
   try {
     const result = await pool.request().query(`
       SELECT 
@@ -595,7 +608,7 @@ router.get('/published', authenticate, allowRoles('admin', 'teacher'), async (re
   } catch (error) { next(error); }
 });
 
-router.delete('/published/:materialId', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.delete('/published/:materialId', authenticate, requirePermission('materials.delete'), async (req, res, next) => {
   const materialId = z.coerce.number().int().positive().safeParse(req.params.materialId);
   if (!materialId.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID materi tidak valid.' } });
 
@@ -658,7 +671,7 @@ router.delete('/published/:materialId', authenticate, allowRoles('admin', 'teach
   } catch (error) { next(error); }
 });
 
-router.delete('/submissions/:id', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.delete('/submissions/:id', authenticate, requirePermission('materials.delete'), async (req, res, next) => {
   const id = z.coerce.number().int().positive().safeParse(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID pengajuan tidak valid.' } });
   try {
@@ -712,7 +725,7 @@ router.get('/published/:materialId/file', authenticate, allowRoles('student', 'a
       if (!await studentHasCourseAccess(Number(req.user.student_id), material.course_code, studentAccountType)) {
         return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File materi tidak tersedia.' } });
       }
-    } else if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
+    } else if (!['admin', 'teacher', 'reviewer'].includes(req.user.role)) {
       return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File materi tidak tersedia.' } });
     }
     return sendStoredFile(res, material);

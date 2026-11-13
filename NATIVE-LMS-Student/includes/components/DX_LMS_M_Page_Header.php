@@ -19,16 +19,16 @@ $page_description   = $page_description ?? null;
 $page_actions_html  = $page_actions_html ?? null;
 $page_badge_html    = $page_badge_html ?? null;
 ?>
-<header class="dls-page-banner mb-6 flex min-w-0 flex-col gap-4 border-b border-outline-variant/40 pb-5 sm:flex-row sm:items-end sm:justify-between">
+<header class="dls-page-banner mb-[18px] flex min-w-0 flex-col gap-[12px] rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] sm:flex-row sm:items-end sm:justify-between sm:p-[24px]">
     <div class="min-w-0 flex-1">
         <?php if ($page_eyebrow): ?>
-            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+            <p class="inline-flex items-center gap-1.5 rounded-full bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#525252]">
                 <?= htmlspecialchars((string) $page_eyebrow, ENT_QUOTES, 'UTF-8') ?>
             </p>
         <?php endif; ?>
         
-        <div class="mt-1 flex flex-wrap items-center gap-3">
-            <h1 class="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
+        <div class="mt-[6px] flex flex-wrap items-center gap-[12px]">
+            <h1 class="fd-h1 text-[24px] font-bold leading-[30px] text-[#171717] sm:text-[28px] sm:leading-[34px]">
                 <?= htmlspecialchars((string) $page_title_heading, ENT_QUOTES, 'UTF-8') ?>
             </h1>
             <?php if ($page_badge_html): ?>
@@ -39,14 +39,14 @@ $page_badge_html    = $page_badge_html ?? null;
         </div>
 
         <?php if ($page_description): ?>
-            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-on-surface-variant">
+            <p class="mt-[6px] max-w-3xl text-[14px] leading-[22px] text-[#525252]">
                 <?= htmlspecialchars((string) $page_description, ENT_QUOTES, 'UTF-8') ?>
             </p>
         <?php endif; ?>
     </div>
 
     <?php if ($page_actions_html): ?>
-        <div class="flex shrink-0 flex-wrap items-center gap-2.5 sm:self-end">
+        <div class="flex shrink-0 flex-wrap items-center gap-[12px] sm:self-end">
             <?= $page_actions_html ?>
         </div>
     <?php endif; ?>

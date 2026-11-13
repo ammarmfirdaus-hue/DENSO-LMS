@@ -10,6 +10,10 @@ $base_path    = (string) ($base_path    ?? '');
 $back_url     = (string) ($back_url     ?? '?route=/student');
 $headerTitleEscaped = htmlspecialchars($header_title, ENT_QUOTES, 'UTF-8');
 $backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
+
+$hari_list_hdr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+$bulan_list_hdr = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+$current_header_date = "{$hari_list_hdr[(int)date('w')]}, " . date('j') . " {$bulan_list_hdr[(int)date('n')]} " . date('Y');
 ?>
 <header class="dls-app-header" id="topAppBar" role="banner">
     <div class="dls-app-header-inner">
@@ -32,6 +36,11 @@ $backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
             <div class="dls-header-title-group">
                 <span class="dls-header-title"><?= $headerTitleEscaped ?></span>
             </div>
+            <!-- Tanggal hari ini di header (Desktop) -->
+            <div class="dls-header-date hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-xs font-semibold text-slate-600 dark:text-slate-300 ml-3">
+                <span class="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">calendar_today</span>
+                <span><?= $current_header_date ?></span>
+            </div>
         </div>
 
         <!-- CENTER brand (mobile only, when no back button) -->
@@ -43,23 +52,25 @@ $backUrlEscaped     = htmlspecialchars($back_url,     ENT_QUOTES, 'UTF-8');
         </a>
         <?php endif; ?>
 
-        <!-- RIGHT: notification bell -->
-        <?php if (($_SESSION['sso_mode'] ?? '') === 'teacher_student'): ?>
-        <form method="post" action="?route=/auth/teacher-mode" class="dls-teacher-mode-return-form">
-            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-            <button type="submit" class="dls-header-teacher-mode" aria-label="Kembali ke Portal Teacher" title="Kembali ke Portal Teacher">
-                <span class="material-symbols-outlined" aria-hidden="true">switch_access_shortcut</span>
-                <span class="dls-teacher-mode-return-label">Portal Teacher</span>
-            </button>
-        </form>
-        <?php endif; ?>
-        <a href="?route=/student/notifikasi"
-           class="dls-header-notifications"
-           aria-label="Notifikasi<?= $notif_count > 0 ? ', ' . $notif_count . ' belum dibaca' : '' ?>"
-           title="Notifikasi">
-            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-            <span data-notification-count class="dls-notification-count" aria-hidden="true"<?= $notif_count > 0 ? '' : ' hidden' ?>><?= $notif_count > 99 ? '99+' : $notif_count ?></span>
-        </a>
+        <!-- RIGHT: notifications & role switcher -->
+        <div class="flex items-center gap-2">
+            <?php if (($_SESSION['sso_mode'] ?? '') === 'teacher_student'): ?>
+            <form method="post" action="?route=/auth/teacher-mode" class="dls-teacher-mode-return-form">
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                <button type="submit" class="dls-header-teacher-mode" aria-label="Kembali ke Portal Teacher" title="Kembali ke Portal Teacher">
+                    <span class="material-symbols-outlined" aria-hidden="true">switch_access_shortcut</span>
+                    <span class="dls-teacher-mode-return-label">Portal Teacher</span>
+                </button>
+            </form>
+            <?php endif; ?>
+            <a href="?route=/student/notifikasi"
+               class="dls-header-notifications"
+               aria-label="Notifikasi<?= $notif_count > 0 ? ', ' . $notif_count . ' belum dibaca' : '' ?>"
+               title="Notifikasi">
+                <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+                <span data-notification-count class="dls-notification-count" aria-hidden="true"<?= $notif_count > 0 ? '' : ' hidden' ?>><?= $notif_count > 99 ? '99+' : $notif_count ?></span>
+            </a>
+        </div>
 
     </div>
 </header>

@@ -8,6 +8,7 @@ const { authenticate, allowRoles } = require('../middleware/auth');
 const env = require('../config/env');
 const { pool, sql } = require('../config/database');
 const { ensureTeacherShadowAccount } = require('../services/student-auth');
+const { getRoleAccessProfile } = require('../services/role-permissions');
 
 const router = express.Router();
 const loginLimiter = buildLimiter({
@@ -24,8 +25,16 @@ router.post('/login', loginLimiter, async (req, res, next) => {
   try {
     const result = await login(parsed.data.npk, parsed.data.password);
     if (!result) return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'NPK atau kata sandi salah.' } });
+    const accessProfile = await getRoleAccessProfile(result.user.role);
     setSsoCookie(res, result.token);
-    res.json(result);
+    res.json({
+      ...result,
+      user: {
+        ...result.user,
+        canAccessStaffPortal: accessProfile.canAccessStaffPortal,
+        permissions: accessProfile.permissions
+      }
+    });
   } catch (error) { next(error); }
 });
 
@@ -77,23 +86,48 @@ router.post('/teacher-mode', authenticate, allowRoles('student'), async (req, re
 
 router.get('/me', authenticate, async (req, res, next) => {
   if (req.user.role === 'student') {
-    return res.json({ user: { npk: req.user.sub, name: req.user.name || req.user.sub, email: '', role: 'student' } });
+    const accessProfile = await getRoleAccessProfile('student');
+    return res.json({
+      user: {
+        npk: req.user.sub,
+        name: req.user.name || req.user.sub,
+        email: '',
+        role: 'student',
+        canAccessStaffPortal: accessProfile.canAccessStaffPortal,
+        permissions: accessProfile.permissions
+      }
+    });
   }
   try {
     const result = await pool.request()
       .input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT employee_npk, fullname, email, role, status FROM dbo.employee_accounts WHERE employee_npk = @npk`);
     const record = result.recordset[0];
+    const effectiveRole = record?.role || req.user.role;
+    const accessProfile = req.user?.scope === 'reviewer_portal'
+      ? { canAccessStaffPortal: false, permissions: ['materials.review'] }
+      : await getRoleAccessProfile(effectiveRole);
     res.json({
       user: {
         npk: req.user.sub,
         name: record?.fullname || req.user.name,
         email: record?.email || '',
-        role: record?.role || req.user.role
+        role: effectiveRole,
+        canAccessStaffPortal: accessProfile.canAccessStaffPortal,
+        permissions: accessProfile.permissions
       }
     });
   } catch (error) {
-    res.json({ user: { npk: req.user.sub, name: req.user.name, role: req.user.role } });
+    const accessProfile = await getRoleAccessProfile(req.user.role).catch(() => ({ canAccessStaffPortal: false, permissions: [] }));
+    res.json({
+      user: {
+        npk: req.user.sub,
+        name: req.user.name,
+        role: req.user.role,
+        canAccessStaffPortal: accessProfile.canAccessStaffPortal,
+        permissions: accessProfile.permissions
+      }
+    });
   }
 });
 

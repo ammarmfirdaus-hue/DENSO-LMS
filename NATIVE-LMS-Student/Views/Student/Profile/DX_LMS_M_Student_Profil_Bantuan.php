@@ -7,7 +7,7 @@
  */
 $active_tab = 'profil'; ?>
 <!DOCTYPE html>
-<html lang="id" style="">
+<html lang="id">
 
 <head>
     <?php
@@ -21,16 +21,6 @@ $active_tab = 'profil'; ?>
 
         .pt-safe {
             padding-top: env(safe-area-inset-top, 44px);
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-        }
-
-        body *,
-        body *::before,
-        body *::after {
-            font-family: inherit;
         }
 
         .faq-answer {
@@ -261,7 +251,7 @@ $active_tab = 'profil'; ?>
                         ],
                     ];
                     foreach ($guides as $g): ?>
-                    <div class="flex items-start gap-3 p-3.5 bg-surface-container/20 rounded-xl border border-outline-variant/15 hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer group">
+                    <div role="button" tabindex="0" data-guide-title="<?= e($g['title']) ?>" data-guide-desc="<?= e($g['desc']) ?>" class="guide-card-item flex items-start gap-3 p-3.5 bg-surface-container/20 rounded-xl border border-outline-variant/15 hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer group">
                         <div class="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
                             <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1;"><?= $g[
                                 'icon'
@@ -399,6 +389,18 @@ $active_tab = 'profil'; ?>
                     behavior: 'smooth',
                     block: 'nearest'
                 });
+            });
+        });
+
+        document.querySelectorAll('.guide-card-item').forEach(function(card) {
+            card.addEventListener('click', function() {
+                var title = this.getAttribute('data-guide-title') || 'Panduan Penggunaan';
+                var desc = this.getAttribute('data-guide-desc') || '';
+                var openModal = function(DLS) {
+                    DLS && DLS.info(title, desc);
+                };
+                if (window.DLS) openModal(window.DLS);
+                else window.addEventListener('DLSReady', function() { openModal(window.DLS); }, { once: true });
             });
         });
     </script>
