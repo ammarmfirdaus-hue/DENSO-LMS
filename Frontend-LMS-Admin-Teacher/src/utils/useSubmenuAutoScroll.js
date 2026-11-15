@@ -45,6 +45,8 @@ export default function useSubmenuAutoScroll() {
     let resizeObserver = null;
     let settleTimer = null;
     let rafId = 0;
+    let scrollScheduled = false;
+    let scrollCommandIssued = false;
 
     const cleanup = () => {
       cancelled = true;
@@ -62,10 +64,17 @@ export default function useSubmenuAutoScroll() {
       if (!el) return false;
       const desiredTop = 80; // Matches scroll-mt-20 clearance under 64px sticky header
       const { top } = el.getBoundingClientRect();
-      if (Math.abs(top - desiredTop) > 24) {
+      if (
+        Math.abs(top - desiredTop) > 24 &&
+        !scrollScheduled &&
+        !scrollCommandIssued
+      ) {
+        scrollScheduled = true;
         if (rafId) window.cancelAnimationFrame(rafId);
         rafId = window.requestAnimationFrame(() => {
-          if (!cancelled) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (cancelled) return;
+          scrollCommandIssued = true;
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       }
       return true;

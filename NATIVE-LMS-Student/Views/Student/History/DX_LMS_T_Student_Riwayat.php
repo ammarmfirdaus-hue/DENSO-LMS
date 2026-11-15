@@ -33,99 +33,61 @@ $active_tab = 'riwayat'; ?>
     include APP_ROOT . '/includes/components/DX_LMS_M_Header.php';
     ?>
     <main class="dls-main flex-1 pt-[72px] pb-32 lg:ml-[240px] transition-all duration-300">
+        <?php
+        $topbar_title = 'Riwayat Belajar';
+        $topbar_subtitle = 'Pantau pencapaian dan unduh sertifikat pelatihan Anda.';
+        $topbar_search_id = 'searchInput';
+        $topbar_search_placeholder = 'Cari riwayat course...';
+        include APP_ROOT . '/includes/components/DX_LMS_M_Workspace_Topbar.php';
+        ?>
         <!-- Header & Stats Section -->
-        <section class="px-container-margin py-6">
-            <h1 class="fd-h1 text-[#171717] mb-[6px]">Riwayat Belajar</h1>
-            <p class="fd-body text-[#525252] mb-[18px]">Pantau pencapaian dan unduh sertifikat pelatihan Anda.</p>
+        <section class="px-container-margin py-2 lg:py-0 mb-5">
+            <div class="lg:hidden mb-4">
+                <h1 class="fd-h1 text-[22px] font-bold text-[#181824] dark:text-white mb-[4px]">Riwayat Belajar</h1>
+                <p class="fd-body text-[13px] text-[#64748B]">Pantau pencapaian dan unduh sertifikat pelatihan Anda.</p>
+                <div class="relative mt-3">
+                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#64748B]">search</span>
+                    <input type="text" oninput="var d=document.getElementById('searchInput');if(d){d.value=this.value;d.dispatchEvent(new Event('input'));}" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-[13px]" placeholder="Cari riwayat course...">
+                </div>
+            </div>
             <!-- Stats Card -->
-            <div class="fd-card-elevated rounded-[12px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.12)] p-[24px] flex flex-col items-center justify-center mb-[24px]">
-                <span class="rounded-full bg-[#DCFCE7] px-3 py-1 text-[11px] font-semibold text-[#16A34A] uppercase tracking-wider mb-[12px]">Total Kursus Selesai</span>
-                <div class="flex items-center gap-[12px]">
-                    <span class="fd-mono text-[42px] leading-[44px] text-[#171717] font-bold tracking-tight"><?= e(
+            <div class="lms-card p-[20px] flex items-center justify-between gap-4">
+                <div>
+                    <span class="rounded-full bg-[#DCFCE7] px-3 py-1 text-[11px] font-bold text-[#16A34A] uppercase tracking-wider">Total Kursus Selesai</span>
+                    <p class="mt-2 text-[13px] text-[#64748B]">Semua pelatihan wajib yang berhasil Anda tuntaskan.</p>
+                </div>
+                <div class="flex items-center gap-[10px] shrink-0">
+                    <span class="fd-mono text-[34px] leading-none text-[#181824] dark:text-white font-bold tracking-tight"><?= e(
                         (string) $stats['completed_count'],
                     ) ?></span>
-                    <span class="material-symbols-outlined text-[#16A34A] text-[32px]" style='font-variation-settings: "FILL" 1;'>verified</span>
+                    <span class="material-symbols-outlined text-[#16A34A] text-[30px]" style='font-variation-settings: "FILL" 1;'>verified</span>
                 </div>
-            </div>
-            <!-- Search Bar -->
-            <div class="relative pb-[12px]">
-                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-[11px] text-[#737373]">search</span>
-                <input type="text" id="searchInput" class="fd-input fd-search-input w-full" placeholder="Cari riwayat course...">
-            </div>
-
-            <!-- Filter Tabs -->
-            <div class="flex gap-[6px] overflow-x-auto pb-2 scrollbar-hide">
             </div>
         </section>
-        <!-- Course List -->
-        <section id="course-results" class="px-container-margin grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px] pt-2">
-            <?php foreach ($completedCourses as $c): ?>
-            <div class="course-card fd-card flex flex-col h-full bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden" data-filters="<?= htmlspecialchars(
-                json_encode($c['filters'] ?? []),
-            ) ?>">
-                <div class="course-card-cover aspect-video relative shrink-0 bg-[#171717]">
-                    <?php if ($c['thumbnail']): ?>
-                    <img alt="<?= e(
-                        $c['title'],
-                    ) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="<?= e(
-    $c['thumbnail'],
-) ?>">
-                    <?php endif; ?>
-                    <?php
-                    $icon = $c['thumbnail_icon'] ?? 'school';
-                    $showFallback = empty($c['thumbnail']) ? 'flex' : 'none';
-                    ?>
-                    <div class="fd-cover-fallback<?= $c['thumbnail'] ? ' hidden' : '' ?>" style="display:<?= $showFallback ?>">
-                        <span class="fd-cover-icon-badge">
-                            <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;"><?= e(
-                                $icon,
-                            ) ?></span>
-                        </span>
-                    </div>
-                    <div class="fd-chip fd-chip-success absolute top-3 right-3 shadow-sm">
-                        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
-                    </div>
+        <!-- Sertifikat & Penghargaan Diterima -->
+        <section id="student-certificates-section" class="px-container-margin mb-6">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[#E60012] text-[22px]">workspace_premium</span>
+                    <h2 class="text-[16px] font-bold text-[#181824] dark:text-white">Sertifikat &amp; Penghargaan Diterima</h2>
                 </div>
-                <div class="p-[18px] flex flex-col flex-1">
-                    <div class="flex justify-between items-start mb-[6px]">
-                        <div>
-                            <h3 class="fd-h4 text-[#171717] leading-tight course-title"><?= e(
-                                $c['title'],
-                            ) ?></h3>
-                            <span class="text-[12px] font-medium text-[#737373] mt-1 block"><strong class="fd-mono text-[#171717]"><?= e(
-                                (string) $c['modules_count'],
-                            ) ?></strong> Modul</span>
-                        </div>
-                    </div>
-                    <p class="fd-body text-[#525252] line-clamp-2 mb-[12px]"><?= e(
-                        $c['description'],
-                    ) ?></p>
-
-                    <div class="flex gap-[6px] flex-wrap">
-                        <?php foreach ($c['filters'] ?? [] as $f): ?>
-                        <span class="bg-[#F5F5F5] text-[#525252] text-[11px] px-2.5 py-0.5 rounded-full font-medium"><?= e(
-                            $f,
-                        ) ?></span>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <div class="mt-auto pt-[18px] space-y-[6px]">
-                        <div class="flex justify-between text-[12px]">
-                            <span class="text-[#525252]">Selesai</span>
-                            <span class="fd-mono text-[#16A34A] font-bold">100%</span>
-                        </div>
-                        <div class="w-full bg-[#F5F5F5] rounded-full h-[6px] overflow-hidden">
-                            <div class="bg-[#16A34A] h-[6px] rounded-full" style="width: 100%"></div>
-                        </div>
-                        <button onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e(
-                            $c['id'],
-                        ) ?>'" class="fd-btn fd-btn-secondary fd-btn-md w-full mt-[12px]">
-                            Lihat Riwayat
-                        </button>
-                    </div>
-                </div>
+                <span id="student-certificates-count" class="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                    Memuat...
+                </span>
             </div>
-            <?php endforeach; ?>
+            <div id="student-certificates-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[14px]">
+                <div class="lms-card p-4 text-[13px] text-[#64748B]">Memuat sertifikat &amp; penghargaan Anda...</div>
+            </div>
+        </section>
+
+        <!-- Course List -->
+        <section id="course-results" class="px-container-margin grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[18px] pt-2">
+            <?php
+            $card_context = 'riwayat';
+            foreach ($completedCourses as $c):
+                include APP_ROOT . '/includes/components/DX_LMS_M_Course_Card.php';
+            endforeach;
+            ?>
         </section>
 
         <!-- Pagination Controls -->
@@ -239,6 +201,137 @@ $active_tab = 'riwayat'; ?>
     <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->
     <script src="assets/js/DX_LMS_M_SweetAlert2.min.js" defer></script>
     <script src="assets/js/DX_LMS_M_Helpers.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const grid = document.getElementById('student-certificates-grid');
+            const countBadge = document.getElementById('student-certificates-count');
+            const apiMeta = document.querySelector('meta[name="dls-api-base"]');
+            const apiBase = (apiMeta ? apiMeta.getAttribute('content') : '').replace(/\/+$/, '');
+            if (!grid || !apiBase) {
+                if (countBadge) countBadge.textContent = '0 Item';
+                return;
+            }
+
+            const typeMeta = {
+                certificate: { label: 'Sertifikat', cls: 'bg-red-50 text-[#E60012] border-red-200' },
+                award: { label: 'Penghargaan', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+                document: { label: 'Dokumen', cls: 'bg-blue-50 text-blue-700 border-blue-200' }
+            };
+
+            function formatCertDate(val) {
+                if (!val) return '-';
+                const d = new Date(val);
+                if (Number.isNaN(d.getTime())) return '-';
+                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            try {
+                const fetcher = typeof window.dlsFetch === 'function'
+                    ? (url) => window.dlsFetch(url, { credentials: 'include' })
+                    : (url) => fetch(url, { credentials: 'include' });
+                const res = await fetcher(`${apiBase}/certificates`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                const items = Array.isArray(data.items) ? data.items : [];
+
+                if (countBadge) countBadge.textContent = `${items.length} Item`;
+                grid.innerHTML = '';
+
+                if (items.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.className = 'lms-card p-5 col-span-full text-center text-[13px] text-[#64748B]';
+                    empty.textContent = 'Belum ada sertifikat, penghargaan, atau dokumen yang dikirimkan kepada Anda.';
+                    grid.appendChild(empty);
+                    return;
+                }
+
+                items.forEach((item) => {
+                    const meta = typeMeta[item.award_type] || typeMeta.certificate;
+                    const card = document.createElement('article');
+                    card.className = 'lms-card p-4 flex flex-col justify-between gap-3';
+
+                    const top = document.createElement('div');
+                    top.className = 'space-y-1.5';
+
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'flex items-center justify-between gap-2';
+
+                    const badge = document.createElement('span');
+                    badge.className = `inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${meta.cls}`;
+                    badge.textContent = meta.label;
+                    headerRow.appendChild(badge);
+
+                    const dateEl = document.createElement('span');
+                    dateEl.className = 'text-[11px] text-[#64748B]';
+                    dateEl.textContent = formatCertDate(item.issued_at);
+                    headerRow.appendChild(dateEl);
+
+                    top.appendChild(headerRow);
+
+                    const titleEl = document.createElement('h3');
+                    titleEl.className = 'text-[14px] font-bold text-[#181824] dark:text-white leading-snug';
+                    titleEl.textContent = item.title || 'Sertifikat';
+                    top.appendChild(titleEl);
+
+                    if (item.certificate_no) {
+                        const noEl = document.createElement('p');
+                        noEl.className = 'text-[11px] font-medium text-[#64748B]';
+                        noEl.textContent = `No: ${item.certificate_no}`;
+                        top.appendChild(noEl);
+                    }
+
+                    if (item.course_title) {
+                        const courseEl = document.createElement('p');
+                        courseEl.className = 'text-[12px] text-[#475569] dark:text-slate-300';
+                        courseEl.textContent = `Course: ${item.course_title}`;
+                        top.appendChild(courseEl);
+                    }
+
+                    if (item.description) {
+                        const descEl = document.createElement('p');
+                        descEl.className = 'text-[12px] text-[#64748B] line-clamp-2';
+                        descEl.textContent = item.description;
+                        top.appendChild(descEl);
+                    }
+
+                    const issuerEl = document.createElement('p');
+                    issuerEl.className = 'text-[11px] text-[#64748B] pt-1';
+                    issuerEl.textContent = `Dikirim oleh: ${item.issued_by_name || 'Pengajar / Admin'}`;
+                    top.appendChild(issuerEl);
+
+                    card.appendChild(top);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800';
+
+                    const viewLink = document.createElement('a');
+                    viewLink.href = `${apiBase}/certificates/${encodeURIComponent(item.certificate_id)}/file`;
+                    viewLink.target = '_blank';
+                    viewLink.rel = 'noopener noreferrer';
+                    viewLink.className = 'flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-semibold py-2 px-3 transition-colors';
+                    viewLink.textContent = 'Lihat';
+                    actions.appendChild(viewLink);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = `${apiBase}/certificates/${encodeURIComponent(item.certificate_id)}/file?download=1`;
+                    downloadLink.setAttribute('download', item.original_filename || 'sertifikat');
+                    downloadLink.className = 'flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[12px] font-semibold py-2 px-3 transition-colors';
+                    downloadLink.textContent = 'Unduh';
+                    actions.appendChild(downloadLink);
+
+                    card.appendChild(actions);
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                if (countBadge) countBadge.textContent = '0 Item';
+                grid.innerHTML = '';
+                const errBox = document.createElement('div');
+                errBox.className = 'lms-card p-4 col-span-full text-[13px] text-[#64748B]';
+                errBox.textContent = 'Gagal memuat daftar sertifikat & penghargaan.';
+                grid.appendChild(errBox);
+            }
+        });
+    </script>
 
 </body>
 

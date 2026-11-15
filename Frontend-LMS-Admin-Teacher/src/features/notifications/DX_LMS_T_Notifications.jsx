@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import {
   Bell,
   BookOpen,
@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Megaphone,
   MessageSquare,
+  Plus,
   Search,
   Send,
   Settings
@@ -15,6 +16,7 @@ import { api } from '../../api/client';
 import PageHeader from '../../components/PageHeader';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import Modal from '../../components/Modal';
 import StatusBadge from '../../components/StatusBadge';
 import Pagination, { usePagination } from '../../components/Pagination';
 import { useQueryParamState } from '../../utils/useQueryParamState';
@@ -58,6 +60,8 @@ const FIELD_CLASS =
  */
 export default function NotificationsPage() {
   const user = useOutletContext();
+  const location = useLocation();
+  const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
   const canSendNotifications = hasPermission(user, 'notifications.send');
   const [items, setItems] = useState([]);
@@ -66,6 +70,7 @@ export default function NotificationsPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [sendModalOpen, setSendModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [targetRoles, setTargetRoles] = useState(['student']);
@@ -94,6 +99,13 @@ export default function NotificationsPage() {
     window.addEventListener('dls_notifications_changed', loadNotifications);
     return () => window.removeEventListener('dls_notifications_changed', loadNotifications);
   }, []);
+
+  useEffect(() => {
+    if (canSendNotifications && location.hash === '#send-notification') {
+      setSendModalOpen(true);
+      navigate(`${location.pathname}${location.search}`, { replace: true });
+    }
+  }, [canSendNotifications, location.hash, location.pathname, location.search, navigate]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('id');
@@ -152,6 +164,7 @@ export default function NotificationsPage() {
       setTargetRoles(['student']);
       setSendEmail(false);
       setShowPopup(false);
+      setSendModalOpen(false);
       const emailNote = sendEmail
         ? ` ${result.emailQueued || 0} email masuk antrean pengiriman.`
         : '';
@@ -199,10 +212,22 @@ export default function NotificationsPage() {
         title="Notifikasi"
         description="Kirim pengumuman penting, pengingat penyelesaian materi, serta pantau pemberitahuan portal secara langsung."
         actions={
-          <span className="inline-flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-lowest px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-            <Bell className="size-3.5 text-primary" />
-            {unreadCount} pesan belum dibaca
-          </span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-lowest px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <Bell className="size-3.5 text-primary" />
+              {unreadCount} pesan belum dibaca
+            </span>
+            {canSendNotifications && (
+              <Button
+                type="button"
+                variant="primary"
+                icon={<Plus className="size-4" />}
+                onClick={() => setSendModalOpen(true)}
+              >
+                Kirim Notifikasi
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -224,13 +249,14 @@ export default function NotificationsPage() {
         </div>
       )}
 
-      {/* Form Kirim Notifikasi */}
+      {/* Modal Kirim Notifikasi */}
       {canSendNotifications && (
-        <div id="send-notification" className="scroll-mt-20">
-        <Card
+        <Modal
+          isOpen={sendModalOpen}
+          onClose={() => !busy && setSendModalOpen(false)}
           title="Kirim Notifikasi Baru"
           subtitle="Penerima akan langsung melihat pesan di pusat notifikasi portal mereka."
-          action={<StatusBadge status={user?.role || 'teacher'} label={user?.role} />}
+          maxWidth="2xl"
         >
           <form onSubmit={sendNotification} className="space-y-4">
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -338,21 +364,27 @@ export default function NotificationsPage() {
               )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2 border-t border-outline/40 pt-3 dark:border-slate-800">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={busy}
+                onClick={() => setSendModalOpen(false)}
+              >
+                Batal
+              </Button>
               <Button
                 type="submit"
                 variant="primary"
                 disabled={busy}
                 loading={busy}
                 icon={<Send className="size-4" />}
-                className="w-full sm:w-auto"
               >
                 {busy ? 'Mengirim...' : 'Kirim Notifikasi'}
               </Button>
             </div>
           </form>
-        </Card>
-        </div>
+        </Modal>
       )}
 
       {/* Daftar Notifikasi */}

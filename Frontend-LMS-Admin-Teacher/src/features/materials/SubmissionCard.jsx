@@ -25,6 +25,7 @@ import {
   User
 } from 'lucide-react';
 import Button from '../../components/Button';
+import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 
 const STATUS_LABEL = {
@@ -250,7 +251,7 @@ export default function SubmissionCard({
           </span>
           <div className="min-w-0 flex-1">
             <Link
-              to={`/courses/${item.course_id}`}
+              to={`/courses/view/${item.course_public_id || item.course_id}`}
               className="block break-words text-sm font-bold leading-snug text-on-surface transition hover:text-primary"
               title={item.title}
             >
@@ -343,14 +344,14 @@ export default function SubmissionCard({
           </p>
         )}
 
-        <div className="mt-auto space-y-2 border-t border-outline/40 pt-4 dark:border-slate-800">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="mt-auto space-y-3 border-t border-outline/40 pt-4 dark:border-slate-800">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Button
               size="sm"
               variant="info"
               icon={<Eye className="size-3.5" />}
               onClick={onPreview}
-              className="w-full"
+              className={`w-full min-w-0 ${canEdit ? '' : 'sm:col-span-2'}`}
             >
               Pratinjau
             </Button>
@@ -361,7 +362,7 @@ export default function SubmissionCard({
                 variant="indigo"
                 icon={<Pencil className="size-3.5" />}
                 onClick={onEdit}
-                className="w-full"
+                className="w-full min-w-0"
               >
                 {item.status === 'rejected' ? 'Perbaiki' : 'Edit'}
               </Button>
@@ -381,22 +382,20 @@ export default function SubmissionCard({
               </label>
               <div className="mt-2 flex min-w-0 flex-col gap-2 sm:flex-row">
                 {reviewers.length > 0 ? (
-                  <select
+                  <SearchableSelect
                     id={`reviewer-select-${item.submission_id}`}
                     name="reviewerEmail"
+                    title="Pilih Reviewer Materi"
                     required
                     value={reviewerEmail}
                     onChange={(event) => setReviewerEmail(event.target.value)}
+                    options={reviewers.map((reviewer) => ({
+                      value: reviewer.email,
+                      label: `${reviewer.fullname}${reviewer.position ? ` (${reviewer.position})` : ''} — ${reviewer.email}`
+                    }))}
+                    placeholder="Cari nama atau email reviewer..."
                     className="h-9 min-w-0 flex-1 rounded-md border border-outline bg-surface-lowest px-2.5 text-xs text-on-surface outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    <option value="">Pilih reviewer...</option>
-                    {reviewers.map((reviewer) => (
-                      <option key={reviewer.employee_npk} value={reviewer.email}>
-                        {reviewer.fullname}
-                        {reviewer.position ? ` (${reviewer.position})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 ) : (
                   <input
                     id={`reviewer-email-${item.submission_id}`}
@@ -439,14 +438,14 @@ export default function SubmissionCard({
             </form>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {allowSendReview && item.status === 'pending_admin' && (
               <Button
                 size="xs"
                 variant="warning"
                 icon={<RotateCcw className="size-3.5" />}
                 onClick={onReject}
-                className="w-full justify-center"
+                className="w-full justify-center sm:col-span-2"
               >
                 Minta Revisi
               </Button>
@@ -484,7 +483,7 @@ export default function SubmissionCard({
                 disabled={busy}
                 icon={<Upload className="size-3.5" />}
                 onClick={onPublish}
-                className="w-full justify-center"
+                className="w-full justify-center sm:col-span-2"
               >
                 Terbitkan
               </Button>
@@ -503,7 +502,7 @@ export default function SubmissionCard({
                 variant="danger"
                 onClick={onDelete}
                 icon={<Trash2 className="size-3.5" />}
-                className="w-full justify-center"
+                className="w-full justify-center sm:col-span-2"
               >
                 Hapus
               </Button>

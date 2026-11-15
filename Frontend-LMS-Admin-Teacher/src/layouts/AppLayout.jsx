@@ -1,10 +1,11 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { Bell, Calendar, GraduationCap, Menu, PanelLeftOpen, History, BellRing, Maximize2, Minimize2, X, HelpCircle } from 'lucide-react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Bell, Calendar, GraduationCap, Menu, PanelLeftOpen, History, BellRing, Maximize2, Minimize2, X, HelpCircle, Search } from 'lucide-react';
 import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
 import JobsCenter from '../components/JobsCenter';
 import FloatingGuideBubble from '../components/FloatingGuideBubble';
+import GlobalSearchEnhancer from '../components/GlobalSearchEnhancer';
 import showAlert from '../utils/alert';
 import ModalNotif from '../components/ModalNotif';
 import useSubmenuAutoScroll from '../utils/useSubmenuAutoScroll';
@@ -18,8 +19,10 @@ const ROUTE_TITLES = [
   ['/quizzes', 'Kelola Quiz'],
   ['/activity', 'Aktivitas'],
   ['/grades', 'Kelola Nilai'],
+  ['/certificates', 'Sertifikat & Penghargaan'],
   ['/forum', 'Forum Diskusi'],
   ['/notifications', 'Notifikasi'],
+  ['/support-chat', 'Pusat Bantuan'],
   ['/reviewers', 'Kelola Reviewer'],
   ['/users', 'Kelola Pengguna'],
   ['/enrollments', 'Persetujuan Course'],
@@ -47,6 +50,28 @@ export default function AppLayout({ user: initialUser, onLogout }) {
   const [activityToastWide, setActivityToastWide] = useState(false);
   const notificationToastTimer = useRef(null);
   const toastTimer = useRef(null);
+  const navigate = useNavigate();
+  const [quickQuery, setQuickQuery] = useState('');
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickIdx, setQuickIdx] = useState(-1);
+  const quickSearchRef = useRef(null);
+
+  const quickNavSuggestions = useMemo(() => {
+    const q = quickQuery.trim().toLowerCase();
+    return ROUTE_TITLES
+      .filter(([, label]) => !q || label.toLowerCase().includes(q))
+      .slice(0, 7);
+  }, [quickQuery]);
+
+  useEffect(() => {
+    const onOutside = e => {
+      if (quickSearchRef.current && !quickSearchRef.current.contains(e.target)) {
+        setQuickOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, []);
 
   const pageTitle = pathname.startsWith('/courses/')
     ? 'Detail Course'
@@ -152,6 +177,21 @@ export default function AppLayout({ user: initialUser, onLogout }) {
   }, [user?.role, user?.npk, canViewNotifications]);
 
   useEffect(() => {
+    if (String(user?.role || '').toLowerCase() !== 'admin') return undefined;
+    const sendHeartbeat = () => {
+      if (document.visibilityState === 'hidden') return;
+      api('/support-chat/heartbeat', { method: 'POST', body: '{}' }).catch(() => {});
+    };
+    sendHeartbeat();
+    const id = window.setInterval(sendHeartbeat, 25000);
+    window.addEventListener('focus', sendHeartbeat);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener('focus', sendHeartbeat);
+    };
+  }, [user?.role, user?.npk]);
+
+  useEffect(() => {
     if (!canViewActivity) return;
     const events = new EventSource(`${API_BASE}/dashboard/activity/events`, { withCredentials: true });
     const handleActivity = event => {
@@ -250,13 +290,13 @@ export default function AppLayout({ user: initialUser, onLogout }) {
                 to="/notifications"
                 aria-label={`Notifikasi${notificationCount ? `, ${notificationCount} belum dibaca` : ''}`}
                 title="Notifikasi"
-                className="relative grid size-10 place-items-center rounded-lg text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="relative grid size-10 place-items-center rounded-xl bg-red-600 text-white shadow-sm transition hover:bg-red-700 active:scale-95"
               >
                 <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
                   <span
                     aria-hidden="true"
-                    className="absolute right-1 top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#10141a]"
+                    className="absolute -right-1 -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-slate-900 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#10141a]"
                   >
                     {notificationCount > 99 ? '99+' : notificationCount}
                   </span>
@@ -268,6 +308,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
 
         {/* Workspace Container: 1400px max-width, 32px desktop padding */}
         <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+          <GlobalSearchEnhancer />
           <Suspense fallback={<PageSkeleton />}>
             <Outlet context={user} />
           </Suspense>
@@ -399,7 +440,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         onClose={handleCloseModalNotification}
       />
       {canViewActivity && <JobsCenter role={user?.role} />}
-      <FloatingGuideBubble />
+      <FloatingGuideBubble role={user?.role} />
     </div>
   );
 }

@@ -17,7 +17,8 @@ const reviewerUpdateSchema = z.object({
   position: z.string().trim().max(100).optional().default(''),
   phoneNumber: z.string().trim().max(30).optional().default(''),
   status: z.enum(['active', 'inactive']).default('active'),
-  password: z.string().min(12, 'Kata sandi baru minimal 12 karakter.').max(200).optional().or(z.literal(''))
+  password: z.string().min(12, 'Kata sandi baru minimal 12 karakter.').max(200).optional().or(z.literal('')),
+  targetReviewerNpk: z.string().trim().min(1).max(50).optional()
 });
 
 module.exports = { reviewerSchema, reviewerUpdateSchema };

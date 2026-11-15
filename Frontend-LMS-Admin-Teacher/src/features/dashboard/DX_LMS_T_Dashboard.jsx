@@ -10,7 +10,11 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  FileCheck2
+  FileCheck2,
+  UserPlus,
+  PlusCircle,
+  ClipboardCheck,
+  BarChart3
 } from 'lucide-react';
 import { api } from '../../api/client';
 import PageHeader from '../../components/PageHeader';
@@ -19,6 +23,7 @@ import Card from '../../components/Card';
 import StatusBadge from '../../components/StatusBadge';
 import Button from '../../components/Button';
 import showAlert from '../../utils/alert';
+import { hasPermission } from '../../utils/access-control';
 import {
   ActivityTrendChart,
   CoursePerformanceChart,
@@ -124,6 +129,79 @@ export default function DashboardPage() {
   const pipeline = analytics?.materialPipeline || {};
   const pipelinePendingTotal = Number(pipeline.pending_admin || 0) + Number(pipeline.pending_review || 0);
 
+  const quickActions = [
+    hasPermission(user, 'materials.view') && {
+      key: 'materials',
+      to: '/materials#materials-submissions',
+      title: 'Tinjau materi',
+      description: 'Periksa materi yang menunggu persetujuan.',
+      count: pipelinePendingTotal,
+      countLabel: 'menunggu',
+      Icon: FileCheck2,
+      iconClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
+    },
+    hasPermission(user, 'materials.submit') && {
+      key: 'submit-material',
+      to: '/materials?action=submit#submit-material',
+      title: 'Ajukan materi',
+      description: 'Kirim materi baru untuk ditinjau oleh reviewer.',
+      Icon: PlusCircle,
+      iconClass: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300'
+    },
+    hasPermission(user, 'courses.create') && {
+      key: 'course-create',
+      to: '/courses/new',
+      title: 'Buat course',
+      description: 'Tambahkan course baru ke katalog pembelajaran.',
+      Icon: PlusCircle,
+      iconClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+    },
+    hasPermission(user, 'courses.view') && !hasPermission(user, 'courses.create') && {
+      key: 'courses',
+      to: '/courses#courses-list',
+      title: 'Buka katalog course',
+      description: 'Lihat course aktif dan sesi pembelajaran.',
+      count: activeCoursesValue,
+      countLabel: 'course aktif',
+      Icon: BookOpen,
+      iconClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+    },
+    hasPermission(user, 'enrollments.view') && {
+      key: 'enrollments',
+      to: '/enrollments#enrollments-list',
+      title: 'Persetujuan peserta',
+      description: 'Tinjau permintaan akses ke course.',
+      count: Number(s.pendingEnrollmentRequests || 0),
+      countLabel: 'permintaan',
+      Icon: ClipboardCheck,
+      iconClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+    },
+    isAdmin && hasPermission(user, 'users.manage') && {
+      key: 'users',
+      to: '/users/new',
+      title: 'Tambah pengguna',
+      description: 'Buat akun Student, Teacher, Admin, atau Reviewer.',
+      Icon: UserPlus,
+      iconClass: 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300'
+    },
+    hasPermission(user, 'quizzes.view') && {
+      key: 'quizzes',
+      to: '/quizzes#quizzes-list',
+      title: 'Kelola quiz',
+      description: 'Buat atau periksa quiz dalam course.',
+      Icon: Award,
+      iconClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+    },
+    hasPermission(user, 'grades.view') && {
+      key: 'grades',
+      to: '/grades#grades-list',
+      title: 'Lihat nilai',
+      description: 'Pantau nilai dan progres peserta.',
+      Icon: BarChart3,
+      iconClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+    }
+  ].filter(Boolean);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -180,6 +258,7 @@ export default function DashboardPage() {
       <section id="tour-overview" className="scroll-mt-20 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Statistik Utama">
         <StatCard
           label="Course Aktif"
+          to="/courses#courses-list"
           value={activeCoursesValue}
           icon={<BookOpen className="h-5 w-5" />}
           tone="primary"
@@ -199,6 +278,7 @@ export default function DashboardPage() {
 
         <StatCard
           label="Pengguna Aktif"
+          to="/users?status=active#users-list"
           value={activeUsersValue}
           icon={<Users className="h-5 w-5" />}
           tone="secondary"
@@ -218,6 +298,7 @@ export default function DashboardPage() {
 
         <StatCard
           label="Sesi Belajar"
+          to="/courses#courses-list"
           value={activeSessionsValue}
           icon={<Layers className="h-5 w-5" />}
           tone="info"
@@ -233,6 +314,7 @@ export default function DashboardPage() {
 
         <StatCard
           label="Rata-rata Progres"
+          to="/grades#grades-list"
           value={`${avgProgressValue}%`}
           icon={<Award className="h-5 w-5" />}
           tone="tertiary"
@@ -421,7 +503,7 @@ export default function DashboardPage() {
               {courses.slice(0, 6).map(course => (
                 <Link
                   key={course.course_id}
-                  to={`/courses/${course.course_id}`}
+                  to={`/courses/view/${course.public_id || course.course_id}`}
                   className="flex items-center justify-between gap-4 px-6 py-3.5 transition hover:bg-surface-low/70"
                 >
                   <div className="min-w-0 flex-1">
@@ -531,35 +613,45 @@ export default function DashboardPage() {
       </div>
     </section>
 
-      {/* Quick Action Footer Strip */}
-      <section className="dls-card-surface flex flex-col gap-4 rounded-xl p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3.5">
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-            <FileCheck2 className="h-5 w-5" aria-hidden="true" />
-          </span>
+      {/* Quick Action Cards */}
+      <section
+        id="quick-actions"
+        aria-labelledby="quick-actions-title"
+        className="rounded-2xl border border-outline bg-surface-lowest p-4 sm:p-5"
+      >
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.05em] text-primary">Langkah Cepat</p>
-            <h2 className="mt-0.5 text-base font-bold text-on-surface">Kelola Materi &amp; Persetujuan</h2>
-            <p className="mt-0.5 text-sm text-muted">
-              Periksa antrean persetujuan materi atau tambahkan sesi baru ke katalog course yang aktif.
-            </p>
+            <p className="text-xs font-semibold text-primary">Langkah cepat</p>
+            <h2 id="quick-actions-title" className="mt-0.5 text-lg font-bold text-on-surface">
+              Mulai dari sini
+            </h2>
+            <p className="mt-1 text-sm text-muted">Akses menu yang paling sering digunakan.</p>
           </div>
+          <span className="text-xs text-muted">{quickActions.length} pilihan</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            to="/materials"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-indigo-700"
-          >
-            Antrean Materi ({pipelinePendingTotal})
-          </Link>
-          <Link
-            to="/courses"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-container"
-          >
-            <span>Buka Katalog Course</span>
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {quickActions.map(({ key, to, title, description, count, countLabel, Icon, iconClass }) => (
+            <Link
+              key={key}
+              to={to}
+              className="group flex min-h-32 flex-col rounded-xl border border-outline/80 bg-surface-lowest p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-surface-low/60 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            >
+              <span className={`grid size-9 place-items-center rounded-lg ${iconClass}`}>
+                <Icon className="size-4" aria-hidden="true" />
+              </span>
+              <span className="mt-3 flex items-start justify-between gap-2">
+                <span className="text-sm font-semibold text-on-surface">{title}</span>
+                <ArrowRight className="mt-0.5 size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+              </span>
+              <span className="mt-1 text-xs leading-relaxed text-muted">{description}</span>
+              {count !== undefined && (
+                <span className="mt-auto pt-3 text-xs font-semibold text-on-surface-variant">
+                  {count} {countLabel}
+                </span>
+              )}
+            </Link>
+          ))}
         </div>
       </section>
     </div>

@@ -14,11 +14,13 @@ $totalBobot = 0;
 foreach ($questions as $q) {
     $totalBobot += $q['weight'] ?? 0;
 }
+$quizProtectionEnabled = !$isHistoryMode && ($totalQuestions > 0 || ($isRealCourseQuiz && !empty($realQuiz['questions'])));
+$coursePublicId = $course['public_id'] ?? publicCourseId($course['id'] ?? '');
 
 $backUrl =
     $course['status'] === 'selesai'
-        ? '?route=/student/riwayat/detail&id=' . urlencode($course['id'])
-        : '?route=/student/course/detail&id=' . urlencode($course['id']);
+        ? '?route=/student/riwayat/detail&id=' . urlencode($coursePublicId)
+        : '?route=/student/course/detail&id=' . urlencode($coursePublicId);
 
 if ($isHistoryMode) $title = 'Riwayat ' . $title;
 ?>
@@ -75,7 +77,7 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
     </style>
 </head>
 
-<body class="dls-app-shell dls-fullscreen-quiz bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
+<body class="dls-app-shell dls-fullscreen-quiz bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px] <?= $quizProtectionEnabled ? 'dls-quiz-protected' : '' ?>">
     <!-- TopAppBar -->
     <header class="dls-topbar dls-quiz-topbar bg-surface border-b border-outline-variant flex justify-between items-center w-full px-container-margin min-h-[56px] py-2 shadow-sm sticky top-0 z-50">
         <a href="<?= $backUrl ?>" class="text-primary transition-all duration-200 active:scale-95 hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center">
@@ -103,8 +105,9 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
             <?php elseif (($realQuiz['status'] ?? 'terkunci') !== 'belum_dimulai'): ?>
             <section class="fd-card rounded-[12px] bg-white p-[24px] text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]"><span class="material-symbols-outlined text-4xl text-[#737373]">lock</span><h3 class="fd-h3 mt-[6px] text-[#171717]"><?= in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true) ? 'Quiz belum dapat dikerjakan' : 'Quiz masih terkunci' ?></h3><p class="mx-auto mt-[6px] max-w-xl text-[14px] leading-[22px] text-[#525252]"><?php if (in_array(($realQuiz['publication_status'] ?? ''), ['draft', 'inactive'], true)): ?>Pengajar belum menerbitkan quiz ini.<?php else: ?>Selesaikan dan tandai seluruh <?= (int) ($realQuiz['total_materials'] ?? 0) ?> materi course sebagai selesai. Saat ini <?= (int) ($realQuiz['completed_materials'] ?? 0) ?> materi sudah selesai.<?php endif; ?></p><a href="<?= e($backUrl) ?>" class="fd-btn fd-btn-secondary fd-btn-md mt-[18px] rounded-full"><span class="material-symbols-outlined">menu_book</span>Kembali ke Materi</a></section>
             <?php else: ?>
-            <form id="courseQuizForm" method="post" action="?route=/student/quiz&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;type=quiz" class="space-y-[18px]">
+            <form id="courseQuizForm" method="post" action="?route=/student/quiz&amp;id=<?= rawurlencode((string) $coursePublicId) ?>&amp;type=quiz" class="space-y-[18px]">
                 <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
+                <input type="hidden" name="_quiz_session" value="<?= e((string) ($quizSession['session_token'] ?? '')) ?>">
                 <?php foreach ($realQuiz['questions'] as $index => $question): ?>
                 <fieldset class="fd-card rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] sm:p-[24px]"><legend class="sr-only">Pertanyaan <?= $index + 1 ?></legend><div class="mb-[12px] flex items-start gap-[12px]"><span class="fd-mono grid size-8 shrink-0 place-items-center rounded-full bg-[#FEF2F2] text-[13px] font-bold text-[#DC2626]"><?= $index + 1 ?></span><p class="fd-h4 pt-1 text-[#171717]"><?= e($question['question']) ?><span class="ml-1 text-[#DC2626]" aria-label="Wajib diisi">*</span></p></div><div class="space-y-[10px] pl-0 sm:pl-11"><?php foreach ($question['options'] as $optionIndex => $option): ?><label class="flex cursor-pointer items-center gap-[12px] rounded-[12px] border border-[#E5E5E5] bg-white p-[14px] transition hover:border-[#A3A3A3] hover:bg-[#FAFAFA] has-[:checked]:border-[#DC2626] has-[:checked]:bg-[#FEF2F2]"><input type="radio" name="answers[<?= (int) $question['id'] ?>]" value="<?= (int) $optionIndex ?>" required class="fd-radio shrink-0" <?= (string) ($submittedAnswers[(string) $question['id']] ?? '') === (string) $optionIndex ? 'checked' : '' ?>><span class="fd-body text-[#171717]"><?= e($option) ?></span></label><?php endforeach; ?></div></fieldset>
                 <?php endforeach; ?>
@@ -337,6 +340,7 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
 
     <!-- BottomNavBar Shared Component (Desktop Sidebar + Mobile Bottom Nav) -->
     <?php
+    $hide_right_panel = true;
     $active_tab = isset($course['status']) && $course['status'] === 'selesai' ? 'riwayat' : 'course';
     include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
@@ -413,6 +417,20 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
             }
         }
     </script>
+    <?php endif; ?>
+
+    <?php if ($quizProtectionEnabled): ?>
+    <script src="<?= e($base_path . 'assets/js/DX_LMS_M_Quiz_Protection.js') ?>" defer></script>
+    <style>
+        .dls-quiz-protected,
+        .dls-quiz-protected * { -webkit-user-select: none; user-select: none; }
+        .dls-quiz-protected input,
+        .dls-quiz-protected textarea { -webkit-user-select: text; user-select: text; }
+        .dls-quiz-protected img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
+        html.dls-quiz-away body.dls-quiz-protected main,
+        html.dls-quiz-away body.dls-quiz-protected header { filter: blur(18px); }
+        @media print { body.dls-quiz-protected { display: none !important; } }
+    </style>
     <?php endif; ?>
 
     <!-- SweetAlert2 & DLS Helpers (loaded with defer for optimal performance) -->

@@ -76,16 +76,22 @@
              * Menampilkan dialog sukses.
              * @param {string} title
              * @param {string} [text]
+             * @param {Object} [opts]
              */
-            success: function(title, text) {
+            success: function(title, text, opts) {
+                opts = opts || {};
                 var dark = isDarkMode();
                 return Swal.fire({
                     icon: 'success',
                     title: title || 'Berhasil!',
                     text: text || '',
-                    confirmButtonText: 'Selesai',
+                    footer: opts.footer || undefined,
+                    showCloseButton: true,
+                    confirmButtonText: opts.confirmText || 'Selesai',
                     confirmButtonColor: '#10b981',
                     iconColor: '#10b981',
+                    timer: opts.timer || undefined,
+                    timerProgressBar: Boolean(opts.timer),
                     background: dark ? '#1e293b' : '#ffffff',
                     color: dark ? '#f8fafc' : '#0f172a',
                     customClass: {
@@ -98,14 +104,18 @@
              * Menampilkan dialog error.
              * @param {string} title
              * @param {string} [text]
+             * @param {Object} [opts]
              */
-            error: function(title, text) {
+            error: function(title, text, opts) {
+                opts = opts || {};
                 var dark = isDarkMode();
                 return Swal.fire({
                     icon: 'error',
                     title: title || 'Gagal!',
                     text: text || 'Terjadi kendala sistem.',
-                    confirmButtonText: 'Mengerti',
+                    footer: opts.footer || undefined,
+                    showCloseButton: true,
+                    confirmButtonText: opts.confirmText || 'Mengerti',
                     confirmButtonColor: '#ef4444',
                     iconColor: '#ef4444',
                     background: dark ? '#1e293b' : '#ffffff',
@@ -120,14 +130,18 @@
              * Menampilkan dialog peringatan.
              * @param {string} title
              * @param {string} [text]
+             * @param {Object} [opts]
              */
-            warning: function(title, text) {
+            warning: function(title, text, opts) {
+                opts = opts || {};
                 var dark = isDarkMode();
                 return Swal.fire({
                     icon: 'warning',
                     title: title || 'Perhatian!',
                     text: text || '',
-                    confirmButtonText: 'Mengerti',
+                    footer: opts.footer || undefined,
+                    showCloseButton: true,
+                    confirmButtonText: opts.confirmText || 'Mengerti',
                     confirmButtonColor: '#f59e0b',
                     iconColor: '#f59e0b',
                     background: dark ? '#1e293b' : '#ffffff',
@@ -142,14 +156,18 @@
              * Menampilkan dialog info.
              * @param {string} title
              * @param {string} [text]
+             * @param {Object} [opts]
              */
-            info: function(title, text) {
+            info: function(title, text, opts) {
+                opts = opts || {};
                 var dark = isDarkMode();
                 return Swal.fire({
                     icon: 'info',
                     title: title || 'Informasi',
                     text: text || '',
-                    confirmButtonText: 'Baik',
+                    footer: opts.footer || undefined,
+                    showCloseButton: true,
+                    confirmButtonText: opts.confirmText || 'Baik',
                     confirmButtonColor: '#2563eb',
                     iconColor: '#3b82f6',
                     background: dark ? '#1e293b' : '#ffffff',

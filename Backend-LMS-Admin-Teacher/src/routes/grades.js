@@ -92,8 +92,14 @@ router.delete('/:npk/:courseCode', requirePermission('grades.edit'), trustedWrit
   try {
     const result = await pool.request().input('npk', sql.VarChar(50), identity.data.npk)
       .input('courseCode', sql.VarChar(30), identity.data.courseCode)
-      .query(`UPDATE dbo.student_progress_snapshots SET score=NULL,grade_feedback=NULL,graded_by=NULL,graded_at=NULL,synced_at=SYSUTCDATETIME()
-        WHERE student_npk=@npk AND course_code=@courseCode; SELECT @@ROWCOUNT AS affected;`);
+      .input('isAdmin', sql.Bit, req.user.role !== 'teacher')
+      .input('teacher', sql.VarChar(50), req.user.sub)
+      .query(`UPDATE p SET score=NULL,grade_feedback=NULL,graded_by=NULL,graded_at=NULL,synced_at=SYSUTCDATETIME()
+        FROM dbo.student_progress_snapshots p
+        JOIN dbo.courses c ON c.course_code=p.course_code
+        WHERE p.student_npk=@npk AND p.course_code=@courseCode
+          AND (@isAdmin=1 OR c.created_by=@teacher OR c.assigned_trainer_npk=@teacher);
+        SELECT @@ROWCOUNT AS affected;`);
     if (!result.recordset[0]?.affected) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Data nilai tidak ditemukan.' } });
     queueStudentGradeSync(identity.data.npk, identity.data.courseCode);
     res.json({ deleted: true });

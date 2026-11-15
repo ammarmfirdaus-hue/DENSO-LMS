@@ -1,157 +1,86 @@
-# DENSO Learning Management System
+# DENSO Learning Management System (DENSO-LMS)
 
-Workspace ini berisi tiga runtime terpisah. Jalankan setiap proyek dari foldernya masing-masing atau gunakan launcher di bawah.
+Repositori ini berisi sistem **DENSO Learning Management System (DENSO-LMS)** yang terdiri dari tiga komponen utama: layanan API backend, portal web pengelola dan pengajar, serta portal pembelajaran siswa.
 
-| Proyek | Teknologi | URL / port lokal | Database |
+| Komponen | Teknologi Utama | Alamat Lokal | Basis Data |
 |---|---|---|---|
-| `Backend-LMS-Admin-Teacher` | Node.js, Express, JWT | `http://127.0.0.1:3001` | Microsoft SQL Server (`DX_LMS_AdminTeacher`) |
-| `Frontend-LMS-Admin-Teacher` | React, Vite, Tailwind CSS | `http://127.0.0.1:5173` | Mengakses API Node.js |
-| `NATIVE-LMS-Student` | PHP Native, Tailwind CSS, GET JSON API | `http://127.0.0.1:8082` | MySQL (`dls_student`) |
+| `Backend-LMS-Admin-Teacher` | Node.js, Express, JWT (`HS256`) | `http://127.0.0.1:3001` | Microsoft SQL Server (`DX_LMS_AdminTeacher`) |
+| `Frontend-LMS-Admin-Teacher` | React 19, Vite, Tailwind CSS | `http://127.0.0.1:5173` | Terhubung ke REST API Backend |
+| `NATIVE-LMS-Student` | PHP 8.1+ Native MVC, Tailwind CSS | `http://127.0.0.1:8082` | MySQL 8+ (`dls_student`) |
 
-Katalog fitur, hasil audit, perintah test, dan cakupan yang sudah diuji tersedia di [`docs/FEATURES-AND-QA.md`](docs/FEATURES-AND-QA.md). Panduan instalasi PWA, cache/offline, dan deployment ada di [`docs/PWA-AND-DEPLOYMENT.md`](docs/PWA-AND-DEPLOYMENT.md). Flowchart yang dapat diedit ada di [`docs/diagrams`](docs/diagrams/), termasuk [alur PWA](docs/diagrams/14-pwa-install-offline.drawio) dan [arsitektur runtime](docs/diagrams/15-pwa-system-architecture.drawio).
+---
 
-## Menjalankan proyek
+## 1. Peran Pengguna & Ringkasan Fitur Utama
 
-### Memasang environment di Windows
+Sistem mendukung empat peran pengguna (`role`) dengan pembagian hak akses dinamis (**31 izin fungsional pada 12 modul**):
 
-Jalankan [`install-runtime-all.bat`](install-runtime-all.bat) dari folder utama untuk memasang dependency ketiga proyek, atau jalankan installer di folder proyek yang ingin disiapkan saja:
+1. **Administrator (`admin`)**: Pengelolaan penuh kursus dan sesi, moderasi materi (pra-review, kirim ke reviewer, terbitkan), manajemen quiz, rekap & ekspor nilai, penerbitan sertifikat PDF, persetujuan enrollment, kelola pengguna (termasuk impor/ekspor CSV), kelola reviewer, pengaturan RBAC, konfigurasi API & sinkronisasi MySQL, backup/restore 14 dataset JSON, forum, broadcast notifikasi, serta konsol Live Support Chat.
+2. **Pengajar / Trainer (`teacher`)**: Pengelolaan kursus ampuan dan sesi pertemuan, pengajuan & revisi materi, penyusunan quiz pilihan ganda, pengisian nilai akhir & penerbitan sertifikat kelas ampuan, rekomendasi enrollment siswa, forum diskusi sesi, pengingat belajar, serta simulasi **Mode Belajar Siswa** (30 menit).
+3. **Peserta (`student`)**: Akses Portal Siswa untuk memantau progres belajar di Beranda, menjelajahi Katalog Course dan mengajukan enrollment, membaca materi berurutan hingga 100%, mengerjakan Quiz, melihat Nilai, mengunduh Sertifikat PDF di menu Riwayat, berdiskusi di Forum Sesi, membaca Notifikasi, dan menghubungi Admin lewat Live Chat.
+4. **Peninjau Materi (`reviewer`)**: Mengakses portal tinjauan melalui tautan undangan sekali pakai (berlaku 2 jam setelah dibuka) untuk memeriksa pratinjau materi lalu memutuskan **Setujui Materi** atau **Minta Revisi**.
 
-- `NATIVE-LMS-Student\install.bat`: memeriksa PHP 8.1+ dan `pdo_mysql`, memasang dependency Tailwind, lalu membangun CSS.
-- `Backend-LMS-Admin-Teacher\install.bat`: memeriksa Node.js 20+, memasang dependency API, dan membuat `.env` dengan JWT secret acak jika `.env` belum ada.
-- `Frontend-LMS-Admin-Teacher\install.bat`: memeriksa Node.js 20+, memasang dependency React/Vite, dan membuat `.env` jika belum ada.
+---
 
-Installer mempertahankan `.env` yang sudah ada. Setelah selesai, sesuaikan kredensial database dan alamat API di setiap `.env`, lalu pasang skema database di bawah ini. Proyek Native PHP saat ini tidak memiliki `composer.json`, jadi tidak memerlukan Composer.
+## 2. Keamanan Sistem
 
-### Setup database dan migrations
+* **Autentikasi & Sesi**: JWT (`HS256`, TTL 15 menit) yang disimpan pada cookie SSO `HttpOnly` (`SameSite=Lax`), serta token undangan Reviewer sekali pakai yang di-hash dengan `SHA-256`.
+* **Kata Sandi & Enkripsi**: Hashing kata sandi memakai `bcryptjs`; antrean impor pengguna massal dan pengacakan ID rute publik dienkripsi menggunakan `AES-256-GCM`.
+* **Perlindungan HTTP & API**: Pembatasan percobaan login (`express-rate-limit` per IP + NPK), validasi input (`Zod`), CORS whitelist, `Helmet`, `X-Frame-Options: DENY`, `Content-Security-Policy`, pengecekan header `Origin`, token CSRF pada formulir Portal Siswa, serta *parameterized queries* dan daftar putih 14 tabel untuk Backup/Restore.
 
-Admin/Teacher menggunakan SQL Server (`DX_LMS_AdminTeacher`), sedangkan Student menggunakan MySQL (`dls_student`). Atur koneksi kedua database pada `Backend-LMS-Admin-Teacher/.env` dan pastikan database sudah dibuat. Untuk memisahkan izin aplikasi dan DDL, migrasi dapat memakai akun khusus melalui `MIGRATION_DB_USER` / `MIGRATION_DB_PASSWORD` (SQL Server) serta `MIGRATION_STUDENT_DB_USER` / `MIGRATION_STUDENT_DB_PASSWORD` (MySQL). Panduan izin migrator ada di [`database/MIGRATIONS.md`](database/MIGRATIONS.md). Jalankan migration CLI dari root repository:
+---
+
+## 3. Instalasi dan Menjalankan Aplikasi (Windows)
+
+### A. Pemasangan Dependensi
+Jalankan skrip [`Install-Runtime-All.bat`](Install-Runtime-All.bat) dari direktori utama untuk memasang dependensi ketiga komponen:
+- `Backend-LMS-Admin-Teacher\install.bat` (memeriksa Node.js 20+, memasang paket npm, menyiapkan `.env`).
+- `Frontend-LMS-Admin-Teacher\install.bat` (memeriksa Node.js 20+, memasang paket npm, menyiapkan `.env`).
+- `NATIVE-LMS-Student\install.bat` (memeriksa PHP 8.1+ & ekstensi `pdo_mysql`, memasang dependensi Tailwind, membangun CSS).
+
+> Pastikan koneksi database SQL Server, MySQL, serta nilai `JWT_SECRET` (Backend) dan `SSO_JWT_SECRET` (Student) pada masing-masing berkas `.env` telah disesuaikan.
+
+### B. Migrasi Basis Data
+Panduan izin dan rincian skema tersedia di [`database/MIGRATIONS.md`](database/MIGRATIONS.md). Jalankan migrasi dari direktori utama:
 
 ```powershell
-# Menggunakan script PowerShell interaktif (validasi .env, preview status, konfirmasi):
+# Melalui skrip PowerShell interaktif:
 .\Start-All-Migration.ps1
 
-# Atau menggunakan Node CLI langsung:
+# Atau melalui Node CLI langsung:
 node database/migrate.js status all
 node database/migrate.js up all
 ```
 
-Gunakan `admin` atau `student` sebagai argumen terakhir untuk menjalankan satu target. CLI mencatat file yang sudah dijalankan di tabel `schema_migrations` pada masing-masing database dan melewati versi yang telah tercatat. Untuk opsi, urutan, dan inventaris tabel/kolom fitur, lihat [`database/MIGRATIONS.md`](database/MIGRATIONS.md). CLI tidak membuat database dan tidak mengubah kredensial. Pastikan `.env` Student menunjuk ke database MySQL yang sama.
+### C. Pengisian Data Demo & Menjalankan Server
+* Untuk mengisi data contoh berprefix `DLS-DEMO-*` ke kedua database:
+  ```powershell
+  .\Start-All-Datadummy.ps1
+  ```
+* Untuk menjalankan seluruh server (`3001`, `5173`, dan `8082`) secara bersamaan:
+  ```bat
+  Start-All-Server.bat
+  ```
 
-File SQL tunggal seperti `database/student.sql` dan `database/admin&teacher.sql` tetap tersedia sebagai skema referensi/instalasi manual lama. Untuk instalasi baru maupun peningkatan skema terkelola, gunakan migration CLI di atas; jangan jalankan file lama dan migration untuk database yang sama tanpa memahami perubahan yang diduplikasi.
+---
 
-`DX_LMS_W_Forum_Migration.php` adalah script forum legacy sekaligus seeder, bukan migration untuk forum LMS aktif. Script itu menghapus tabel like legacy dan dapat menambahkan akun demo berkredensial tetap, jadi jangan jalankan pada database aktif. `DX_LMS_W_DDL.sql` adalah script reset schema legacy, bukan migration.
+## 4. Struktur Direktori Utama
 
-#### 1. Pasang skema MySQL Student
+* `Backend-LMS-Admin-Teacher/` — REST API Express (`src/config`, `src/middleware`, `src/routes`, `src/services`, `tests/`).
+* `Frontend-LMS-Admin-Teacher/` — Aplikasi SPA React (`src/features/<modul>`, `src/components`, `src/layouts`, `src/utils`).
+* `NATIVE-LMS-Student/` — Portal Siswa PHP MVC (`Controllers/`, `Models/`, `Views/`, `Core/`, `includes/`, `public/`).
+* `database/` — Skrip migrasi terkelola (`migrations/sqlserver/`, `migrations/mysql/`, `migrate.js`, `MIGRATIONS.md`).
+* `postman/` — Koleksi pengujian API ([`DENSO-LMS-Backend.postman_collection.json`](postman/DENSO-LMS-Backend.postman_collection.json), 19 folder / 171 request) dan environment lokal ([`DENSO-LMS-Local.postman_environment.json`](postman/DENSO-LMS-Local.postman_environment.json)).
+* `docs/` — Dokumentasi teknis, makalah, diagram alir Draw.io, dan skema ERD.
 
-**Melalui phpMyAdmin:** mulai layanan MySQL, buka phpMyAdmin, pilih **Import**, pilih `database/student.sql`, lalu klik **Import/Go**. File tersebut membuat database `dls_student` sekaligus seluruh tabel Student.
+---
 
-**Melalui MySQL Workbench:** sambungkan ke server MySQL, buka file `database/student.sql` melalui **File → Open SQL Script**, lalu jalankan seluruh script dengan tombol petir.
+## 5. Daftar Dokumentasi & Diagram
 
-Setelah skema dibuat, isi koneksi pada `NATIVE-LMS-Student/.env`. Contoh untuk MySQL lokal dengan akun `root` tanpa password:
-
-```dotenv
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=dls_student
-DB_USER=root
-DB_PASSWORD=
-```
-
-Jika akun MySQL Anda memiliki password atau memakai username lain, gunakan nilai akun tersebut. Untuk deployment, buat akun aplikasi khusus dengan hak minimum; jangan gunakan `root`.
-
-#### 2. Pasang skema SQL Server Admin/Teacher
-
-**Melalui SQL Server Management Studio (SSMS):** mulai layanan SQL Server, sambungkan ke instance yang dipakai aplikasi, buka `database/admin&teacher.sql` melalui **File → Open → File**, lalu jalankan seluruh script dengan **Execute**. Script membuat database `DX_LMS_AdminTeacher` dan tabel-tabelnya. `GO` di file tersebut adalah pemisah batch SQL Server; jalankan script di SSMS, bukan di PowerShell.
-
-Buat login SQL Server khusus untuk API. Jalankan script berikut di jendela **New Query** SSMS menggunakan akun admin Windows/SQL Server. Ganti placeholder password sebelum menjalankan. Jika login sudah ada, baris `CREATE LOGIN` akan dilewati; pastikan password di `.env` tetap cocok dengan password login itu.
-
-```sql
-USE master;
-GO
-IF SUSER_ID(N'dls_lms_app') IS NULL
-    CREATE LOGIN dls_lms_app WITH PASSWORD = N'<PASSWORD_KUAT_PILIHAN_ANDA>', CHECK_POLICY = ON;
-GO
-
-USE DX_LMS_AdminTeacher;
-GO
-IF DATABASE_PRINCIPAL_ID(N'dls_lms_app') IS NULL
-    CREATE USER dls_lms_app FOR LOGIN dls_lms_app;
-GO
-IF DATABASE_PRINCIPAL_ID(N'dls_app_role') IS NULL
-    CREATE ROLE dls_app_role;
-GO
-GRANT SELECT, INSERT, UPDATE ON SCHEMA::dbo TO dls_app_role;
-GO
-IF NOT EXISTS (
-    SELECT 1
-    FROM sys.database_role_members
-    WHERE role_principal_id = DATABASE_PRINCIPAL_ID(N'dls_app_role')
-      AND member_principal_id = DATABASE_PRINCIPAL_ID(N'dls_lms_app')
-)
-    ALTER ROLE dls_app_role ADD MEMBER dls_lms_app;
-GO
-```
-
-Isi `Backend-LMS-Admin-Teacher/.env` dengan host/instance, port, dan kredensial SQL Server yang benar. Contoh untuk SQL Server lokal pada port `1433`:
-
-```dotenv
-DB_SERVER=localhost
-DB_PORT=1433
-DB_NAME=DX_LMS_AdminTeacher
-DB_USER=dls_lms_app
-DB_PASSWORD=<PASSWORD_YANG_SAMA_DENGAN_LOGIN_SQL_SERVER>
-```
-
-Nilai `DB_SERVER` dan `DB_PORT` harus menunjuk ke instance SQL Server tempat script skema dan login tadi dibuat. Password database ini berbeda dari password demo yang diminta seeder.
-
-#### 3. Periksa hasil pemasangan
-
-Di SSMS, pilih `DX_LMS_AdminTeacher` lalu jalankan:
-
-```sql
-SELECT name FROM sys.tables ORDER BY name;
-```
-
-Di phpMyAdmin, pilih `dls_student`; tabel-tabel Student akan terlihat di panel navigasi. Untuk memeriksa dari tab SQL:
-
-```sql
-USE dls_student;
-SHOW TABLES;
-```
-
-Sesudah kedua database, skema, dan `.env` siap, jalankan `Start-All-DataDummy.bat` untuk mengisi data demo sekaligus memulai runtime. Gunakan hanya pada database pengembangan.
-
-
-### Menjalankan ketiga runtime (Windows)
-
-Untuk mengisi kedua database dengan data dummy lalu menjalankan server, gunakan [`Start-All-DataDummy.bat`](Start-All-DataDummy.bat). Launcher meminta satu password demo untuk akun dummy Admin/Teacher dan Student.
-
-## Struktur proyek
-
-- **Backend Admin/Teacher** menggunakan pemisahan `src/config`, `src/middleware`, `src/routes`, dan `src/services`; tiap domain API dikelompokkan menurut tanggung jawabnya.
-- **Frontend Admin/Teacher** memakai `src/features/<fitur>` untuk auth, dashboard, courses, materials, activity, grades, forum, users, dan reviewer. API, layout, komponen umum, dan style disimpan terpisah.
-- **Native Student** mengelompokkan controller dan view ke `Dashboard`, `Courses`, `Learning`, `Forum`, `History`, `Notifications`, dan `Profile`. URL halaman tetap sama.
-
-Tema lintas aplikasi menggunakan merah DENSO untuk aksi utama, charcoal untuk navigasi dan teks, serta latar netral untuk konten.
-
-Audit cakupan source, data, batas implementasi, dan hasil verifikasi tersedia di [Audit Implementasi](docs/IMPLEMENTATION-AUDIT.md), [Katalog Fitur dan QA](docs/FEATURES-AND-QA.md), serta [Panduan Fitur dan Teknis](docs/PROJECT-GUIDE.md). Diagram use case dan flow dapat diedit di [Draw.io](docs/diagrams/).
-
-## Pemisahan data
-
-Database Admin/Teacher dan Student memang dipisahkan. Sinkronisasi opsional mengirim course/sesi/materi terbit dari SQL Server ke MySQL dan mengambil enrollment/progres Student sebagai snapshot ke SQL Server; nilai resmi juga disalin ke enrollment MySQL. Ini bukan transaksi atomik lintas database. Forum dan notifikasi menggunakan backend SQL Server secara langsung, sedangkan hasil quiz belum dipersist sebagai nilai produksi.
-
-## SSO Admin/Teacher dan Student
-
-Login Admin/Teacher dan Native Student memakai backend Admin/Teacher sebagai penyedia sesi bersama. Backend memeriksa akun karyawan di SQL Server dan, jika diaktifkan, akun Student di MySQL. Pastikan NPK atau email dan kata sandi yang sama dipakai saat masuk dari kedua aplikasi.
-
-Untuk development, aktifkan `STUDENT_AUTH_ENABLED=true` dan isi koneksi `STUDENT_DB_*` pada `Backend-LMS-Admin-Teacher/.env`. Salin nilai `JWT_SECRET` backend yang sama ke `SSO_JWT_SECRET` pada `NATIVE-LMS-Student/.env`; jangan masukkan rahasia ini ke file frontend atau commit ke Git. URL native lokal disetel melalui `STUDENT_APP_URL` dan `VITE_STUDENT_APP_URL`.
-
-Backend menerbitkan cookie SSO `HttpOnly`, `SameSite=Lax`, dan berlaku 8 jam. Semua app production harus memakai HTTPS di bawah hostname/domain induk yang sama; setel `SSO_COOKIE_DOMAIN` dan samakan nilainya di konfigurasi backend dan native (contoh `.example.com`). Untuk production gunakan password DB khusus berhak minimum, sertifikat TLS SQL Server yang valid, dan URL HTTPS pada `APP_URL`, `SSO_API_URL`, `SSO_FRONTEND_URL`, `FRONTEND_ORIGIN`, serta `STUDENT_APP_URL`. Tombol keluar menghapus cookie bersama; halaman Native memeriksa sesi SSO itu pada setiap request terlindungi.
-
-## Data database dummy
-
-Setiap aplikasi memiliki seeder data dummy yang aman dijalankan berulang kali. Lihat [README Backend](Backend-LMS-Admin-Teacher/README.md) dan [README Student](NATIVE-LMS-Student/README.md) untuk perintah dan NPK akun demo. Launcher data dummy meminta password khusus demo; password tersebut diatur pada akun berawalan `DLS-DEMO-` setiap kali seeder dijalankan. Seeder tidak menghapus data dan tidak mengubah akun di luar akun demo. Jalankan hanya pada database pengembangan. Seed Admin/Teacher dan Student berjalan ke database terpisah tanpa memerlukan sinkronisasi Student.
-
-## Catatan migrasi
-
-Workspace Admin/Teacher mencakup kelola pengguna lintas role (Admin; Student saja untuk Teacher), reviewer, nilai dan ekspor `.xlsx`, notifikasi/email, forum, workflow materi, serta job akun dengan progress SSE dan stop/resume. Student memiliki halaman nilai sendiri, forum/notifikasi backend, katalog dan progres MySQL; quiz/assessment serta beberapa halaman profil masih demo. API course saat ini belum menyediakan edit/hapus umum course atau sesi. Lihat [audit detail dan gap](docs/IMPLEMENTATION-AUDIT.md) untuk cakupan yang tepat.
+* **Dokumentasi Lengkap & Laporan Pengujian**: [`docs/Makalah-Implementasi-DENSO-LMS.docx`](docs/Makalah-Implementasi-DENSO-LMS.docx) | [`docs/Makalah-Implementasi-DENSO-LMS.pdf`](docs/Makalah-Implementasi-DENSO-LMS.pdf)
+* **Panduan Proyek & Instalasi**: [`docs/01-Project-Overview-and-Setup.docx`](docs/01-Project-Overview-and-Setup.docx) ([`docs/PROJECT-GUIDE.docx`](docs/PROJECT-GUIDE.docx))
+* **Referensi Backend API**: [`docs/02-Backend-API-Reference.docx`](docs/02-Backend-API-Reference.docx) ([`docs/documentation-backend.docx`](docs/documentation-backend.docx))
+* **Dokumentasi Frontend Admin & Teacher**: [`docs/03-Frontend-Admin-Teacher-Documentation.docx`](docs/03-Frontend-Admin-Teacher-Documentation.docx) ([`docs/documentation-frontend.docx`](docs/documentation-frontend.docx))
+* **Dokumentasi Portal Siswa PHP**: [`docs/04-Student-Portal-PHP-Documentation.docx`](docs/04-Student-Portal-PHP-Documentation.docx) ([`docs/documentation-native-student.docx`](docs/documentation-native-student.docx))
+* **Skema Basis Data & ERD**: [`docs/05-Database-Schema-ERD-and-Migrations.docx`](docs/05-Database-Schema-ERD-and-Migrations.docx) ([`docs/sdd-erd-architecture.docx`](docs/sdd-erd-architecture.docx)) | Diagram Draw.io: [`docs/uml/architecture/02-erd-dual-database.drawio`](docs/uml/architecture/02-erd-dual-database.drawio)
+* **Matriks Fitur per Role & Audit QA**: [`docs/06-Role-Feature-Matrix-and-QA-Audit.docx`](docs/06-Role-Feature-Matrix-and-QA-Audit.docx) ([`docs/daftar-fitur-per-role.docx`](docs/daftar-fitur-per-role.docx))
+* **Spesifikasi UML & Flowchart**: [`docs/07-UML-Architecture-and-Flow-Specification.docx`](docs/07-UML-Architecture-and-Flow-Specification.docx) | Berkas Draw.io di [`docs/uml/`](docs/uml/) dan [`docs/Flowchart/`](docs/Flowchart/)

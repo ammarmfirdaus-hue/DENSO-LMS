@@ -270,74 +270,25 @@ $active_tab = 'profil'; ?>
                 </div>
             </section>
 
-            <!-- ===== SECTION 5: KONTAK & BANTUAN LANJUTAN ===== -->
-            <section class="flex flex-col gap-4">
-                <!-- Hubungi Admin -->
-                <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-                    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">contact_phone</span>
-                        <h2 class="font-headline-sm text-on-surface font-bold text-[14px]">Hubungi Admin</h2>
+            <!-- ===== SECTION 5: LIVE CHAT ADMIN ===== -->
+            <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">chat</span>
                     </div>
-                    <div class="p-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="flex items-center gap-3 p-3.5 bg-surface-container/30 rounded-xl">
-                                <span class="material-symbols-outlined text-[22px] text-secondary" style="font-variation-settings:'FILL' 1;">mail</span>
-                                <div>
-                                    <p class="text-[14px] text-on-surface-variant font-medium">Kanal bantuan</p>
-                                    <p class="text-[14px] text-on-surface font-semibold">Admin melalui kanal internal perusahaan</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3 p-3.5 bg-surface-container/30 rounded-xl">
-                                <span class="material-symbols-outlined text-[22px] text-secondary" style="font-variation-settings:'FILL' 1;">call</span>
-                                <div>
-                                <p class="text-[14px] text-on-surface-variant font-medium">Informasi kontak</p>
-                                <p class="text-[14px] text-on-surface font-semibold">Mengikuti kebijakan perusahaan</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-[14px] text-on-surface-variant mt-3">Gunakan kontak dan jam layanan resmi yang berlaku di perusahaan Anda.</p>
+                    <div>
+                        <h2 class="font-headline-sm text-on-surface font-bold text-[15px]">Butuh Bantuan Langsung?</h2>
+                        <p class="text-[13px] text-on-surface-variant mt-0.5">Hubungi Admin LMS secara realtime melalui jendela Live Chat.</p>
                     </div>
                 </div>
-
-                <!-- Laporkan Masalah -->
-                <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-                    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">bug_report</span>
-                        <h2 class="font-headline-sm text-on-surface font-bold text-[14px]">Laporkan Masalah</h2>
-                    </div>
-                    <div class="p-4">
-                        <div class="dls-feature-note" role="status">Form tiket belum tersambung ke sistem bantuan. Hubungi Admin LMS melalui kanal internal resmi perusahaan.</div>
-                    </div>
-                </div>
-
-                <!-- Riwayat Tiket -->
-                <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-                    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">receipt_long</span>
-                        <h2 class="font-headline-sm text-on-surface font-bold text-[14px]">Riwayat Tiket Bantuan</h2>
-                    </div>
-                    <div class="p-4 flex flex-col gap-2.5">
-                        <?php
-                        $tickets = [];
-                        ?>
-                        <?php if (empty($tickets)): ?><p class="dls-feature-note">Belum ada tiket bantuan.</p><?php endif; ?>
-                        <?php foreach ($tickets as $t): ?>
-                        <div class="flex items-center gap-3 p-3 bg-surface-container/20 rounded-xl border border-outline-variant/15">
-                            <span class="material-symbols-outlined text-[14px] text-on-surface-variant shrink-0" style="font-variation-settings:'FILL' 0;">confirmation_number</span>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-0.5">
-                                    <p class="text-[14px] text-on-surface font-semibold truncate"><?= $t['title'] ?></p>
-                                </div>
-                                <p class="text-[14px] text-on-surface-variant"><?= $t['id'] ?> · <?= $t['date'] ?></p>
-                            </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 <?= $t[
-                                'statusColor'
-                            ] ?>"><?= $t['status'] ?></span>
-                        </div>
-                        <?php endforeach;
-                        ?>
-                    </div>
-                </div>
+                <button
+                    type="button"
+                    data-open-support-chat="1"
+                    onclick="if (typeof window.openStudentSupportChat === 'function') window.openStudentSupportChat();"
+                    class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[13px] font-bold transition-colors shrink-0 cursor-pointer"
+                >
+                    Mulai Live Chat Admin
+                </button>
             </section>
 
         </div><!-- /max-w-3xl -->

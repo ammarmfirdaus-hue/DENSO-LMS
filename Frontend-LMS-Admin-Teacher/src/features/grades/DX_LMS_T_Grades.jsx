@@ -329,6 +329,7 @@ export default function GradesPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Rekaman"
+          to="/grades#grades-list"
           value={summary.total}
           icon={<ClipboardList className="size-5" />}
           tone="secondary"
@@ -337,6 +338,7 @@ export default function GradesPage() {
         />
         <StatCard
           label="Rata-rata Progres"
+          to="/grades#grades-list"
           value={`${summary.avgProgress}%`}
           icon={<TrendingUp className="size-5" />}
           tone="info"
@@ -345,6 +347,7 @@ export default function GradesPage() {
         />
         <StatCard
           label="Rata-rata Nilai Quiz"
+          to="/grades#grades-list"
           value={summary.avgQuiz == null ? '—' : summary.avgQuiz.toLocaleString('id-ID')}
           icon={<Award className="size-5" />}
           tone="tertiary"
@@ -353,6 +356,7 @@ export default function GradesPage() {
         />
         <StatCard
           label="Status Selesai"
+          to="/grades?status=completed#grades-list"
           value={summary.completed}
           icon={<CheckCircle2 className="size-5" />}
           tone="primary"

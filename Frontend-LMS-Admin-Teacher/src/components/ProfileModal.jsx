@@ -3,6 +3,7 @@ import { Moon, Sun, X, Loader2 } from 'lucide-react';
 import { api } from '../api/client';
 import showAlert from '../utils/alert';
 import { getInitialTheme, toggleTheme } from '../utils/theme';
+import ToggleSwitch from './ToggleSwitch';
 
 /**
  * Modal Pengaturan Profil & Keamanan Akun Pengelola (Admin & Teacher).
@@ -109,21 +110,13 @@ export default function ProfileModal({ user, onClose, onUserUpdated }) {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
+            <ToggleSwitch
               data-dls-action-ignore="true"
-              onClick={handleToggleTheme}
-              aria-label="Ganti Tema"
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
-                isDark ? 'bg-primary' : 'bg-slate-300'
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow transition duration-200 ${
-                  isDark ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
+              checked={isDark}
+              onChange={handleToggleTheme}
+              ariaLabel="Ganti tema tampilan"
+              title={isDark ? 'Gunakan mode terang' : 'Gunakan mode gelap'}
+            />
           </div>
 
           <div className="space-y-4">

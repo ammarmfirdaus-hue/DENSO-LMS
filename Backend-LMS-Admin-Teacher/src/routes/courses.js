@@ -10,11 +10,19 @@ const { courseCoverUpload } = require('../middleware/forum-upload');
 const { uploadLimiter } = require('../middleware/rate-limit');
 const { parseImageBuffer } = require('../services/forum-image');
 const { syncStudentNow } = require('../services/student-sync');
+const { encodePublicId, decodePublicId } = require('../services/public-route-id');
 
 const router = express.Router();
 const courseUploadDir = path.resolve(__dirname, '../../uploads/courses');
 const THUMBNAIL_PATH_PREFIX = '/courses/thumbnails/';
 const THUMBNAIL_FILENAME_REGEX = /^[0-9a-f-]{36}\.(jpg|png|gif|webp)$/i;
+
+function parseCourseRouteId(value) {
+  const raw = String(value || '');
+  if (/^\d+$/.test(raw) && Number.isSafeInteger(Number(raw)) && Number(raw) > 0) return { success: true, data: Number(raw) };
+  const decoded = decodePublicId('course', raw);
+  return decoded ? { success: true, data: decoded } : { success: false };
+}
 
 /**
  * Memastikan path file sampul yang disimpan berada di dalam direktori uploads/courses.
@@ -83,7 +91,10 @@ router.get('/', requirePermission('courses.view'), async (req, res, next) => {
         FROM dbo.courses
         WHERE status='active' AND (@isAdmin=1 OR created_by=@npk OR assigned_trainer_npk=@npk)
         ORDER BY title`);
-    const page = paginateCollection(req, result.recordset);
+    const page = paginateCollection(req, result.recordset.map(course => ({
+      ...course,
+      public_id: encodePublicId('course', course.course_id)
+    })));
     res.json({ courses: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });
@@ -109,7 +120,7 @@ router.post('/', requirePermission('courses.create'), async (req, res, next) => 
               INSERT INTO dbo.activity_logs(employee_npk,activity_type,description)
               VALUES(@creator,'course_created',CONCAT(N'Membuat course ',@code));`);
     await syncStudentNow().catch(() => {});
-    res.status(201).json({ course: result.recordset[0] });
+    res.status(201).json({ course: { ...result.recordset[0], public_id: encodePublicId('course', result.recordset[0].course_id) } });
   } catch (error) { if (error.number === 2627 || error.number === 2601) error.status = 409; next(error); }
 });
 
@@ -118,7 +129,7 @@ router.post('/', requirePermission('courses.create'), async (req, res, next) => 
  * dan menyinkronkannya langsung ke database portal Student.
  */
 router.post('/:id/thumbnail', requirePermission('courses.manage_cover'), uploadLimiter, courseCoverUpload.single('thumbnail'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   let savedPath = null;
   try {
@@ -169,7 +180,7 @@ router.post('/:id/thumbnail', requirePermission('courses.manage_cover'), uploadL
  * Menghapus foto sampul course sehingga kembali ke tampilan ikon bawaan.
  */
 router.delete('/:id/thumbnail', requirePermission('courses.manage_cover'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   try {
     if (!(await courseAccess(id.data, req.user))) {
@@ -199,10 +210,16 @@ router.delete('/:id/thumbnail', requirePermission('courses.manage_cover'), async
 });
 
 router.put('/:id/trainer', requirePermission('courses.assign_trainer'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   const input = z.object({ trainerNpk: z.string().trim().max(50).optional().default('') }).safeParse(req.body);
   if (!id.success || !input.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih trainer yang valid.' } });
   try {
+    // Assignment is an object-level operation.  A Teacher may only change a
+    // course that they own or are already assigned to; Admin and other
+    // privileged roles retain the wide scope defined by courseAccess().
+    if (!(await courseAccess(id.data, req.user))) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan atau tidak ditugaskan kepada Anda.' } });
+    }
     const trainerNpk = input.data.trainerNpk || null;
     if (trainerNpk) {
       const trainer = await pool.request().input('npk', sql.VarChar(50), trainerNpk)
@@ -217,7 +234,7 @@ router.put('/:id/trainer', requirePermission('courses.assign_trainer'), async (r
 });
 
 router.get('/:id/sessions', requirePermission('courses.view'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   try {
     if (!(await courseAccess(id.data, req.user))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
@@ -231,7 +248,7 @@ router.get('/:id/sessions', requirePermission('courses.view'), async (req, res, 
 });
 
 router.get('/:id/detail', requirePermission('courses.view'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID course tidak valid.' } });
   try {
     if (!(await courseAccess(id.data, req.user))) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan atau tidak ditugaskan kepada Anda.' } });
@@ -242,6 +259,7 @@ router.get('/:id/detail', requirePermission('courses.view'), async (req, res, ne
         JOIN dbo.employee_accounts creator ON creator.employee_npk=c.created_by WHERE c.course_id=@id`);
     const course = courseResult.recordset[0];
     if (!course) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
+    course.public_id = encodePublicId('course', course.course_id);
 
     const sessionsResult = await pool.request().input('id', sql.BigInt, id.data)
       .query(`SELECT session_id,title,sort_order,status,created_at FROM dbo.course_sessions WHERE course_id=@id ORDER BY sort_order,session_id`);
@@ -275,7 +293,7 @@ router.get('/:id/detail', requirePermission('courses.view'), async (req, res, ne
 });
 
 router.post('/:id/sessions', requirePermission('courses.manage_sessions'), async (req, res, next) => {
-  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  const id = parseCourseRouteId(req.params.id);
   const input = z.object({ title: z.string().trim().min(2).max(200), sortOrder: z.number().int().min(0).max(10000).default(0) }).safeParse(req.body);
   if (!id.success || !input.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Data sesi tidak valid.' } });
   try {

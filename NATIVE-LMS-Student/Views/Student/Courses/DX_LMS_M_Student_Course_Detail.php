@@ -1,6 +1,7 @@
 <?php
 $tab = $tab ?? ($_GET['tab'] ?? 'materi');
 $courseId = $course['id'] ?? 'CRS001';
+$coursePublicId = $course['public_id'] ?? publicCourseId($courseId);
 $all_sessions_completed = $all_sessions_completed ?? false;
 ?>
 <!DOCTYPE html>
@@ -40,7 +41,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
     </style>
 </head>
 
-<body class="dls-app-shell <?= $tab === 'quiz' ? 'dls-course-quiz' : '' ?> bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
+<body class="dls-app-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col pt-safe pb-[80px]">
     <!-- TopAppBar Shared Component -->
     <?php
     $header_title = 'Detail Course';
@@ -117,35 +118,35 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         <div class="dls-course-tabs w-full bg-[#F5F5F5] rounded-full sticky top-[66px] z-30 p-[6px] mt-[18px]">
             <nav class="flex overflow-x-auto hide-scrollbar gap-[6px]">
                 <a href="?route=/student/course/detail&id=<?= e(
-                    $courseId,
+                    $coursePublicId,
                 ) ?>&tab=materi" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === 'materi'
     ? 'is-active bg-[#DC2626] text-white font-semibold'
     : 'text-[#525252] hover:text-[#171717]' ?>">
                     <span class="truncate">Materi</span>
                 </a>
                 <a href="?route=/student/course/detail&id=<?= e(
-                    $courseId,
+                    $coursePublicId,
                 ) ?>&tab=quiz" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === 'quiz'
     ? 'is-active bg-[#DC2626] text-white font-semibold'
     : 'text-[#525252] hover:text-[#171717]' ?>">
                     <span class="truncate">Quiz</span>
                 </a>
                 <a href="?route=/student/course/detail&id=<?= e(
-                    $courseId,
+                    $coursePublicId,
                 ) ?>&tab=forum" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === 'forum'
     ? 'is-active bg-[#DC2626] text-white font-semibold'
     : 'text-[#525252] hover:text-[#171717]' ?>">
                     <span class="truncate">Forum</span>
                 </a>
                 <a href="?route=/student/course/detail&id=<?= e(
-                    $courseId,
+                    $coursePublicId,
                 ) ?>&tab=riwayat" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === 'riwayat'
     ? 'is-active bg-[#DC2626] text-white font-semibold'
     : 'text-[#525252] hover:text-[#171717]' ?>">
                     <span class="truncate">Riwayat</span>
                 </a>
                 <a href="?route=/student/course/detail&id=<?= e(
-                    $courseId,
+                    $coursePublicId,
                 ) ?>&tab=capaian" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === 'capaian'
     ? 'is-active bg-[#DC2626] text-white font-semibold'
     : 'text-[#525252] hover:text-[#171717]' ?>">
@@ -208,9 +209,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                         ?>
                         <a href="<?= !$isLockedMat
                             ? '?route=/student/learning&id=' .
-                                e($courseId) .
+                                e($coursePublicId) .
                                 '&session_id=' .
-                                e($session['id']) .
+                                rawurlencode(publicSessionId($session['id'])) .
                                 '&material_index=' .
                                 $mIndex
                             : 'javascript:void(0)' ?>" class="fd-list-row <?= $isCurrentMat ? 'is-selected' : '' ?> <?= $isLockedMat ? 'opacity-45 cursor-not-allowed' : '' ?>">
@@ -573,7 +574,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             <!-- Quiz -->
             <div class="fd-list rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden w-full">
                 <a href="<?= $quiz['status'] !== 'terkunci'
-                    ? '?route=/student/quiz&id=' . e($courseId) . '&type=quiz'
+                    ? '?route=/student/quiz&id=' . e($coursePublicId) . '&type=quiz'
                     : 'javascript:void(0)' ?>" class="fd-list-row w-full text-left <?= $quiz['status'] === 'terkunci'
     ? 'opacity-50 cursor-not-allowed'
     : 'is-selected' ?>">
@@ -634,7 +635,7 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                 ? 'opacity-65'
                 : '' ?>">
                 <a href="<?= $faStatus !== 'terkunci' && !$isPassed
-                    ? '?route=/student/quiz&id=' . e($courseId) . '&type=final_assessment'
+                    ? '?route=/student/quiz&id=' . e($coursePublicId) . '&type=final_assessment'
                     : 'javascript:void(0)' ?>" class="fd-list-row w-full text-left <?= $faStatus === 'terkunci' || $isPassed
     ? 'cursor-not-allowed'
     : 'is-selected' ?>">
@@ -716,9 +717,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                 <a href="<?= $isLocked
                     ? '#'
                     : '?route=/student/forum/category&course_id=' .
-                        urlencode($course['id']) .
+                        urlencode($coursePublicId) .
                         '&category_type=materi&session_id=' .
-                        urlencode($sessId) ?>" class="fd-card fd-card-interactive block rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group relative overflow-hidden <?= $isLocked ? 'opacity-70 cursor-not-allowed' : '' ?>">
+                        urlencode(publicSessionId($sessId)) ?>" class="fd-card fd-card-interactive block rounded-[12px] bg-white p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group relative overflow-hidden <?= $isLocked ? 'opacity-70 cursor-not-allowed' : '' ?>">
                     <div class="flex items-start justify-between gap-[12px]">
                         <div class="min-w-0">
                             <h4 class="fd-h4 text-[#171717] mb-[6px] flex items-center gap-[8px] group-hover:text-[#DC2626] transition-colors">

@@ -139,5 +139,11 @@ export async function api(path, options = {}) {
     if (response.status === 401 && requestToken === undefined) authToken.clear();
     throw new Error(body?.error?.message || `Layanan LMS bermasalah (HTTP ${response.status}). Coba kembali.`);
   }
+  const createdJobId = Number(body?.jobId || body?.job_id || body?.job?.job_id || 0);
+  if (createdJobId > 0 && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('dls_job_created', {
+      detail: { jobId: createdJobId, job: body?.job || null }
+    }));
+  }
   return body;
 }

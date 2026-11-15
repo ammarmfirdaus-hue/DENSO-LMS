@@ -19,27 +19,28 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
      */
     public function index()
     {
-        $courseId = $_GET['course_id'] ?? '';
+        $rawCourseId = $_GET['course_id'] ?? '';
+        $courseId = resolveCourseId($rawCourseId) ?? '';
         $categoryType = $_GET['category_type'] ?? ''; /** Mengatur jenis modul: materi, kuis, atau penilaian akhir. */
-        $sessionId = $_GET['session_id'] ?? '';
+        $sessionId = resolveSessionId($_GET['session_id'] ?? '') ?? '';
         $isRiwayat = isset($_GET['is_riwayat']) && $_GET['is_riwayat'] === 'true';
 
         /** Melakukan validasi awal pada data masukan. */
-        if (!is_string($courseId) || strlen($courseId) > 80
+        if (!is_string($courseId) || !preg_match('/^[A-Za-z0-9_-]{1,80}$/', $courseId)
             || !is_string($categoryType) || !in_array($categoryType, ['materi', 'quiz', 'final_assessment'], true)
-            || !is_string($sessionId) || strlen($sessionId) > 80 || $courseId === '') {
+            || !is_string($sessionId) || $sessionId === '' || $courseId === '') {
             header('Location: ?route=' . ($isRiwayat ? '/student/riwayat' : '/student/courses'));
             exit();
         }
         if ($categoryType !== 'materi') {
-            header('Location: ?route=/student/course/detail&id=' . urlencode($courseId) . '&tab=forum', true, 303);
+            header('Location: ?route=/student/course/detail&id=' . urlencode(publicCourseId($courseId)) . '&tab=forum', true, 303);
             exit();
         }
 
         /** Mengambil rincian informasi kursus. */
         $course = DX_LMS_M_Student_Data::getCourseById($courseId);
 
-        if (!$course) {
+        if (!$course || empty($course['has_access'])) {
             header('Location: ?route=' . ($isRiwayat ? '/student/riwayat' : '/student/courses'));
             exit();
         }
@@ -52,7 +53,7 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
 
         if ($categoryType === 'materi') {
             if (empty($sessionId)) {
-                header('Location: ?route=/student/course/detail&id=' . urlencode($courseId) . '&tab=forum');
+                header('Location: ?route=/student/course/detail&id=' . urlencode(publicCourseId($courseId)) . '&tab=forum');
                 exit();
             }
 
@@ -66,7 +67,7 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
             }
 
             if (!$sessionData) {
-                header('Location: ?route=/student/course/detail&id=' . urlencode($courseId) . '&tab=forum');
+                header('Location: ?route=/student/course/detail&id=' . urlencode(publicCourseId($courseId)) . '&tab=forum');
                 exit();
             }
 
@@ -91,7 +92,7 @@ class DX_LMS_T_Student_Forum_Category extends DX_LMS_M_Controller
             $forumData = $course['forums']['final_assessment'] ?? ['threads' => [], 'has_created_thread' => false];
             $hasCreatedThread = $forumData['has_created_thread'] ?? false;
         } else {
-            header('Location: ?route=/student/course/detail&id=' . urlencode($courseId) . '&tab=forum');
+            header('Location: ?route=/student/course/detail&id=' . urlencode(publicCourseId($courseId)) . '&tab=forum');
             exit();
         }
 

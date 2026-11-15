@@ -241,12 +241,13 @@ main .course-card button:hover, #course-results > .course-card button:hover, .fi
     font-weight: 650 !important;
     box-shadow: none !important;
 }
-.filter-chip[aria-pressed="true"], [data-student-courses] #chip-container > button:first-child {
+.filter-chip[aria-pressed="true"],
+.filter-chip.is-active {
     border-color: var(--student-red) !important;
     background: var(--student-red) !important;
     color: #fff !important;
 }
-.filter-chip:hover { border-color: var(--student-red) !important; color: var(--student-red) !important; transform: none !important; }
+.filter-chip:not([aria-pressed="true"]):not(.is-active):hover { border-color: var(--student-red) !important; color: var(--student-red) !important; transform: none !important; }
 
 /* Course detail: distinct cover, easy-to-scan tabs, lessons and summaries. */
 main .dls-course-hero {
@@ -408,7 +409,7 @@ html.dark main .filter-chip,
 html.dark [data-student-courses] #chip-container > a,
 html.dark [data-student-courses] #chip-container > button { background: var(--student-card) !important; color: var(--student-ink) !important; }
 html.dark main .filter-chip[aria-pressed="true"],
-html.dark [data-student-courses] #chip-container > button:first-child { background: var(--student-red) !important; color: #fff !important; }
+html.dark main .filter-chip.is-active { background: var(--student-red) !important; color: #fff !important; border-color: var(--student-red) !important; }
 html.dark main .dls-grade-table-hint { border-color: var(--student-line); background: #302528; color: var(--student-muted); }
 html.dark main .dls-course-tabs nav > a:hover,
 html.dark main table tbody tr:nth-child(even) { background: #202c36 !important; }

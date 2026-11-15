@@ -6,6 +6,7 @@ import AppLayout from './layouts/AppLayout';
 import LoginPage from './features/auth/DX_LMS_M_Auth_Login';
 const DashboardPage = React.lazy(() => import('./features/dashboard/DX_LMS_T_Dashboard'));
 const CoursesPage = React.lazy(() => import('./features/courses/DX_LMS_T_Courses'));
+const CreateCoursePage = React.lazy(() => import('./features/courses/CreateCoursePage'));
 const MaterialsPage = React.lazy(() => import('./features/materials/DX_LMS_T_Materials'));
 const CourseDetailPage = React.lazy(() => import('./features/courses/DX_LMS_T_Course_Detail'));
 const ActivityPage = React.lazy(() => import('./features/activity/DX_LMS_T_Activity'));
@@ -13,11 +14,15 @@ const GradesPage = React.lazy(() => import('./features/grades/DX_LMS_T_Grades'))
 const QuizzesPage = React.lazy(() => import('./features/quizzes/DX_LMS_T_Quizzes'));
 const ForumPage = React.lazy(() => import('./features/forum/DX_LMS_T_Forum'));
 const NotificationsPage = React.lazy(() => import('./features/notifications/DX_LMS_T_Notifications'));
+const SupportChatPage = React.lazy(() => import('./features/support-chat/DX_LMS_M_Support_Chat'));
 const UsersPage = React.lazy(() => import('./features/users/DX_LMS_M_Users'));
+const CreateUserPage = React.lazy(() => import('./features/users/CreateUserPage'));
 const ReviewersPage = React.lazy(() => import('./features/reviewers/DX_LMS_M_Reviewers'));
 const EnrollmentsPage = React.lazy(() => import('./features/enrollments/DX_LMS_T_Enrollments'));
 const RolesPage = React.lazy(() => import('./features/roles/DX_LMS_M_Role_Access'));
 const ApiSettingsPage = React.lazy(() => import('./features/settings/DX_LMS_M_Settings_Api'));
+const BackupPage = React.lazy(() => import('./features/settings/DX_LMS_M_Backup'));
+const CertificatesPage = React.lazy(() => import('./features/certificates/DX_LMS_T_Certificates'));
 const ReviewerPortalPage = React.lazy(() => import('./features/reviewer/DX_LMS_M_Reviewer_Portal'));
 import { canAccessStaffPortal, hasPermission } from './utils/access-control';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
@@ -72,9 +77,25 @@ function Application() {
       const result = await api('/auth/me');
       if (canAccessStaffPortal(result.user)) {
         setSession(result.user);
+      } else {
+        authToken.clear();
+        setSession(null);
+        navigate('/login');
       }
     } catch { /* ignore transient error */ }
   }
+
+  useEffect(() => {
+    if (!session || isReviewerRoute) return undefined;
+    let lastCheckedAt = Date.now();
+    const handleFocus = () => {
+      if (Date.now() - lastCheckedAt < 15000) return;
+      lastCheckedAt = Date.now();
+      refreshSession();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [session?.npk, isReviewerRoute]);
 
   async function login(npk, password) {
     await initializeApiBase();
@@ -132,6 +153,9 @@ function Application() {
         <Route element={<AppLayout user={session} onLogout={logout} />}>
           <Route index element={hasPermission(session, 'dashboard.view') ? <DashboardPage /> : (fallbackRoute ? <Navigate to={fallbackRoute} replace /> : <DashboardPage />)} />
           <Route path="courses" element={protect('courses.view', <CoursesPage />)} />
+          <Route path="courses/new" element={protect('courses.create', <CreateCoursePage />)} />
+          <Route path="courses/view/:publicId" element={protect('courses.view', <CourseDetailPage />)} />
+          {/* Legacy route remains readable for old bookmarks; all new links use opaque IDs. */}
           <Route path="courses/:id" element={protect('courses.view', <CourseDetailPage />)} />
           <Route path="materials" element={protect('materials.view', <MaterialsPage />)} />
           <Route path="quizzes" element={protect('quizzes.view', <QuizzesPage />)} />
@@ -139,11 +163,15 @@ function Application() {
           <Route path="grades" element={protect('grades.view', <GradesPage />)} />
           <Route path="forum" element={protect('forum.view', <ForumPage />)} />
           <Route path="notifications" element={protect('notifications.view', <NotificationsPage />)} />
+          <Route path="certificates" element={['admin', 'teacher'].includes(String(session?.role || '').toLowerCase()) ? <CertificatesPage session={session} /> : <Navigate to={fallbackRoute || '/'} replace />} />
+          <Route path="support-chat" element={String(session?.role || '').toLowerCase() === 'admin' ? <SupportChatPage /> : <Navigate to={fallbackRoute || '/'} replace />} />
           <Route path="enrollments" element={protect(['enrollments.view', 'enrollments.decide', 'enrollments.recommend'], <EnrollmentsPage />)} />
           <Route path="reviewers" element={protect(['reviewers.view', 'reviewers.manage'], <ReviewersPage />)} />
           <Route path="users" element={protect(['users.view', 'users.manage'], <UsersPage />)} />
+          <Route path="users/new" element={protect('users.manage', <CreateUserPage />)} />
           <Route path="roles" element={protect('roles.manage', <RolesPage onPermissionsUpdated={refreshSession} />)} />
           <Route path="settings/api" element={protect('settings.api', <ApiSettingsPage />)} />
+          <Route path="settings/backup" element={protect('settings.api', <BackupPage />)} />
           <Route path="*" element={<Navigate to={fallbackRoute || '/'} replace />} />
         </Route>
       </Routes>

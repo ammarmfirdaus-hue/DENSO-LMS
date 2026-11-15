@@ -157,10 +157,11 @@ $isVideoEmbed = $materialType === 'video'
     <?php
     $header_title = (string) $material['title'];
     $show_back = true;
+    $coursePublicId = $course['public_id'] ?? publicCourseId($course['id'] ?? '');
     $back_url =
         $course['status'] === 'selesai'
-            ? '?route=/student/riwayat/detail&id=' . urlencode($course['id'])
-            : '?route=/student/course/detail&id=' . urlencode($course['id']);
+            ? '?route=/student/riwayat/detail&id=' . urlencode($coursePublicId)
+            : '?route=/student/course/detail&id=' . urlencode($coursePublicId);
     $notif_count = isset($stats['unread_notifs']) ? $stats['unread_notifs'] : 0;
     /** Memanggil kop antarmuka basis untuk menyajikan tampilan seragam. */
     include APP_ROOT . '/includes/components/DX_LMS_M_Header.php';
@@ -168,6 +169,7 @@ $isVideoEmbed = $materialType === 'video'
 
     <!-- Sidebar / Bottom Nav Component -->
     <?php
+    $hide_right_panel = true;
     $active_tab = isset($course['status']) && $course['status'] === 'selesai' ? 'riwayat' : 'course';
     include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php';
     ?>
@@ -437,7 +439,7 @@ $isVideoEmbed = $materialType === 'video'
                     </div>
 
                     <?php if (!empty($isLiveCourse) && !$materialIsCompleted && !$isCompleted): ?>
-                    <form method="post" action="?route=/student/learning&amp;id=<?= rawurlencode((string) $course['id']) ?>&amp;session_id=<?= rawurlencode((string) $session['id']) ?>&amp;material_index=<?= (int) $materialIndex ?>">
+                    <form method="post" action="?route=/student/learning&amp;id=<?= rawurlencode((string) $coursePublicId) ?>&amp;session_id=<?= rawurlencode((string) $session['id']) ?>&amp;material_index=<?= (int) $materialIndex ?>">
                         <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
                         <button type="submit" class="fd-btn fd-btn-primary fd-btn-md rounded-full"><span class="material-symbols-outlined text-[20px]">task_alt</span><span>Tandai Selesai</span></button>
                     </form>

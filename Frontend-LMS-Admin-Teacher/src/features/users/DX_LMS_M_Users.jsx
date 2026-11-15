@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import {
+  ArrowRightLeft,
   CheckCircle2,
   Download,
   FileCheck2,
   GraduationCap,
   Mail,
   Pencil,
-  Plus,
   Presentation,
   ShieldCheck,
   Table,
@@ -29,6 +29,7 @@ import StatusBadge from '../../components/StatusBadge';
 import Button from '../../components/Button';
 import DataTable from '../../components/DataTable';
 import Modal from '../../components/Modal';
+import SearchableSelect from '../../components/SearchableSelect';
 import showAlert from '../../utils/alert';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 
@@ -96,6 +97,7 @@ function downloadCsv(filename, rows) {
  */
 export default function UsersPage() {
   const currentUser = useOutletContext();
+  const navigate = useNavigate();
   const isAdmin = currentUser?.role === 'admin';
   const canManageUserAccounts = hasPermission(currentUser, 'users.manage');
   const [users, setUsers] = useState([]);
@@ -107,7 +109,11 @@ export default function UsersPage() {
   const importInput = useRef(null);
   const [search, setSearch] = useState('');
   const [role, setRole] = useQueryParamState('role', 'all');
+  const [status, setStatus] = useQueryParamState('status', 'all');
   const [editing, setEditing] = useState(null);
+  const [editRole, setEditRole] = useState('');
+  const [editStatus, setEditStatus] = useState('');
+  const [transferTarget, setTransferTarget] = useState(null);
   const [emailTarget, setEmailTarget] = useState(null);
 
   const filteredUsers = useMemo(
@@ -115,11 +121,12 @@ export default function UsersPage() {
       users.filter(
         (user) =>
           (role === 'all' || user.role === role) &&
+          (status === 'all' || user.status === status) &&
           `${user.fullname} ${user.employee_npk} ${user.email} ${user.role}`
             .toLowerCase()
             .includes(search.trim().toLowerCase())
       ),
-    [users, role, search]
+    [users, role, status, search]
   );
 
   const summary = useMemo(
@@ -132,6 +139,11 @@ export default function UsersPage() {
       admins: users.filter((user) => user.role === 'admin').length,
       reviewers: users.filter((user) => user.role === 'reviewer').length
     }),
+    [users]
+  );
+
+  const activeReviewers = useMemo(
+    () => users.filter((user) => user.role === 'reviewer' && user.status === 'active'),
     [users]
   );
 
@@ -164,57 +176,13 @@ export default function UsersPage() {
     return () => window.removeEventListener('dls_job_settled', refreshAfterQueue);
   }, []);
 
-  async function create(event) {
-    event.preventDefault();
-    const formElement = event.currentTarget;
-    const data = Object.fromEntries(new FormData(formElement));
-    data.sendEmail = data.sendEmail === 'on';
-    setBusy(true);
-    setError('');
-    try {
-      data.sendEmail
-        ? await api('/jobs/users', {
-            method: 'POST',
-            body: JSON.stringify({
-              items: [
-                {
-                  ...data,
-                  action: 'upsert',
-                  status: 'active',
-                  label: `${data.fullname} (${data.npk})`
-                }
-              ]
-            })
-          })
-        : await api('/users', { method: 'POST', body: JSON.stringify(data) });
-      formElement.reset();
-      await load();
-      if (data.sendEmail) {
-        showAlert.success(
-          'Pembuatan Akun Masuk Antrean',
-          `Akun ${data.npk} dan email data akun akan diproses berurutan.`
-        );
-      } else {
-        showAlert.success(
-          'Pengguna Berhasil Ditambahkan',
-          `Akun untuk ${data.fullname} (${data.role.toUpperCase()}) telah berhasil dibuat.`
-        );
-      }
-    } catch (e) {
-      setError(e.message);
-      showAlert.error(
-        'Gagal Menambahkan Pengguna',
-        e.message || 'Terjadi kesalahan saat membuat pengguna.'
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function update(event) {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData);
     data.sendEmail = data.sendEmail === 'on';
+    const targetReviewerNpk = formData.get('targetReviewerNpk');
+    if (targetReviewerNpk) data.targetReviewerNpk = targetReviewerNpk;
     const isStudentPromotion = editing.role === 'student' && data.role === 'teacher';
     if (isStudentPromotion) {
       const confirmed = await showAlert.confirm({
@@ -321,7 +289,58 @@ export default function UsersPage() {
     }
   }
 
+  async function handleTransferReviewTasks(event) {
+    event.preventDefault();
+    if (!transferTarget) return;
+    const targetReviewerNpk = new FormData(event.currentTarget).get('targetReviewerNpk');
+    if (!targetReviewerNpk) return;
+    setBusy(true);
+    setError('');
+    try {
+      if (transferTarget.pendingAction === 'deactivate') {
+        await api(`/reviewers/${encodeURIComponent(transferTarget.employee_npk)}`, {
+          method: 'DELETE',
+          body: JSON.stringify({ targetReviewerNpk })
+        });
+        showAlert.success('Reviewer Dinonaktifkan', `Tugas review dialihkan dan akun ${transferTarget.fullname} berhasil dinonaktifkan.`);
+      } else if (transferTarget.pendingAction === 'delete') {
+        await api(`/users/${encodeURIComponent(transferTarget.employee_npk)}`, {
+          method: 'DELETE',
+          body: JSON.stringify({ targetReviewerNpk })
+        });
+        showAlert.success('Reviewer Diproses', `Tugas review dialihkan dan akun ${transferTarget.fullname} berhasil diproses.`);
+      } else {
+        const res = await api(`/reviewers/${encodeURIComponent(transferTarget.employee_npk)}/transfer-review-tasks`, {
+          method: 'POST',
+          body: JSON.stringify({ targetReviewerNpk })
+        });
+        showAlert.success('Tugas Review Dialihkan', res.message || 'Tugas review berhasil dialihkan ke reviewer pengganti.');
+      }
+      setTransferTarget(null);
+      await load();
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Mengalihkan Tugas Review', err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function deactivateUser(user) {
+    if (user.role === 'reviewer') {
+      const choice = await showAlert.confirm({
+        title: 'Nonaktifkan Reviewer?',
+        text: `Apakah Anda ingin mengalihkan tugas review aktif akun ${user.fullname} ke reviewer pengganti terlebih dahulu?`,
+        confirmText: 'Pilih Pengganti & Nonaktifkan',
+        cancelText: 'Nonaktifkan Langsung',
+        icon: 'question'
+      });
+      if (choice) {
+        setTransferTarget({ ...user, pendingAction: 'deactivate' });
+        return;
+      }
+    }
+
     const confirmed = await showAlert.confirm({
       title: 'Nonaktifkan Pengguna?',
       text: `Akun ${user.fullname} tidak dapat login. Data dan seluruh riwayatnya tetap disimpan.`,
@@ -351,14 +370,32 @@ export default function UsersPage() {
         `Akun ${user.fullname} akan diproses dan statusnya tampil secara realtime.`
       );
     } catch (e) {
-      setError(e.message);
-      showAlert.error('Gagal Menghapus Pengguna', e.message);
+      if (user.role === 'reviewer' && (e.code === 'REVIEWER_HAS_PENDING_WORK' || e.message?.includes('review'))) {
+        setTransferTarget({ ...user, pendingAction: 'deactivate' });
+      } else {
+        setError(e.message);
+        showAlert.error('Gagal Menghapus Pengguna', e.message);
+      }
     } finally {
       setBusy(false);
     }
   }
 
   async function deleteUser(user) {
+    if (user.role === 'reviewer') {
+      const choice = await showAlert.confirm({
+        title: 'Hapus / Nonaktifkan Reviewer?',
+        text: `Apakah Anda ingin mengalihkan tugas review aktif akun ${user.fullname} ke reviewer pengganti sebelum diproses?`,
+        confirmText: 'Pilih Pengganti & Proses',
+        cancelText: 'Proses Langsung',
+        icon: 'question'
+      });
+      if (choice) {
+        setTransferTarget({ ...user, pendingAction: 'delete' });
+        return;
+      }
+    }
+
     const confirmed = await showAlert.confirm({
       title: 'Hapus Pengguna Permanen?',
       text: `Akun ${user.fullname} akan dihapus jika tidak memiliki riwayat terkait. Jika ada riwayat, akun otomatis dinonaktifkan agar seluruh riwayat tetap tersimpan.`,
@@ -393,8 +430,12 @@ export default function UsersPage() {
         `Penghapusan akun ${user.fullname} diproses; progresnya dapat dipantau di antrean.`
       );
     } catch (e) {
-      setError(e.message);
-      showAlert.error('Gagal Menghapus Pengguna', e.message);
+      if (user.role === 'reviewer' && (e.code === 'REVIEWER_HAS_PENDING_WORK' || e.message?.includes('review'))) {
+        setTransferTarget({ ...user, pendingAction: 'delete' });
+      } else {
+        setError(e.message);
+        showAlert.error('Gagal Menghapus Pengguna', e.message);
+      }
     } finally {
       setBusy(false);
     }
@@ -652,10 +693,23 @@ export default function UsersPage() {
             : 'Kelola akun Student: perbarui data, aktifkan kembali, atau nonaktifkan akses.'
         }
         actions={
-          <span className="inline-flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-lowest px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-            <Users className="size-3.5 text-primary" />
-            {summary.total} total akun terdaftar
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-lowest px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <Users className="size-3.5 text-primary" />
+              {summary.total} total akun terdaftar
+            </span>
+            {isAdmin && (
+              <Button
+                type="button"
+                size="sm"
+                id="add-user"
+                icon="person_add"
+                onClick={() => navigate('/users/new')}
+              >
+                Tambah Pengguna
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -675,6 +729,7 @@ export default function UsersPage() {
       >
         <StatCard
           label="Total Akun"
+          to="/users#users-list"
           value={summary.total}
           icon={<Users className="size-5" />}
           tone="primary"
@@ -682,6 +737,7 @@ export default function UsersPage() {
         />
         <StatCard
           label="Aktif"
+          to="/users?status=active#users-list"
           value={summary.active}
           icon={<ShieldCheck className="size-5" />}
           tone="tertiary"
@@ -689,6 +745,7 @@ export default function UsersPage() {
         />
         <StatCard
           label="Nonaktif"
+          to="/users?status=inactive#users-list"
           value={summary.inactive}
           icon={<UserX className="size-5" />}
           tone="warning"
@@ -696,6 +753,7 @@ export default function UsersPage() {
         />
         <StatCard
           label="Student"
+          to="/users?role=student#users-list"
           value={summary.students}
           icon={<GraduationCap className="size-5" />}
           tone="info"
@@ -703,6 +761,7 @@ export default function UsersPage() {
         />
         <StatCard
           label="Teacher"
+          to="/users?role=teacher#users-list"
           value={summary.teachers}
           icon={<Presentation className="size-5" />}
           tone="tertiary"
@@ -710,6 +769,7 @@ export default function UsersPage() {
         />
         <StatCard
           label="Admin"
+          to="/users?role=admin#users-list"
           value={summary.admins}
           icon={<UserCog className="size-5" />}
           tone="primary"
@@ -717,70 +777,13 @@ export default function UsersPage() {
         />
         <StatCard
           label="Reviewer"
+          to="/users?role=reviewer#users-list"
           value={summary.reviewers}
           icon={<FileCheck2 className="size-5" />}
           tone="secondary"
           loading={loading}
         />
       </section>
-
-      {/* Form Tambah Pengguna (Admin) */}
-      {isAdmin && (
-        <div id="add-user" className="scroll-mt-20">
-          <Card
-            title="Tambah Pengguna Baru"
-            subtitle="Akun Student tersimpan ke database Student secara otomatis. Pastikan SMTP siap bila mengirim kredensial email."
-          >
-            <form onSubmit={create} className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <input required name="npk" maxLength="50" placeholder="NPK" className={FIELD_CLASS} />
-              <input
-                required
-                name="fullname"
-                maxLength="150"
-                placeholder="Nama lengkap"
-                className={FIELD_CLASS}
-              />
-              <input
-                required
-                type="email"
-                name="email"
-                maxLength="254"
-                placeholder="Email kerja"
-                className={FIELD_CLASS}
-              />
-              <input
-                required
-                type="password"
-                name="password"
-                minLength="12"
-                maxLength="200"
-                placeholder="Kata sandi awal (min. 12 karakter)"
-                className={FIELD_CLASS}
-              />
-              <select name="role" className={FIELD_CLASS}>
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
-                <option value="reviewer">Reviewer</option>
-              </select>
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={busy}
-                loading={busy}
-                icon={<Plus className="size-4" />}
-              >
-                {busy ? 'Menyimpan...' : 'Tambah Pengguna'}
-              </Button>
-
-              <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-on-surface-variant md:col-span-2 xl:col-span-3">
-                <input type="checkbox" name="sendEmail" className="size-4 rounded accent-primary" />
-                Kirim NPK dan kata sandi awal ke email pengguna
-              </label>
-            </form>
-          </Card>
-        </div>
-      )}
 
       {/* Tabel Daftar Pengguna */}
       <Card
@@ -959,7 +962,11 @@ export default function UsersPage() {
                       variant="info"
                       disabled={busy}
                       icon={<Pencil className="size-3.5" />}
-                      onClick={() => setEditing(user)}
+                      onClick={() => {
+                        setEditing(user);
+                        setEditRole(user.role);
+                        setEditStatus(user.status);
+                      }}
                       className="w-full justify-center"
                     >
                       Edit
@@ -1019,6 +1026,21 @@ export default function UsersPage() {
                         Hapus
                       </Button>
                     )}
+
+                    {user.role === 'reviewer' && (
+                      <Button
+                        type="button"
+                        size="xs"
+                        variant="teal"
+                        disabled={busy}
+                        icon={<ArrowRightLeft className="size-3.5" />}
+                        onClick={() => setTransferTarget(user)}
+                        title="Alihkan tugas review ke reviewer lain"
+                        className="col-span-2 w-full justify-center"
+                      >
+                        Alihkan Tugas Review
+                      </Button>
+                    )}
                   </div>
                 )}
               </td>
@@ -1063,7 +1085,12 @@ export default function UsersPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               {editing.role === 'student' && isAdmin ? (
-                <select name="role" defaultValue="student" className={`${FIELD_CLASS} w-full`}>
+                <select
+                  name="role"
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  className={`${FIELD_CLASS} w-full`}
+                >
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
                 </select>
@@ -1075,18 +1102,48 @@ export default function UsersPage() {
                   </select>
                 </>
               ) : (
-                <select name="role" defaultValue={editing.role} className={`${FIELD_CLASS} w-full`}>
+                <select
+                  name="role"
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  className={`${FIELD_CLASS} w-full`}
+                >
                   <option value="teacher">Teacher</option>
                   <option value="admin">Admin</option>
                   <option value="reviewer">Reviewer</option>
                 </select>
               )}
 
-              <select name="status" defaultValue={editing.status} className={`${FIELD_CLASS} w-full`}>
+              <select
+                name="status"
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value)}
+                className={`${FIELD_CLASS} w-full`}
+              >
                 <option value="active">Aktif</option>
                 <option value="inactive">Non-aktif</option>
               </select>
             </div>
+
+            {editing.role === 'reviewer' && (editStatus === 'inactive' || editRole !== 'reviewer') && (
+              <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3.5 dark:border-amber-800 dark:bg-amber-950/35">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  Reviewer mungkin memiliki tugas review aktif. Pilih reviewer pengganti untuk mentransfer seluruh tugasnya:
+                </p>
+                <SearchableSelect
+                  name="targetReviewerNpk"
+                  title="Pilih Reviewer Pengganti"
+                  className={`${FIELD_CLASS} w-full`}
+                  placeholder="Cari reviewer pengganti aktif..."
+                  options={activeReviewers
+                    .filter((r) => r.employee_npk !== editing.employee_npk)
+                    .map((r) => ({
+                      value: r.employee_npk,
+                      label: `${r.fullname} (${r.employee_npk})`
+                    }))}
+                />
+              </div>
+            )}
 
             {editing.role === 'student' && isAdmin && (
               <p className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs leading-5 text-on-surface-variant dark:bg-red-950/30">
@@ -1178,6 +1235,67 @@ export default function UsersPage() {
                 loading={busy}
               >
                 {busy ? 'Memproses...' : 'Ganti & Kirim Email'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* Modal Alihkan Tugas Review */}
+      <Modal
+        isOpen={Boolean(transferTarget)}
+        onClose={() => !busy && setTransferTarget(null)}
+        title={
+          transferTarget?.pendingAction === 'deactivate'
+            ? 'Alihkan Tugas & Nonaktifkan Reviewer'
+            : transferTarget?.pendingAction === 'delete'
+            ? 'Alihkan Tugas & Hapus Reviewer'
+            : 'Alihkan Tugas Review'
+        }
+        subtitle={
+          transferTarget
+            ? `${transferTarget.fullname} (${transferTarget.employee_npk})`
+            : ''
+        }
+        maxWidth="max-w-md"
+      >
+        {transferTarget && (
+          <form onSubmit={handleTransferReviewTasks} className="space-y-4">
+            <p className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs leading-5 text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-200">
+              {transferTarget.pendingAction
+                ? `Seluruh tugas review yang masih berjalan pada akun ${transferTarget.fullname} akan dialihkan ke reviewer pengganti sebelum akun ${transferTarget.pendingAction === 'delete' ? 'dihapus / dinonaktifkan' : 'dinonaktifkan'}.`
+                : `Pindahkan seluruh antrean tugas review dari ${transferTarget.fullname} ke reviewer lain yang aktif.`}
+            </p>
+            <label className="block">
+              <span className="text-xs font-semibold text-secondary dark:text-slate-300">
+                Pilih Reviewer Pengganti *
+              </span>
+              <SearchableSelect
+                name="targetReviewerNpk"
+                title="Pilih Reviewer Pengganti"
+                required
+                className={`${FIELD_CLASS} w-full mt-1`}
+                placeholder="Cari reviewer pengganti aktif..."
+                options={activeReviewers
+                  .filter((r) => r.employee_npk !== transferTarget.employee_npk)
+                  .map((r) => ({
+                    value: r.employee_npk,
+                    label: `${r.fullname} (${r.employee_npk})`
+                  }))}
+              />
+            </label>
+            <div className="flex justify-end gap-2 border-t border-outline/40 pt-3 dark:border-slate-800">
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setTransferTarget(null)}>
+                Batal
+              </Button>
+              <Button type="submit" variant="primary" disabled={busy} loading={busy} icon={<ArrowRightLeft className="size-3.5" />}>
+                {busy
+                  ? 'Memproses...'
+                  : transferTarget.pendingAction === 'deactivate'
+                  ? 'Alihkan & Nonaktifkan'
+                  : transferTarget.pendingAction === 'delete'
+                  ? 'Alihkan & Hapus'
+                  : 'Alihkan Tugas'}
               </Button>
             </div>
           </form>

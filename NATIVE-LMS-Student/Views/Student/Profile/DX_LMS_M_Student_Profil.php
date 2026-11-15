@@ -34,11 +34,17 @@ $active_tab = 'profil'; ?>
     ?>
     <!-- Main Content Canvas -->
     <main class="dls-main flex-1 px-4 lg:px-8 py-6 lg:py-8 flex flex-col pb-32 mt-14 lg:ml-[240px] lg:w-[calc(100%-240px)]">
+        <?php
+        $topbar_title = 'Profil Saya';
+        $topbar_subtitle = 'Kelola data diri, pengaturan akun, dan bantuan pembelajaran Anda.';
+        $topbar_show_search = false;
+        include APP_ROOT . '/includes/components/DX_LMS_M_Workspace_Topbar.php';
+        ?>
 
-        <div class="w-full max-w-3xl mx-auto flex flex-col gap-5">
+        <div class="w-full max-w-4xl mx-auto flex flex-col gap-5">
 
             <!-- Top Profile Card -->
-            <section class="bg-surface rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <section class="lms-card bg-surface rounded-2xl overflow-hidden">
                 <!-- Top Section with Gradient -->
                 <div class="relative p-6 lg:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b border-outline-variant/30">
                     <!-- Subtle background gradient inside card -->
@@ -89,123 +95,21 @@ $active_tab = 'profil'; ?>
                 </div>
 
                 <!-- Bottom Section Data -->
-                <?php
-                $position = $profile['position'] ?? 'Operator';
-                $userGolongan = $profile['golongan'] ?? 'Gol 1'; /** Contoh struktur data hierarki. */
-                $golList = $golonganMap[$position] ?? [];
-                ?>
-                <div class="bg-surface-container-lowest/50 p-5 lg:px-8 lg:py-6 flex flex-col sm:flex-row gap-6">
-
-                    <!-- LEFT: Info Departemen & Divisi -->
-                    <div class="flex flex-col gap-4 min-w-0 sm:w-1/3">
-                        <div>
-                            <p class="text-[11px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">DEPARTEMEN</p>
-                            <p class="font-body-md text-on-surface font-semibold"><?= e(
-                                $profile['department'] ?? '-',
-                            ) ?></p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">DIVISI / SEKSI</p>
-                            <p class="font-body-md text-on-surface font-semibold truncate" title="<?= e(
-                                $profile['division'] ?? '-',
-                            ) ?> / <?= e($profile['section'] ?? '-') ?>">
-                                <?= e($profile['division'] ?? '-') ?> / <?= e($profile['section'] ?? '-') ?>
-                            </p>
-                        </div>
+                <div class="bg-surface-container-lowest/50 p-5 lg:px-8 lg:py-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-[11px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">DEPARTEMEN</p>
+                        <p class="font-body-md text-on-surface font-semibold"><?= e(
+                            $profile['department'] ?? '-',
+                        ) ?></p>
                     </div>
-
-                    <!-- DIVIDER -->
-                    <div class="hidden sm:block w-px bg-outline-variant/30 self-stretch"></div>
-                    <div class="block sm:hidden h-px bg-outline-variant/30 w-full"></div>
-
-                    <!-- RIGHT: Jabatan + Golongan Hierarchy -->
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[11px] uppercase font-bold text-on-surface-variant tracking-wider mb-3">JABATAN &amp; GOLONGAN</p>
-                        <div class="flex items-center gap-2 mb-4 flex-wrap">
-                            <span class="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full font-label-sm font-bold">
-                                <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">badge</span>
-                                <?= e($position) ?>
-                            </span>
-                            <?php
-                            $activeGolLabel = '';
-                            $activeGolName = '';
-                            foreach ($golList as $g) {
-                                if ($g['label'] === $userGolongan) {
-                                    $activeGolLabel = $g['label'];
-                                    $activeGolName = $g['name'];
-                                    break;
-                                }
-                            }
-                            /** Melakukan kalkulasi indeks aktif untuk menentukan tahapan progres yang telah terlampaui. */
-                            $activeIdx = 0;
-                            foreach ($golList as $ki => $kg) {
-                                if ($kg['label'] === $userGolongan) {
-                                    $activeIdx = $ki;
-                                    break;
-                                }
-                            }
-                            ?>
-                            <?php if ($activeGolLabel): ?>
-                            <span class="inline-flex items-center gap-1 bg-secondary/10 text-secondary px-3 py-1 rounded-full font-label-sm font-bold">
-                                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1;">military_tech</span>
-                                <?= e($activeGolLabel) ?> — <?= e($activeGolName) ?>
-                            </span>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Golongan Step Ladder -->
-                        <?php if (!empty($golList)): ?>
-                        <div class="relative flex items-start">
-                            <!-- Background track line (full width, centered on the dots) -->
-                            <div class="absolute left-0 right-0 top-[14px] h-[3px] bg-outline-variant/25 z-0"></div>
-                            <!-- Filled track up to active step (blue) -->
-                            <?php if ($activeIdx > 0): ?>
-                            <div class="absolute left-0 top-[14px] h-[3px] bg-primary/60 z-0" style="width: calc(<?= round(
-                                ($activeIdx / (count($golList) - 1)) * 100,
-                                2,
-                            ) ?>% - 14px)"></div>
-                            <?php endif; ?>
-
-                            <?php foreach ($golList as $idx => $gol):
-
-                                $isActive = $idx === $activeIdx;
-                                $isPast = $idx < $activeIdx;
-                                ?>
-                            <!-- Step item -->
-                            <div class="flex-1 flex flex-col items-center relative z-10">
-                                <!-- Circle: active = solid blue dot, past = solid blue + checkmark, future = outline -->
-                                <div class="w-7 h-7 rounded-full flex items-center justify-center transition-all
-                                <?= $isActive || $isPast
-                                    ? 'bg-primary ring-4 ring-primary/20'
-                                    : 'bg-surface border-2 border-outline-variant/40' ?>">
-                                    <?php if ($isActive): ?>
-                                    <span class="block w-2.5 h-2.5 rounded-full bg-white"></span>
-                                    <?php elseif ($isPast): ?>
-                                    <span class="material-symbols-outlined text-white" style="font-size:16px;font-variation-settings:'FILL' 1;line-height:1;display:block;">check</span>
-                                    <?php endif; ?>
-                                </div>
-                                <!-- Labels -->
-                                <div class="mt-2 text-center w-full px-1">
-                                    <p class="text-[12px] font-bold leading-tight
-                                    <?= $isActive || $isPast ? 'text-primary' : 'text-on-surface-variant/40' ?>">
-                                        <?= e($gol['label']) ?>
-                                    </p>
-                                    <p class="text-[12px] leading-tight mt-0.5
-                                    <?= $isActive
-                                        ? 'text-on-surface font-semibold'
-                                        : ($isPast
-                                            ? 'text-primary/70'
-                                            : 'text-on-surface-variant/50') ?>">
-                                        <?= e($gol['name']) ?>
-                                    </p>
-                                </div>
-                            </div>
-                            <?php
-                            endforeach; ?>
-                        </div>
-                        <?php endif; ?>
+                    <div>
+                        <p class="text-[11px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">DIVISI / SEKSI</p>
+                        <p class="font-body-md text-on-surface font-semibold truncate" title="<?= e(
+                            $profile['division'] ?? '-',
+                        ) ?> / <?= e($profile['section'] ?? '-') ?>">
+                            <?= e($profile['division'] ?? '-') ?> / <?= e($profile['section'] ?? '-') ?>
+                        </p>
                     </div>
-
                 </div>
             </section>
 
@@ -267,25 +171,11 @@ $active_tab = 'profil'; ?>
                             </div>
                             <div class="flex flex-col text-left min-w-0">
                                 <span class="fd-h4 text-slate-900 dark:text-slate-100 group-hover:text-[#DC2626] dark:group-hover:text-red-400 transition-colors">Profil Saya</span>
-                                <span class="text-[13px] text-slate-500 dark:text-slate-400 truncate">Informasi pribadi, pekerjaan, dan riwayat karir</span>
+                                <span class="text-[13px] text-slate-500 dark:text-slate-400 truncate">Informasi pribadi dan pekerjaan</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-[#DC2626] dark:group-hover:text-red-400 group-hover:translate-x-1 transition-all text-[20px]">chevron_right</span>
                     </a>
-
-                    <!-- Akses Peran -->
-                    <button type="button" id="btn-ubah-peran" class="fd-list-row justify-between w-full group text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                        <div class="flex items-center gap-[12px] min-w-0">
-                            <div class="fd-list-thumb bg-[#FFF7ED] dark:bg-orange-950/40 text-[#EA580C] dark:text-orange-400">
-                                <span class="material-symbols-outlined text-[22px]">swap_horiz</span>
-                            </div>
-                            <div class="flex flex-col text-left min-w-0">
-                                <span class="fd-h4 text-slate-900 dark:text-slate-100 group-hover:text-[#DC2626] dark:group-hover:text-red-400 transition-colors">Akses Peran</span>
-                                <span class="text-[13px] text-slate-500 dark:text-slate-400 truncate">Perubahan hak akses dikelola Admin LMS</span>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-[#DC2626] dark:group-hover:text-red-400 group-hover:translate-x-1 transition-all text-[20px]">chevron_right</span>
-                    </button>
 
                     <!-- Pengaturan -->
                     <a href="?route=/student/profil/pengaturan" class="fd-list-row justify-between w-full group hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">

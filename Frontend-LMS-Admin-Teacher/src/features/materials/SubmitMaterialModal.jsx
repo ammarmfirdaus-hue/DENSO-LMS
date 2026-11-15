@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../api/client';
 import Button from '../../components/Button';
+import SearchableSelect from '../../components/SearchableSelect';
 import TinyEditor from '../../components/TinyEditor';
 import showAlert from '../../utils/alert';
 
@@ -414,21 +415,19 @@ export default function SubmitMaterialModal({
                 <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">
                   Pilih Course Pembelajaran <span className="text-primary">*</span>
                 </label>
-                <select
+                <SearchableSelect
+                  title="Pilih Course Pembelajaran"
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
                   disabled={loadingCourses || busy}
+                  options={courses.map((c) => ({
+                    value: String(c.course_id),
+                    label: `[${c.course_code}] ${c.title}`
+                  }))}
+                  placeholder={loadingCourses ? 'Memuat daftar course...' : 'Cari course berdasarkan kode atau nama...'}
                   className={FIELD_CLASS}
                 >
-                  <option value="">
-                    {loadingCourses ? 'Memuat daftar course...' : '-- Pilih Course Pembelajaran --'}
-                  </option>
-                  {courses.map((c) => (
-                    <option key={c.course_id} value={c.course_id}>
-                      [{c.course_code}] {c.title}
-                    </option>
-                  ))}
-                </select>
+                </SearchableSelect>
               </div>
 
               <div>
@@ -453,21 +452,15 @@ export default function SubmitMaterialModal({
                     Pilih course terlebih dahulu
                   </div>
                 ) : !showNewSessionInput ? (
-                  <select
+                  <SearchableSelect
+                    title="Pilih Sesi Pembelajaran"
                     value={selectedSessionId}
                     onChange={(e) => setSelectedSessionId(e.target.value)}
                     disabled={loadingSessions || busy}
+                    options={sessions.map((s) => ({ value: String(s.session_id), label: s.title }))}
+                    placeholder={loadingSessions ? 'Memuat sesi...' : 'Cari sesi pembelajaran...'}
                     className={FIELD_CLASS}
-                  >
-                    <option value="">
-                      {loadingSessions ? 'Memuat sesi...' : '-- Pilih Sesi Pembelajaran --'}
-                    </option>
-                    {sessions.map((s) => (
-                      <option key={s.session_id} value={s.session_id}>
-                        {s.title}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 ) : (
                   <div className="flex gap-2">
                     <input

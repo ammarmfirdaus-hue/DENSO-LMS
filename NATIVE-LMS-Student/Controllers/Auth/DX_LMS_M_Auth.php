@@ -186,7 +186,7 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
         }
         session_destroy();
-        header('Location: /?route=/login', true, 303);
+        header('Location: /?route=/login&logged_out=1', true, 303);
         exit;
     }
 }

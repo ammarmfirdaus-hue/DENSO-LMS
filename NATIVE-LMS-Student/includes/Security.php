@@ -3,6 +3,80 @@ declare(strict_types=1);
 require_once __DIR__ . '/Config.php';
 
 /**
+ * Membuat referensi publik opaque untuk parameter URL. Nilai asli (misalnya
+ * course_code) tidak pernah ditampilkan di URL baru; token ini hanya dapat
+ * dibuka oleh server yang memiliki SSO_JWT_SECRET dan dilindungi AES-GCM.
+ */
+function publicRouteId(string $type, string $value): string
+{
+    $key = hash('sha256', SSO_JWT_SECRET . '|dls-student-public-route', true);
+    $iv = random_bytes(12);
+    $cipher = openssl_encrypt($type . ':' . $value, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '', 16);
+    if ($cipher === false) throw new RuntimeException('Token URL tidak dapat dibuat.');
+    return rtrim(strtr(base64_encode($iv), '+/', '-_'), '=') . '.'
+        . rtrim(strtr(base64_encode($cipher), '+/', '-_'), '=') . '.'
+        . rtrim(strtr(base64_encode($tag), '+/', '-_'), '=');
+}
+
+/** Mengurai token URL publik dan menolak token rusak/tampered tanpa fallback SQL. */
+function resolvePublicRouteId(string $type, mixed $token): ?string
+{
+    if (!is_string($token) || strlen($token) < 20 || strlen($token) > 240
+        || !preg_match('/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/D', $token)) return null;
+    [$encodedIv, $encodedCipher, $encodedTag] = explode('.', $token, 3);
+    $decode = static function (string $part): string|false {
+        return base64_decode(strtr($part, '-_', '+/') . str_repeat('=', (4 - strlen($part) % 4) % 4), true);
+    };
+    $iv = $decode($encodedIv); $cipher = $decode($encodedCipher); $tag = $decode($encodedTag);
+    if ($iv === false || $cipher === false || $tag === false || strlen($iv) !== 12 || strlen($tag) !== 16) return null;
+    $key = hash('sha256', SSO_JWT_SECRET . '|dls-student-public-route', true);
+    $plain = openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '');
+    $prefix = $type . ':';
+    if (!is_string($plain) || !str_starts_with($plain, $prefix)) return null;
+    $value = substr($plain, strlen($prefix));
+    return $value !== '' && strlen($value) <= 120 ? $value : null;
+}
+
+function publicCourseId(mixed $courseId): string
+{
+    return publicRouteId('course', (string) $courseId);
+}
+
+function resolveCourseId(mixed $token): ?string
+{
+    $resolved = resolvePublicRouteId('course', $token);
+    if ($resolved !== null) return $resolved;
+    if (is_string($token) && preg_match('/^[A-Za-z0-9_-]{1,80}$/D', $token)) return $token;
+    return null;
+}
+
+function publicSessionId(mixed $sessionId): string
+{
+    return publicRouteId('session', (string) $sessionId);
+}
+
+function resolveSessionId(mixed $token): ?string
+{
+    $resolved = resolvePublicRouteId('session', $token);
+    if ($resolved !== null) return $resolved;
+    if (is_string($token) && preg_match('/^[A-Za-z0-9_-]{1,80}$/D', $token)) return $token;
+    return null;
+}
+
+function publicThreadId(mixed $threadId): string
+{
+    return publicRouteId('thread', (string) $threadId);
+}
+
+function resolveThreadId(mixed $token): ?string
+{
+    $resolved = resolvePublicRouteId('thread', $token);
+    if ($resolved !== null) return $resolved;
+    if (is_string($token) && ctype_digit($token) && (int) $token > 0) return $token;
+    return null;
+}
+
+/**
  * Memulai sesi PHP aplikasi dengan konfigurasi pengerasan keamanan (strict ID, HttpOnly, SameSite Lax).
  */
 function startAppSession(): void
@@ -149,6 +223,9 @@ function createStudentSession(array $claims): void
     $_SESSION['sso_mode'] = (string) ($claims['mode'] ?? '');
     $_SESSION['user'] = ['npk' => $_SESSION['student_npk'], 'name' => $_SESSION['student_name'], 'role' => 'student', 'mode' => $_SESSION['sso_mode']];
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['_last_activity'] = time();
+    $_SESSION['_session_created'] = time();
+    $_SESSION['_fingerprint'] = hash_hmac('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'none'), SSO_JWT_SECRET);
 }
 
 /**
@@ -158,6 +235,11 @@ function createStudentSession(array $claims): void
 function requireStudent(): void
 {
     startAppSession();
+    $now = time();
+    $inactivityLimit = 1800; // 30 minutes
+    $isTimedOut = isset($_SESSION['_last_activity']) && ($now - (int) $_SESSION['_last_activity']) > $inactivityLimit;
+    $isFingerprintTampered = isset($_SESSION['_fingerprint']) && !hash_equals((string) $_SESSION['_fingerprint'], hash_hmac('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'none'), SSO_JWT_SECRET));
+
     $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
     $identity = $claims && ($claims['role'] ?? '') === 'student' ? ssoStudentAccountState($claims) : null;
     $promotedToTeacher = $identity === null && $claims && ($claims['role'] ?? '') === 'student'
@@ -175,7 +257,7 @@ function requireStudent(): void
         || !$claims || ($claims['role'] ?? '') !== 'student'
         || (int) $claims['student_id'] !== (int) $_SESSION['student_id']
         || (string) ($claims['mode'] ?? '') !== (string) ($_SESSION['sso_mode'] ?? '')
-        || !$identity) {
+        || !$identity || $isTimedOut || $isFingerprintTampered) {
         $_SESSION = [];
         if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
         clearSsoBrowserCookie();
@@ -186,9 +268,13 @@ function requireStudent(): void
             header('Location: ' . SSO_FRONTEND_URL, true, 303);
             exit;
         }
-        header('Location: /?route=/login', true, 303);
+        $errorCode = $isTimedOut ? 'timeout' : 'unauthorized';
+        header('Location: /?route=/login&error=' . $errorCode, true, 303);
         exit;
     }
+    $_SESSION['_last_activity'] = $now;
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
 }
 
 /**

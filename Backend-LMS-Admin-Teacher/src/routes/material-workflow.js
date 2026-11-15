@@ -14,6 +14,7 @@ const { sendReviewInvitation } = require('../services/review-mail');
 const { syncStudentNow, deleteStudentMaterial } = require('../services/student-sync');
 const { studentHasCourseAccess } = require('../services/student-auth');
 const { getSubmissionEditDecision } = require('../services/material-workflow-rules');
+const { encodePublicId } = require('../services/public-route-id');
 
 const router = express.Router();
 const materialTypes = ['text', 'video', 'pdf', 'image', 'link', 'audio', 'document'];
@@ -168,9 +169,51 @@ router.get('/submissions', authenticate, requirePermission('materials.view', 'ma
       LEFT JOIN dbo.employee_accounts reviewer ON reviewer.employee_npk=ms.reviewer_npk
       WHERE (@isAdmin=1 OR ms.submitted_by=@npk OR (@isReviewer=1 AND (ms.reviewer_npk=@npk OR ms.status='pending_review')))
       ORDER BY ms.created_at DESC`);
-    const page = paginateCollection(req, result.recordset);
+    const page = paginateCollection(req, result.recordset.map(item => ({
+      ...item,
+      course_public_id: encodePublicId('course', item.course_id)
+    })));
     res.json({ submissions: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
+});
+
+// Detail submission untuk kebutuhan preview/edit dari halaman daftar materi.
+// Endpoint ini sengaja memakai scope yang sama dengan GET /submissions agar
+// submission milik trainer/reviewer lain tidak dapat dibaca langsung melalui ID.
+router.get('/submissions/:id', authenticate, requirePermission('materials.view', 'materials.review'), async (req, res, next) => {
+  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  if (!id.success) {
+    return res.status(400).json({ error: { code: 'INVALID_SUBMISSION_ID', message: 'ID submission tidak valid.' } });
+  }
+
+  try {
+    const isAdmin = req.user.role === 'admin' ? 1 : 0;
+    const isReviewer = req.user.role === 'reviewer' ? 1 : 0;
+    const result = await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .input('isAdmin', sql.Bit, isAdmin)
+      .input('isReviewer', sql.Bit, isReviewer)
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .query(`SELECT TOP 1 ms.submission_id,ms.title,ms.material_type,ms.content,ms.file_path,
+          ms.original_file_name,ms.status,ms.submitted_by,submitter.fullname AS submitter_name,
+          ms.reviewer_npk,reviewer.fullname AS reviewer_name,ms.reviewer_comment,ms.admin_comment,
+          ms.created_at,ms.updated_at,c.course_id,c.course_code,c.title AS course_title,
+          s.session_id,s.title AS session_title,ms.published_material_id
+        FROM dbo.material_submissions ms
+        JOIN dbo.course_sessions s ON s.session_id=ms.session_id
+        JOIN dbo.courses c ON c.course_id=s.course_id
+        JOIN dbo.employee_accounts submitter ON submitter.employee_npk=ms.submitted_by
+        LEFT JOIN dbo.employee_accounts reviewer ON reviewer.employee_npk=ms.reviewer_npk
+        WHERE ms.submission_id=@id
+          AND (@isAdmin=1 OR ms.submitted_by=@npk OR (@isReviewer=1 AND (ms.reviewer_npk=@npk OR ms.status='pending_review')))`);
+
+    if (!result.recordset.length) {
+      return res.status(404).json({ error: { code: 'SUBMISSION_NOT_FOUND', message: 'Submission tidak ditemukan atau tidak dapat diakses.' } });
+    }
+    const submission = result.recordset[0];
+    submission.fileUrl = submission.file_path ? `/material-workflow/submissions/${submission.submission_id}/file` : null;
+    return res.json({ submission });
+  } catch (error) { return next(error); }
 });
 
 /**
@@ -481,9 +524,11 @@ router.get('/reviewer/submissions/:id', authenticate, requirePermission('materia
 });
 
 router.get('/reviewer/submissions/:id/file', authenticate, requirePermission('materials.review'), async (req, res, next) => {
+  const id = z.coerce.number().int().positive().safeParse(req.params.id);
+  if (!id.success) return res.status(400).json({ error: { code: 'INVALID_ID', message: 'ID materi tidak valid.' } });
   try {
     const canWideReview = req.user.role === 'admin' || !isReviewSession(req);
-    const result = await pool.request().input('id', sql.BigInt, Number(req.params.id)).input('npk', sql.VarChar(50), req.user.sub)
+    const result = await pool.request().input('id', sql.BigInt, id.data).input('npk', sql.VarChar(50), req.user.sub)
       .input('wide', sql.Bit, canWideReview ? 1 : 0)
       .query(`SELECT file_path FROM dbo.material_submissions WHERE submission_id=@id AND (reviewer_npk=@npk OR @wide=1)`);
     if (!result.recordset[0]) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File tidak ditemukan.' } });
@@ -710,10 +755,13 @@ router.delete('/submissions/:id', authenticate, requirePermission('materials.del
   } catch (error) { next(error); }
 });
 
-router.get('/published/:materialId/file', authenticate, allowRoles('student', 'admin', 'teacher'), async (req, res, next) => {
+router.get('/published/:materialId/file', authenticate, allowRoles('student', 'admin', 'teacher', 'reviewer'), async (req, res, next) => {
   const materialId = z.coerce.number().int().positive().safeParse(req.params.materialId);
   if (!materialId.success) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Materi tidak ditemukan.' } });
   try {
+    if (req.user.role !== 'student' && !(await requestHasPermission(req, 'materials.view', 'courses.view'))) {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Peran akun Anda tidak memiliki hak akses untuk melihat file materi.' } });
+    }
     const result = await pool.request().input('id', sql.BigInt, materialId.data)
       .query(`SELECT ms.file_path,c.course_code,c.created_by,c.assigned_trainer_npk FROM dbo.material_submissions ms
         JOIN dbo.course_sessions s ON s.session_id=ms.session_id JOIN dbo.courses c ON c.course_id=s.course_id

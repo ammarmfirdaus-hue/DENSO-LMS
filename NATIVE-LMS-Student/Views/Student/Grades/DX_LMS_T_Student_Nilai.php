@@ -13,14 +13,23 @@ $grades = is_array($grades ?? null) ? $grades : [];
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto min-w-0 max-w-5xl">
             <?php
-            $page_eyebrow = 'PEMBELAJARAN';
-            $page_title_heading = 'Nilai Saya';
-            $page_description = 'Lihat rekapitulasi nilai Quiz Course dan progres belajar Anda.';
-            $page_actions_html = '<span class="inline-flex min-h-9 items-center rounded-full bg-[#F5F5F5] px-3.5 text-xs font-semibold text-[#525252]"><strong class="fd-mono mr-1 text-[#171717]">' . count($grades) . '</strong> course terdata</span>';
-            include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+            $topbar_title = 'Nilai Saya';
+            $topbar_subtitle = 'Rekapitulasi nilai Quiz Course dan progres belajar Anda.';
+            $topbar_search_id = 'nilaiQuickSearch';
+            $topbar_search_placeholder = 'Cari nilai course...';
+            include APP_ROOT . '/includes/components/DX_LMS_M_Workspace_Topbar.php';
             ?>
+            <div class="lg:hidden">
+                <?php
+                $page_eyebrow = 'PEMBELAJARAN';
+                $page_title_heading = 'Nilai Saya';
+                $page_description = 'Lihat rekapitulasi nilai Quiz Course dan progres belajar Anda.';
+                $page_actions_html = '<span class="inline-flex min-h-9 items-center rounded-full bg-[#FEF2F2] px-3.5 text-xs font-semibold text-[#DC2626]"><strong class="fd-mono mr-1 text-[#B91C1C]">' . count($grades) . '</strong> course terdata</span>';
+                include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+                ?>
+            </div>
             <?php if (!empty($grade_error)): ?><p role="alert" class="mb-4 rounded-[12px] bg-[#FEE2E2] p-4 text-sm font-medium text-[#B91C1C]"><?= e($grade_error) ?></p><?php endif; ?>
-            <div class="dls-grade-table-scroll max-w-full overflow-x-auto rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]" role="region" aria-label="Tabel nilai saya" tabindex="0"<?= $grades ? ' aria-describedby="grade-table-scroll-hint"' : '' ?>>
+            <div class="dls-grade-table-scroll lms-card max-w-full overflow-x-auto" role="region" aria-label="Tabel nilai saya" tabindex="0"<?= $grades ? ' aria-describedby="grade-table-scroll-hint"' : '' ?>>
                 <?php if ($grades): ?><p id="grade-table-scroll-hint" class="dls-grade-table-hint"><span class="material-symbols-outlined" aria-hidden="true">swipe</span><span>Geser tabel ke samping untuk melihat semua kolom.</span></p><?php endif; ?>
                 <table class="dls-grade-table w-full min-w-[640px] text-left text-sm">
                     <thead class="bg-surface-container-low text-on-surface-variant"><tr>
@@ -47,6 +56,7 @@ $grades = is_array($grades ?? null) ? $grades : [];
                 document.addEventListener('DOMContentLoaded', function() {
                     const rows = Array.from(document.querySelectorAll('.grade-row'));
                     if (!rows.length) return;
+                    const quickSearch = document.getElementById('nilaiQuickSearch');
                     const pageSizeSelect = document.getElementById('pageSizeSelect');
                     const pagContainer = document.getElementById('paginationContainer');
                     const pageIndicator = document.getElementById('pageIndicator');
@@ -55,16 +65,17 @@ $grades = is_array($grades ?? null) ? $grades : [];
                     let currentPage = 1;
 
                     function render() {
+                        const q = (quickSearch?.value || '').trim().toLocaleLowerCase('id');
+                        const matched = rows.filter(r => !q || r.textContent.toLocaleLowerCase('id').includes(q));
                         const pageSize = Number(pageSizeSelect?.value) || 10;
-                        const totalPages = Math.ceil(rows.length / pageSize) || 1;
+                        const totalPages = Math.ceil(matched.length / pageSize) || 1;
                         if (currentPage > totalPages) currentPage = totalPages;
                         if (currentPage < 1) currentPage = 1;
                         const start = (currentPage - 1) * pageSize;
                         const end = start + pageSize;
-                        rows.forEach((r, idx) => {
-                            r.style.display = (idx >= start && idx < end) ? '' : 'none';
-                        });
-                        if (rows.length > 5) {
+                        rows.forEach(r => { r.style.display = 'none'; });
+                        matched.slice(start, end).forEach(r => { r.style.display = ''; });
+                        if (matched.length > 5) {
                             pagContainer?.classList.remove('hidden');
                             if (pageIndicator) pageIndicator.textContent = 'Halaman ' + currentPage + ' dari ' + totalPages;
                             if (prevPageBtn) prevPageBtn.disabled = (currentPage === 1);
@@ -74,6 +85,7 @@ $grades = is_array($grades ?? null) ? $grades : [];
                         }
                     }
 
+                    quickSearch?.addEventListener('input', () => { currentPage = 1; render(); });
                     pageSizeSelect?.addEventListener('change', () => { currentPage = 1; render(); });
                     prevPageBtn?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(); } });
                     nextPageBtn?.addEventListener('click', () => {

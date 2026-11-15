@@ -22,10 +22,12 @@ class DX_LMS_T_Student_Learning extends DX_LMS_M_Controller
     {
         startAppSession();
 
-        $id = $_GET['id'] ?? '';
-        $sessionId = $_GET['session_id'] ?? '';
+        $publicCourseId = $_GET['id'] ?? '';
+        $id = resolveCourseId($publicCourseId);
+        $rawSessionId = $_GET['session_id'] ?? '';
+        $sessionId = resolveSessionId($rawSessionId);
         $materialIndexRaw = $_GET['material_index'] ?? '0';
-        if (!is_string($id) || $id === '' || strlen($id) > 80 || !is_string($sessionId) || strlen($sessionId) > 80
+        if (!is_string($id) || $id === '' || !is_string($sessionId) || $sessionId === ''
             || !is_string($materialIndexRaw) || !ctype_digit($materialIndexRaw)) {
             header('Location: ?route=/student/courses');
             exit();
@@ -36,6 +38,12 @@ class DX_LMS_T_Student_Learning extends DX_LMS_M_Controller
 
         if (!$course) {
             header('Location: ?route=/student/courses');
+            exit();
+        }
+        $course['public_id'] = publicCourseId((string) $course['id']);
+
+        if (empty($course['has_access'])) {
+            header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['public_id']), true, 303);
             exit();
         }
 
@@ -52,17 +60,17 @@ class DX_LMS_T_Student_Learning extends DX_LMS_M_Controller
 
         if (!$currentSession || !isset($currentSession['materials'][$materialIndex])) {
             if ($course['status'] === 'selesai') {
-                header('Location: ?route=/student/riwayat/detail&id=' . urlencode($id));
+                header('Location: ?route=/student/riwayat/detail&id=' . rawurlencode((string) $course['public_id']));
             } else {
-                header('Location: ?route=/student/course/detail&id=' . urlencode($id));
+                header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['public_id']));
             }
             exit();
         }
 
         $currentMaterial = $currentSession['materials'][$materialIndex];
         $isCompleted = $course['status'] === 'selesai';
-        $encodedCourseId = rawurlencode($id);
-        $encodedSessionId = rawurlencode($sessionId);
+        $encodedCourseId = rawurlencode((string) $course['public_id']);
+        $encodedSessionId = rawurlencode(publicSessionId($sessionId));
         $isLiveCourse = !empty($course['is_live']);
         $materialIsCompleted = ($currentMaterial['status'] ?? '') === 'selesai';
         $completionError = '';
@@ -118,7 +126,7 @@ class DX_LMS_T_Student_Learning extends DX_LMS_M_Controller
                         : '?route=/student/course/detail&id=' . $encodedCourseId;
                 } else {
                     $previousMaterial = $courseSequence[$courseMaterialIndex - 1];
-                    $prevUrl = '?route=/student/learning&id=' . $encodedCourseId . '&session_id=' . rawurlencode($previousMaterial['session_id']) . '&material_index=' . $previousMaterial['material_index'];
+                    $prevUrl = '?route=/student/learning&id=' . $encodedCourseId . '&session_id=' . rawurlencode(publicSessionId($previousMaterial['session_id'])) . '&material_index=' . $previousMaterial['material_index'];
                 }
             }
         }
@@ -127,7 +135,7 @@ class DX_LMS_T_Student_Learning extends DX_LMS_M_Controller
         $nextUrl = '';
         if ($isLiveCourse && $courseMaterialIndex >= 0 && isset($courseSequence[$courseMaterialIndex + 1])) {
             $nextMaterial = $courseSequence[$courseMaterialIndex + 1];
-            $nextUrl = '?route=/student/learning&id=' . $encodedCourseId . '&session_id=' . rawurlencode($nextMaterial['session_id']) . '&material_index=' . $nextMaterial['material_index'];
+            $nextUrl = '?route=/student/learning&id=' . $encodedCourseId . '&session_id=' . rawurlencode(publicSessionId($nextMaterial['session_id'])) . '&material_index=' . $nextMaterial['material_index'];
         } elseif ($isLiveCourse && $courseMaterialIndex >= 0) {
             $nextUrl = '?route=/student/quiz&id=' . $encodedCourseId . '&type=quiz';
         } elseif (isset($currentSession['materials'][$materialIndex + 1])) {

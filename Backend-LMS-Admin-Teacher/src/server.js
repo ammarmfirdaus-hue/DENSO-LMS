@@ -18,6 +18,8 @@ const quizRoutes = require('./routes/quizzes');
 const enrollmentsRoutes = require('./routes/enrollments');
 const settingsRoutes = require('./routes/settings');
 const roleRoutes = require('./routes/roles');
+const supportChatRoutes = require('./routes/support-chat');
+const certificateRoutes = require('./routes/certificates');
 const { notFound, errorHandler } = require('./middleware/errors');
 const { apiLimiter, writeLimiter } = require('./middleware/rate-limit');
 const { paginationMiddleware } = require('./middleware/pagination');
@@ -29,11 +31,14 @@ const { registerUserJobHandler } = require('./services/user-job-handler');
 const { registerRecordDeleteJobHandler } = require('./services/record-delete-job-handler');
 const { registerEnrollmentJobHandler } = require('./services/enrollment-job-handler');
 const { registerNotificationJobHandler } = require('./services/notification-job-handler');
+const { registerBackupJobHandler } = require('./services/backup-job-handler');
 const { loadSystemSettings } = require('./services/system-settings');
 const { closeQuizStore } = require('./services/quiz-store');
 
 const app = express();
 app.disable('x-powered-by');
+// Hanya percayai satu hop proxy yang didefinisikan oleh deployment. Ini membuat
+// key rate-limit memakai IP klien yang benar tanpa menerima header spoofing mentah.
 
 // Pengukuran latensi respons (ms) dan header performa
 app.use((req, res, next) => {
@@ -63,11 +68,22 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Last-Event-ID']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Last-Event-ID', 'X-CSRF-Token'],
+  maxAge: 600,
+  optionsSuccessStatus: 204
 }));
+// Tolak URL/path dengan byte kontrol atau ukuran berlebihan sebelum parser dan
+// router berjalan. Payload tetap divalidasi ketat di masing-masing route dengan Zod.
+app.use((req, res, next) => {
+  if (req.originalUrl.length > 4096 || /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(req.originalUrl)) {
+    return res.status(400).json({ error: { code: 'INVALID_REQUEST', message: 'Format request tidak valid.' } });
+  }
+  return next();
+});
 app.use('/api/v1', apiLimiter, paginationMiddleware);
 app.use('/api/v1', (req, res, next) => req.method === 'GET' ? next() : writeLimiter(req, res, next));
 app.use(express.json({ limit: '8mb', strict: true }));
+app.use(express.urlencoded({ extended: false, limit: '64kb', parameterLimit: 100 }));
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
@@ -83,6 +99,8 @@ app.use('/api/v1/quizzes', quizRoutes);
 app.use('/api/v1/enrollments', enrollmentsRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/roles', roleRoutes);
+app.use('/api/v1/support-chat', supportChatRoutes);
+app.use('/api/v1/certificates', certificateRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
@@ -106,6 +124,7 @@ async function start() {
   registerRecordDeleteJobHandler(registerJobHandler);
   registerEnrollmentJobHandler(registerJobHandler);
   registerNotificationJobHandler(registerJobHandler);
+  registerBackupJobHandler(registerJobHandler);
   stopAdminJobs = await startAdminJobWorker();
 
   // Student sync is an optional integration. A missing Student DB credential

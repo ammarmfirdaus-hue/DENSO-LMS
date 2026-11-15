@@ -867,13 +867,30 @@ html.dark .dls-student-floating-guide-bubble .dls-bubble-inner {
    ============================================================ */
 .driver-popover {
     border-radius: 14px !important;
-    padding: 18px 20px 16px !important;
+    padding: 16px 18px 14px !important;
     box-shadow: 0 20px 30px rgba(0, 0, 0, 0.22), 0 8px 12px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid #cbd5e1 !important;
     background-color: #ffffff !important;
     color: #1e293b !important;
-    max-width: 360px !important;
+    width: auto !important;
+    max-width: min(360px, calc(100vw - 24px)) !important;
     font-family: 'Inter', system-ui, sans-serif !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+    .dls-student-floating-guide-bubble {
+        bottom: 84px;
+        right: 16px;
+    }
+    .driver-popover {
+        padding: 14px 14px 12px !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+    .driver-popover-footer {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
 }
 
 html.dark .driver-popover {
@@ -942,4 +959,19 @@ html.dark .driver-popover-prev-btn {
 .swal2-popup.swal2-toast {
     border-radius: 12px !important;
     padding: 12px 16px !important;
+}
+
+.dls-swal-popup {
+    border-radius: 18px !important;
+    max-width: min(440px, calc(100vw - 24px)) !important;
+    padding: 22px 20px 18px !important;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22) !important;
+}
+
+.dls-swal-popup .swal2-footer {
+    font-size: 12px !important;
+    color: #64748b !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.25) !important;
+    margin-top: 14px !important;
+    padding-top: 10px !important;
 }

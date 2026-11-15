@@ -8,6 +8,7 @@ import { hasPermission } from '../../utils/access-control';
 import PageHeader from '../../components/PageHeader';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 import DataTable from '../../components/DataTable';
 import Pagination, { usePagination } from '../../components/Pagination';
@@ -258,11 +259,11 @@ export default function EnrollmentsPage() {
                 variant="primary"
                 onClick={queueBatchApprove}
                 disabled={busy}
-                className="gap-1.5"
+                className="gap-1.5 row-auto" 
                 title="Proses seluruh permintaan pending lewat antrean background realtime"
               >
                 <Check className="size-4" />
-                <span>Setujui Semua di Antrean ({pendingCount})</span>
+                <span>Setujui Semua ({pendingCount})</span>
               </Button>
             )}
           </div>
@@ -354,20 +355,19 @@ export default function EnrollmentsPage() {
                 <label htmlFor="course-select" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
                   Course dalam Tanggung Jawab Anda *
                 </label>
-                <select
+                <SearchableSelect
                   id="course-select"
+                  title="Pilih Course Tanggung Jawab"
                   required
                   value={courseCode}
                   onChange={(event) => setCourseCode(event.target.value)}
+                  options={courses.map((course) => ({
+                    value: course.course_code,
+                    label: `${course.title} (${course.course_code})`
+                  }))}
+                  placeholder="Cari course berdasarkan nama atau kode..."
                   className={INPUT_CLASS}
-                >
-                  <option value="">Pilih course</option>
-                  {courses.map((course) => (
-                    <option key={course.course_code} value={course.course_code}>
-                      {course.title} ({course.course_code})
-                    </option>
-                  ))}
-                </select>
+                />
                 {!courses.length && (
                   <p className="mt-1 text-xs text-muted">
                     Belum ada course aktif yang ditugaskan atau dibuat oleh Anda.
@@ -433,7 +433,7 @@ export default function EnrollmentsPage() {
       >
         <DataTable
           columns={[
-            { key: 'student', label: 'Student' },
+            { key: 'student', label: 'Student', className: 'w-[240px] min-w-[240px]' },
             { key: 'course', label: 'Course' },
             { key: 'source', label: 'Sumber Permintaan' },
             { key: 'status', label: 'Status' },
@@ -448,7 +448,7 @@ export default function EnrollmentsPage() {
         >
           {page.pagedItems.map((request) => (
             <tr key={request.request_id} className="align-top">
-              <td>
+              <td className="w-[240px] min-w-[240px]">
                 <p className="font-semibold text-on-surface">{request.student_name}</p>
                 <p className="mt-0.5 font-mono text-xs text-muted">NPK: {request.student_npk}</p>
                 {request.request_note && (

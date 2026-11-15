@@ -150,13 +150,6 @@ export default function ActivityPage() {
         description="Pantau riwayat aktivitas pengguna portal dan progres antrean proses latar belakang secara realtime."
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
-              </span>
-              Pembaruan Realtime
-            </span>
             <Button
               type="button"
               variant="outline"
@@ -178,6 +171,7 @@ export default function ActivityPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Log Tercatat"
+          to="/activity?tab=all#activity-list"
           value={items.length}
           icon={<Activity className="size-5" />}
           tone="secondary"
@@ -186,6 +180,7 @@ export default function ActivityPage() {
         />
         <StatCard
           label="Aktivitas Hari Ini"
+          to="/activity?tab=all#activity-list"
           value={todayCount}
           icon={<CalendarCheck className="size-5" />}
           tone="info"
@@ -193,6 +188,7 @@ export default function ActivityPage() {
         />
         <StatCard
           label="Antrean Berhasil"
+          to="/activity?tab=completed#activity-list"
           value={completedJobsCount}
           icon={<CheckCircle2 className="size-5" />}
           tone="tertiary"
@@ -200,6 +196,7 @@ export default function ActivityPage() {
         />
         <StatCard
           label="Kendala / Gagal"
+          to="/activity?tab=failed#activity-list"
           value={failedJobsCount}
           icon={<XCircle className="size-5" />}
           tone={failedJobsCount > 0 ? 'primary' : 'neutral'}

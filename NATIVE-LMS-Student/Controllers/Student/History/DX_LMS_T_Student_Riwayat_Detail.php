@@ -20,8 +20,9 @@ class DX_LMS_T_Student_Riwayat_Detail extends DX_LMS_M_Controller
         startAppSession();
 
         /** Mendapatkan identitas course dari parameter URL. */
-        $courseId = $_GET['id'] ?? '';
-        if (!is_string($courseId) || $courseId === '' || strlen($courseId) > 80) {
+        $publicCourseId = $_GET['id'] ?? '';
+        $courseId = resolveCourseId($publicCourseId);
+        if (!is_string($courseId) || $courseId === '') {
             header('Location: ?route=/student/riwayat');
             exit();
         }
@@ -32,6 +33,7 @@ class DX_LMS_T_Student_Riwayat_Detail extends DX_LMS_M_Controller
             header('Location: ?route=/student/riwayat');
             exit();
         }
+        $course['public_id'] = publicCourseId((string) $course['id']);
 
         $stats = DX_LMS_M_Student_Data::getStats();
 

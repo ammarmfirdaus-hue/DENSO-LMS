@@ -16,12 +16,20 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
     <main class="dls-main min-w-0 px-4 pb-24 pt-20 lg:ml-[240px] lg:px-8 lg:pb-10">
         <div class="mx-auto min-w-0 max-w-5xl">
             <?php
-            $page_eyebrow = 'PUSAT INFORMASI';
-            $page_title_heading = 'Notifikasi';
-            $page_description = 'Pengumuman dan pengingat terkait pembelajaran Anda.';
-            $page_actions_html = '<span class="inline-flex min-h-9 shrink-0 items-center rounded-full bg-[#FEF2F2] px-3.5 text-xs font-semibold text-[#DC2626]"><span class="fd-mono mr-1 font-bold" data-notification-unread-count>' . $notif_count . '</span> belum dibaca</span>';
-            include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+            $topbar_title = 'Notifikasi';
+            $topbar_subtitle = 'Pengumuman dan pengingat terkait pembelajaran Anda.';
+            $topbar_show_search = false;
+            include APP_ROOT . '/includes/components/DX_LMS_M_Workspace_Topbar.php';
             ?>
+            <div class="lg:hidden">
+                <?php
+                $page_eyebrow = 'PUSAT INFORMASI';
+                $page_title_heading = 'Notifikasi';
+                $page_description = 'Pengumuman dan pengingat terkait pembelajaran Anda.';
+                $page_actions_html = '<span class="inline-flex min-h-9 shrink-0 items-center rounded-full bg-[#FEF2F2] px-3.5 text-xs font-semibold text-[#DC2626]"><span class="fd-mono mr-1 font-bold" data-notification-unread-count>' . $notif_count . '</span> belum dibaca</span>';
+                include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
+                ?>
+            </div>
 
             <div class="mb-[18px] grid min-w-0 gap-[12px] md:grid-cols-[minmax(0,1fr)_auto_auto]">
                 <label class="relative block min-w-0">
@@ -67,5 +75,59 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
     </main>
 
     <?php include APP_ROOT . '/includes/components/DX_LMS_M_Student_Bottom_Nav.php'; ?>
+    <script>
+        (function() {
+            var input = document.getElementById('notificationSearch');
+            if (!input || !input.parentElement) return;
+            var wrap = input.parentElement;
+            wrap.classList.add('relative');
+            var box = document.createElement('div');
+            box.className = 'dls-workspace-search-dropdown hidden';
+            box.setAttribute('role', 'listbox');
+            wrap.appendChild(box);
+
+            function render() {
+                var q = input.value.trim().toLowerCase();
+                if (!q) {
+                    box.classList.add('hidden');
+                    box.innerHTML = '';
+                    return;
+                }
+                var seen = Object.create(null);
+                var items = [];
+                document.querySelectorAll('#studentNotifications h2, #studentNotifications h3, #studentNotifications strong').forEach(function(el) {
+                    var txt = (el.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (!txt || txt.length < 2) return;
+                    var key = txt.toLowerCase();
+                    if (seen[key] || key.indexOf(q) === -1) return;
+                    seen[key] = true;
+                    items.push(txt);
+                });
+                box.innerHTML = '';
+                if (!items.length) {
+                    box.classList.add('hidden');
+                    return;
+                }
+                items.slice(0, 6).forEach(function(label) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'dls-workspace-search-item';
+                    btn.textContent = label;
+                    btn.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        input.value = label;
+                        box.classList.add('hidden');
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                    });
+                    box.appendChild(btn);
+                });
+                box.classList.remove('hidden');
+            }
+
+            input.addEventListener('input', render);
+            input.addEventListener('focus', function() { if (input.value.trim()) render(); });
+            document.addEventListener('click', function(e) { if (!wrap.contains(e.target)) box.classList.add('hidden'); });
+        })();
+    </script>
 </body>
 </html>

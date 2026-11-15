@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Diskusi - ' . e($course['title']);
-$backUrl = '?route=/student/forum/category&course_id=' . rawurlencode((string) $courseId)
-    . '&category_type=materi&session_id=' . rawurlencode((string) $sessionId)
+$backUrl = '?route=/student/forum/category&course_id=' . rawurlencode(publicCourseId($courseId))
+    . '&category_type=materi&session_id=' . rawurlencode(publicSessionId($sessionId))
     . ($isRiwayat ? '&is_riwayat=true' : '');
 ?>
 <!doctype html>

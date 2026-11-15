@@ -7,6 +7,7 @@ import { hasPermission } from '../../utils/access-control';
 import PageHeader from '../../components/PageHeader';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 import Pagination, { usePagination } from '../../components/Pagination';
 import showAlert from '../../utils/alert';
@@ -314,7 +315,8 @@ export default function ForumPage() {
           <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2">
             <label className="min-w-0 text-xs font-semibold text-on-surface-variant">
               Course
-              <select
+              <SearchableSelect
+                title="Pilih Course Forum"
                 className={`${FIELD_CLASS} mt-1.5 min-w-0`}
                 value={selectedSession?.course_code || ''}
                 onChange={(event) => {
@@ -322,35 +324,26 @@ export default function ForumPage() {
                   setSelectedKey(next ? sessionKey(next) : '');
                   setExpanded(null);
                 }}
-              >
-                <option value="">Pilih course</option>
-                {grouped.map((course) => (
-                  <option key={course.code} value={course.code}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
+                options={grouped.map((course) => ({ value: course.code, label: course.title }))}
+                placeholder="Cari course..."
+              />
             </label>
 
             <label className="min-w-0 text-xs font-semibold text-on-surface-variant">
               Sesi
-              <select
+              <SearchableSelect
+                title="Pilih Sesi Forum"
                 className={`${FIELD_CLASS} mt-1.5 min-w-0`}
                 value={selectedKey}
                 onChange={(event) => {
                   setSelectedKey(event.target.value);
                   setExpanded(null);
                 }}
-              >
-                <option value="">Pilih sesi</option>
-                {sessions
+                options={sessions
                   .filter((item) => item.course_code === selectedSession?.course_code)
-                  .map((item) => (
-                    <option key={sessionKey(item)} value={sessionKey(item)}>
-                      {item.session_title}
-                    </option>
-                  ))}
-              </select>
+                  .map((item) => ({ value: sessionKey(item), label: item.session_title }))}
+                placeholder="Cari sesi..."
+              />
             </label>
           </div>
 

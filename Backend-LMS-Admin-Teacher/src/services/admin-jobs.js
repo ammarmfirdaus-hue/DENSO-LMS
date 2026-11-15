@@ -113,8 +113,12 @@ async function processJob(job) {
     }
   }
   const status = failures ? 'completed_with_errors' : 'completed';
+  // Keep the terminal status parameterized as well.  It is currently chosen
+  // from an internal enum, but interpolating even internal values makes future
+  // changes easy to turn into SQL injection by accident.
   await pool.request().input('id', sql.BigInt, job.job_id)
-    .query(`UPDATE dbo.lms_admin_jobs SET status='${status}',payload_ciphertext=NULL,payload_iv=NULL,payload_tag=NULL,
+    .input('status', sql.VarChar(30), status)
+    .query(`UPDATE dbo.lms_admin_jobs SET status=@status,payload_ciphertext=NULL,payload_iv=NULL,payload_tag=NULL,
       current_item=NULL,finished_at=SYSUTCDATETIME(),updated_at=SYSUTCDATETIME() WHERE job_id=@id`);
 }
 

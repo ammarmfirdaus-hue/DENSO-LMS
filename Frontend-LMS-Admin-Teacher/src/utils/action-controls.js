@@ -32,6 +32,7 @@ function iconFor(label) {
 
 function decorateAction(control) {
   if (control.dataset.dlsActionIgnore === 'true') return;
+  if (control.getAttribute('role') === 'switch' || control.classList.contains('dls-toggle-switch')) return;
   if (control.closest('.dls-shell-chrome, .dls-shell-chrome-strong')) return;
   if (control.dataset.dlsActionDecorated === 'true') return;
   control.dataset.dlsActionDecorated = 'true';
@@ -51,12 +52,30 @@ function decorateAction(control) {
     }
   }
 
+  // Jangan timpa warna tombol yang sudah dikelola komponen Button (.dls-btn)
+  if (control.classList.contains('dls-btn')) return;
+
   const background = getComputedStyle(control).backgroundColor.match(/rgba?\(([^)]+)\)/)?.[1].split(',').map(Number);
   const alpha = background?.length === 4 ? background[3] : 1;
-  if (!background || alpha < 0.85) {
-    const color = getComputedStyle(control).color.match(/rgba?\(([^)]+)\)/)?.[1].split(',').map(Number) || [];
-    const isLightText = color.length >= 3 && color.slice(0, 3).every(channel => channel > 220);
-    control.classList.add(isLightText ? 'dls-action-solid-primary' : 'dls-action-solid-neutral');
+  const isPureWhiteBg = background && background.length >= 3 && background[0] >= 248 && background[1] >= 248 && background[2] >= 248;
+  if (!background || alpha < 0.85 || isPureWhiteBg) {
+    if (/^(edit|ubah|perbarui)\b|\bedit\b/i.test(label)) {
+      control.classList.add('dls-action-solid-edit');
+    } else if (/^(lihat|detail|buka|pratinjau|preview|email)\b/i.test(label)) {
+      control.classList.add('dls-action-solid-view');
+    } else if (/^(simpan|setujui|terima|aktifkan|publish|publikasikan|selesai)\b/i.test(label)) {
+      control.classList.add('dls-action-solid-success');
+    } else if (/^(export|ekspor|download|unduh)\b/i.test(label)) {
+      control.classList.add('dls-action-solid-info');
+    } else if (/^(kirim|ajukan|reset|transfer|peringatan|nonaktif)\b/i.test(label)) {
+      control.classList.add('dls-action-solid-warning');
+    } else if (/^(hapus|tolak|delete|remove)\b/i.test(label)) {
+      control.classList.add('dls-action-solid-danger');
+    } else {
+      const color = getComputedStyle(control).color.match(/rgba?\(([^)]+)\)/)?.[1].split(',').map(Number) || [];
+      const isLightText = color.length >= 3 && color.slice(0, 3).every(channel => channel > 220);
+      control.classList.add(isLightText ? 'dls-action-solid-primary' : 'dls-action-solid-neutral');
+    }
   }
 }
 

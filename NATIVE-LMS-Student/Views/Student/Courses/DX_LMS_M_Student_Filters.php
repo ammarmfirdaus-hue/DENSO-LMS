@@ -2,7 +2,12 @@
 <html lang="id">
 
 <head>
-    <?php
+<?php
+$courses = array_map(static function (array $course): array {
+    $course['public_id'] = publicCourseId((string) ($course['id'] ?? ''));
+    return $course;
+}, $courses ?? []);
+?>
     $page_title = 'Filter Course - LMS';
     include APP_ROOT . '/includes/components/DX_LMS_M_Tailwind_Head.php';
     ?>
@@ -68,7 +73,7 @@
                 $isCompleted = ($course['status'] ?? '') === 'selesai';
             ?>
             <article class="filter-course-card course-card fd-card flex flex-col overflow-hidden" data-filters="<?= e(json_encode($course['filters'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP)) ?>" data-course-status="<?= e($course['status']) ?>" data-progress="<?= $progress ?>">
-                <a class="course-card-cover group relative flex items-center justify-center overflow-hidden" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>" aria-label="Buka course <?= e($course['title']) ?>">
+                <a class="course-card-cover group relative flex items-center justify-center overflow-hidden" href="?route=/student/course/detail&id=<?= urlencode($course['public_id']) ?>" aria-label="Buka course <?= e($course['title']) ?>">
                     <?php if (!empty($course['thumbnail'])): ?>
                     <img alt="<?= e($course['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="<?= e($course['thumbnail']) ?>">
                     <?php endif; ?>
@@ -94,7 +99,7 @@
                     <div class="mt-[12px]">
                         <div class="h-[6px] w-full overflow-hidden rounded-full bg-[#F5F5F5]"><span class="block h-full rounded-full <?= $isCompleted ? 'bg-[#16A34A]' : 'bg-[#DC2626]' ?>" style="width: <?= $progress ?>%"></span></div>
                     </div>
-                    <a class="fd-btn fd-btn-primary fd-btn-md mt-[18px] w-full rounded-full" href="?route=/student/course/detail&id=<?= urlencode($course['id']) ?>">
+                    <a class="fd-btn fd-btn-primary fd-btn-md mt-[18px] w-full rounded-full" href="?route=/student/course/detail&id=<?= urlencode($course['public_id']) ?>">
                         <span><?= $isInProgress ? 'Lanjutkan Belajar' : 'Mulai Course' ?></span>
                         <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
                     </a>
@@ -204,7 +209,7 @@
                     const progress = Math.max(0, Math.min(100, Number(c.progress || 0)));
                     const isInProgress = c.status === 'sedang_dipelajari';
                     const isCompleted = c.status === 'selesai';
-                    const targetUrl = isCompleted ? `?route=/student/riwayat/detail&id=${c.id}` : `?route=/student/course/detail&id=${c.id}`;
+                    const targetUrl = isCompleted ? `?route=/student/riwayat/detail&id=${encodeURIComponent(c.public_id || '')}` : `?route=/student/course/detail&id=${encodeURIComponent(c.public_id || '')}`;
 
                     const mediaHtml = c.thumbnail ?
                         `<img alt="${c.title}" class="w-full h-full object-cover" src="${c.thumbnail}">` :

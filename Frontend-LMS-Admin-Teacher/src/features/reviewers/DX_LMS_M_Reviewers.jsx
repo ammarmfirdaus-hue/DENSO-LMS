@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  ArrowRightLeft,
   CheckCircle2,
   ClipboardCheck,
   Edit3,
@@ -21,6 +22,7 @@ import PageHeader from '../../components/PageHeader';
 import Pagination, { usePagination } from '../../components/Pagination';
 import StatCard from '../../components/StatCard';
 import StatusBadge from '../../components/StatusBadge';
+import SearchableSelect from '../../components/SearchableSelect';
 import showAlert from '../../utils/alert';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 
@@ -42,7 +44,9 @@ export default function ReviewersPage() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [editStatus, setEditStatus] = useState('active');
   const [emailTarget, setEmailTarget] = useState(null);
+  const [transferTarget, setTransferTarget] = useState(null);
 
   async function load() {
     try {
@@ -146,6 +150,7 @@ export default function ReviewersPage() {
     if (!editTarget) return;
 
     const formData = new FormData(e.currentTarget);
+    const targetReviewerNpk = formData.get('targetReviewerNpk');
     const payload = {
       fullname: formData.get('fullname'),
       email: formData.get('email'),
@@ -153,7 +158,8 @@ export default function ReviewersPage() {
       position: formData.get('position'),
       phoneNumber: formData.get('phoneNumber'),
       status: formData.get('status'),
-      password: formData.get('password') || ''
+      password: formData.get('password') || '',
+      ...(targetReviewerNpk ? { targetReviewerNpk } : {})
     };
 
     setBusy(true);
@@ -181,6 +187,11 @@ export default function ReviewersPage() {
   }
 
   async function handleDelete(reviewer) {
+    if (Number(reviewer.active_reviews) > 0) {
+      setTransferTarget({ ...reviewer, pendingAction: 'deactivate' });
+      return;
+    }
+
     const confirmed = await showAlert.confirm({
       title: 'Nonaktifkan Reviewer?',
       text: `Akun ${reviewer.fullname} tidak dapat digunakan lagi. Riwayat review tetap disimpan.`,
@@ -209,10 +220,53 @@ export default function ReviewersPage() {
     }
   }
 
+  async function handleTransferReviewTasks(event) {
+    event.preventDefault();
+    if (!transferTarget) return;
+    const targetReviewerNpk = new FormData(event.currentTarget).get('targetReviewerNpk');
+    if (!targetReviewerNpk) return;
+
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      if (transferTarget.pendingAction === 'deactivate' || transferTarget.pendingAction === 'delete') {
+        const res = await api(`/reviewers/${encodeURIComponent(transferTarget.employee_npk)}`, {
+          method: 'DELETE',
+          body: JSON.stringify({ targetReviewerNpk })
+        });
+        const message = `Tugas review dialihkan dan akun ${transferTarget.fullname} berhasil ${transferTarget.pendingAction === 'delete' ? 'dihapus / dinonaktifkan' : 'dinonaktifkan'}.`;
+        setNotice(message);
+        showAlert.success('Berhasil Dialihkan & Diproses', message);
+      } else {
+        const res = await api(`/reviewers/${encodeURIComponent(transferTarget.employee_npk)}/transfer-review-tasks`, {
+          method: 'POST',
+          body: JSON.stringify({ targetReviewerNpk })
+        });
+        const message = res.message || 'Tugas review berhasil dialihkan.';
+        setNotice(message);
+        if (res.emailSent === false) showAlert.warning('Tugas Dialihkan, Email Belum Terkirim', message);
+        else showAlert.success('Tugas Review Dialihkan', message);
+      }
+      setTransferTarget(null);
+      await load();
+    } catch (err) {
+      setError(err.message);
+      showAlert.error('Gagal Mengalihkan Tugas Review', err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleHardDelete(reviewer) {
+    if (Number(reviewer.active_reviews) > 0) {
+      setTransferTarget({ ...reviewer, pendingAction: 'delete' });
+      return;
+    }
+
     const confirmed = await showAlert.confirm({
       title: 'Hapus Reviewer Permanen?',
-      text: `Akun ${reviewer.fullname} akan dihapus jika tidak memiliki riwayat terkait. Jika ada riwayat, akun otomatis dinonaktifkan. Materi yang masih menunggu review tetap harus diselesaikan atau dialihkan terlebih dahulu.`,
+      text: `Akun ${reviewer.fullname} akan dihapus jika tidak memiliki riwayat terkait. Jika ada riwayat, akun otomatis dinonaktifkan.`,
       confirmText: 'Hapus / Nonaktifkan',
       cancelText: 'Batal',
       danger: true
@@ -432,6 +486,7 @@ export default function ReviewersPage() {
       <section aria-label="Ringkasan Reviewer" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Reviewer"
+          to="/reviewers#reviewers-list"
           value={summary.total}
           icon={<Users className="h-5 w-5" />}
           tone="primary"
@@ -440,6 +495,7 @@ export default function ReviewersPage() {
         />
         <StatCard
           label="Reviewer Aktif"
+          to="/reviewers?status=active#reviewers-list"
           value={summary.active}
           icon={<ShieldCheck className="h-5 w-5" />}
           tone="tertiary"
@@ -448,6 +504,7 @@ export default function ReviewersPage() {
         />
         <StatCard
           label="Non-aktif"
+          to="/reviewers?status=inactive#reviewers-list"
           value={summary.inactive}
           icon={<UserX className="h-5 w-5" />}
           tone="warning"
@@ -456,6 +513,7 @@ export default function ReviewersPage() {
         />
         <StatCard
           label="Total Materi Direview"
+          to="/materials?status=pending_review#materials-submissions"
           value={summary.totalReviews}
           icon={<ClipboardCheck className="h-5 w-5" />}
           tone="secondary"
@@ -630,6 +688,7 @@ export default function ReviewersPage() {
                       disabled={busy}
                       onClick={() => {
                         setEditTarget(reviewer);
+                        setEditStatus(reviewer.status);
                         setError('');
                         setNotice('');
                       }}
@@ -661,6 +720,29 @@ export default function ReviewersPage() {
                         className="w-full justify-center !border-emerald-600 !bg-emerald-600 !text-white hover:!bg-emerald-700 dark:!border-emerald-500 dark:!bg-emerald-600 dark:hover:!bg-emerald-500"
                       >
                         Aktifkan
+                      </Button>
+                    )}
+
+                    {reviewer.status === 'active' && (
+                      <Button
+                        type="button"
+                        variant="primary"
+                        size="xs"
+                        icon={<ArrowRightLeft className="h-3.5 w-3.5" />}
+                        disabled={busy || !hasActiveReviews}
+                        title={
+                          hasActiveReviews
+                            ? 'Alihkan seluruh tugas review aktif ke reviewer lain.'
+                            : 'Tidak ada tugas review aktif untuk dialihkan.'
+                        }
+                        onClick={() => {
+                          setTransferTarget(reviewer);
+                          setError('');
+                          setNotice('');
+                        }}
+                        className="w-full justify-center !border-violet-600 !bg-violet-600 !text-white hover:!bg-violet-700 dark:!border-violet-500 dark:!bg-violet-600 dark:hover:!bg-violet-500"
+                      >
+                        Alihkan
                       </Button>
                     )}
 
@@ -706,6 +788,66 @@ export default function ReviewersPage() {
           })}
         </DataTable>
       </Card>
+
+      <Modal
+        isOpen={Boolean(transferTarget)}
+        onClose={() => !busy && setTransferTarget(null)}
+        title={
+          transferTarget?.pendingAction === 'deactivate'
+            ? 'Alihkan Tugas & Nonaktifkan Reviewer'
+            : transferTarget?.pendingAction === 'delete'
+            ? 'Alihkan Tugas & Hapus Reviewer'
+            : 'Alihkan Tugas Review'
+        }
+        subtitle={
+          transferTarget
+            ? `${transferTarget.fullname} memiliki ${transferTarget.active_reviews} tugas review aktif.`
+            : ''
+        }
+        maxWidth="md"
+      >
+        {transferTarget && (
+          <form key={transferTarget.employee_npk} onSubmit={handleTransferReviewTasks} className="space-y-4">
+            <p className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-6 text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-200">
+              {transferTarget.pendingAction
+                ? `Reviewer ini memiliki ${transferTarget.active_reviews} tugas review aktif. Seluruh tugas review aktif akan dialihkan ke reviewer pengganti sebelum akun ${transferTarget.pendingAction === 'delete' ? 'dihapus / dinonaktifkan' : 'dinonaktifkan'}.`
+                : 'Seluruh tugas yang masih menunggu review akan dipindahkan. Tautan reviewer lama dicabut, lalu tautan review baru dikirim ke reviewer tujuan.'}
+            </p>
+            <label className="block">
+              <span className="text-xs font-semibold text-secondary dark:text-slate-300">
+                Reviewer Tujuan / Pengganti *
+              </span>
+              <SearchableSelect
+                name="targetReviewerNpk"
+                title="Pilih Reviewer Tujuan"
+                required
+                className={FIELD_CLASS}
+                placeholder="Cari nama atau NPK reviewer..."
+                options={reviewers
+                  .filter((reviewer) => reviewer.status === 'active' && reviewer.employee_npk !== transferTarget.employee_npk)
+                  .map((reviewer) => ({
+                    value: reviewer.employee_npk,
+                    label: `${reviewer.fullname} (${reviewer.employee_npk}) — ${reviewer.active_reviews || 0} tugas aktif`
+                  }))}
+              />
+            </label>
+            <div className="flex justify-end gap-2 border-t border-outline/40 pt-4 dark:border-slate-700/70">
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setTransferTarget(null)}>
+                Batal
+              </Button>
+              <Button type="submit" loading={busy} disabled={busy} icon={<ArrowRightLeft className="h-4 w-4" />}>
+                {busy
+                  ? 'Memproses...'
+                  : transferTarget.pendingAction === 'deactivate'
+                  ? 'Alihkan & Nonaktifkan'
+                  : transferTarget.pendingAction === 'delete'
+                  ? 'Alihkan & Hapus'
+                  : 'Alihkan Tugas'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
 
       {/* Modal Tambah Reviewer */}
       <Modal
@@ -881,7 +1023,8 @@ export default function ReviewersPage() {
                 </span>
                 <select
                   name="status"
-                  defaultValue={editTarget.status}
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value)}
                   className={FIELD_CLASS}
                 >
                   <option value="active">Aktif (Dapat Ditugaskan)</option>
@@ -889,6 +1032,28 @@ export default function ReviewersPage() {
                 </select>
               </label>
             </div>
+
+            {editStatus === 'inactive' && Number(editTarget.active_reviews) > 0 && (
+              <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3.5 dark:border-amber-800 dark:bg-amber-950/35">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  Perhatian: Reviewer ini memiliki {editTarget.active_reviews} tugas review aktif.
+                  Pilih reviewer pengganti untuk mentransfer seluruh tugas aktif sebelum dinonaktifkan: *
+                </p>
+                <SearchableSelect
+                  name="targetReviewerNpk"
+                  title="Pilih Reviewer Pengganti"
+                  required
+                  className={FIELD_CLASS}
+                  placeholder="Cari reviewer pengganti yang aktif..."
+                  options={reviewers
+                    .filter((r) => r.status === 'active' && r.employee_npk !== editTarget.employee_npk)
+                    .map((r) => ({
+                      value: r.employee_npk,
+                      label: `${r.fullname} (${r.employee_npk}) — ${r.active_reviews || 0} tugas aktif`
+                    }))}
+                />
+              </div>
+            )}
 
             <div className="grid gap-3.5 sm:grid-cols-2">
               <label className="block">

@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "d4a92f1e-7b3c-4e8a-9f12-202611120002",
+    "_postman_id": "d4a92f1e-7b3c-4e8a-9f12-202611150001",
     "name": "DENSO-LMS Backend API",
-    "description": "# DENSO-LMS Backend API Reference & Test Suite (Postman v2.1.0)\n\nDokumentasi & suite pengujian **lengkap & terverifikasi** terhadap kode sumber backend terkini pada proyek **DENSO-LMS**:\n- **Express 5 API Server (`Backend-LMS-Admin-Teacher`)**: **86 endpoint** (`GET /health` + `/api/v1/*` pada 13 domain router)\n- **Native Student PHP API (`NATIVE-LMS-Student/api/index.php`)**: **3 JSON resource** + **1 helper bootstrap SSO->PHP Session**\n- **Folder `16` — Skenario Uji Kompleks & Variasi Body Test**: **40 skenario positif & negatif** siap jalankan.\n\n---\n\n## Arsitektur Keamanan & Protokol Pengujian\n1. **Dual Auth (`Authorization: Bearer <jwt>` + HttpOnly Cookie `dls_sso`)**:\n   - Login (`POST /api/v1/auth/login`) memakai verifikasi bcrypt timing-safe, menghasilkan JWT (`JWT_TTL`, default `15m`) + cookie `dls_sso` (`8h`).\n   - Teacher dapat berpindah ke portal Student via `POST /api/v1/auth/student-mode` (`teacher_shadow`, TTL **30 menit**).\n2. **Reviewer Portal Scope (`reviewer_portal`)**:\n   - Link review menyimpan **SHA-256 hash** (`48h` TTL, sekali pakai), ditukar menjadi JWT scope `reviewer_portal` (`2h`) di `POST /material-workflow/links/:token/consume`.\n3. **Trusted Origin Enforcement (`UNTRUSTED_ORIGIN`)**:\n   - Endpoint tulis pada `auth/*-mode`, `quizzes`, `enrollments`, `grades`, `forum`, dan `notifications` mewajibkan header `Origin` cocok `{{frontend_origin}}` / `{{student_app_url}}`.\n4. **Rate Limiter `draft-8`**:\n   - Global `/api/v1`: **300 req / 1 mnt** | Write non-GET: **90 req / 15 mnt** | Login: **8 req / 15 mnt** per IP+NPK | Upload materi/forum: **20 req / 15 mnt** | Broadcast notifikasi: **10 req / 1 jam**.\n5. **Upload & Background Job Encryption**:\n   - Upload materi maks **250 MB** & gambar forum maks **5 MB** dicek dengan **magic-byte signature** (`415` jika palsu).\n   - Bulk jobs (`POST /jobs/users` & `POST /jobs/records/delete`) dienkripsi **AES-256-GCM** di SQL Server.",
+    "description": "# DENSO-LMS Backend API Reference & Test Suite (Postman v2.1.0)\n\nDokumentasi dan suite pengujian **lengkap serta terverifikasi** terhadap kode sumber backend terkini pada proyek **DENSO-LMS**:\n- **Express 5 API Server (`Backend-LMS-Admin-Teacher`)**: **113 endpoint** (`GET /health` + `/api/v1/*` pada **16 domain router**)\n- **Native Student PHP Portal & API (`NATIVE-LMS-Student`)**: **6 endpoint** (SSO bootstrap, JSON API `me`, `dashboard`, `courses`, halaman sertifikat, dan aksi belajar)\n- **Folder `19` — Skenario Uji Kompleks & Variasi Body Test**: **52 skenario positif & negatif** siap jalankan.\n\n---\n\n## Arsitektur Keamanan & Protokol Pengujian\n1. **Dual Auth (`Authorization: Bearer <jwt>` + HttpOnly Cookie `dls_sso`) & Matriks RBAC Dinamis (31 Izin Granular)**:\n   - Login (`POST /api/v1/auth/login`) memakai verifikasi bcrypt timing-safe, menghasilkan JWT (`JWT_TTL`, default `15m`) + cookie `dls_sso` (`8h`), disertai atribut `canAccessStaffPortal` dan daftar `permissions` dari tabel `dbo.lms_role_permissions`.\n   - Teacher dapat berpindah ke portal Student via `POST /api/v1/auth/student-mode` (`teacher_shadow`, TTL **30 menit**).\n2. **Reviewer Portal Scope (`reviewer_portal`) & Pengalihan Tugas Review**:\n   - Link review menyimpan **SHA-256 hash** (`48h` TTL, sekali pakai), ditukar menjadi JWT scope `reviewer_portal` (`2h`) di `POST /material-workflow/links/:token/consume`.\n   - Admin dapat mengalihkan antrean review aktif antar-reviewer melalui `POST /api/v1/reviewers/:npk/transfer-review-tasks`.\n3. **Trusted Origin Enforcement (`UNTRUSTED_ORIGIN`)**:\n   - Endpoint tulis pada `auth/*-mode`, `quizzes`, `enrollments`, `grades`, `certificates`, `roles`, `forum`, `notifications`, dan `support-chat` mewajibkan header `Origin` cocok dengan `{{frontend_origin}}` atau `{{student_app_url}}`.\n4. **Rate Limiter `draft-8`**:\n   - Global `/api/v1`: **300 req / 1 mnt** | Write non-GET: **90 req / 15 mnt** | Login: **8 req / 15 mnt** per IP+NPK | Upload materi/sampul/sertifikat/forum: **20 req / 15 mnt** | Broadcast notifikasi: **10 req / 1 jam**.\n5. **Upload Magic-Byte Signature, Background Job Encryption (AES-256-GCM) & JSON Backup/Restore**:\n   - Upload materi (maks **250 MB**), sertifikat (maks **15 MB**), sampul kursus (maks **5 MB**), dan gambar forum (maks **5 MB**) diverifikasi menggunakan **magic-byte signature** (`415` jika tidak sesuai).\n   - Bulk jobs (`users`, `records_delete`, `enrollments_decision`, `notifications_broadcast`, `backup_restore`) dienkripsi **AES-256-GCM** pada tabel `dbo.lms_admin_job_items`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -969,6 +969,66 @@
       "description": "Ringkasan metrik LMS, daftar course ringkas, log aktivitas, dan real-time SSE stream (`/api/v1/dashboard/*`).",
       "item": [
         {
+          "name": "[Admin/Teacher] Get Dashboard Analytics & Trends",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/analytics?days=30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "analytics"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Rentang hari tren analitik (7, 14, 30, 90)"
+                }
+              ]
+            },
+            "description": "Mengambil data analitik komprehensif untuk halaman Dashboard (`GET /api/v1/dashboard/analytics`).\n\n- **Izin RBAC:** `dashboard.view`\n- **Cakupan Data:** Ringkasan KPI, distribusi status materi, tren aktivitas harian, progres kursus teratas, serta metrik penyelesaian kuis."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/dashboard/analytics?days=30"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"days\": 30,\n  \"overview\": {\n    \"activeCourses\": 6,\n    \"activeStudents\": 42,\n    \"averageProgress\": 78.5,\n    \"publishedMaterials\": 18\n  },\n  \"materialBreakdown\": {\n    \"published\": 18,\n    \"pending_admin\": 2,\n    \"pending_review\": 1,\n    \"rejected\": 1\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is JSON object', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "[Admin/Teacher] Get Dashboard Summary",
           "request": {
             "method": "GET",
@@ -1623,6 +1683,178 @@
                   "  pm.environment.set('course_id', String(c.course_id));",
                   "  pm.environment.set('course_code', String(c.course_code));",
                   "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Public] Get Course Cover Thumbnail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/thumbnails/:filename",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "courses",
+                "thumbnails",
+                ":filename"
+              ],
+              "variable": [
+                {
+                  "key": "filename",
+                  "value": "{{course_thumbnail_filename}}",
+                  "description": "Nama file UUID sampul kursus (.jpg/.png/.gif/.webp)"
+                }
+              ]
+            },
+            "description": "Menyajikan file gambar sampul kursus aktif lintas portal (`GET /api/v1/courses/thumbnails/:filename`).\n\n- **Auth:** Publik (`noauth`) agar tag `<img>` pada portal Admin/Teacher dan Student dapat memuat sampul dengan header `Cross-Origin-Resource-Policy: cross-origin`.\n- **Validasi:** Memeriksa format nama file UUID dan memastikan kursus terkait berstatus `active`.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404 Not Found', () => pm.expect([200, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher] Upload Course Cover Thumbnail (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/:id/thumbnail",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "courses",
+                ":id",
+                "thumbnail"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{course_id}}",
+                  "description": "ID numerik atau public_id kursus"
+                }
+              ]
+            },
+            "description": "Mengunggah atau memperbarui foto sampul kursus (`POST /api/v1/courses/:id/thumbnail`).\n\n- **Izin RBAC:** `courses.manage_cover`\n- **Validasi Keamanan:** Memeriksa magic-byte signature (`parseImageBuffer`), menyimpan dengan nama UUID di `uploads/courses/`, menghapus file sampul lama, dan memicu `syncStudentNow()`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "src": "",
+                  "description": "File gambar sampul kursus (JPG, PNG, GIF, WebP maks. 5 MB)"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/courses/:id/thumbnail"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"thumbnail_path\": \"/courses/thumbnails/550e8400-e29b-41d4-a716-446655440000.png\",\n  \"course\": {\n    \"course_id\": 1,\n    \"thumbnail_path\": \"/courses/thumbnails/550e8400-e29b-41d4-a716-446655440000.png\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 400/415 when file missing/invalid', () => pm.expect([200, 400, 404, 415]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher] Remove Course Cover Thumbnail",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/:id/thumbnail",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "courses",
+                ":id",
+                "thumbnail"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{course_id}}",
+                  "description": "ID numerik atau public_id kursus"
+                }
+              ]
+            },
+            "description": "Menghapus foto sampul kursus dan mengembalikannya ke tampilan sampul bawaan (`DELETE /api/v1/courses/:id/thumbnail`).\n\n- **Izin RBAC:** `courses.manage_cover`\n- **Efek:** Mengosongkan `thumbnail_path` di `dbo.courses`, menghapus file fisik di disk, mencatat log aktivitas, dan menyinkronkan ke database Student."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/courses/:id/thumbnail"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"thumbnail_path\": null,\n  \"course\": {\n    \"course_id\": 1,\n    \"thumbnail_path\": null\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404 Not Found', () => pm.expect([200, 404]).to.include(pm.response.code));"
                 ]
               }
             }
@@ -2777,6 +3009,66 @@
                   "const subs = pm.response.json().submissions;",
                   "pm.expect(subs).to.be.an('array');",
                   "if (subs.length > 0) pm.environment.set('submission_id', String(subs[0].submission_id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher/Reviewer] Get Material Submission Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/material-workflow/submissions/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "material-workflow",
+                "submissions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{submission_id}}",
+                  "description": "ID pengajuan materi (submission_id)"
+                }
+              ]
+            },
+            "description": "Mengambil detail lengkap satu pengajuan materi untuk keperluan pratinjau atau formulir revisi (`GET /api/v1/material-workflow/submissions/:id`).\n\n- **Izin RBAC:** `materials.view` atau `materials.review`\n- **Pembatasan Scope:** Admin dapat mengakses seluruh pengajuan, Teacher hanya pengajuan miliknya sendiri, dan Reviewer hanya pengajuan yang ditugaskan kepadanya atau berstatus `pending_review`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/material-workflow/submissions/:id"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"submission\": {\n    \"submission_id\": 10,\n    \"title\": \"Standar Keselamatan Lini Produksi\",\n    \"material_type\": \"pdf\",\n    \"status\": \"pending_admin\",\n    \"submitted_by\": \"TCH001\",\n    \"course_code\": \"DLS-SAF-01\",\n    \"fileUrl\": \"/material-workflow/submissions/10/file\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404 Not Found', () => pm.expect([200, 404]).to.include(pm.response.code));"
                 ]
               }
             }
@@ -6054,7 +6346,345 @@
       ]
     },
     {
-      "name": "09 - Users Management",
+      "name": "09 - Certificates & Awards",
+      "description": "Manajemen penerbitan, pencarian, pengunduhan, dan penghapusan sertifikat serta penghargaan siswa (`/api/v1/certificates`).",
+      "item": [
+        {
+          "name": "[Admin/Teacher] List Active Students for Certificate Issuance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/certificates/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "certificates",
+                "students"
+              ]
+            },
+            "description": "Mengambil daftar akun siswa aktif dari MySQL `student_accounts` sebagai pilihan penerima pada formulir penerbitan sertifikat (`GET /api/v1/certificates/students`).\n\n- **Izin RBAC:** `certificates.view` atau `certificates.manage` (Role: `admin`, `teacher`)"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/certificates/students"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"students\": [\n    {\n      \"student_id\": 1,\n      \"npk\": \"STD001\",\n      \"fullname\": \"Budi Santoso\",\n      \"email\": \"budi@denso.co.id\"\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns students array', () => pm.expect(pm.response.json().students).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher/Student] List Certificates & Awards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/certificates?award_type=certificate&search=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "certificates"
+              ],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "{{student_id}}",
+                  "disabled": true,
+                  "description": "Filter ID siswa tertentu (Admin/Teacher)"
+                },
+                {
+                  "key": "award_type",
+                  "value": "certificate",
+                  "description": "Filter jenis dokumen: certificate | award | document"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Kata kunci judul, nomor sertifikat, kode kursus, atau NPK"
+                }
+              ]
+            },
+            "description": "Mengambil daftar sertifikat, penghargaan, atau dokumen kelulusan (`GET /api/v1/certificates`).\n\n- **Izin RBAC:** `certificates.view` (`admin`, `teacher`, `student`)\n- **Isolasi Data:** Siswa hanya melihat sertifikat miliknya sendiri (`student_id` dari klaim JWT), sedangkan Admin dan Teacher dapat memfilter seluruh siswa."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/certificates"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"certificates\": [\n    {\n      \"certificate_id\": 1,\n      \"student_id\": 1,\n      \"student_npk\": \"STD001\",\n      \"student_name\": \"Budi Santoso\",\n      \"course_code\": \"DLS-QMS-01\",\n      \"course_title\": \"Dasar Kualitas Manufaktur DENSO\",\n      \"award_type\": \"certificate\",\n      \"title\": \"Sertifikat Kelulusan QMS Dasar\",\n      \"certificate_no\": \"CERT/DENSO/2026/001\",\n      \"file_url\": \"/certificates/1/file\",\n      \"download_url\": \"/certificates/1/file?download=1\"\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns certificates array', () => pm.expect(pm.response.json().certificates).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher] Issue Certificate / Award (Multipart + Origin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "certificates"
+              ]
+            },
+            "description": "Menerbitkan sertifikat atau penghargaan baru beserta lampiran berkas (`POST /api/v1/certificates`).\n\n- **Izin RBAC:** `certificates.manage` + `trustedWriteOrigin`\n- **Keamanan Berkas:** Memeriksa ekstensi dan *magic-byte signature* (`hasExpectedCertificateSignature`) untuk PDF/PNG/JPG/WebP hingga 15 MB.\n- **Notifikasi Otomatis:** Menyimpan data ke MySQL `student_certificates` dan mengirim notifikasi realtime ke siswa penerima melalui SQL Server `dbo.lms_notifications`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "student_id",
+                  "value": "{{student_id}}",
+                  "type": "text",
+                  "description": "ID siswa penerima dari MySQL student_accounts"
+                },
+                {
+                  "key": "course_id",
+                  "value": "{{course_id}}",
+                  "type": "text",
+                  "description": "Opsional: ID kursus terkait"
+                },
+                {
+                  "key": "award_type",
+                  "value": "certificate",
+                  "type": "text",
+                  "description": "certificate | award | document"
+                },
+                {
+                  "key": "title",
+                  "value": "Sertifikat Kompetensi Dasar Manufaktur DENSO",
+                  "type": "text"
+                },
+                {
+                  "key": "certificate_no",
+                  "value": "CERT/DENSO/2026/009",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Diberikan atas kelulusan evaluasi kompetensi dasar dengan nilai sangat memuaskan.",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "File PDF, PNG, JPG, atau WebP (maks. 15 MB, wajib lolos magic-byte check)"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/certificates"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"certificate\": {\n    \"certificate_id\": 9\n  },\n  \"message\": \"Sertifikat atau penghargaan berhasil dikirim ke siswa.\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created or 400 when file is not attached in runner', () => pm.expect([201, 400, 404, 415]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher/Student] Preview or Download Certificate File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/certificates/:id/file?download=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "certificates",
+                ":id",
+                "file"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "0",
+                  "description": "Set 1 untuk attachment download, 0 untuk inline preview"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{certificate_id}}",
+                  "description": "ID sertifikat (certificate_id)"
+                }
+              ]
+            },
+            "description": "Menampilkan pratinjau inline atau mengunduh berkas sertifikat (`GET /api/v1/certificates/:id/file`).\n\n- **Izin RBAC:** `certificates.view`\n- **Validasi Kepemilikan:** Siswa hanya dapat mengunduh sertifikat miliknya sendiri (`row.student_id === req.user.student_id`)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404 Not Found', () => pm.expect([200, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher] Delete Certificate & File (Origin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificates/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "certificates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{certificate_id}}",
+                  "description": "ID sertifikat yang akan dihapus"
+                }
+              ]
+            },
+            "description": "Menghapus data sertifikat beserta berkas fisiknya di direktori `uploads/certificates` (`DELETE /api/v1/certificates/:id`).\n\n- **Izin RBAC:** `certificates.manage` + `trustedWriteOrigin`\n- **Pembatasan Teacher:** Pengajar hanya dapat menghapus sertifikat yang diterbitkan olehnya sendiri (`issued_by_npk === req.user.sub`), sedangkan Admin dapat menghapus seluruh sertifikat."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/certificates/:id"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"deleted\": true\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404 Not Found', () => pm.expect([200, 403, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10 - Users Management",
       "description": "Pengelolaan akun Student, Teacher, Reviewer, dan Admin (`/api/v1/users/*`).",
       "item": [
         {
@@ -6458,7 +7088,7 @@
       ]
     },
     {
-      "name": "10 - Reviewers Management",
+      "name": "11 - Reviewers Management",
       "description": "CRUD khusus akun Reviewer materi oleh Admin (`/api/v1/reviewers/*`).",
       "item": [
         {
@@ -6751,6 +7381,75 @@
           ]
         },
         {
+          "name": "[Admin] Transfer Active Review Tasks to Another Reviewer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviewers/:npk/transfer-review-tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviewers",
+                ":npk",
+                "transfer-review-tasks"
+              ],
+              "variable": [
+                {
+                  "key": "npk",
+                  "value": "{{reviewer_npk}}",
+                  "description": "NPK reviewer asal yang memiliki tugas pending_review"
+                }
+              ]
+            },
+            "description": "Memindahkan seluruh antrean materi berstatus `pending_review` dari satu reviewer ke reviewer aktif lainnya (`POST /api/v1/reviewers/:npk/transfer-review-tasks`).\n\n- **Izin RBAC:** `reviewers.manage`\n- **Keamanan Token:** Mencabut (`revoked_at = SYSUTCDATETIME()`) seluruh tautan review lama agar reviewer asal tidak dapat lagi membuka portal review untuk materi tersebut.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetReviewerNpk\": \"{{target_reviewer_npk}}\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/reviewers/:npk/transfer-review-tasks"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"transferred\": true,\n  \"movedCount\": 2,\n  \"message\": \"Berhasil mengalihkan 2 antrean review ke reviewer tujuan.\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 400/404/409', () => pm.expect([200, 400, 404, 409]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "[Admin] Delete / Soft-Deactivate Reviewer",
           "request": {
             "method": "DELETE",
@@ -6826,7 +7525,269 @@
       ]
     },
     {
-      "name": "11 - Forum",
+      "name": "12 - Roles & RBAC Matrix",
+      "description": "Pengelolaan matriks izin akses berbasis peran (Role-Based Access Control / RBAC) dengan 31 izin granular, preset peran, dan riwayat audit (`/api/v1/roles`).",
+      "item": [
+        {
+          "name": "[Authenticated] Get Effective Role Access Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                "me"
+              ]
+            },
+            "description": "Mengambil profil akses efektif dan daftar izin (`permissions`) untuk sesi pengguna yang sedang login (`GET /api/v1/roles/me`).\n\n- **Auth:** Semua peran terautentikasi (`admin`, `teacher`, `reviewer`, `student`).\n- **Catatan Scope:** Jika dipanggil dari token `reviewer_portal`, hanya mengembalikan `canAccessStaffPortal: false` dan `permissions: ['materials.review']`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/roles/me"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"role\": {\n    \"roleKey\": \"admin\",\n    \"displayName\": \"Administrator\",\n    \"canAccessStaffPortal\": true,\n    \"permissions\": [\n      \"dashboard.view\",\n      \"courses.view\",\n      \"courses.create\",\n      \"roles.manage\"\n    ]\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Contains role profile and permissions array', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('role');",
+                  "  pm.expect(body.role.permissions).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Get Full RBAC Matrix, Catalog, Presets & Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "description": "Mengambil matriks konfigurasi RBAC lengkap untuk keempat peran (`admin`, `teacher`, `reviewer`, `student`), katalog 31 izin granular pada 12 grup modul, daftar preset bawaan, dan 25 log audit terbaru (`GET /api/v1/roles`).\n\n- **Izin RBAC:** `roles.manage`"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/roles"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"roles\": [\n    {\n      \"roleKey\": \"admin\",\n      \"displayName\": \"Administrator\",\n      \"canAccessStaffPortal\": true\n    }\n  ],\n  \"permissionCatalog\": [\n    {\n      \"key\": \"roles.manage\",\n      \"group\": \"Manajemen Peran\",\n      \"label\": \"Kelola hak akses peran\"\n    }\n  ],\n  \"presets\": [\n    {\n      \"key\": \"default\",\n      \"label\": \"Konfigurasi Standar\"\n    }\n  ],\n  \"auditLogs\": []\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Contains roles, permissionCatalog, presets, auditLogs', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.roles).to.be.an('array');",
+                  "  pm.expect(b.permissionCatalog).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] List Role Permission Audit History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles/audit?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Mengambil riwayat perubahan izin peran secara terpaginasi dari tabel `dbo.lms_role_audit_logs` (`GET /api/v1/roles/audit`).\n\n- **Izin RBAC:** `roles.manage`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns auditLogs array', () => pm.expect(pm.response.json().auditLogs).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Update Role Access & Granular Permissions (Strict + Origin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/:roleKey",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                ":roleKey"
+              ],
+              "variable": [
+                {
+                  "key": "roleKey",
+                  "value": "teacher",
+                  "description": "admin | teacher | reviewer | student"
+                }
+              ]
+            },
+            "description": "Memperbarui profil akses portal staf dan daftar izin granular suatu peran (`PUT /api/v1/roles/:roleKey`).\n\n- **Izin RBAC:** `roles.manage` + `trustedStaffOrigin`\n- **Proteksi Lockout Admin:** Sistem otomatis memastikan izin inti Admin (`roles.manage`, `dashboard.view`, `users.view`, `users.manage`, `settings.api`) dan `canAccessStaffPortal = true` pada peran `admin` tidak pernah tercabut.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Trainer / Pengajar\",\n  \"description\": \"Mengelola sesi kursus yang ditugaskan, mengajukan materi, membuat kuis, dan memberi nilai.\",\n  \"canAccessStaffPortal\": true,\n  \"permissions\": [\n    \"dashboard.view\",\n    \"activity.view\",\n    \"courses.view\",\n    \"courses.manage_sessions\",\n    \"courses.manage_cover\",\n    \"materials.view\",\n    \"materials.submit\",\n    \"quizzes.view\",\n    \"quizzes.manage\",\n    \"enrollments.view\",\n    \"enrollments.recommend\",\n    \"grades.view\",\n    \"grades.edit\",\n    \"certificates.view\",\n    \"certificates.manage\",\n    \"users.view\",\n    \"forum.view\",\n    \"forum.participate\",\n    \"forum.moderate\",\n    \"notifications.view\",\n    \"notifications.send\"\n  ],\n  \"note\": \"Sinkronisasi izin standar pengajar melalui Postman\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns updated role snapshot', () => pm.expect(pm.response.json().role).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Apply Role Permission Preset (Origin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/:roleKey/preset",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                ":roleKey",
+                "preset"
+              ],
+              "variable": [
+                {
+                  "key": "roleKey",
+                  "value": "teacher",
+                  "description": "admin | teacher | reviewer | student"
+                }
+              ]
+            },
+            "description": "Menerapkan ulang paket preset izin resmi pada peran tertentu dan mencatatnya di log audit RBAC (`POST /api/v1/roles/:roleKey/preset`).\n\n- **Izin RBAC:** `roles.manage` + `trustedStaffOrigin`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presetKey\": \"default\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13 - Forum",
       "description": "Forum diskusi sesi kursus: SSE stream, moderasi thread, unggah gambar (`<= 5 MB`), balasan, dan suka (`/api/v1/forum/*`). Operasi tulis wajib header `Origin`.",
       "item": [
         {
@@ -8077,7 +9038,7 @@
       ]
     },
     {
-      "name": "12 - Notifications",
+      "name": "14 - Notifications",
       "description": "Notifikasi sistem in-app, popup, email broadcast, unread counter, dan SSE real-time (`/api/v1/notifications/*`). Operasi tulis wajib header `Origin`.",
       "item": [
         {
@@ -8648,7 +9609,307 @@
       ]
     },
     {
-      "name": "13 - Background Jobs",
+      "name": "15 - Live Support Chat",
+      "description": "Layanan percakapan bantuan langsung (Live Support Chat) antara Siswa dan Administrator dengan indikator kehadiran (presence TTL 45 detik) dan streaming SSE (`/api/v1/support-chat`).",
+      "item": [
+        {
+          "name": "[Authenticated] Get Admin Live Support Online Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/support-chat/presence",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "presence"
+              ]
+            },
+            "description": "Memeriksa apakah Administrator sedang daring (online) pada layanan Live Support Chat (`GET /api/v1/support-chat/presence`).\n\n- **Logika Kehadiran:** Admin dinyatakan `online: true` apabila terdapat *heartbeat* aktif dalam 45 detik terakhir pada tabel `dbo.support_admin_presence`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/support-chat/presence"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"online\": true,\n  \"adminName\": \"Administrator LMS\",\n  \"lastSeenAt\": \"2026-11-15T00:00:00.000Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Contains boolean online flag', () => pm.expect(pm.response.json().online).to.be.a('boolean'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Send Admin Presence Heartbeat (Origin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/support-chat/heartbeat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "heartbeat"
+              ]
+            },
+            "description": "Memperbarui waktu aktif (*heartbeat*) Administrator di `dbo.support_admin_presence` dan menyiarkan perubahan status online melalui SSE (`POST /api/v1/support-chat/heartbeat`).\n\n- **Role:** `admin` + `trustedWriteOrigin`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Admin online is true', () => pm.expect(pm.response.json().online).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] List Active Student Support Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/support-chat/conversations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "conversations"
+              ]
+            },
+            "description": "Mengambil daftar seluruh utas percakapan siswa yang aktif beserta jumlah pesan yang belum dibaca Admin (`unread_count`) (`GET /api/v1/support-chat/conversations`).\n\n- **Role:** `admin`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns conversations array', () => pm.expect(pm.response.json().conversations).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Student] List Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/support-chat/messages?student_id={{student_id}}&after_id=0&limit=120&mark_read=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "{{student_id}}",
+                  "description": "Wajib diisi jika dipanggil oleh Admin"
+                },
+                {
+                  "key": "after_id",
+                  "value": "0",
+                  "description": "Cursor message_id untuk polling inkremental"
+                },
+                {
+                  "key": "limit",
+                  "value": "120",
+                  "description": "Batas jumlah pesan (1-200)"
+                },
+                {
+                  "key": "mark_read",
+                  "value": "1",
+                  "description": "Tandai pesan lawan bicara sebagai sudah dibaca"
+                }
+              ]
+            },
+            "description": "Mengambil daftar pesan percakapan bantuan antara siswa tertentu dan Admin (`GET /api/v1/support-chat/messages`).\n\n- **Role:** `admin` (wajib menyertakan `?student_id=`) atau `student` (otomatis memakai `req.user.student_id`)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns messages array and presence', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.messages).to.be.an('array');",
+                  "  pm.expect(b.presence).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Student] Send Support Chat Message (Strict + Origin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/support-chat/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "messages"
+              ]
+            },
+            "description": "Mengirim pesan baru pada percakapan Live Support Chat dan menyiarkannya secara waktu nyata melalui SSE (`POST /api/v1/support-chat/messages`).\n\n- **Role:** `admin` atau `student` + `trustedWriteOrigin`\n- **Catatan Payload:** Jika dikirim oleh `student`, properti `student_id` boleh dikosongkan karena diambil dari sesi token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": 1,\n  \"message_text\": \"Halo Budi, silakan buka menu My Course untuk mengakses modul yang baru disetujui.\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created or 404 if student_id not found', () => pm.expect([201, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Clear Student Conversation History (Origin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/support-chat/conversations/:studentId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "conversations",
+                ":studentId"
+              ],
+              "variable": [
+                {
+                  "key": "studentId",
+                  "value": "{{student_id}}",
+                  "description": "ID siswa yang riwayat percakapannya akan dibersihkan"
+                }
+              ]
+            },
+            "description": "Menghapus riwayat percakapan bantuan untuk siswa tertentu dan mengirim event SSE `cleared` (`DELETE /api/v1/support-chat/conversations/:studentId`).\n\n- **Role:** `admin` + `trustedWriteOrigin`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Cleared flag is true', () => pm.expect(pm.response.json().cleared).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Student] Stream Live Support Chat Events (SSE)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/support-chat/stream",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "support-chat",
+                "stream"
+              ]
+            },
+            "description": "Membuka koneksi Server-Sent Events (`text/event-stream`) untuk menerima pesan baru, perubahan status baca, dan indikator kehadiran Admin secara waktu nyata (`GET /api/v1/support-chat/stream`).\n\n- **Batas Koneksi:** Maksimal 3 stream aktif per pengguna (`429 STREAM_LIMIT` jika melebihi)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('SSE stream status 200 or 429', () => pm.expect([200, 429]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "16 - Background Jobs",
       "description": "Antrean proses massal asinkron (`/api/v1/jobs/*`) untuk impor/update/hapus pengguna, penghapusan record massal, polling event, SSE stream, serta jeda/lanjutkan job.",
       "item": [
         {
@@ -8706,6 +9967,90 @@
                   "const jobs = pm.response.json().jobs;",
                   "pm.expect(jobs).to.be.an('array');",
                   "if (jobs.length > 0) pm.environment.set('job_id', String(jobs[0].job_id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Enqueue Bulk Enrollment Decisions Job (Strict)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs/enrollments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jobs",
+                "enrollments"
+              ]
+            },
+            "description": "Membuat antrean pekerjaan latar belakang (`enrollments_decision`) untuk menyetujui atau menolak hingga 5.000 permintaan pendaftaran kursus sekaligus (`POST /api/v1/jobs/enrollments`).\n\n- **Izin RBAC:** `enrollments.decide`\n- **Enkripsi Payload:** Setiap item dienkripsi dengan AES-256-GCM di tabel `dbo.lms_admin_job_items`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"requestId\": 1,\n      \"action\": \"approved\",\n      \"note\": \"Disetujui secara massal melalui antrean background job.\",\n      \"label\": \"Permintaan #1 (Setujui)\"\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 202 Accepted', () => pm.response.to.have.status(202));",
+                  "pm.test('Returns jobId and queued status', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.status).to.eql('queued');",
+                  "  if (b.jobId) pm.environment.set('job_id', String(b.jobId));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin/Teacher] Enqueue Bulk Notifications Broadcast Job (Strict)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jobs",
+                "notifications"
+              ]
+            },
+            "description": "Membuat antrean pekerjaan latar belakang (`notifications_broadcast`) untuk mengirim hingga 5.000 notifikasi personal atau massal beserta opsi popup dan email (`POST /api/v1/jobs/notifications`).\n\n- **Izin RBAC:** `notifications.send`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"title\": \"Pengingat Evaluasi Kuis Mingguan\",\n      \"message\": \"Mohon selesaikan kuis pada modul aktif sebelum hari Jumat pukul 16.00 WIB.\",\n      \"category\": \"assessment\",\n      \"priority\": \"important\",\n      \"role\": \"student\",\n      \"npk\": \"STD001\",\n      \"sendEmail\": false,\n      \"showPopup\": true\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 202 Accepted', () => pm.response.to.have.status(202));",
+                  "pm.test('Returns jobId', () => pm.expect(pm.response.json()).to.have.property('jobId'));"
                 ]
               }
             }
@@ -9400,8 +10745,8 @@
       ]
     },
     {
-      "name": "14 - System Settings & Sync",
-      "description": "Pengaturan URL API dinamis dan sinkronisasi manual SQL Server <-> MySQL Student (`Admin` only, `/api/v1/settings/*`).",
+      "name": "17 - System Settings, Sync & Backup",
+      "description": "Pengaturan URL API runtime, sinkronisasi manual SQL Server -> MySQL Student, serta ekspor dan pemulihan (restore) cadangan basis data JSON (`/api/v1/settings`).",
       "item": [
         {
           "name": "[Admin] Get API & Student Sync Status",
@@ -9684,12 +11029,94 @@
               }
             }
           ]
+        },
+        {
+          "name": "[Admin] Export Database Backup JSON (All or Selected Datasets)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/backup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "backup"
+              ]
+            },
+            "description": "Mengekspor isi tabel SQL Server ke dalam berkas cadangan JSON berformat `dls-lms-json-backup` (`POST /api/v1/settings/backup`).\n\n- **Izin RBAC:** `settings.api`\n- **Keamanan Identifier:** Hanya mengekspor 14 dataset yang terdaftar pada `BACKUP_DATASETS` allowlist (`employees`, `courses`, `sessions`, `materials`, `submissions`, `reviewLinks`, `enrollments`, `forumThreads`, `forumReplies`, `notifications`, `activity`, `settings`, `roleDefinitions`, `rolePermissions`).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scope\": \"selected\",\n  \"datasets\": [\n    \"courses\",\n    \"sessions\",\n    \"roleDefinitions\",\n    \"rolePermissions\",\n    \"settings\"\n  ]\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Backup format is dls-lms-json-backup', () => pm.expect(pm.response.json().format).to.eql('dls-lms-json-backup'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Enqueue Database Backup Restore Job (Multipart JSON)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/backup/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "backup",
+                "restore"
+              ]
+            },
+            "description": "Mengunggah berkas JSON cadangan (`dls-lms-json-backup`) untuk dipulihkan secara bertahap (per 50 baris) melalui antrean background job `backup_restore` (`POST /api/v1/settings/backup/restore`).\n\n- **Izin RBAC:** `settings.api`",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "backup",
+                  "type": "file",
+                  "src": "",
+                  "description": "Berkas JSON hasil ekspor backup (dls-lms-json-backup, maks. 25 MB)"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 202 Accepted or 400 when file is not attached', () => pm.expect([202, 400]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "15 - Native Student PHP API",
-      "description": "Endpoint JSON read-only pada `NATIVE-LMS-Student/api/index.php` (hanya `GET`, rate limit PHP `180 req / 60 detik`, CSP ketat).\n\n**Urutan Uji Wajib:**\n1. Login sebagai Student via Folder `02` / `16.1` (agar cookie `dls_sso` tersimpan di Postman Cookie Jar).\n2. Jalankan `[Bootstrap Session] Exchange dls_sso Cookie -> PHP Session` agar PHP menginisialisasi `$_SESSION['student_id']`.\n3. Jalankan `?resource=me`, `?resource=dashboard`, dan `?resource=courses`.",
+      "name": "18 - Native Student PHP Portal & API",
+      "description": "Endpoint portal pembelajar berbasis PHP 8.2 (`NATIVE-LMS-Student`), mencakup pertukaran cookie SSO `dls_sso`, REST API JSON (`me`, `dashboard`, `courses`), serta rute halaman sertifikat dan interaksi belajar.",
       "item": [
         {
           "name": "[Bootstrap Session] Exchange dls_sso Cookie -> PHP Session",
@@ -9984,15 +11411,100 @@
               }
             }
           ]
+        },
+        {
+          "name": "[Student Session] Open Student Certificates & Awards Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{student_app_url}}/?route=/certificates&type=all",
+              "host": [
+                "{{student_app_url}}"
+              ],
+              "path": [
+                ""
+              ],
+              "query": [
+                {
+                  "key": "route",
+                  "value": "/certificates"
+                },
+                {
+                  "key": "type",
+                  "value": "all",
+                  "description": "all | certificate | award | document"
+                }
+              ]
+            },
+            "description": "Memuat halaman daftar sertifikat dan penghargaan siswa pada Portal Siswa PHP (`GET /?route=/certificates`).",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Student Session] Open Course Detail, Quiz & Discussion Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{student_app_url}}/?route=/courses/view&code={{course_code}}",
+              "host": [
+                "{{student_app_url}}"
+              ],
+              "path": [
+                ""
+              ],
+              "query": [
+                {
+                  "key": "route",
+                  "value": "/courses/view"
+                },
+                {
+                  "key": "code",
+                  "value": "{{course_code}}"
+                }
+              ]
+            },
+            "description": "Memuat halaman ruang belajar kursus, materi sesi, evaluasi kuis, dan forum diskusi pada Portal Siswa PHP (`GET /?route=/courses/view&code=...`).",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK or 404', () => pm.expect([200, 302, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "16 - Complex Test Scenarios & Body Variants (Positive & Negative)",
+      "name": "19 - Complex Test Scenarios & Body Variants (Positive & Negative)",
       "description": "Suite uji **skenario lanjutan, variasi payload (test bodies), serta negative test cases** untuk memvalidasi setiap guard keamanan, skema Zod `.strict()`, batas upload, dan transisi state lintas database SQL Server + MySQL.\n\n### Panduan Menjalankan Folder 16\n1. Pastikan Environment **`DENSO-LMS - Local Environment`** aktif dan sandi `admin_password`, `teacher_password`, `student_password` terisi.\n2. Jalankan login Admin (`02`), plus `[Positif] Login Sebagai Teacher` & `[Positif] Login Sebagai Student` (`16.1`) sehingga variabel `admin_token`, `teacher_token`, dan `student_token` terisi otomatis.\n3. Setiap request di Folder `16.1`–`16.7` memakai token peran spesifiknya secara mandiri dan membawa `pm.test(...)` lengkap.",
       "item": [
         {
-          "name": "16.1 - Auth, Multi-Role Token & Security Perimeter",
+          "name": "19.1 - Auth, Multi-Role Token & Security Perimeter",
           "description": "Skenario login multi-peran (`teacher_token`, `student_token`), ubah password profil valid vs error, serta pengujian header `Origin`.",
           "item": [
             {
@@ -10297,7 +11809,7 @@
           ]
         },
         {
-          "name": "16.2 - Courses & Material 5-State Workflow",
+          "name": "19.2 - Courses & Material 5-State Workflow",
           "description": "Variasi body pengajuan materi (`link`, `video` YouTube), validasi RBAC course, dan negative state machine workflow materi.",
           "item": [
             {
@@ -10831,7 +12343,7 @@
           ]
         },
         {
-          "name": "16.3 - Quizzes, Enrollments & Grades Edge Cases",
+          "name": "19.3 - Quizzes, Enrollments & Grades Edge Cases",
           "description": "Body multi-soal kuis, pengujian `.strict()`, validasi rentang nilai, serta penolakan catatan enrollment.",
           "item": [
             {
@@ -11306,7 +12818,7 @@
           ]
         },
         {
-          "name": "16.4 - Users Promotion, Guards & Reviewers",
+          "name": "19.4 - Users Promotion, Guards & Reviewers",
           "description": "Skenario promosi `student -> teacher_shadow` lintas SQL Server & MySQL serta proteksi akun Admin/Reviewer.",
           "item": [
             {
@@ -11609,7 +13121,7 @@
           ]
         },
         {
-          "name": "16.5 - Forum Moderation, Locking & Notification Blast",
+          "name": "19.5 - Forum Moderation, Locking & Notification Blast",
           "description": "Skenario penguncian topik, penutupan sesi, like balasan, dan broadcast notifikasi multi-role + popup.",
           "item": [
             {
@@ -11924,7 +13436,7 @@
           ]
         },
         {
-          "name": "16.6 - Background Jobs Matrix (AES-GCM) & Settings",
+          "name": "19.6 - Background Jobs Matrix (AES-GCM) & Settings",
           "description": "Payload multi-item untuk keempat aksi User Job (`upsert`, `email`, `deactivate`, `delete`), keempat tipe Record Delete Job (`grade`, `quiz`, `material_submission`, `published_material`), serta normalisasi URL settings.",
           "item": [
             {
@@ -12282,7 +13794,7 @@
           ]
         },
         {
-          "name": "16.7 - Pagination Middleware & Student PHP API Edge Cases",
+          "name": "19.7 - Pagination Middleware & Student PHP API Edge Cases",
           "description": "Validasi query pagination (`INVALID_PAGINATION`) serta pengujian method & paginasi pada `NATIVE-LMS-Student/api/index.php`.",
           "item": [
             {
@@ -12442,6 +13954,470 @@
                       "pm.test('Status 405 METHOD_NOT_ALLOWED', () => pm.response.to.have.status(405));",
                       "pm.expect(pm.response.headers.get('Allow')).to.eql('GET');",
                       "pm.expect(pm.response.json().error.code).to.eql('METHOD_NOT_ALLOWED');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "19.8 - Roles RBAC Matrix, Certificates, Support Chat & Backup Restore Scenarios",
+          "description": "12 skenario pengujian positif dan negatif untuk fitur-fitur terbaru: matriks izin RBAC (`/roles`), penerbitan sertifikat (`/certificates`), Live Support Chat (`/support-chat`), pengalihan tugas reviewer, antrean job massal baru, dan ekspor/pemulihan backup JSON.",
+          "item": [
+            {
+              "name": "[Positive] RBAC - Get Current User Effective Role Profile",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/roles/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "me"
+                  ]
+                },
+                "description": "Memastikan `/api/v1/roles/me` mengembalikan profil akses efektif beserta array `permissions`."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "pm.test('Has roleKey and permissions list', () => {",
+                      "  const r = pm.response.json().role;",
+                      "  pm.expect(r.roleKey).to.be.a('string');",
+                      "  pm.expect(r.permissions).to.be.an('array');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 403] RBAC - Update Role Without Trusted Origin Header",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/roles/teacher",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "teacher"
+                  ]
+                },
+                "description": "Menguji penolakan `403 UNTRUSTED_ORIGIN` ketika perubahan izin peran dilakukan tanpa header `Origin` portal staf.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"displayName\": \"Trainer\",\n  \"description\": \"Uji tanpa header Origin\",\n  \"canAccessStaffPortal\": true,\n  \"permissions\": [\n    \"dashboard.view\"\n  ]\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 403 Forbidden (UNTRUSTED_ORIGIN)', () => pm.expect([401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] RBAC - Apply Unknown Role Preset Key",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "{{frontend_origin}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/roles/teacher/preset",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "teacher",
+                    "preset"
+                  ]
+                },
+                "description": "Menguji validasi gagal ketika `presetKey` tidak terdaftar pada katalog preset peran.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"presetKey\": \"invalid_preset_xyz\"\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Positive] Certificates - List Filtered Certificates by Award Type",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/certificates?award_type=certificate",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "certificates"
+                  ],
+                  "query": [
+                    {
+                      "key": "award_type",
+                      "value": "certificate"
+                    }
+                  ]
+                },
+                "description": "Memastikan filter `award_type=certificate` mengembalikan daftar sertifikat yang valid."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "pm.test('Certificates list returned', () => pm.expect(pm.response.json().certificates).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Certificates - Issue Certificate Without File Upload",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "{{frontend_origin}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/certificates",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "certificates"
+                  ]
+                },
+                "description": "Menguji penolakan `400 FILE_REQUIRED` ketika penerbitan sertifikat tidak menyertakan berkas lampiran.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"student_id\": 1,\n  \"award_type\": \"certificate\",\n  \"title\": \"Sertifikat Tanpa Berkas\"\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 FILE_REQUIRED', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Positive] Support Chat - Check Admin Presence Status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/support-chat/presence",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "support-chat",
+                    "presence"
+                  ]
+                },
+                "description": "Memastikan endpoint kehadiran Live Support Chat mengembalikan atribut `online`."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "pm.test('Has online boolean', () => pm.expect(pm.response.json().online).to.be.a('boolean'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Support Chat - Admin Send Message Without student_id",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "{{frontend_origin}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/support-chat/messages",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "support-chat",
+                    "messages"
+                  ]
+                },
+                "description": "Menguji validasi `400 INVALID_STUDENT` ketika Admin mengirim pesan bantuan tanpa memilih `student_id` penerima.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message_text\": \"Pesan Admin tanpa target student_id\"\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Reviewers - Transfer Tasks to Same Source Reviewer NPK",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/reviewers/REV001/transfer-review-tasks",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviewers",
+                    "REV001",
+                    "transfer-review-tasks"
+                  ]
+                },
+                "description": "Menguji validasi gagal ketika reviewer asal dan reviewer tujuan memiliki NPK yang sama.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"targetReviewerNpk\": \"REV001\"\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 or 404/409', () => pm.expect([400, 404, 409]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Jobs - Enqueue Bulk Enrollment Job with Empty Items",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/jobs/enrollments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "jobs",
+                    "enrollments"
+                  ]
+                },
+                "description": "Menguji validasi skema Zod `INVALID_JOB` ketika array `items` pada `/api/v1/jobs/enrollments` kosong.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": []\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 INVALID_JOB', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Jobs - Enqueue Bulk Notification Job with Invalid Priority",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/jobs/notifications",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "jobs",
+                    "notifications"
+                  ]
+                },
+                "description": "Menguji penolakan `400 INVALID_JOB` ketika nilai `priority` berada di luar enum `urgent | important | normal`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"title\": \"Uji Prioritas\",\n      \"message\": \"Isi pesan\",\n      \"priority\": \"critical_invalid\"\n    }\n  ]\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 INVALID_JOB', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Settings Backup - Request Selected Scope Without Valid Dataset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/settings/backup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "settings",
+                    "backup"
+                  ]
+                },
+                "description": "Memastikan allowlist `BACKUP_DATASETS` menolak permintaan ekspor ketika nama dataset tidak dikenali (`400 BACKUP_DATASET_REQUIRED`).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"scope\": \"selected\",\n  \"datasets\": [\n    \"unknown_table_injection\"\n  ]\n}"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 BACKUP_DATASET_REQUIRED', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[Negative - 400] Settings Backup Restore - Missing Backup File",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/settings/backup/restore",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "settings",
+                    "backup",
+                    "restore"
+                  ]
+                },
+                "description": "Memastikan `/api/v1/settings/backup/restore` mengembalikan `400 BACKUP_FILE_REQUIRED` jika dipanggil tanpa berkas JSON."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 BACKUP_FILE_REQUIRED', () => pm.expect([400, 401, 403]).to.include(pm.response.code));"
                     ]
                   }
                 }

@@ -13,6 +13,13 @@ function addOwner(request, req) {
   if (req.user.role !== 'admin') request.input('owner', sql.VarChar(50), req.user.sub);
   return request;
 }
+function parseEventCursor(req, headerOnly = false) {
+  const raw = headerOnly ? req.get('Last-Event-ID') : (req.query.after ?? req.get('Last-Event-ID'));
+  if (raw === undefined || raw === null || raw === '') return 0;
+  if (Array.isArray(raw) || typeof raw !== 'string' || !/^\d{1,18}$/.test(raw)) return null;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) ? value : null;
+}
 
 router.get('/', requirePermission('activity.view'), async (req, res, next) => {
   try {
@@ -152,7 +159,8 @@ router.get('/:id/events', async (req, res, next) => {
     const job = await owner.query(`SELECT job_id,status,total_items,processed_items,success_count,failure_count,current_item,updated_at
       FROM dbo.lms_admin_jobs WHERE job_id=@id${accessClause(req)}`);
     if (!job.recordset.length) return res.status(404).json({ error: { code: 'JOB_NOT_FOUND', message: 'Job tidak ditemukan.' } });
-    const after = Math.max(0, Number(req.query.after || req.get('Last-Event-ID') || 0));
+    const after = parseEventCursor(req);
+    if (after === null) return res.status(400).json({ error: { code: 'INVALID_EVENT_CURSOR', message: 'Cursor event tidak valid.' } });
     const events = await pool.request().input('id', sql.BigInt, jobId.data).input('after', sql.BigInt, after)
       .query(`SELECT event_id,item_no,item_label,item_status,message,created_at FROM dbo.lms_admin_job_events
         WHERE job_id=@id AND event_id>@after ORDER BY event_id`);
@@ -170,7 +178,8 @@ router.get('/:id/stream', async (req, res, next) => {
     res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.flushHeaders?.();
     res.write('retry: 1500\n\n');
-    let after = Math.max(0, Number(req.get('Last-Event-ID') || 0));
+    let after = parseEventCursor(req, true);
+    if (after === null) return res.status(400).end();
     let polling = false;
     let closed = false;
     let timer;

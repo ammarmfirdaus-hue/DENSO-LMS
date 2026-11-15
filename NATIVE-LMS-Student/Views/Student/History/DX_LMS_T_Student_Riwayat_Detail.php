@@ -1,6 +1,7 @@
 <?php
 $tab = $tab ?? ($_GET['tab'] ?? 'materi');
 $courseId = $course['id'] ?? 'CRS001';
+$coursePublicId = $course['public_id'] ?? publicCourseId($courseId);
 $completionDate = formatDateID($course['completion_date'] ?? '2025-06-20');
 $nilaiFa = (int) ($course['quiz_score'] ?? 100);
 ?>
@@ -99,7 +100,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
         <div class="dls-course-tabs w-full bg-[#F5F5F5] rounded-full sticky top-[66px] z-30 p-[6px] mt-[18px]">
             <nav class="flex overflow-x-auto hide-scrollbar gap-[6px]">
                 <?php foreach (['materi' => 'Materi', 'quiz' => 'Quiz', 'forum' => 'Forum', 'riwayat' => 'Riwayat', 'capaian' => 'Capaian'] as $tabKey => $tabLabel): ?>
-                <a href="?route=/student/riwayat/detail&id=<?= e($courseId) ?>&tab=<?= e($tabKey) ?>" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === $tabKey
+                <a href="?route=/student/riwayat/detail&id=<?= e($coursePublicId) ?>&tab=<?= e($tabKey) ?>" class="dls-course-tab flex-1 py-[10px] px-[14px] text-center text-[14px] rounded-full whitespace-nowrap transition-all <?= $tab === $tabKey
                     ? 'is-active bg-[#DC2626] text-white font-semibold'
                     : 'text-[#525252] hover:text-[#171717]' ?>">
                     <span class="truncate"><?= e($tabLabel) ?></span>
@@ -245,7 +246,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                         if ($material['type'] === 'pdf') $icon = 'picture_as_pdf';
                         if ($material['type'] === 'image') $icon = 'image';
                         ?>
-                        <a href="?route=/student/learning&id=<?= e($courseId) ?>&session_id=<?= e($session['id']) ?>&material_index=<?= $mIndex ?>" class="fd-list-row group">
+                        <a href="?route=/student/learning&id=<?= e($coursePublicId) ?>&session_id=<?= rawurlencode(publicSessionId($session['id'])) ?>&material_index=<?= $mIndex ?>" class="fd-list-row group">
                             <div class="fd-list-thumb bg-[#DCFCE7] text-[#16A34A] shrink-0">
                                 <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;"><?= $icon ?></span>
                             </div>
@@ -279,7 +280,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
             <?php if (!empty($course['quiz'])): ?>
             <?php $quiz = $course['quiz']; ?>
             <div class="fd-list rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden w-full">
-                <a href="?route=/student/quiz&id=<?= e($courseId) ?>&type=quiz" class="fd-list-row w-full text-left group">
+                <a href="?route=/student/quiz&id=<?= e($coursePublicId) ?>&type=quiz" class="fd-list-row w-full text-left group">
                     <div class="fd-list-thumb bg-[#DCFCE7] text-[#16A34A]">
                         <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">quiz</span>
                     </div>
@@ -300,7 +301,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
             <?php if (!empty($course['final_assessment'])): ?>
             <?php $fa = $course['final_assessment']; $isPassed = ($fa['nilai'] ?? null) !== null && $fa['nilai'] >= 75; ?>
             <div class="fd-list rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden w-full <?= $isPassed ? 'opacity-90' : '' ?>">
-                <a href="<?= !$isPassed ? '?route=/student/quiz&id=' . e($courseId) . '&type=final_assessment' : 'javascript:void(0)' ?>" class="fd-list-row w-full text-left <?= $isPassed ? 'cursor-default' : '' ?>">
+                <a href="<?= !$isPassed ? '?route=/student/quiz&id=' . e($coursePublicId) . '&type=final_assessment' : 'javascript:void(0)' ?>" class="fd-list-row w-full text-left <?= $isPassed ? 'cursor-default' : '' ?>">
                     <div class="fd-list-thumb <?= $isPassed ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]' ?>">
                         <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' <?= $isPassed ? '1' : '0' ?>;">military_tech</span>
                     </div>
@@ -369,7 +370,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                     $forumData = $forumsMateri[$sessId] ?? ['threads' => []];
                     $threadCount = count($forumData['threads']);
                 ?>
-                <a href="?route=/student/forum/category&course_id=<?= urlencode($course['id']) ?>&category_type=materi&session_id=<?= urlencode($sessId) ?>&is_riwayat=true" class="fd-card fd-card-interactive block bg-white rounded-[12px] p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group">
+                <a href="?route=/student/forum/category&course_id=<?= urlencode($coursePublicId) ?>&category_type=materi&session_id=<?= urlencode(publicSessionId($sessId)) ?>&is_riwayat=true" class="fd-card fd-card-interactive block bg-white rounded-[12px] p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group">
                     <div class="flex items-start justify-between gap-[12px]">
                         <div class="min-w-0">
                             <h4 class="fd-h4 text-[#171717] mb-[4px] group-hover:text-[#DC2626] transition-colors flex items-center gap-[8px]">
@@ -392,7 +393,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                 $qThreads = $forumQuiz['threads'] ?? [];
                 $qThreadCount = count($qThreads);
                 ?>
-                <a href="?route=/student/forum/category&course_id=<?= urlencode($course['id']) ?>&category_type=quiz&is_riwayat=true" class="fd-card fd-card-interactive block bg-white rounded-[12px] p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group">
+                <a href="?route=/student/forum/category&course_id=<?= urlencode($coursePublicId) ?>&category_type=quiz&is_riwayat=true" class="fd-card fd-card-interactive block bg-white rounded-[12px] p-[18px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] group">
                     <div class="flex items-start justify-between gap-[12px]">
                         <div class="min-w-0">
                             <h4 class="fd-h4 text-[#171717] mb-[4px] group-hover:text-[#DC2626] transition-colors flex items-center gap-[8px]">
@@ -546,7 +547,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                                 <?php else: ?>
                                 <div class="flex flex-col gap-[8px]" id="rd-riwayat-quiz-list">
                                     <?php foreach ($assessments['quiz'] as $qIdx => $h): ?>
-                                    <a href="?route=/student/quiz&id=<?= urlencode($courseId) ?>&type=quiz&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $qIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $qIdx >= 5 ? 'style="display:none;"' : '' ?>>
+                                    <a href="?route=/student/quiz&id=<?= urlencode($coursePublicId) ?>&type=quiz&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $qIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $qIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
                                             <div class="w-8 h-8 bg-[#FEF2F2] text-[#DC2626] rounded-full flex items-center justify-center shrink-0">
                                                 <span class="material-symbols-outlined text-[16px]">quiz</span>
@@ -589,7 +590,7 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                                     $isPassed = $val >= 75;
                                     $_sc2 = $val >= 75 ? 'text-[#16A34A]' : ($val >= 50 ? 'text-[#D97706]' : 'text-[#EF4444]');
                                     ?>
-                                    <a href="?route=/student/quiz&id=<?= urlencode($courseId) ?>&type=final_assessment&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $fIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $fIdx >= 5 ? 'style="display:none;"' : '' ?>>
+                                    <a href="?route=/student/quiz&id=<?= urlencode($coursePublicId) ?>&type=final_assessment&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $fIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $fIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
                                             <div class="w-8 h-8 <?= $isPassed ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#EF4444]' ?> rounded-full flex items-center justify-center shrink-0">
                                                 <span class="material-symbols-outlined text-[16px]"><?= $isPassed ? 'check_circle' : 'cancel' ?></span>

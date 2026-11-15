@@ -5,6 +5,10 @@ const { sql, pool } = require('../config/database');
 const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { reviewerSchema, reviewerUpdateSchema } = require('../services/reviewer-rules');
+const { sendReviewInvitation } = require('../services/review-mail');
+const { transferReviewerTasks } = require('../services/review-transfer');
+const env = require('../config/env');
+const crypto = require('crypto');
 
 const router = express.Router();
 router.use(authenticate);
@@ -113,9 +117,29 @@ router.put('/:npk', requirePermission('reviewers.manage'), async (req, res, next
     return res.status(400).json({ error: { code: 'INVALID_INPUT', message } });
   }
 
-  const { fullname, email, department, position, phoneNumber, status, password } = parsed.data;
+  const { fullname, email, department, position, phoneNumber, status, password, targetReviewerNpk } = parsed.data;
 
   try {
+    if (status === 'inactive') {
+      const pending = await pool.request().input('npk', sql.VarChar(50), npk.data)
+        .query(`SELECT TOP 1 1 AS exists_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
+      if (pending.recordset.length) {
+        if (!targetReviewerNpk) {
+          return res.status(409).json({
+            error: {
+              code: 'REVIEWER_HAS_PENDING_WORK',
+              message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.'
+            }
+          });
+        }
+        await transferReviewerTasks({
+          sourceNpk: npk.data,
+          targetReviewerNpk,
+          pool
+        });
+      }
+    }
+
     let passwordHash = null;
     if (password && password.trim().length >= 12) {
       passwordHash = await bcrypt.hash(password.trim(), 12);
@@ -169,23 +193,79 @@ router.put('/:npk', requirePermission('reviewers.manage'), async (req, res, next
   }
 });
 
+/**
+ * POST /api/v1/reviewers/:npk/transfer-review-tasks
+ * Memindahkan seluruh antrean review aktif ke reviewer aktif lain. Tautan lama
+ * dicabut agar reviewer asal tidak dapat lagi membuka portal review.
+ */
+router.post('/:npk/transfer-review-tasks', requirePermission('reviewers.manage'), async (req, res, next) => {
+  const sourceNpk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
+  const body = z.object({ targetReviewerNpk: z.string().trim().min(1).max(50) }).safeParse(req.body);
+  if (!sourceNpk.success || !body.success) {
+    return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih reviewer tujuan yang valid.' } });
+  }
+
+  try {
+    const result = await transferReviewerTasks({
+      sourceNpk: sourceNpk.data,
+      targetReviewerNpk: body.data.targetReviewerNpk,
+      pool
+    });
+    res.json(result);
+  } catch (error) {
+    if (error.code && error.status) {
+      return res.status(error.status).json({ error: { code: error.code, message: error.message } });
+    }
+    next(error);
+  }
+});
+
 // Keep the reviewer record for review history; removing access is implemented as deactivation.
 router.delete('/:npk', requirePermission('reviewers.manage'), async (req, res, next) => {
   const npk = z.string().trim().min(1).max(50).safeParse(req.params.npk);
   if (!npk.success) return res.status(400).json({ error: { code: 'INVALID_NPK', message: 'NPK tidak valid.' } });
+  const targetReviewerNpk = (req.body?.targetReviewerNpk || req.query?.targetReviewerNpk || '').toString().trim();
+
   try {
+    const pending = await pool.request().input('npk', sql.VarChar(50), npk.data)
+      .query(`SELECT TOP 1 1 AS exists_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
+
+    if (pending.recordset.length) {
+      if (!targetReviewerNpk) {
+        return res.status(409).json({
+          error: {
+            code: 'REVIEWER_HAS_PENDING_WORK',
+            message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.'
+          }
+        });
+      }
+      await transferReviewerTasks({
+        sourceNpk: npk.data,
+        targetReviewerNpk,
+        pool
+      });
+    }
+
     const result = await pool.request().input('npk', sql.VarChar(50), npk.data)
       .query(`UPDATE dbo.employee_accounts SET status='inactive',updated_at=SYSUTCDATETIME()
-        OUTPUT INSERTED.employee_npk WHERE employee_npk=@npk AND role='reviewer'
-          AND NOT EXISTS (SELECT 1 FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review');`);
+        OUTPUT INSERTED.employee_npk WHERE employee_npk=@npk AND role='reviewer'`);
+
     if (!result.recordset.length) {
-      const pending = await pool.request().input('npk', sql.VarChar(50), npk.data)
-        .query(`SELECT TOP 1 1 AS exists_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
-      if (pending.recordset.length) return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.' } });
       return res.status(404).json({ error: { code: 'REVIEWER_NOT_FOUND', message: 'Akun reviewer tidak ditemukan.' } });
     }
-    res.json({ deleted: true, deactivated: true, message: 'Akun reviewer dinonaktifkan; riwayat review tetap tersimpan.' });
-  } catch (error) { next(error); }
+
+    res.json({
+      deleted: true,
+      deactivated: true,
+      transferred: Boolean(targetReviewerNpk),
+      message: 'Akun reviewer dinonaktifkan; riwayat review tetap tersimpan.'
+    });
+  } catch (error) {
+    if (error.code && error.status) {
+      return res.status(error.status).json({ error: { code: error.code, message: error.message } });
+    }
+    next(error);
+  }
 });
 
 module.exports = router;

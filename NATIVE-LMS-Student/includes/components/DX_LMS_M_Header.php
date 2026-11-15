@@ -47,7 +47,9 @@ $current_header_date = "{$hari_list_hdr[(int)date('w')]}, " . date('j') . " {$bu
         <?php if (!$show_back): ?>
         <a class="dls-mobile-brand" href="?route=/student" aria-label="DENSO Learning — Beranda">
             <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo.png', ENT_QUOTES, 'UTF-8') ?>"
-                 alt="DENSO" width="28" height="28">
+                 alt="DENSO" width="28" height="28" class="dark:hidden">
+            <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo-dark.png', ENT_QUOTES, 'UTF-8') ?>"
+                 alt="DENSO" width="28" height="28" class="hidden dark:block">
             <span>DENSO Learning</span>
         </a>
         <?php endif; ?>

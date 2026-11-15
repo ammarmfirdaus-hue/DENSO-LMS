@@ -242,18 +242,79 @@ $base_path = '';
                 }
             });
 
-            <?php if (isset($_GET['error']) || isset($_GET['logged_out'])): ?>
+            <?php
+            $authModalPayload = null;
+            if (isset($_GET['logged_out'])) {
+                $authModalPayload = [
+                    'type' => 'success',
+                    'title' => 'Anda Berhasil Logout',
+                    'text' => 'Sesi pembelajaran Anda telah diakhiri dengan aman. Silakan masuk kembali kapan saja.',
+                    'confirmText' => 'Oke, Mengerti',
+                    'footer' => 'Terima kasih telah belajar di DENSO Learning Portal'
+                ];
+            } elseif (isset($_GET['error'])) {
+                $errCode = (string) ($_GET['error'] ?? '');
+                $errorMap = [
+                    '1' => [
+                        'type' => 'error',
+                        'title' => 'NPK atau Kata Sandi Salah',
+                        'text' => 'Kombinasi NPK/email dan kata sandi tidak cocok. Periksa kembali penulisan huruf besar/kecil Anda.',
+                        'confirmText' => 'Coba Lagi',
+                        'footer' => 'Pastikan Caps Lock tidak aktif sebelum mengetik kata sandi'
+                    ],
+                    'invalid' => [
+                        'type' => 'warning',
+                        'title' => 'Data Login Belum Lengkap',
+                        'text' => 'Harap isi kolom NPK/email dan kata sandi dengan format yang benar.',
+                        'confirmText' => 'Perbaiki Input'
+                    ],
+                    'rate' => [
+                        'type' => 'warning',
+                        'title' => 'Terlalu Banyak Percobaan Masuk',
+                        'text' => 'Demi keamanan akun, akses login dibatasi sementara selama 15 menit setelah beberapa kali percobaan gagal.',
+                        'confirmText' => 'Saya Mengerti',
+                        'footer' => 'Silakan tunggu 15 menit atau hubungi Admin LMS'
+                    ],
+                    'sso' => [
+                        'type' => 'error',
+                        'title' => 'Layanan Autentikasi Sibuk',
+                        'text' => 'Layanan masuk tunggal (SSO) sedang tidak dapat dihubungi. Mohon coba beberapa saat lagi.',
+                        'confirmText' => 'Tutup'
+                    ],
+                    'timeout' => [
+                        'type' => 'info',
+                        'title' => 'Sesi Berakhir Otomatis',
+                        'text' => 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan masuk kembali untuk melanjutkan belajar.',
+                        'confirmText' => 'Masuk Kembali'
+                    ],
+                    'unauthorized' => [
+                        'type' => 'info',
+                        'title' => 'Perlu Masuk Terlebih Dahulu',
+                        'text' => 'Silakan masuk menggunakan akun siswa Anda untuk mengakses halaman tersebut.',
+                        'confirmText' => 'Baik'
+                    ]
+                ];
+                $authModalPayload = $errorMap[$errCode] ?? [
+                    'type' => 'error',
+                    'title' => 'Gagal Masuk ke Portal',
+                    'text' => 'Terjadi kendala saat memproses permintaan login Anda. Silakan coba kembali.',
+                    'confirmText' => 'Mengerti'
+                ];
+            }
+            if ($authModalPayload !== null):
+            ?>
             (function showAuthModal() {
+                var payload = <?= json_encode($authModalPayload, JSON_UNESCAPED_UNICODE) ?>;
                 var run = function(DLS) {
                     if (!DLS) return;
-                    <?php if (isset($_GET['error'])): ?>
-                    DLS.error(
-                        'Login Gagal',
-                        <?= json_encode(($_GET['error'] ?? '') === 'sso' ? 'Layanan masuk tunggal tidak tersedia. Coba lagi beberapa saat.' : 'NPK/email atau password salah.', JSON_UNESCAPED_UNICODE) ?>
-                    );
-                    <?php elseif (isset($_GET['logged_out'])): ?>
-                    DLS.success('Berhasil Keluar', 'Sesi pembelajaran Anda telah diakhiri.');
-                    <?php endif; ?>
+                    var fn = DLS[payload.type] || DLS.info;
+                    fn(payload.title, payload.text, {
+                        confirmText: payload.confirmText,
+                        footer: payload.footer
+                    });
+                    if (window.history && window.history.replaceState) {
+                        window.history.replaceState(null, '', '/?route=/login');
+                    }
                 };
                 if (window.DLS) run(window.DLS);
                 else window.addEventListener('DLSReady', function() { run(window.DLS); }, { once: true });

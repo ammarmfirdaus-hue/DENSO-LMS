@@ -498,6 +498,7 @@ export default function MaterialsPage() {
           value={summary.waitingAdmin}
           icon={<Clock className="size-5" />}
           tone="warning"
+          to="/materials?status=pending_admin#materials-submissions"
           loading={loading}
         />
         <StatCard
@@ -505,6 +506,7 @@ export default function MaterialsPage() {
           value={summary.waitingReview}
           icon={<Eye className="size-5" />}
           tone="info"
+          to="/materials?status=pending_review#materials-submissions"
           loading={loading}
         />
         <StatCard
@@ -512,6 +514,7 @@ export default function MaterialsPage() {
           value={summary.rejected}
           icon={<RotateCcw className="size-5" />}
           tone="primary"
+          to="/materials?status=rejected#materials-submissions"
           loading={loading}
         />
         <StatCard
@@ -519,6 +522,7 @@ export default function MaterialsPage() {
           value={summary.readyToPublish}
           icon={<UploadCloud className="size-5" />}
           tone="secondary"
+          to="/materials?status=approved#materials-submissions"
           loading={loading}
         />
         <StatCard
@@ -526,6 +530,7 @@ export default function MaterialsPage() {
           value={summary.totalFinal}
           icon={<CheckCircle2 className="size-5" />}
           tone="tertiary"
+          to="/materials?view=published#published-materials-section"
           loading={loading}
         />
       </section>

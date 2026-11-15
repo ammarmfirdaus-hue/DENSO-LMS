@@ -19,12 +19,13 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
     {
         startAppSession();
 
-        $id = $_GET['id'] ?? '';
-        $sessionId = $_GET['session_id'] ?? '';
+        $publicCourseId = $_GET['id'] ?? '';
+        $id = resolveCourseId($publicCourseId);
+        $rawSessionId = $_GET['session_id'] ?? '';
+        $sessionId = resolveSessionId($rawSessionId) ?? '';
         $type = $_GET['type'] ?? 'quiz'; /** Jenis evaluasi: evaluasi awal, evaluasi akhir, kuis, dan penilaian akhir. */
         $attemptRaw = $_GET['attempt'] ?? null;
-        if (!is_string($id) || strlen($id) > 80 || !is_string($sessionId) || strlen($sessionId) > 80
-            || !is_string($type) || !in_array($type, ['quiz', 'final_assessment'], true)) {
+        if (!is_string($id) || $id === '' || !is_string($type) || !in_array($type, ['quiz', 'final_assessment'], true)) {
             header('Location: ?route=/student/courses');
             exit();
         }
@@ -36,6 +37,12 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
             header('Location: ?route=/student/courses');
             exit();
         }
+        $course['public_id'] = publicCourseId((string) $course['id']);
+
+        if (empty($course['has_access'])) {
+            header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['public_id']), true, 303);
+            exit();
+        }
 
         $quizData = null;
         $session = null;
@@ -43,6 +50,7 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
         $quizError = '';
         $submittedAnswers = is_array($_POST['answers'] ?? null) ? $_POST['answers'] : [];
         $realQuiz = null;
+        $quizSession = null;
 
         if ($type === 'quiz') {
             $quizData = $course['quiz'];
@@ -57,11 +65,17 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
                         http_response_code(403);
                         exit('Permintaan tidak valid. Muat ulang halaman lalu coba kembali.');
                     }
+                    $quizToken = is_string($_POST['_quiz_session'] ?? null) ? $_POST['_quiz_session'] : '';
+                    apiValidateStudentQuizTimer($quizToken, (int) ($_SESSION['student_id'] ?? 0));
                     apiSubmitStudentCourseQuiz($id, (int) ($_SESSION['student_id'] ?? 0), $submittedAnswers);
-                    header('Location: ?route=/student/quiz&id=' . rawurlencode($id) . '&type=quiz&submitted=1', true, 303);
+                    apiFinishStudentQuizSession($quizToken, (int) ($_SESSION['student_id'] ?? 0));
+                    header('Location: ?route=/student/quiz&id=' . rawurlencode((string) $course['public_id']) . '&type=quiz&submitted=1', true, 303);
                     exit();
                 }
                 $realQuiz = apiStudentCourseQuizDetails($id, (int) ($_SESSION['student_id'] ?? 0));
+                if (!empty($realQuiz['has_quiz']) && ($realQuiz['status'] ?? '') === 'belum_dimulai' && empty($realQuiz['attempt'])) {
+                    $quizSession = apiStartStudentCourseQuiz($id, (int) ($_SESSION['student_id'] ?? 0));
+                }
             } catch (PDOException $error) {
                 error_log('Student quiz database error: ' . $error->getMessage());
                 $quizError = 'Quiz belum dapat dimuat atau disimpan. Coba lagi sebentar.';
@@ -172,6 +186,7 @@ class DX_LMS_T_Student_Quiz extends DX_LMS_M_Controller
             'realQuiz' => $realQuiz,
             'quizError' => $quizError,
             'submittedAnswers' => $submittedAnswers,
+            'quizSession' => $quizSession,
         ];
 
         $this->view('DX_LMS_T_Student_Quiz', $data);

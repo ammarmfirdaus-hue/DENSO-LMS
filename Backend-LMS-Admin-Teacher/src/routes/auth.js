@@ -131,7 +131,7 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
-router.put('/profile', authenticate, allowRoles('admin', 'teacher'), async (req, res, next) => {
+router.put('/profile', authenticate, allowRoles('admin', 'teacher', 'reviewer'), async (req, res, next) => {
   const bcrypt = require('bcryptjs');
   const { pool, sql } = require('../config/database');
   const profileSchema = z.object({

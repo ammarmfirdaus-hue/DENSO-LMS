@@ -4,6 +4,7 @@ const { authenticate, requirePermission } = require('../middleware/auth');
 const { paginateCollection } = require('../middleware/pagination');
 const { getActivityFeed } = require('../services/activity-feed');
 const { getDashboardAnalytics } = require('../services/dashboard-analytics');
+const { encodePublicId } = require('../services/public-route-id');
 
 const router = express.Router();
 router.use(authenticate);
@@ -45,7 +46,10 @@ router.get('/courses', requirePermission('courses.view'), async (_req, res, next
       WHERE (@isAdmin=1 OR c.created_by=@npk OR c.assigned_trainer_npk=@npk)
       GROUP BY c.course_id, c.course_code, c.title, c.description, c.category, c.thumbnail_path, c.assigned_trainer_npk,trainer.fullname,c.status,c.updated_at
       ORDER BY c.updated_at DESC`);
-    const page = paginateCollection(_req, result.recordset);
+    const page = paginateCollection(_req, result.recordset.map(course => ({
+      ...course,
+      public_id: encodePublicId('course', course.course_id)
+    })));
     res.json({ courses: page.data, ...(page.pagination ? { pagination: page.pagination } : {}) });
   } catch (error) { next(error); }
 });

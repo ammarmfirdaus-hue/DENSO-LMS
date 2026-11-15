@@ -3,6 +3,10 @@ const { sql, pool } = require('../config/database');
 const { createStudentAccount, updateStudentAccount, getStudentAccountState, deactivateStudentAccount, deleteStudentAccount } = require('./student-auth');
 const { sendAccountCredentials } = require('./account-mail');
 
+function getTransferReviewerTasks() {
+  return require('./review-transfer').transferReviewerTasks;
+}
+
 async function deactivateEmployeeWithHistory(npk) {
   const tx = new sql.Transaction(pool);
   await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
@@ -74,6 +78,18 @@ function registerUserJobHandler(register) {
           const admins = await new sql.Request(tx).query(`SELECT COUNT(*) AS total FROM dbo.employee_accounts WITH (UPDLOCK,HOLDLOCK) WHERE role='admin' AND status='active'`);
           if (admins.recordset[0].total <= 1) { await tx.rollback(); throw new Error('Admin aktif terakhir tidak dapat dinonaktifkan.'); }
         }
+        if (target.recordset[0].role === 'reviewer') {
+          const pending = await new sql.Request(tx).input('npk', sql.VarChar(50), npk)
+            .query(`SELECT TOP 1 1 AS has_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
+          if (pending.recordset.length) {
+            if (!item.targetReviewerNpk) {
+              await tx.rollback();
+              throw new Error('Reviewer memiliki materi yang masih menunggu review. Alihkan tugasnya terlebih dahulu.');
+            }
+            const transferReviewerTasks = getTransferReviewerTasks();
+            await transferReviewerTasks({ sourceNpk: npk, targetReviewerNpk: item.targetReviewerNpk, tx });
+          }
+        }
         await new sql.Request(tx).input('npk', sql.VarChar(50), npk)
           .query(`UPDATE dbo.employee_accounts SET status='inactive',updated_at=SYSUTCDATETIME() WHERE employee_npk=@npk`);
         await tx.commit();
@@ -106,7 +122,14 @@ function registerUserJobHandler(register) {
         if (role === 'reviewer') {
           const pending = await new sql.Request(tx).input('npk', sql.VarChar(50), npk)
             .query(`SELECT TOP 1 1 AS has_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
-          if (pending.recordset.length) { await tx.rollback(); throw new Error('Reviewer memiliki materi yang masih menunggu review. Selesaikan atau alihkan tugasnya terlebih dahulu.'); }
+          if (pending.recordset.length) {
+            if (!item.targetReviewerNpk) {
+              await tx.rollback();
+              throw new Error('Reviewer memiliki materi yang masih menunggu review. Selesaikan atau alihkan tugasnya terlebih dahulu.');
+            }
+            const transferReviewerTasks = getTransferReviewerTasks();
+            await transferReviewerTasks({ sourceNpk: npk, targetReviewerNpk: item.targetReviewerNpk, tx });
+          }
         }
         await new sql.Request(tx).input('npk', sql.VarChar(50), npk)
           .query(`DELETE FROM dbo.employee_accounts WHERE employee_npk=@npk`);

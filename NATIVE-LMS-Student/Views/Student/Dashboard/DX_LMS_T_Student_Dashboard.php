@@ -9,6 +9,10 @@
 /** Menyiapkan status dan nilai awal variabel sistem yang dibutuhkan. */
 $userName = $userName ?? ($_SESSION['student_name'] ?? ($_SESSION['user']['name'] ?? 'Siswa DENSO'));
 $userRole = 'Peserta DENSO';
+$courses = array_map(static function (array $course): array {
+    $course['public_id'] = publicCourseId((string) ($course['id'] ?? ''));
+    return $course;
+}, $courses ?? []);
 
 /** Hak akses atau peranan bawaan yang berlaku untuk antarmuka terkait. */
 ?>
@@ -40,7 +44,7 @@ $userRole = 'Peserta DENSO';
     ?>
 
     <!-- Main Content Canvas -->
-    <main class="dls-main flex-1 overflow-y-auto space-y-[24px] pt-[72px] px-[18px] pb-[96px]" data-student-dashboard>
+    <main class="dls-main flex-1 overflow-y-auto space-y-[22px] pt-[72px] px-[18px] pb-[96px]" data-student-dashboard>
         <p data-api-status hidden role="status" class="rounded-[12px] bg-[#FEE2E2] p-[12px] text-[14px] font-medium text-[#EF4444]"></p>
         <?php
         $quickResumeCourse = null;
@@ -53,191 +57,140 @@ $userRole = 'Peserta DENSO';
         if ($quickResumeCourse === null && !empty($courses)) {
             $quickResumeCourse = $courses[0];
         }
+        $quickResumeCoursePublicId = $quickResumeCourse ? publicCourseId((string) ($quickResumeCourse['id'] ?? '')) : '';
+
+        $topbar_title = 'Halo, ' . trim((string) explode(' ', trim((string) $userName))[0]) . ' 👋';
+        $topbar_subtitle = 'Mari pelajari hal baru hari ini!';
+        $topbar_search_id = 'dashboardCourseSearch';
+        $topbar_search_placeholder = 'Cari course yang sedang dipelajari...';
+        include APP_ROOT . '/includes/components/DX_LMS_M_Workspace_Topbar.php';
         ?>
-        <!-- FoodDash Hero Banner (Single Clean Banner, Poppins h1) -->
-        <section class="dls-welcome-hero fd-card-elevated rounded-[12px] bg-white p-[18px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:p-[24px] min-w-0">
-            <div class="flex flex-col gap-[18px] sm:flex-row sm:items-center sm:justify-between">
-                <div class="min-w-0 flex-1 space-y-[6px]">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#F5F5F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#525252]">RUANG BELAJAR KARYAWAN</span>
-                    <h1 class="fd-h1 text-[26px] font-bold leading-[32px] text-[#171717] sm:text-[28px] sm:leading-[34px]">Selamat <span id="dynamic-greeting">...</span>, <?= e($userName) ?></h1>
-                    <p class="fd-body text-[#525252]"><?= e($userRole) ?> · Akses materi, course, dan progres belajar Anda dengan cepat.</p>
-                </div>
-                <?php if ($quickResumeCourse): ?>
-                <div class="shrink-0">
-                    <a href="?route=/student/course/detail&amp;id=<?= urlencode((string) $quickResumeCourse['id']) ?>" class="fd-btn fd-btn-primary fd-btn-md rounded-full w-full sm:w-auto">
-                        <span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span>
-                        <span><?= ($quickResumeCourse['status'] ?? '') === 'sedang_dipelajari' ? 'Lanjutkan Belajar' : 'Mulai Belajar' ?></span>
-                    </a>
-                </div>
-                <?php endif; ?>
-            </div>
+
+        <!-- Mobile Greeting Banner (Compact, only shown below lg) -->
+        <section class="lms-card p-4 lg:hidden">
+            <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#DC2626]">RUANG BELAJAR KARYAWAN</p>
+            <h1 class="mt-1 text-[20px] font-bold text-[#181824] dark:text-white">Selamat <span id="dynamic-greeting">belajar</span>, <?= e($userName) ?></h1>
+            <p class="mt-0.5 text-[12.5px] text-[#64748B]">Akses materi, course, dan progres belajar Anda.</p>
+            <label class="relative mt-3 block">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#64748B]">search</span>
+                <input id="dashboardCourseSearchMobile" type="search" oninput="var d=document.getElementById('dashboardCourseSearch');if(d){d.value=this.value;d.dispatchEvent(new Event('input'));}" class="h-10 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] pl-10 pr-4 text-[13px]" placeholder="Cari course..." aria-label="Cari course di dashboard">
+            </label>
         </section>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
+                const el = document.getElementById('dynamic-greeting');
+                if (!el) return;
                 const hour = new Date().getHours();
                 let greeting = 'malam';
-                if (hour >= 4 && hour < 11) {
-                    greeting = 'pagi';
-                } else if (hour >= 11 && hour < 15) {
-                    greeting = 'siang';
-                } else if (hour >= 15 && hour < 18) {
-                    greeting = 'sore';
-                }
-                document.getElementById('dynamic-greeting').textContent = greeting;
+                if (hour >= 4 && hour < 11) greeting = 'pagi';
+                else if (hour >= 11 && hour < 15) greeting = 'siang';
+                else if (hour >= 15 && hour < 18) greeting = 'sore';
+                el.textContent = greeting;
             });
         </script>
 
-        <!-- Summary Cards (FoodDash 6px Grid, Borderless White Cards) -->
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-[12px] sm:gap-[18px]">
-            <div class="dls-stat-card dls-stat-card-featured fd-card col-span-2 bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-center gap-[12px]">
-                <div class="w-12 h-12 bg-[#FEF2F2] rounded-[12px] flex shrink-0 items-center justify-center text-[#DC2626]">
-                    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">play_lesson</span>
-                </div>
-                <div class="min-w-0">
-                    <p class="text-[12px] font-medium leading-[18px] text-[#525252] truncate">Sedang Dipelajari</p>
-                    <p data-api-active-courses class="fd-h2 text-[20px] font-semibold leading-[26px] text-[#171717] truncate"><?= e(
-                        (string) $stats['active_count'],
-                    ) ?> Course Aktif</p>
-                </div>
-            </div>
-            <div class="dls-stat-card fd-card bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center gap-[6px]">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
-                    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">verified</span>
-                </span>
+        <!-- Course Saya Section (Reference Image 3-Card Row + Underline Tabs) -->
+        <section class="space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <p data-api-completed-courses class="fd-h2 text-[22px] font-semibold text-[#171717]"><?= e(
-                        (string) $stats['completed_count'],
-                    ) ?></p>
-                    <p class="text-[12px] font-medium text-[#525252]">Course Selesai</p>
-                </div>
-            </div>
-            <div class="dls-stat-card fd-card bg-white p-[18px] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex flex-col justify-center items-center text-center gap-[6px]">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
-                    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">analytics</span>
-                </span>
-                <div>
-                    <p class="fd-h2 text-[22px] font-semibold text-[#171717]"><?= e(
-                        (string) $stats['avg_score'],
-                    ) ?>%</p>
-                    <p class="text-[12px] font-medium text-[#525252]">Skor Rata-rata</p>
-                </div>
-            </div>
-        </section>
-        <!-- Lanjutkan Belajar Section -->
-        <section class="space-y-[12px]">
-            <div class="flex justify-between items-center gap-[12px]">
-                <h2 class="fd-h2 text-[#171717]">Lanjutkan Belajar</h2>
-                <a class="fd-btn fd-btn-ghost fd-btn-sm rounded-full text-[13px] font-semibold text-[#525252] hover:text-[#171717]" href="?route=/student/courses">Lihat Semua <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></a>
-            </div>
-            <label class="relative block"><span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#737373]" style="font-size:20px;">search</span><input id="dashboardCourseSearch" type="search" class="fd-input fd-search-input w-full rounded-full pl-11 pr-4" placeholder="Cari course yang sedang dipelajari..." aria-label="Cari course di dashboard"></label>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px] pt-[6px]" id="course-results" data-api-course-list>
-                <?php foreach ($courses as $c): ?>
-                <div class="course-card fd-card flex flex-col h-full bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden" data-filters="<?= htmlspecialchars(
-                    json_encode($c['filters'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
-                ) ?>">
-                    <div class="course-card-cover aspect-video bg-[#171717] relative overflow-hidden rounded-t-[12px]">
-                        <?php if (!empty($c['thumbnail'])): ?>
-                        <img alt="<?= e($c['title']) ?>" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="<?= e(
-    $c['thumbnail'],
-) ?>">
-                        <?php endif; ?>
-                        <?php
-                        $icon = $c['thumbnail_icon'] ?? 'school';
-                        $showFallback = empty($c['thumbnail']) ? 'flex' : 'none';
-                        ?>
-                        <div class="fd-cover-fallback<?= !empty($c['thumbnail']) ? ' hidden' : '' ?>" style="display:<?= $showFallback ?>">
-                            <span class="fd-cover-icon-badge">
-                                <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;"><?= e(
-                                    $icon,
-                                ) ?></span>
-                            </span>
-                        </div>
-                        <?php if ($c['status'] !== 'selesai'): ?>
-                        <div class="fd-chip fd-chip-promo absolute top-[12px] left-[12px] text-[11px]">Wajib</div>
-                        <?php endif; ?>
-                        <?php if ($c['status'] === 'selesai'): ?>
-                        <div class="fd-chip fd-chip-success absolute top-[12px] right-[12px] shadow-sm">
-                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>Selesai
-                        </div>
-                        <?php endif; ?>
-                        <div class="fd-chip absolute bottom-[12px] right-[12px] bg-white/95 text-[#171717] shadow-sm">
-                            <span class="material-symbols-outlined text-[#EA580C]" style="font-size:15px;">menu_book</span>
-                            <span class="font-medium"><?= e((string) $c['modules_count']) ?> Modul</span>
-                        </div>
-                    </div>
-                    <div class="p-[18px] space-y-[12px] flex flex-col flex-1">
-                        <div>
-                            <h3 class="fd-h3 text-[#171717] leading-[24px] course-title line-clamp-2" title="<?= e(
-                                $c['title'],
-                            ) ?>" style="min-height: 3rem;"><?= e($c['title']) ?></h3>
-                        </div>
-                        <p class="fd-body text-[#525252] line-clamp-2"><?= e(
-                            $c['description'],
-                        ) ?></p>
-
-                        <div class="flex gap-[6px] flex-wrap pt-[6px] mt-auto h-[40px] overflow-hidden items-start">
-                            <?php foreach ($c['filters'] ?? [] as $f): ?>
-                            <span class="bg-[#F5F5F5] text-[#525252] text-[11px] px-2.5 py-0.5 rounded-[6px] font-medium whitespace-nowrap"><?= e(
-                                $f,
-                            ) ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                        <div class="pt-[6px] space-y-[6px]">
-                            <div class="flex justify-between items-center text-[13px]">
-                                <?php if ($c['status'] === 'sedang_dipelajari'): ?>
-                                <span class="fd-chip fd-chip-info">Sedang Dipelajari</span>
-                                <span class="fd-mono font-semibold text-[#171717]"><?= e((string) $c['progress']) ?>%</span>
-                                <?php elseif ($c['status'] === 'selesai'): ?>
-                                <span class="fd-chip fd-chip-success">Tuntas</span>
-                                <span class="fd-mono font-semibold text-[#16A34A]">100%</span>
-                                <?php else: ?>
-                                <span class="fd-chip fd-chip-neutral">Belum dimulai</span>
-                                <span class="fd-mono font-semibold text-[#737373]">0%</span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="w-full bg-[#F5F5F5] rounded-full h-[6px] overflow-hidden">
-                                <div class="<?= $c['status'] === 'selesai' ? 'bg-[#16A34A]' : 'bg-[#DC2626]' ?> h-[6px] rounded-full" style="width: <?= (int) $c[
-                                    'progress'
-                                ] ?>%"></div>
-                            </div>
-                        </div>
-                        <?php if ($c['status'] === 'sedang_dipelajari'): ?>
-                        <button onclick="window.location.href='?route=/student/course/detail&id=<?= e(
-                            $c['id'],
-                        ) ?>'" class="fd-btn fd-btn-primary fd-btn-md w-full mt-[6px] rounded-full">
-                            Lanjutkan Belajar
-                        </button>
-                        <?php elseif ($c['status'] === 'belum_dimulai'): ?>
-                        <button onclick="window.location.href='?route=/student/course/detail&id=<?= e(
-                            $c['id'],
-                        ) ?>'" class="fd-btn fd-btn-secondary fd-btn-md w-full mt-[6px] rounded-full">
-                            Mulai Course
-                        </button>
-                        <?php else: ?>
-                        <button onclick="window.location.href='?route=/student/riwayat/detail&id=<?= e(
-                            $c['id'],
-                        ) ?>'" class="fd-btn fd-btn-ghost fd-btn-md w-full mt-[6px] rounded-full bg-[#F5F5F5]">
-                            Lihat Detail
-                        </button>
-                        <?php endif; ?>
+                    <h2 class="text-[19px] font-bold text-[#181824] dark:text-white">Course Saya</h2>
+                    <div class="lms-tab-bar mt-1.5" role="tablist" aria-label="Filter status course">
+                        <button type="button" class="lms-tab-btn is-active" data-dash-tab="all" role="tab" aria-selected="true">Semua</button>
+                        <button type="button" class="lms-tab-btn" data-dash-tab="active" role="tab" aria-selected="false">Aktif</button>
+                        <button type="button" class="lms-tab-btn" data-dash-tab="completed" role="tab" aria-selected="false">Selesai</button>
                     </div>
                 </div>
-                <?php endforeach; ?>
+                <a class="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#64748B] hover:text-[#DC2626] transition" href="?route=/student/courses">
+                    <span>Lihat Semua</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
             </div>
-            <p data-dashboard-course-empty class="hidden rounded-[12px] bg-[#FAFAFA] p-[24px] text-center text-[14px] text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Tidak ada course yang cocok dengan pencarian.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[18px] pt-1" id="course-results" data-api-course-list>
+                <?php
+                $card_context = 'dashboard';
+                foreach ($courses as $c):
+                    include APP_ROOT . '/includes/components/DX_LMS_M_Course_Card.php';
+                endforeach;
+                ?>
+            </div>
+            <p data-dashboard-course-empty class="hidden rounded-2xl bg-white p-6 text-center text-[13.5px] text-[#64748B]">Tidak ada course yang cocok dengan filter atau pencarian.</p>
         </section>
 
         <!-- Pagination Controls -->
         <?php include APP_ROOT . '/includes/components/DX_LMS_M_Pagination.php'; ?>
+
+        <!-- Aktivitas Belajar Horizontal Row (Matching "Assignments" Row in Reference) -->
+        <?php if ($quickResumeCourse): ?>
+        <section class="space-y-2.5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-[17px] font-bold text-[#181824] dark:text-white">Lanjutkan Aktivitas</h2>
+                <a href="?route=/student/courses" class="text-[12px] font-semibold text-[#64748B] hover:text-[#DC2626]">Katalog →</a>
+            </div>
+            <div class="lms-card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FEF2F2] text-[#DC2626]">
+                        <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1;">play_circle</span>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="truncate text-[14px] font-bold text-[#181824] dark:text-white"><?= e((string) $quickResumeCourse['title']) ?></p>
+                        <p class="mt-0.5 text-[12px] text-[#64748B]">Progres saat ini <?= e((string) ($quickResumeCourse['progress'] ?? 0)) ?>% · <?= e((string) ($quickResumeCourse['modules_count'] ?? 0)) ?> Modul</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="?route=/student/courses" class="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-[12px] font-semibold text-[#181824] transition hover:border-red-200 hover:text-[#DC2626]">Semua Course</a>
+                    <a href="?route=/student/course/detail&amp;id=<?= urlencode($quickResumeCoursePublicId) ?>" class="inline-flex h-9 items-center justify-center rounded-full bg-[#FEF2F2] px-4 text-[12px] font-bold text-[#DC2626] transition hover:bg-[#DC2626] hover:text-white">
+                        <?= ($quickResumeCourse['status'] ?? '') === 'sedang_dipelajari' ? 'Lanjutkan' : 'Mulai Belajar' ?>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- Ringkasan & Evaluasi 2-Column Feature Cards (Dark + Soft DENSO Red, Matching Bottom Row in Reference) -->
+        <section class="space-y-2.5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-[17px] font-bold text-[#181824] dark:text-white">Ringkasan Belajar</h2>
+                <a href="?route=/student/nilai" class="text-[12px] font-semibold text-[#64748B] hover:text-[#DC2626]">Lihat Nilai →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Left Deep Indigo-Charcoal Contrast Card -->
+                <div class="rounded-[20px] p-5 text-white shadow-sm flex flex-col justify-between gap-4" style="background: linear-gradient(135deg, #1E1B4B 0%, #181824 65%, #2E1025 100%);">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-[15.5px] font-bold text-white">Progres Pelatihan</h3>
+                            <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-[#FCA5A5]">Aktif ↗</span>
+                        </div>
+                        <p class="mt-2 text-[12.5px] leading-relaxed text-slate-300">
+                            Anda sedang mempelajari <strong data-api-active-courses class="text-white"><?= e((string) $stats['active_count']) ?> Course Aktif</strong> dan telah menuntaskan <strong data-api-completed-courses class="text-white"><?= e((string) $stats['completed_count']) ?></strong> pelatihan wajib.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-white/10 pt-3 text-[12px]">
+                        <a href="?route=/student/courses" class="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:text-[#FCA5A5]">Kelola Course</a>
+                        <span class="text-slate-400">PT DENSO LMS</span>
+                    </div>
+                </div>
+
+                <!-- Right Warm DENSO Rose-Coral Gradient Card -->
+                <div class="rounded-[20px] p-5 text-[#181824] shadow-sm flex flex-col justify-between gap-4 border border-rose-200/80" style="background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 55%, #FECDD3 100%);">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-[15.5px] font-bold text-[#181824]">Evaluasi &amp; Sertifikat</h3>
+                            <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#E11D48] shadow-xs">Rata-rata <?= e((string) $stats['avg_score']) ?>%</span>
+                        </div>
+                        <p class="mt-2 text-[12.5px] leading-relaxed text-[#881337]">
+                            Pantau hasil nilai Quiz Anda secara berkala dan unduh sertifikat pelatihan yang telah selesai.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-rose-300/60 pt-3 text-[12px]">
+                        <a href="?route=/student/riwayat" class="font-bold text-[#BE123C] underline decoration-rose-300 underline-offset-4 hover:text-[#181824]">Riwayat &amp; Sertifikat</a>
+                        <a href="?route=/student/nilai" class="font-bold text-[#181824] hover:text-[#BE123C]">Buka Nilai →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
-    <?php if (!empty($quickResumeCourse)): ?>
-    <a href="?route=/student/course/detail&amp;id=<?= urlencode((string) $quickResumeCourse['id']) ?>" class="fd-floating-cta fd-btn fd-btn-primary fd-btn-md rounded-full lg:hidden" aria-label="Lanjutkan course aktif">
-        <span class="material-symbols-outlined" style="font-size:18px;">bolt</span>
-        <span>Lanjut Belajar</span>
-    </a>
-    <?php endif; ?>
     <!-- BottomNavBar Shared Component -->
     <?php
     $active_tab = 'beranda';
@@ -263,14 +216,36 @@ $userRole = 'Peserta DENSO';
         const dashboardSearch = document.getElementById('dashboardCourseSearch');
         const dashboardEmpty = document.querySelector('[data-dashboard-course-empty]');
         const pageSizeSelect = document.getElementById('pageSizeSelect');
+        const dashTabButtons = Array.from(document.querySelectorAll('[data-dash-tab]'));
+        let activeDashTab = 'all';
         let filteredCards = [];
         let currentPage = 1;
+
+        dashTabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                activeDashTab = btn.getAttribute('data-dash-tab') || 'all';
+                dashTabButtons.forEach(b => {
+                    const isSel = b === btn;
+                    b.classList.toggle('is-active', isSel);
+                    b.setAttribute('aria-selected', isSel ? 'true' : 'false');
+                });
+                currentPage = 1;
+                updateUI();
+            });
+        });
 
         function updateUI() {
             const itemsPerPage = Number(pageSizeSelect?.value) || 10;
             const query = (dashboardSearch?.value || '').trim().toLocaleLowerCase('id');
             const courseCards = Array.from(document.querySelectorAll('#course-results .course-card'));
-            filteredCards = courseCards.filter(card => card.textContent.toLocaleLowerCase('id').includes(query));
+            filteredCards = courseCards.filter(card => {
+                const status = card.getAttribute('data-course-status') || '';
+                const matchesTab = activeDashTab === 'all'
+                    || (activeDashTab === 'active' && status !== 'selesai')
+                    || (activeDashTab === 'completed' && status === 'selesai');
+                const matchesQuery = card.textContent.toLocaleLowerCase('id').includes(query);
+                return matchesTab && matchesQuery;
+            });
             if (dashboardEmpty) {
                 dashboardEmpty.textContent = query ? 'Tidak ada course yang cocok dengan pencarian.' : 'Belum ada course aktif untuk dilanjutkan.';
                 dashboardEmpty.classList.toggle('hidden', filteredCards.length > 0);

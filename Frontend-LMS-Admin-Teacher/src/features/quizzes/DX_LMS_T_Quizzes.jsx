@@ -339,6 +339,7 @@ export default function QuizzesPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Course Terdaftar"
+          to="/quizzes#quizzes-list"
           value={summary.coursesTotal}
           icon={<BookOpen className="size-5" />}
           tone="secondary"
@@ -346,6 +347,7 @@ export default function QuizzesPage() {
         />
         <StatCard
           label="Quiz Terbit"
+          to="/quizzes?status=published#quizzes-list"
           value={summary.published}
           icon={<CheckCircle2 className="size-5" />}
           tone="tertiary"
@@ -353,6 +355,7 @@ export default function QuizzesPage() {
         />
         <StatCard
           label="Quiz Draft / Nonaktif"
+          to="/quizzes?status=draft#quizzes-list"
           value={summary.draft}
           icon={<FileEdit className="size-5" />}
           tone="warning"
@@ -360,6 +363,7 @@ export default function QuizzesPage() {
         />
         <StatCard
           label="Total Pengerjaan"
+          to="/quizzes#quizzes-list"
           value={summary.attempts}
           icon={<Users className="size-5" />}
           tone="info"

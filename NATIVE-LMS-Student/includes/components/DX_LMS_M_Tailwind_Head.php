@@ -104,6 +104,7 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Coursera_Theme.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Student_Experience.css">
 <link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_FoodDash_Theme.css">
+<link rel="stylesheet" href="<?= $base_path ?>assets/css/DX_LMS_M_Modern_Lms_Theme.css?v=<?= (int) @filemtime(APP_ROOT . '/public/assets/css/DX_LMS_M_Modern_Lms_Theme.css') ?>">
 <link rel="stylesheet" href="<?= $base_path ?>assets/vendor/driverjs/driver.css">
 <script src="<?= $base_path ?>assets/vendor/driverjs/driver.js.iife.js" defer></script>
 <script src="<?= $base_path ?>assets/js/DX_LMS_M_Student_User_Guide.js" defer></script>
@@ -186,4 +187,173 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
     }
 })();
 </script>
+<?php
+$__devHost = strtolower((string) parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST));
+$__isDevAutoReload = getenv('APP_ENV') !== 'production'
+    && in_array((string) ($_SERVER['REMOTE_ADDR'] ?? ''), ['127.0.0.1', '::1'], true)
+    && in_array($__devHost, ['127.0.0.1', 'localhost'], true);
+if ($__isDevAutoReload):
+?>
+<script>
+(function() {
+    var currentVersion = null;
+    var timer = null;
+    function checkReload() {
+        if (document.visibilityState === 'hidden') return;
+        fetch('/__dev_reload_stamp', { cache: 'no-store' })
+            .then(function(res) { return res.ok ? res.json() : null; })
+            .then(function(data) {
+                if (!data || !data.version) return;
+                if (currentVersion === null) {
+                    currentVersion = data.version;
+                } else if (data.version !== currentVersion) {
+                    clearInterval(timer);
+                    window.location.reload();
+                }
+            })
+            .catch(function() {});
+    }
+    checkReload();
+    timer = setInterval(checkReload, 1500);
+})();
+</script>
+<?php endif; ?>
+<style>
+.dls-page-skeleton {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 76px;
+    left: 0;
+    z-index: 40;
+    padding: 20px 16px;
+    background: #F8FAFC;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.28s ease;
+}
+html.dark .dls-page-skeleton {
+    background: #0F141C;
+}
+html.dls-page-loading .dls-page-skeleton {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+main.dls-main {
+    transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.dls-page-loading main.dls-main {
+    opacity: 0;
+    transform: translateY(4px);
+}
+@media (min-width: 1024px) {
+    .dls-page-skeleton {
+        top: 64px;
+        bottom: 0;
+        left: 240px;
+        padding: 24px 28px;
+    }
+}
+.dls-skel-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: dlsSkelPulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes dlsSkelPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.48; }
+}
+.dls-skel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.dls-skel-box {
+    background: #E2E8F0;
+    border-radius: 10px;
+}
+html.dark .dls-skel-box {
+    background: #1E293B;
+}
+.dls-skel-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+@media (min-width: 1024px) {
+    .dls-skel-kpis {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+.dls-skel-panel {
+    background: #E2E8F0;
+    border-radius: 14px;
+}
+html.dark .dls-skel-panel {
+    background: #1E293B;
+}
+@media (prefers-reduced-motion: reduce) {
+    .dls-skel-inner { animation: none; }
+    .dls-page-skeleton, main.dls-main { transition: none; }
+}
+</style>
+<script>
+(function() {
+    var root = document.documentElement;
+    root.classList.add('dls-page-loading');
+    var shownAt = Date.now();
+    var safetyTimer = setTimeout(hideSkeleton, 900);
+
+    function hideSkeleton() {
+        clearTimeout(safetyTimer);
+        var elapsed = Date.now() - shownAt;
+        var remaining = Math.max(0, 180 - elapsed);
+        setTimeout(function() {
+            requestAnimationFrame(function() {
+                root.classList.remove('dls-page-loading');
+            });
+        }, remaining);
+    }
+
+    if (document.readyState === 'complete') {
+        hideSkeleton();
+    } else {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(hideSkeleton, 60);
+        });
+        window.addEventListener('load', hideSkeleton);
+    }
+
+    window.addEventListener('pageshow', function() {
+        clearTimeout(safetyTimer);
+        root.classList.remove('dls-page-loading');
+    });
+
+    document.addEventListener('click', function(evt) {
+        var anchor = evt.target && evt.target.closest ? evt.target.closest('a[href]') : null;
+        if (!anchor) return;
+        if (evt.metaKey || evt.ctrlKey || evt.shiftKey || evt.altKey) return;
+        if (anchor.target && anchor.target !== '_self') return;
+        var href = anchor.getAttribute('href') || '';
+        if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+        if (href.indexOf('?route=') !== -1 || href.charAt(0) === '/') {
+            shownAt = Date.now();
+            root.classList.add('dls-page-loading');
+            clearTimeout(safetyTimer);
+            safetyTimer = setTimeout(function() {
+                root.classList.remove('dls-page-loading');
+            }, 1800);
+        }
+    });
+})();
+</script>
+
 

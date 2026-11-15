@@ -1,9 +1,11 @@
 <?php
 $pageTitle = 'Forum Diskusi - ' . e($course['title']);
-$categoryUrl = '?route=/student/forum/category&course_id=' . rawurlencode((string) $courseId)
-    . '&category_type=' . rawurlencode((string) $categoryType) . '&session_id=' . rawurlencode((string) $sessionId)
+$coursePublicId = publicCourseId($courseId);
+$sessionPublicId = publicSessionId($sessionId);
+$categoryUrl = '?route=/student/forum/category&course_id=' . rawurlencode($coursePublicId)
+    . '&category_type=' . rawurlencode((string) $categoryType) . '&session_id=' . rawurlencode($sessionPublicId)
     . ($isRiwayat ? '&is_riwayat=true' : '');
-$backUrl = '?route=/student/course/detail&id=' . rawurlencode((string) $courseId) . '&tab=forum'
+$backUrl = '?route=/student/course/detail&id=' . rawurlencode($coursePublicId) . '&tab=forum'
     . ($isRiwayat ? '&is_riwayat=true' : '');
 ?>
 <!doctype html>
@@ -49,7 +51,7 @@ $backUrl = '?route=/student/course/detail&id=' . rawurlencode((string) $courseId
                 <div class="flex flex-wrap items-center justify-between gap-[12px]">
                     <p class="text-[13px] font-medium text-[#737373]">Pilih topik untuk membaca balasan atau mulai diskusi baru.</p>
                     <?php if (!$isRiwayat && !$isLocked): ?>
-                    <a data-new-topic-link href="?route=/student/forum/new&amp;course_id=<?= rawurlencode((string) $courseId) ?>&amp;category_type=<?= rawurlencode((string) $categoryType) ?>&amp;session_id=<?= rawurlencode((string) $sessionId) ?>" class="fd-btn fd-btn-primary fd-btn-md w-full rounded-full sm:w-auto"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span>Mulai diskusi</a>
+                    <a data-new-topic-link href="?route=/student/forum/new&amp;course_id=<?= rawurlencode($coursePublicId) ?>&amp;category_type=<?= rawurlencode((string) $categoryType) ?>&amp;session_id=<?= rawurlencode($sessionPublicId) ?>" class="fd-btn fd-btn-primary fd-btn-md w-full rounded-full sm:w-auto"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span>Mulai diskusi</a>
                     <?php endif; ?>
                 </div>
                 <div data-forum-list class="min-w-0 space-y-[12px]" aria-live="polite">

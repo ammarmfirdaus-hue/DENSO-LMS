@@ -18,6 +18,7 @@ import PageHeader from '../../components/PageHeader';
 import StatCard from '../../components/StatCard';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
 import { useQueryParamState } from '../../utils/useQueryParamState';
@@ -202,6 +203,15 @@ export default function CoursesPage() {
         description="Kelola katalog course, penugasan trainer, struktur sesi, serta pantau kelengkapan materi terbit."
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {canCreateCourse && (
+              <Link
+                to="/courses/new"
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-primary-container"
+              >
+                <Plus className="size-4" />
+                Buat Course Baru
+              </Link>
+            )}
             <span className="inline-flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-lowest px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
               <BookOpen className="size-3.5 text-primary" />
               Total {courses.length} course terdaftar
@@ -232,6 +242,7 @@ export default function CoursesPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Course"
+          to="/courses#courses-list"
           value={summary.total}
           icon={<BookOpen className="size-5" />}
           tone="secondary"
@@ -240,6 +251,7 @@ export default function CoursesPage() {
         />
         <StatCard
           label="Kategori Wajib"
+          to="/courses?category=Wajib#courses-list"
           value={summary.mandatoryCount}
           icon={<ShieldCheck className="size-5" />}
           tone="primary"
@@ -248,6 +260,7 @@ export default function CoursesPage() {
         />
         <StatCard
           label="Total Sesi"
+          to="/courses#courses-list"
           value={summary.totalSessions}
           icon={<Layers className="size-5" />}
           tone="info"
@@ -256,6 +269,7 @@ export default function CoursesPage() {
         />
         <StatCard
           label="Materi Terbit"
+          to="/materials?view=published#published-materials-section"
           value={summary.totalMaterials}
           icon={<FileCheck2 className="size-5" />}
           tone="tertiary"
@@ -265,7 +279,7 @@ export default function CoursesPage() {
       </section>
 
       {/* Form Pembuatan Course */}
-      {canCreateCourse && (
+      {false && canCreateCourse && (
         <div id="create-course" className="scroll-mt-20">
           <Card
             title="Buat Course Baru"
@@ -324,14 +338,16 @@ export default function CoursesPage() {
                 <label className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
                   Trainer Penanggung Jawab
                 </label>
-                <select name="trainerNpk" className={FIELD_CLASS}>
-                  <option value="">Pilih trainer (opsional)</option>
-                  {trainers.map((t) => (
-                    <option key={t.employee_npk} value={t.employee_npk}>
-                      {t.fullname} ({t.employee_npk})
-                    </option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  name="trainerNpk"
+                  title="Pilih Trainer Penanggung Jawab"
+                  className={FIELD_CLASS}
+                  placeholder="Cari trainer (opsional)..."
+                  options={trainers.map((t) => ({
+                    value: t.employee_npk,
+                    label: `${t.fullname} (${t.employee_npk})`
+                  }))}
+                />
               </div>
 
               <div className="md:col-span-2 xl:col-span-3">
@@ -432,7 +448,7 @@ export default function CoursesPage() {
 
                   <h3 className="mt-3 text-base font-bold leading-snug text-on-surface">
                     <Link
-                      to={`/courses/${course.course_id}`}
+                      to={`/courses/view/${course.public_id || course.course_id}`}
                       className="outline-none transition hover:text-primary focus-visible:text-primary"
                     >
                       {course.title}
@@ -464,8 +480,9 @@ export default function CoursesPage() {
                         Ubah Trainer
                       </label>
                       <div className="mt-1.5 flex gap-2">
-                        <select
+                        <SearchableSelect
                           aria-label={`Trainer ${course.title}`}
+                          title={`Pilih Trainer untuk ${course.title}`}
                           value={assignments[course.course_id] ?? course.assigned_trainer_npk ?? ''}
                           onChange={(event) =>
                             setAssignments((current) => ({
@@ -473,15 +490,10 @@ export default function CoursesPage() {
                               [course.course_id]: event.target.value
                             }))
                           }
+                          options={trainers.map((t) => ({ value: t.employee_npk, label: `${t.fullname} (${t.employee_npk})` }))}
+                          placeholder="Cari trainer..."
                           className="h-9 min-w-0 flex-1 rounded-md border border-outline bg-surface-lowest px-2.5 text-xs text-on-surface outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                        >
-                          <option value="">Tanpa trainer</option>
-                          {trainers.map((t) => (
-                            <option key={t.employee_npk} value={t.employee_npk}>
-                              {t.fullname}
-                            </option>
-                          ))}
-                        </select>
+                        />
                         <Button
                           size="sm"
                           variant="indigo"
@@ -495,7 +507,7 @@ export default function CoursesPage() {
                   )}
 
                   <Link
-                    to={`/courses/${course.course_id}`}
+                      to={`/courses/view/${course.public_id || course.course_id}`}
                     data-dls-action-ignore="true"
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary"
                   >
@@ -558,7 +570,7 @@ function CourseCoverThumbnail({ course }) {
 
   return (
     <Link
-      to={`/courses/${course.course_id}`}
+      to={`/courses/view/${course.public_id || course.course_id}`}
       className="relative block aspect-video w-full overflow-hidden bg-slate-900"
     >
       {src && !failed ? (

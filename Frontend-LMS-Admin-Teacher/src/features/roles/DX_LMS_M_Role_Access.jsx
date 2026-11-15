@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   AlertTriangle,
-  Check,
   CheckCircle2,
   Eye,
   GraduationCap,
@@ -26,6 +25,7 @@ import PageHeader from '../../components/PageHeader';
 import StatCard from '../../components/StatCard';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import ToggleSwitch from '../../components/ToggleSwitch';
 import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
 
@@ -114,31 +114,6 @@ function calculateRoleDiff(savedRole, draftRole, catalog) {
     portalChanged,
     hasChanges: added.length > 0 || removed.length > 0 || metaChanged || portalChanged
   };
-}
-
-/**
- * Komponen Switch interaktif dengan dukungan keyboard, label aria, dan tema Gelap/Terang.
- */
-function PermissionSwitch({ checked, disabled, onChange, ariaLabel }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-        disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-      } ${checked ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
-    >
-      <span
-        className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-sm transition-transform ${
-          checked ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
 }
 
 /**
@@ -415,7 +390,6 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
         description="Atur hak akses granular per role (Admin, Teacher, Reviewer, Student), kelola pembukaan akses Portal Staff, bandingkan matriks antar peran, dan audit perubahan secara real-time."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status="admin" label={`Anda masuk: ${currentUser?.role || 'admin'}`} />
             <Button
               type="button"
               size="sm"
@@ -438,6 +412,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
       >
         <StatCard
           label="Role Terkelola"
+          to="/roles#roles-editor-panel"
           value={(snapshot.roles || []).length}
           icon={<Shield className="size-5" />}
           tone="secondary"
@@ -446,6 +421,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
         />
         <StatCard
           label="Izin Aktif Role Terpilih"
+          to="/roles#roles-editor-panel"
           value={`${selectedPermsCount}/${totalCatalogCount}`}
           icon={<KeyRound className="size-5" />}
           tone="primary"
@@ -454,6 +430,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
         />
         <StatCard
           label="Akses Portal Staff"
+          to="/roles#roles-editor-panel"
           value={`${staffPortalCount} Role`}
           icon={<UserCheck className="size-5" />}
           tone="tertiary"
@@ -462,6 +439,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
         />
         <StatCard
           label="Rekam Audit Tersimpan"
+          to="/roles#roles-editor-panel"
           value={(snapshot.auditLogs || []).length}
           icon={<History className="size-5" />}
           tone="info"
@@ -648,7 +626,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                                 : 'Aktifkan agar akun ber-role ini (mis. Reviewer) dapat masuk ke dashboard & menu yang diizinkan.'}
                           </p>
                         </div>
-                        <PermissionSwitch
+                        <ToggleSwitch
                           checked={Boolean(draftSelected.can_access_staff_portal)}
                           disabled={selectedRoleKey === 'admin' || selectedRoleKey === 'student' || saving}
                           ariaLabel="Akses Login Portal Staff"
@@ -801,23 +779,29 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                                 </span>
                               </div>
 
-                              <div className="flex items-center gap-1.5">
-                                <button
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <Button
                                   type="button"
+                                  size="xs"
+                                  variant="secondary"
                                   disabled={saving}
                                   onClick={() => toggleModulePermissions(group.key, true)}
-                                  className="cursor-pointer rounded-md border border-outline/60 bg-surface-lowest px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant transition hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                                  icon={<CheckCircle2 className="size-3.5" />}
+                                  aria-label={`Aktifkan semua izin pada ${group.label}`}
                                 >
-                                  Aktifkan Modul
-                                </button>
-                                <button
+                                  Semua aktif
+                                </Button>
+                                <Button
                                   type="button"
+                                  size="xs"
+                                  variant="ghost"
                                   disabled={saving}
                                   onClick={() => toggleModulePermissions(group.key, false)}
-                                  className="cursor-pointer rounded-md border border-outline/60 bg-surface-lowest px-2.5 py-1 text-[11px] font-semibold text-muted transition hover:border-red-300 hover:text-red-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+                                  icon={<RotateCcw className="size-3.5" />}
+                                  aria-label={`Nonaktifkan semua izin pada ${group.label}`}
                                 >
-                                  Nonaktifkan Modul
-                                </button>
+                                  Semua nonaktif
+                                </Button>
                               </div>
                             </div>
 
@@ -866,10 +850,15 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                                       </p>
                                     </div>
 
-                                    <PermissionSwitch
+                                    <ToggleSwitch
                                       checked={isChecked}
                                       disabled={isProtected || saving}
                                       ariaLabel={`${perm.label} untuk ${draftSelected.display_name}`}
+                                      title={
+                                        isProtected
+                                          ? 'Izin ini wajib aktif untuk Administrator.'
+                                          : undefined
+                                      }
                                       onChange={(nextVal) =>
                                         toggleRolePermission(selectedRoleKey, perm.key, nextVal)
                                       }
@@ -1027,8 +1016,8 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                   <th className="px-4 py-3">Modul &amp; Izin</th>
                   {(snapshot.roles || []).map((role) => (
                     <th key={role.role_key} className="px-4 py-3 text-center">
-                      <span className="block text-on-surface">{role.display_name}</span>
-                      <span className="font-mono text-[10px] font-normal text-muted">
+                      <span className="block text-white">{role.display_name}</span>
+                      <span className="font-mono text-[10px] font-normal text-white/75">
                         ({(drafts[role.role_key]?.permissions || []).length}/{totalCatalogCount})
                       </span>
                     </th>
@@ -1065,31 +1054,22 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                           role.role_key === 'admin' && Boolean(perm.systemProtectedForAdmin);
                         return (
                           <td key={`${perm.key}-${role.role_key}`} className="px-4 py-3 text-center">
-                            <button
-                              type="button"
-                              disabled={locked || saving}
-                              onClick={() => toggleRolePermission(role.role_key, perm.key, !checked)}
-                              title={
-                                locked
-                                  ? 'Terkunci untuk Administrator'
-                                  : `Klik untuk ${checked ? 'mencabut' : 'memberikan'} izin ${perm.label} pada ${role.display_name}`
-                              }
-                              className={`inline-flex size-8 items-center justify-center rounded-lg border transition ${
-                                locked
-                                  ? 'cursor-not-allowed border-emerald-300 bg-emerald-50 text-emerald-700 opacity-75 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
-                                  : checked
-                                    ? 'cursor-pointer border-emerald-400 bg-emerald-500 text-white shadow-2xs hover:bg-emerald-600'
-                                    : 'cursor-pointer border-outline/60 bg-surface-lowest text-muted hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900'
-                              }`}
-                            >
-                              {locked ? (
-                                <Lock className="size-3.5" />
-                              ) : checked ? (
-                                <Check className="size-4 stroke-[2.5]" />
-                              ) : (
-                                <span className="size-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                              )}
-                            </button>
+                            <div className="flex items-center justify-center">
+                              <ToggleSwitch
+                                checked={checked}
+                                compact
+                                disabled={locked || saving}
+                                ariaLabel={`${perm.label} untuk ${role.display_name}`}
+                                title={
+                                  locked
+                                    ? 'Izin ini wajib aktif untuk Administrator.'
+                                    : `${checked ? 'Nonaktifkan' : 'Aktifkan'} izin ${perm.label} untuk ${role.display_name}.`
+                                }
+                                onChange={(nextVal) =>
+                                  toggleRolePermission(role.role_key, perm.key, nextVal)
+                                }
+                              />
+                            </div>
                           </td>
                         );
                       })}

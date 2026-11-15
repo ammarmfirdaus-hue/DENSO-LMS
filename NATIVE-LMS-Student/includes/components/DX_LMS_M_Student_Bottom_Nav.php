@@ -66,53 +66,24 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
 <form id="studentNavLogoutForm" class="hidden" method="POST" action="?route=/auth/logout" aria-hidden="true">
     <input type="hidden" name="_csrf" value="<?= e(csrfToken()) ?>">
 </form>
-<nav class="fixed bottom-0 left-0 w-full z-50 flex items-stretch px-0 h-[76px] shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:h-screen lg:flex-col lg:justify-start lg:top-0 lg:left-0 lg:rounded-none lg:border-r border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-4 lg:pt-8 lg:gap-2 transition-all duration-300" id="bottomNavBar">
+<nav class="fixed bottom-0 left-0 w-full z-50 flex items-stretch px-0 h-[76px] shadow-[0_-4px_12px_0_rgba(0,0,0,0.05)] dark:shadow-none bg-surface dark:bg-on-background rounded-t-xl lg:h-screen lg:flex-col lg:justify-start lg:top-0 lg:left-0 lg:rounded-none border-t border-outline-variant dark:border-outline lg:border-t-0 lg:p-5 lg:gap-1.5 transition-all duration-300" id="bottomNavBar">
 
     <!-- Brand untuk sidebar desktop -->
-    <div class="dls-nav-brand" id="dlsNavBrand">
-        <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo.png', ENT_QUOTES, 'UTF-8') ?>" alt="Logo DENSO" class="w-9 h-9 object-contain shrink-0">
-        <span class="dls-nav-brand-copy dls-sidebar-text"><strong>DENSO</strong><small>Learning</small></span>
-        <!-- Collapse button only visible when expanded -->
-        <button type="button" id="dlsSidebarCollapseBtn" onclick="window.toggleStudentSidebar()" class="dls-sidebar-text ml-auto flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition cursor-pointer" title="Kecilkan sidebar" aria-label="Kecilkan sidebar">
-            <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
-        </button>
-    </div>
-
-    <!-- Search Box untuk Sidebar Desktop (Tanggal sudah dipindah ke Header) -->
-    <div class="hidden lg:flex flex-col gap-2 my-2 w-full dls-sidebar-text">
-        <div class="relative w-full">
-            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none" aria-hidden="true">search</span>
-            <input
-                type="search"
-                id="studentMenuSearch"
-                placeholder="Cari menu..."
-                class="h-8 w-full rounded-xl border border-outline-variant/70 bg-white dark:bg-slate-900 pl-8 pr-7 text-xs outline-none transition focus:border-primary dark:text-slate-100 dark:placeholder:text-slate-500"
-                oninput="window.filterStudentMenu(this.value)"
-            />
-            <button
-                type="button"
-                id="btnStudentClearSearch"
-                onclick="window.clearStudentMenuSearch()"
-                class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
-                aria-label="Hapus pencarian menu"
-            >
-                <span class="material-symbols-outlined text-[14px]">close</span>
-            </button>
-        </div>
-        <div id="studentMenuNoResult" class="hidden py-4 text-center text-xs text-slate-400 dark:text-slate-500">
-            <span class="material-symbols-outlined text-lg block mb-1">search_off</span>
-            Menu tidak ditemukan
-        </div>
-    </div>
-
-    <p class="dls-nav-section-label dls-sidebar-text">MENU UTAMA</p>
+    <a href="?route=/student" class="dls-nav-brand hidden lg:flex items-center gap-3 px-2 pb-6 pt-1 text-decoration-none" id="dlsNavBrand">
+        <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo.png', ENT_QUOTES, 'UTF-8') ?>" alt="Logo DENSO" class="w-9 h-9 object-contain shrink-0 dark:hidden">
+        <img src="<?= htmlspecialchars($base_path . 'assets/img/icon/denso-vector-logo-dark.png', ENT_QUOTES, 'UTF-8') ?>" alt="Logo DENSO" class="w-9 h-9 object-contain shrink-0 hidden dark:block">
+        <span class="flex flex-col leading-tight">
+            <strong class="text-[15px] font-bold tracking-tight text-[#181824] dark:text-white" style="font-family:'Poppins',sans-serif;">DENSO</strong>
+            <small class="text-[11px] font-bold tracking-[0.08em] text-[#DC2626] uppercase">Learning</small>
+        </span>
+    </a>
 
     <?php foreach ($tabs as $tab): ?>
     <?php
     $is_active = $active_tab === $tab['id'];
     $is_mobile_profile_active = $tab['id'] === 'profil' && $active_tab === 'profil';
     $active_class = $is_active
-        ? 'text-primary dark:text-primary-fixed bg-primary-container-light lg:bg-primary-container-light font-semibold'
+        ? 'is-active text-primary dark:text-primary-fixed bg-primary-container-light lg:bg-transparent font-semibold'
         : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant';
     ?>
     <?php if ($tab['id'] === 'profil'): ?>
@@ -129,28 +100,28 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         <span class="dls-nav-label font-label-sm text-label-sm">Profil</span>
     </button>
     <a href="<?= $tab['href'] ?>"
-       class="dls-desktop-profile-link flex-1 lg:flex-none hidden lg:flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
+       class="dls-desktop-profile-link dls-nav-item flex-1 lg:flex-none hidden lg:flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
        id="nav-profil-desktop"
        title="Profil"
        aria-label="Profil"<?= $is_active ? ' aria-current="page"' : '' ?>>
-        <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3" style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;">person</span>
-        <span class="dls-nav-label font-label-sm text-label-sm lg:text-body-md">Profil</span>
+        <span class="material-symbols-outlined text-[20px] mb-1 lg:mb-0" style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;">person</span>
+        <span class="dls-nav-label font-label-sm text-label-sm lg:text-[13.5px]">Profil</span>
     </a>
     <?php else: ?>
     <a href="<?= $tab['href'] ?>" 
-       class="<?= $tab['id'] === 'notifikasi' ? 'dls-mobile-nav-notifications ' : '' ?>flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:px-4 lg:py-3 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
+       class="<?= $tab['id'] === 'notifikasi' ? 'dls-mobile-nav-notifications ' : '' ?>dls-nav-item flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:justify-start justify-center rounded-xl py-2 lg:w-full transition-transform duration-200 active:scale-95 relative <?= $active_class ?>"
        id="nav-<?= $tab['id'] ?>"
        title="<?= htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8') ?>"
        aria-label="<?= $tab['label'] ?>"<?= $is_active ? ' aria-current="page"' : '' ?>>
         
-        <span class="material-symbols-outlined mb-1 lg:mb-0 lg:mr-3"
+        <span class="material-symbols-outlined text-[20px] mb-1 lg:mb-0"
               style="font-variation-settings: 'FILL' <?= $is_active ? '1' : '0' ?>;"
         ><?= $tab['icon'] ?></span>
         
-        <span class="dls-nav-label font-label-sm text-label-sm lg:text-body-md"><?= $tab['label'] ?></span>
+        <span class="dls-nav-label font-label-sm text-label-sm lg:text-[13.5px]"><?= $tab['label'] ?></span>
 
         <?php if ($tab['id'] === 'notifikasi'): ?>
-        <span data-notification-count class="dls-bottom-notification-count" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
+        <span data-notification-count class="dls-sidebar-notif-pill" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
         <?php endif; ?>
     </a>
     <?php endif; ?>
@@ -173,54 +144,36 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         </a>
     </div>
 
-    <!-- Desktop Profile Dropup Section -->
-    <div class="hidden lg:block relative mt-auto pt-3 border-t border-outline-variant/50 dark:border-slate-800 w-full">
-        <!-- Dropup Menu (Initially hidden) -->
-        <div id="studentProfileDropup" class="hidden absolute bottom-full left-0 mb-3 w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2.5 z-50 flex-col gap-1.5 transition-all">
-            <!-- User summary card -->
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/60 mb-1">
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($student_name, ENT_QUOTES, 'UTF-8') ?></p>
-                <div class="flex items-center justify-between gap-1 mt-0.5">
-                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono"><?= htmlspecialchars($student_npk, ENT_QUOTES, 'UTF-8') ?></span>
-                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 uppercase">Student</span>
-                </div>
+    <!-- Desktop Bottom Help Center Card & Account Controls -->
+    <div class="hidden lg:flex flex-col gap-3 mt-auto w-full pt-2">
+        <!-- Help Center Card (Reference Image Style with DENSO Red Badge) -->
+        <div class="dls-help-card">
+            <div class="dls-help-card-badge" aria-hidden="true">
+                <span class="material-symbols-outlined text-[20px]">help</span>
             </div>
-
-            <!-- Theme Toggle Button -->
-            <button type="button" id="btnStudentThemeToggle" onclick="window.toggleStudentTheme()" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px] text-amber-500" id="themeIcon">dark_mode</span>
-                    <span>Mode Tampilan</span>
-                </span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300" id="themeStatusBadge">Normal</span>
-            </button>
-
-            <!-- Edit / View Profil Link -->
-            <a href="?route=/student/profil" class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 dark:text-slate-400">person</span>
-                <span>Lihat Profil Saya</span>
-            </a>
-
-            <!-- Logout Button with SweetAlert2 Confirm -->
-            <button type="button" onclick="window.confirmStudentLogout()" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition cursor-pointer">
-                <span class="material-symbols-outlined text-[18px] text-red-600">logout</span>
-                <span>Keluar Akun</span>
-            </button>
+            <p class="text-[14px] font-bold text-white" style="font-family:'Poppins',sans-serif;">Pusat Bantuan</p>
+            <p class="mt-1 text-[11px] leading-relaxed text-slate-300">Ada kendala belajar? Hubungi tim kami!</p>
+            <a href="?route=/student/profil/bantuan" class="dls-help-card-btn">Buka Bantuan</a>
         </div>
 
-        <!-- Trigger Button -->
-        <button type="button" id="btnStudentProfileTrigger" onclick="window.toggleStudentProfileDropup()" class="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition cursor-pointer text-left">
-            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-fixed flex items-center justify-center font-bold text-xs shrink-0">
-                <?= strtoupper(substr($student_name, 0, 1)) ?>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($student_name, ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Siswa DENSO</p>
-            </div>
-            <span class="material-symbols-outlined text-slate-400 text-[18px] transition-transform duration-200" id="profileDropupChevron">expand_less</span>
-        </button>
+        <!-- Compact Theme & Logout Row -->
+        <div class="flex items-center justify-between gap-2 pt-1">
+            <button type="button" id="btnStudentThemeToggle" onclick="window.toggleStudentTheme()" class="flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[11.5px] font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 transition cursor-pointer" title="Mode Tampilan">
+                <span class="material-symbols-outlined text-[17px]" id="themeIcon">dark_mode</span>
+                <span id="themeStatusBadge">Normal</span>
+            </button>
+            <button type="button" onclick="window.confirmStudentLogout()" class="flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[11.5px] font-bold text-[#DC2626] hover:bg-[#FEF2F2] dark:hover:bg-red-950/40 transition cursor-pointer" title="Keluar Akun">
+                <span class="material-symbols-outlined text-[17px]">logout</span>
+                <span>Keluar</span>
+            </button>
+        </div>
     </div>
 </nav>
+<?php if (empty($hide_right_panel)): ?>
+<?php include APP_ROOT . '/includes/components/DX_LMS_M_Right_Panel.php'; ?>
+<script>document.body.classList.add('dls-has-right-panel');</script>
+<?php endif; ?>
+<?php include APP_ROOT . '/includes/components/DX_LMS_M_Support_Chat_Widget.php'; ?>
 
 <script>
 /* ── Student Sidebar Mini-Rail Toggle ── */
@@ -440,3 +393,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<div id="dlsPageSkeleton" class="dls-page-skeleton" aria-busy="true" aria-label="Memuat konten halaman...">
+    <div class="dls-skel-inner">
+        <div class="dls-skel-header">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div class="dls-skel-box" style="width:112px;height:14px;border-radius:6px;"></div>
+                <div class="dls-skel-box" style="width:210px;height:28px;border-radius:8px;"></div>
+            </div>
+            <div class="dls-skel-box" style="width:144px;height:40px;border-radius:10px;"></div>
+        </div>
+        <div class="dls-skel-kpis">
+            <div class="dls-skel-panel" style="height:136px;"></div>
+            <div class="dls-skel-panel" style="height:136px;"></div>
+            <div class="dls-skel-panel" style="height:136px;"></div>
+            <div class="dls-skel-panel" style="height:136px;"></div>
+        </div>
+        <div class="dls-skel-panel" style="height:300px;"></div>
+    </div>
+</div>

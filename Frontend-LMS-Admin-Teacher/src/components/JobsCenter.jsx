@@ -81,25 +81,37 @@ export default function JobsCenter({ role }) {
   const panelRef = useRef(null);
   const restoreRef = useRef(null);
   const dragRef = useRef(null);
+  const lastAutoShownJobIdRef = useRef(0);
+  const jobIdRef = useRef(null);
+
+  useEffect(() => {
+    jobIdRef.current = jobId;
+  }, [jobId]);
 
   const currentJob = useMemo(() => {
     if (Number(job?.job_id) === Number(jobId)) return job;
     return jobs.find(item => Number(item.job_id) === Number(jobId)) || job;
   }, [jobs, jobId, job]);
 
-  async function refreshJobs() {
+  async function refreshJobs(preferredJobId = null) {
     try {
       const nextJobs = (await api('/jobs')).jobs || [];
       setJobs(nextJobs);
-      const savedId = Number(jobId || localStorage.getItem('dls_active_job_id'));
-      const selected = nextJobs.find(item => activeStatuses.has(item.status))
-        || nextJobs.find(item => Number(item.job_id) === savedId) || nextJobs[0];
+      const activeJob = nextJobs.find(item => activeStatuses.has(item.status));
+      const savedId = Number(preferredJobId || jobIdRef.current || localStorage.getItem('dls_active_job_id'));
+      const selected = (preferredJobId && nextJobs.find(item => Number(item.job_id) === Number(preferredJobId)))
+        || activeJob
+        || nextJobs.find(item => Number(item.job_id) === savedId)
+        || nextJobs[0];
       if (selected) {
-        setJobId(Number(selected.job_id));
+        const nextId = Number(selected.job_id);
+        setJobId(nextId);
         setJob(previous => mergeJobSnapshot(previous, selected));
-        localStorage.setItem('dls_active_job_id', String(selected.job_id));
-        if (activeStatuses.has(selected.status) && localStorage.getItem('dls_jobs_center_hidden') === null) {
+        localStorage.setItem('dls_active_job_id', String(nextId));
+        if (activeStatuses.has(selected.status) && lastAutoShownJobIdRef.current !== nextId) {
+          lastAutoShownJobIdRef.current = nextId;
           setHidden(false);
+          setExpanded(true);
         }
       } else {
         setJobId(null);
@@ -111,8 +123,30 @@ export default function JobsCenter({ role }) {
 
   useEffect(() => {
     refreshJobs();
-    const timer = setInterval(refreshJobs, 3500);
-    return () => clearInterval(timer);
+    const timer = setInterval(() => refreshJobs(), 2500);
+    const onJobCreated = event => {
+      const nextId = Number(event?.detail?.jobId || event?.detail?.job?.job_id || 0);
+      if (nextId > 0) {
+        lastAutoShownJobIdRef.current = nextId;
+        setJobId(nextId);
+        if (event?.detail?.job) {
+          setJob(previous => mergeJobSnapshot(previous, event.detail.job));
+        }
+        setHidden(false);
+        setExpanded(true);
+        refreshJobs(nextId);
+      } else {
+        refreshJobs();
+      }
+    };
+    const onFocus = () => refreshJobs();
+    window.addEventListener('dls_job_created', onJobCreated);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('dls_job_created', onJobCreated);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   useEffect(() => {
@@ -209,14 +243,14 @@ export default function JobsCenter({ role }) {
   const floatingPosition = position ? { left: `${position.left}px`, top: `${position.top}px`, right: 'auto', bottom: 'auto' } : undefined;
 
   const headerThemeClass = {
-    running: 'border-primary bg-primary',
-    queued: 'border-blue-700 bg-blue-700',
-    stopping: 'border-amber-700 bg-amber-700',
-    stopped: 'border-slate-700 bg-slate-700',
-    completed: 'border-emerald-700 bg-emerald-700',
-    completed_with_errors: 'border-amber-700 bg-amber-700',
-    failed: 'border-red-800 bg-red-800'
-  }[currentJob.status] || 'border-primary bg-primary';
+    running: 'border-[#B91C1C] bg-[#DC2626]',
+    queued: 'border-[#B91C1C] bg-[#DC2626]',
+    stopping: 'border-[#B91C1C] bg-[#B91C1C]',
+    stopped: 'border-[#B91C1C] bg-[#B91C1C]',
+    completed: 'border-[#B91C1C] bg-[#DC2626]',
+    completed_with_errors: 'border-[#B91C1C] bg-[#B91C1C]',
+    failed: 'border-[#991B1B] bg-[#991B1B]'
+  }[currentJob.status] || 'border-[#B91C1C] bg-[#DC2626]';
 
   function startDrag(event) {
     const element = hidden ? restoreRef.current : panelRef.current;

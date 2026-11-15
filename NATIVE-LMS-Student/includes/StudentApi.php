@@ -284,6 +284,53 @@ function apiStudentCourseQuizDetails(string $courseCode, int $studentId): ?array
     ];
 }
 
+/** Membuat atau mengambil timer quiz yang disimpan di database server. */
+function apiStartStudentCourseQuiz(string $courseCode, int $studentId): array
+{
+    if ($studentId < 1) throw new RuntimeException('Sesi Student tidak valid.');
+    $connection = db();
+    $query = $connection->prepare("SELECT quiz.quiz_id,quiz.duration_seconds FROM course_quizzes quiz
+      JOIN courses course ON course.course_id=quiz.course_id AND course.status='active'
+      JOIN course_enrollments enrollment ON enrollment.course_id=course.course_id AND enrollment.student_id=:student_id
+        AND enrollment.enrollment_status IN ('active','completed')
+      WHERE course.course_code=:course_code AND quiz.status='published' LIMIT 1");
+    $query->execute(['student_id' => $studentId, 'course_code' => $courseCode]);
+    $quiz = $query->fetch();
+    if (!$quiz) throw new RuntimeException('Quiz belum tersedia atau akses course belum aktif.');
+    $existing = $connection->prepare("SELECT session_token,started_at,expires_at FROM course_quiz_attempt_sessions
+      WHERE quiz_id=:quiz_id AND student_id=:student_id AND status='active' ORDER BY started_at DESC LIMIT 1");
+    $existing->execute(['quiz_id' => $quiz['quiz_id'], 'student_id' => $studentId]);
+    $session = $existing->fetch();
+    if ($session && strtotime((string) $session['expires_at']) + 10 >= time()) return $session;
+    if ($session) $connection->prepare("UPDATE course_quiz_attempt_sessions SET status='expired' WHERE session_token=:token")->execute(['token' => $session['session_token']]);
+    $token = sprintf('%s-%s-%s-%s-%s', bin2hex(random_bytes(4)), bin2hex(random_bytes(2)), bin2hex(random_bytes(2)), bin2hex(random_bytes(2)), bin2hex(random_bytes(6)));
+    $duration = max(60, min(86400, (int) ($quiz['duration_seconds'] ?? 1800)));
+    $insert = $connection->prepare("INSERT INTO course_quiz_attempt_sessions(session_token,quiz_id,student_id,started_at,expires_at)
+      VALUES(:token,:quiz_id,:student_id,UTC_TIMESTAMP(),DATE_ADD(UTC_TIMESTAMP(),INTERVAL {$duration} SECOND))");
+    $insert->execute(['token' => $token, 'quiz_id' => $quiz['quiz_id'], 'student_id' => $studentId]);
+    $read = $connection->prepare('SELECT session_token,started_at,expires_at FROM course_quiz_attempt_sessions WHERE session_token=:token');
+    $read->execute(['token' => $token]);
+    return $read->fetch() ?: throw new RuntimeException('Session quiz tidak dapat dibuat.');
+}
+
+function apiValidateStudentQuizTimer(string $token, int $studentId): void
+{
+    if (!preg_match('/^[a-f0-9-]{36}$/i', $token)) throw new RuntimeException('Session quiz tidak valid.');
+    $query = db()->prepare("SELECT expires_at FROM course_quiz_attempt_sessions WHERE session_token=:token AND student_id=:student_id AND status='active' LIMIT 1");
+    $query->execute(['token' => $token, 'student_id' => $studentId]);
+    $session = $query->fetch();
+    if (!$session || strtotime((string) $session['expires_at']) + 10 < time()) {
+        if ($session) db()->prepare("UPDATE course_quiz_attempt_sessions SET status='expired' WHERE session_token=:token")->execute(['token' => $token]);
+        throw new RuntimeException('Waktu quiz sudah habis. Jawaban ditolak.');
+    }
+}
+
+function apiFinishStudentQuizSession(string $token, int $studentId): void
+{
+    db()->prepare("UPDATE course_quiz_attempt_sessions SET status='submitted' WHERE session_token=:token AND student_id=:student_id AND status='active'")
+        ->execute(['token' => $token, 'student_id' => $studentId]);
+}
+
 /** Student mengajukan akses course; materi tetap terkunci sampai Admin menyetujui. */
 function apiRequestStudentCourseAccess(string $courseCode, int $studentId, string $studentNpk, string $requestNote = '', string $requesterRole = 'student'): array
 {

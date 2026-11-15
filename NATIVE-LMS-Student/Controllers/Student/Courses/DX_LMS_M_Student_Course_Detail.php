@@ -22,9 +22,9 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
         startAppSession();
 
         /** Mengambil ID course hanya dari parameter URL yang valid. */
-        $courseId = $_GET['id'] ?? '';
+        $publicCourseId = $_GET['id'] ?? '';
         $tab = $_GET['tab'] ?? 'materi';
-        if (!is_string($courseId) || strlen($courseId) > 80) $courseId = '';
+        $courseId = resolveCourseId($publicCourseId) ?? '';
         if (!is_string($tab) || !in_array($tab, ['materi', 'quiz', 'forum', 'riwayat', 'capaian'], true)) $tab = 'materi';
         $course = DX_LMS_M_Student_Data::getCourseById($courseId);
 
@@ -32,6 +32,7 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
             header('Location: ?route=/student/courses');
             exit();
         }
+        $course['public_id'] = publicCourseId((string) $course['id']);
 
         if (empty($course['has_access'])) {
             $requestError = '';
@@ -54,7 +55,7 @@ class DX_LMS_M_Student_Course_Detail extends DX_LMS_M_Controller
                             trim($requestNote),
                             $requesterRole,
                         );
-                        header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['id']) . '&requested=1', true, 303);
+                        header('Location: ?route=/student/course/detail&id=' . rawurlencode((string) $course['public_id']) . '&requested=1', true, 303);
                         exit();
                     } catch (PDOException $error) {
                         error_log('Student course access request failed: ' . $error->getMessage());

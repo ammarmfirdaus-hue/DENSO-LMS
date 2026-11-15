@@ -87,7 +87,7 @@ $isRejected = $accessStatus === 'rejected';
                 <?php endif; ?>
 
                 <?php if (!$isPending): ?>
-                <form method="post" action="?route=/student/course/detail&amp;id=<?= rawurlencode((string) ($course['id'] ?? '')) ?>" class="space-y-[12px]">
+                <form method="post" action="?route=/student/course/detail&amp;id=<?= rawurlencode((string) ($course['public_id'] ?? publicCourseId($course['id'] ?? ''))) ?>" class="space-y-[12px]">
                     <input type="hidden" name="_csrf" value="<?= e($csrf_token) ?>">
                     <div>
                         <label for="access-request-note" class="fd-label">Catatan permintaan <span class="font-normal text-[#737373]">(opsional)</span></label>

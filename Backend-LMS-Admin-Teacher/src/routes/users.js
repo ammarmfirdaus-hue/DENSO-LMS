@@ -7,6 +7,7 @@ const { paginateCollection } = require('../middleware/pagination');
 const { createStudentAccount, listStudentAccounts, updateStudentAccount, getStudentAccountState, deleteStudentAccount,
   getStudentAccountForPromotion, promoteStudentAccountToTeacherShadow } = require('../services/student-auth');
 const { sendAccountCredentials } = require('../services/account-mail');
+const { transferReviewerTasks } = require('../services/review-transfer');
 
 const router = express.Router();
 router.use(authenticate);
@@ -28,7 +29,8 @@ const userUpdateSchema = z.object({
   role: z.enum(['student', 'admin', 'teacher', 'reviewer']),
   status: z.enum(['active', 'inactive']),
   password: z.union([z.string().min(12).max(200), z.literal('')]).optional().default(''),
-  sendEmail: z.boolean().optional().default(false)
+  sendEmail: z.boolean().optional().default(false),
+  targetReviewerNpk: z.string().trim().min(1).max(50).optional()
 }).strict();
 
 router.put('/:npk', requirePermission('users.manage'), async (req, res, next) => {
@@ -99,7 +101,16 @@ router.put('/:npk', requirePermission('users.manage'), async (req, res, next) =>
     if (previous.role === 'reviewer' && previous.status === 'active' && (data.role !== 'reviewer' || data.status !== 'active')) {
       const pending = await pool.request().input('npk', sql.VarChar(50), npk.data)
         .query(`SELECT TOP 1 1 AS has_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
-      if (pending.recordset.length) return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.' } });
+      if (pending.recordset.length) {
+        if (!data.targetReviewerNpk) {
+          return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.' } });
+        }
+        await transferReviewerTasks({
+          sourceNpk: npk.data,
+          targetReviewerNpk: data.targetReviewerNpk,
+          pool
+        });
+      }
     }
     if (previous.role === 'admin' && previous.status === 'active' && (data.role !== 'admin' || data.status !== 'active')) {
       const admins = await pool.request().query(`SELECT COUNT(*) AS total FROM dbo.employee_accounts WHERE role='admin' AND status='active'`);
@@ -145,7 +156,18 @@ router.delete('/:npk', requirePermission('users.manage'), async (req, res, next)
       if (target.recordset[0].role === 'reviewer') {
         const pending = await new sql.Request(tx).input('npk', sql.VarChar(50), npk.data)
           .query(`SELECT TOP 1 1 AS has_pending FROM dbo.material_submissions WHERE reviewer_npk=@npk AND status='pending_review'`);
-        if (pending.recordset.length) { await tx.rollback(); return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review.' } }); }
+        if (pending.recordset.length) {
+          const targetReviewerNpk = (req.body?.targetReviewerNpk || req.query?.targetReviewerNpk || '').toString().trim();
+          if (!targetReviewerNpk) {
+            await tx.rollback();
+            return res.status(409).json({ error: { code: 'REVIEWER_HAS_PENDING_WORK', message: 'Reviewer masih memiliki materi yang menunggu review. Selesaikan atau alihkan tugas tersebut terlebih dahulu.' } });
+          }
+          await transferReviewerTasks({
+            sourceNpk: npk.data,
+            targetReviewerNpk,
+            tx
+          });
+        }
       }
       await new sql.Request(tx).input('npk', sql.VarChar(50), npk.data)
         .query(`DELETE FROM dbo.employee_accounts WHERE employee_npk=@npk`);

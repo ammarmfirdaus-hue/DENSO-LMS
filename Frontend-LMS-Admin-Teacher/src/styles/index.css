@@ -213,16 +213,53 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dls-action-control { gap: 0.45rem; }
 .dls-action-icon { flex: 0 0 auto; font-size: 1.05em; }
 .dls-action-solid-neutral {
-  background-color: #ffffff;
-  border: 1px solid var(--color-outline);
+  background-color: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
 }
-.dls-action-solid-neutral:hover:not(:disabled) { background-color: var(--color-surface-low); }
+.dls-action-solid-neutral:hover:not(:disabled) { background-color: #cbd5e1; }
 .dls-action-solid-primary {
-  background-color: var(--color-primary) !important;
-  border: 1px solid var(--color-primary-container) !important;
+  background-color: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
   color: #ffffff !important;
 }
-.dls-action-solid-primary:hover:not(:disabled) { background-color: var(--color-primary-container) !important; }
+.dls-action-solid-primary:hover:not(:disabled) { background-color: #b91c1c !important; }
+.dls-action-solid-edit {
+  background-color: #2563eb !important;
+  border: 1px solid #1d4ed8 !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-edit:hover:not(:disabled) { background-color: #1d4ed8 !important; }
+.dls-action-solid-view {
+  background-color: #4f46e5 !important;
+  border: 1px solid #4338ca !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-view:hover:not(:disabled) { background-color: #4338ca !important; }
+.dls-action-solid-success {
+  background-color: #059669 !important;
+  border: 1px solid #047857 !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-success:hover:not(:disabled) { background-color: #047857 !important; }
+.dls-action-solid-warning {
+  background-color: #d97706 !important;
+  border: 1px solid #b45309 !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-warning:hover:not(:disabled) { background-color: #b45309 !important; }
+.dls-action-solid-info {
+  background-color: #0d9488 !important;
+  border: 1px solid #0f766e !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-info:hover:not(:disabled) { background-color: #0f766e !important; }
+.dls-action-solid-danger {
+  background-color: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
+  color: #ffffff !important;
+}
+.dls-action-solid-danger:hover:not(:disabled) { background-color: #b91c1c !important; }
 .dls-action-control[hidden] { display: none !important; }
 .dls-action-solid-neutral.bg-primary,
 .dls-action-solid-neutral.bg-error,
@@ -282,13 +319,13 @@ div[role="region"] > table thead th,
 .overflow-x-auto > table thead th {
   height: 46px;
   padding: 0.625rem 1rem;
-  background-color: rgba(215, 25, 32, 0.055);
-  border-bottom: 1.5px solid #c4cdd8;
-  border-right: 1px solid #d5dce4;
-  color: #8f1419;
+  background-color: #111827 !important;
+  border-bottom: 1px solid #111827;
+  border-right: 1px solid #374151;
+  color: #ffffff !important;
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.035em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -349,16 +386,16 @@ div[role="region"] > table tbody tr:last-child td,
 .dls-table-wrap table tbody tr:hover td,
 div[role="region"] > table tbody tr:hover td,
 .overflow-x-auto > table tbody tr:hover td {
-  background-color: rgba(215, 25, 32, 0.025);
+  background-color: rgba(15, 23, 42, 0.045);
 }
 
 html.dark .dls-table-wrap table thead th,
 html.dark div[role="region"] > table thead th,
 html.dark .overflow-x-auto > table thead th {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-bottom-color: #415169;
-  border-right-color: #2f3c4f;
-  color: #fca5a5;
+  background-color: #05070b !important;
+  border-bottom-color: #05070b;
+  border-right-color: #263244;
+  color: #ffffff !important;
 }
 
 html.dark .dls-table-wrap table tbody td,
@@ -372,7 +409,7 @@ html.dark .overflow-x-auto > table tbody td {
 html.dark .dls-table-wrap table tbody tr:hover td,
 html.dark div[role="region"] > table tbody tr:hover td,
 html.dark .overflow-x-auto > table tbody tr:hover td {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(255, 255, 255, 0.045);
 }
 
 /* Explicit opt-in spreadsheet cells (if ever used on export preview) */

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { KpiSparklineChart } from './charts/DashboardCharts';
 
@@ -19,7 +20,9 @@ export default function StatCard({
   sparklineLabels,
   sparklineUnit = '',
   loading = false,
-  className = ''
+  className = '',
+  to,
+  onClick
 }) {
   const toneStyles = {
     primary: {
@@ -63,9 +66,15 @@ export default function StatCard({
   const activeTone = toneStyles[tone] || toneStyles.primary;
   const hasSparkline = Array.isArray(sparkline) && sparkline.length > 0;
 
+  const CardRoot = to ? Link : 'div';
+
   return (
-    <div
-      className={`dls-card-surface relative flex flex-col justify-between overflow-hidden rounded-xl p-5 sm:p-6 transition-shadow hover:shadow-md ${className}`}
+    <CardRoot
+      {...(to ? { to } : {})}
+      {...(onClick ? { onClick } : {})}
+      className={`dls-card-surface relative flex flex-col justify-between overflow-hidden rounded-xl p-5 sm:p-6 transition-shadow hover:shadow-md ${
+        to || onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:ring-2 hover:ring-primary/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary' : ''
+      } ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -128,6 +137,6 @@ export default function StatCard({
           {deltaLabel && <span className="shrink-0 font-medium text-on-surface/80">{deltaLabel}</span>}
         </div>
       )}
-    </div>
+    </CardRoot>
   );
 }

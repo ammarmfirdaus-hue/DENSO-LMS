@@ -11,6 +11,7 @@ import {
   Users,
   UserCheck,
   Sliders,
+  Archive,
   Activity,
   MessagesSquare,
   Bell,
@@ -28,7 +29,6 @@ import {
 import ProfileModal from './ProfileModal';
 import showAlert from '../utils/alert';
 import { getInitialTheme, toggleTheme } from '../utils/theme';
-import { scrollToTargetById } from '../utils/useSubmenuAutoScroll';
 import { hasPermission, resolveRoleLabel } from '../utils/access-control';
 
 const MENU_GROUPS = [
@@ -91,7 +91,8 @@ const MENU_GROUPS = [
         children: [
           { to: '/grades#grades-list', label: 'Rekap Semua Nilai' },
           { to: '/grades?status=completed#grades-list', label: 'Course Selesai' },
-          { to: '/grades?status=in_progress#grades-list', label: 'Sedang Berjalan' }
+          { to: '/grades?status=in_progress#grades-list', label: 'Sedang Berjalan' },
+          { to: '/certificates', label: 'Sertifikat & Penghargaan', adminOrTeacherOnly: true }
         ]
       }
     ]
@@ -109,7 +110,8 @@ const MENU_GROUPS = [
         children: [
           { to: '/grades#grades-list', label: 'Rekap Semua Nilai' },
           { to: '/grades?status=completed#grades-list', label: 'Course Selesai' },
-          { to: '/grades?status=in_progress#grades-list', label: 'Sedang Berjalan' }
+          { to: '/grades?status=in_progress#grades-list', label: 'Sedang Berjalan' },
+          { to: '/certificates', label: 'Sertifikat & Penghargaan', adminOrTeacherOnly: true }
         ]
       },
       {
@@ -137,7 +139,7 @@ const MENU_GROUPS = [
           { to: '/users?role=teacher#users-list', label: 'Daftar Teacher' },
           { to: '/users?role=reviewer#users-list', label: 'Daftar Reviewer' },
           { to: '/users?role=admin#users-list', label: 'Daftar Admin' },
-          { to: '/users#add-user', label: '+ Tambah Pengguna', permission: 'users.manage' }
+          { to: '/users/new', label: '+ Tambah Pengguna', permission: 'users.manage' }
         ]
       },
       {
@@ -155,7 +157,8 @@ const MENU_GROUPS = [
         ]
       },
       { id: 'roles', to: '/roles', Icon: KeyRound, label: 'Role & Hak Akses', permission: 'roles.manage' },
-      { id: 'settings-api', to: '/settings/api', Icon: Sliders, label: 'Atur API', permission: 'settings.api' }
+      { id: 'settings-api', to: '/settings/api', Icon: Sliders, label: 'Atur API', permission: 'settings.api' },
+      { id: 'settings-backup', to: '/settings/backup', Icon: Archive, label: 'Backup Data', permission: 'settings.api' }
     ]
   },
   {
@@ -197,6 +200,13 @@ const MENU_GROUPS = [
           { to: '/notifications?filter=announcement#notifications-list', label: 'Pengumuman' },
           { to: '/notifications#send-notification', label: '+ Kirim Notifikasi', permission: 'notifications.send' }
         ]
+      },
+      {
+        id: 'support-chat',
+        to: '/support-chat',
+        Icon: MessagesSquare,
+        label: 'Pusat Bantuan',
+        adminOnly: true
       }
     ]
   }
@@ -269,10 +279,16 @@ function isSubmenuMatch(targetTo, location, allSiblings = []) {
 
 function isParentRouteActive(item, location) {
   const base = item.baseTo || item.to;
-  if (!base) return false;
-  return base === '/'
-    ? location.pathname === '/'
-    : location.pathname === base || location.pathname.startsWith(`${base}/`);
+  const baseActive = base
+    ? (base === '/'
+      ? location.pathname === '/'
+      : location.pathname === base || location.pathname.startsWith(`${base}/`))
+    : false;
+  if (baseActive) return true;
+  if (Array.isArray(item.children) && item.children.length > 0) {
+    return item.children.some((child) => isSubmenuMatch(child.to, location, item.children));
+  }
+  return false;
 }
 
 export default function Sidebar({ user, onLogout, open, onClose, collapsed, onToggleCollapse, onUserUpdated }) {
@@ -348,6 +364,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
     if (item.teacherOnly && user?.role !== 'teacher') return false;
     if (item.nonTeacherOnly && user?.role === 'teacher') return false;
     if (item.adminOnly && !isAdmin) return false;
+    if (item.adminOrTeacherOnly && !['admin', 'teacher'].includes(String(user?.role || '').toLowerCase())) return false;
     if (item.permission && !hasPermission(user, item.permission)) return false;
     return true;
   };
@@ -406,9 +423,9 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
         >
           <Link to="/" onClick={() => onClose?.()} className="flex min-w-0 items-center gap-2.5">
             <img
-              src="/assets/img/icon/denso-vector-logo.png"
+              src="/assets/img/icon/denso-vector-logo-dark.png"
               alt="Logo DENSO"
-              className="size-8 shrink-0 rounded-md bg-white p-0.5 object-contain"
+              className="size-8 shrink-0 object-contain"
             />
             {isExpanded && (
               <div className="min-w-0">
@@ -576,7 +593,6 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                         <div className="ml-[19px] mt-1 space-y-0.5 border-l border-white/15 pl-3">
                           {link.children.map(child => {
                             const childActive = isSubmenuMatch(child.to, location, link.children);
-                            const [, hashTarget = ''] = child.to.split('#');
                             return (
                               <Link
                                 key={child.to}
@@ -585,9 +601,6 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                                 onClick={() => {
                                   if (menuSearch) setMenuSearch('');
                                   onClose?.();
-                                  if (hashTarget) {
-                                    window.requestAnimationFrame(() => scrollToTargetById(hashTarget));
-                                  }
                                 }}
                                 className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12.5px] transition-colors ${
                                   childActive

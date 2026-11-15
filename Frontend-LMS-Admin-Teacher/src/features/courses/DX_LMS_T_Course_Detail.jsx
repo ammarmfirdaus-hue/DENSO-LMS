@@ -74,7 +74,8 @@ function youtubeEmbed(value = '') {
  * serta pengajuan materi yang sedang berada dalam alur persetujuan.
  */
 export default function CourseDetailPage() {
-  const { id } = useParams();
+  const { id: legacyId, publicId } = useParams();
+  const id = publicId || legacyId;
   const user = useOutletContext();
   const isAdmin = user?.role === 'admin';
   const canManageCover = hasPermission(user, 'courses.manage_cover');
@@ -549,6 +550,7 @@ export default function CourseDetailPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Sesi Pembelajaran"
+          to="#course-sessions"
           value={sessions.length}
           icon={<CalendarDays className="size-5" />}
           tone="secondary"
@@ -556,6 +558,7 @@ export default function CourseDetailPage() {
         />
         <StatCard
           label="Materi Terbit"
+          to="#course-sessions"
           value={publishedCount}
           icon={<BookOpen className="size-5" />}
           tone="tertiary"
@@ -563,6 +566,7 @@ export default function CourseDetailPage() {
         />
         <StatCard
           label="Dalam Persetujuan"
+          to="#course-sessions"
           value={pendingCount}
           icon={<Clock className="size-5" />}
           tone="warning"
@@ -571,7 +575,7 @@ export default function CourseDetailPage() {
       </section>
 
       {/* Daftar Sesi & Materi */}
-      <section className="space-y-4">
+      <section id="course-sessions" className="space-y-4 scroll-mt-20">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
             Struktur Pembelajaran
