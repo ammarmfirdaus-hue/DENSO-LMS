@@ -73,7 +73,7 @@ $courses = array_map(static function (array $course): array {
             <p class="mt-0.5 text-[12.5px] text-[#64748B]">Akses materi, course, dan progres belajar Anda.</p>
             <label class="relative mt-3 block">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#64748B]">search</span>
-                <input id="dashboardCourseSearchMobile" type="search" oninput="var d=document.getElementById('dashboardCourseSearch');if(d){d.value=this.value;d.dispatchEvent(new Event('input'));}" class="h-10 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] pl-10 pr-4 text-[13px]" placeholder="Cari course..." aria-label="Cari course di dashboard">
+                <input id="dashboardCourseSearchMobile" type="text" oninput="var d=document.getElementById('dashboardCourseSearch');if(d){d.value=this.value;d.dispatchEvent(new Event('input'));}" class="h-10 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] pl-10 pr-4 text-[13px]" placeholder="Cari course..." aria-label="Cari course di dashboard">
             </label>
         </section>
 

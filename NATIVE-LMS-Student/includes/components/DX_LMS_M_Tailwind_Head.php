@@ -87,6 +87,24 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
         font-display: swap;
         src: url('<?= $base_path ?>assets/fonts/DX_LMS_M_MaterialSymbolsOutlined.ttf') format('truetype');
     }
+
+    /* Sembunyikan tombol cancel/clear bawaan browser (Chromium/Safari/Edge) agar tidak terjadi duplikasi tombol 'X' */
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-decoration,
+    input[type="search"]::-webkit-search-results-button,
+    input[type="search"]::-webkit-search-results-decoration {
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    input[type="search"]::-ms-clear,
+    input[type="search"]::-ms-reveal {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
 </style>
 
 <!-- =====================================================

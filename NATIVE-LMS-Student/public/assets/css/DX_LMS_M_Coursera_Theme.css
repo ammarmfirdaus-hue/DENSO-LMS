@@ -480,6 +480,23 @@ html.dark .text-on-surface-variant { color: var(--crs-text-muted) !important; }
 /* ============================================================
    SEARCH PILL INPUT
    ============================================================ */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+input[type="search"]::-ms-clear,
+input[type="search"]::-ms-reveal {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
 main input[type="search"],
 [data-student-courses] #searchInput,
 #dashboardCourseSearch {

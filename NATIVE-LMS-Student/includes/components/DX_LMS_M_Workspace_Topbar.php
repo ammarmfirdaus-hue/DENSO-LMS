@@ -225,10 +225,20 @@ $wtCanReturnTeacher = !empty($_SESSION['can_return_teacher']) || (
         if (input.value.trim()) updateSuggestions();
     });
     input.addEventListener('input', updateSuggestions);
+    input.addEventListener('search', function() {
+        syncIndicators();
+        updateSuggestions();
+    });
     input.addEventListener('keydown', function(e) {
         var opts = Array.from(dropdown.querySelectorAll('.dls-workspace-search-item'));
         if (e.key === 'Escape') {
-            dropdown.classList.add('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            } else if (input.value) {
+                input.value = '';
+                syncIndicators();
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
             return;
         }
         if (!opts.length || dropdown.classList.contains('hidden')) return;
