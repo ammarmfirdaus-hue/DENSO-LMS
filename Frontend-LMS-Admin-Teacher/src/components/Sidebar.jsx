@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutGrid,
@@ -158,7 +158,17 @@ const MENU_GROUPS = [
       },
       { id: 'roles', to: '/roles', Icon: KeyRound, label: 'Role & Hak Akses', permission: 'roles.manage' },
       { id: 'settings-api', to: '/settings/api', Icon: Sliders, label: 'Atur API', permission: 'settings.api' },
-      { id: 'settings-backup', to: '/settings/backup', Icon: Archive, label: 'Backup Data', permission: 'settings.api' }
+      {
+        id: 'settings-backup',
+        baseTo: '/settings/backup',
+        Icon: Archive,
+        label: 'Backup Data',
+        permission: 'settings.api',
+        children: [
+          { to: '/settings/backup', label: 'Backup Data', end: true },
+          { to: '/settings/backup/restore', label: 'Pemulihan Data' }
+        ]
+      }
     ]
   },
   {
@@ -221,6 +231,16 @@ function isSubmenuMatch(targetTo, location, allSiblings = []) {
       ? location.pathname === '/'
       : location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`);
   if (!pathMatches) return false;
+
+  // Jika ada sibling dengan path lebih spesifik (mis. /settings/backup/restore vs /settings/backup),
+  // path induk tidak boleh ikut aktif ganda.
+  const hasMoreSpecificSiblingPath = allSiblings.some((sibling) => {
+    const [sibPathAndSearch] = sibling.to.split('#');
+    const [sibPath] = sibPathAndSearch.split('?');
+    if (!sibPath || sibPath === targetPath || sibPath.length <= targetPath.length) return false;
+    return location.pathname === sibPath || location.pathname.startsWith(`${sibPath}/`);
+  });
+  if (hasMoreSpecificSiblingPath) return false;
 
   const currentParams = new URLSearchParams(location.search);
   const currentHash = (location.hash || '').replace(/^#/, '');
@@ -312,6 +332,56 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
   });
 
   const isExpanded = !collapsed || isHovered || open;
+  const navRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
+
+  useEffect(() => {
+    shouldAutoScrollRef.current = true;
+  }, [location.pathname, location.search, location.hash, isExpanded]);
+
+  useEffect(() => {
+    if (!shouldAutoScrollRef.current) return undefined;
+
+    const rafId = window.requestAnimationFrame(() => {
+      const navEl = navRef.current;
+      if (!navEl) return;
+
+      const activeEl =
+        navEl.querySelector('[data-sidebar-active="true"], [aria-current="page"]') ||
+        navEl.querySelector('[data-sidebar-active-parent="true"]');
+
+      if (!activeEl) {
+        shouldAutoScrollRef.current = false;
+        return;
+      }
+
+      if (activeEl.hasAttribute('data-sidebar-active-parent') && activeEl.getAttribute('aria-expanded') === 'false') {
+        return;
+      }
+
+      shouldAutoScrollRef.current = false;
+
+      const navRect = navEl.getBoundingClientRect();
+      const elRect = activeEl.getBoundingClientRect();
+      const padding = 12;
+      const isOutOfView = elRect.top < navRect.top + padding || elRect.bottom > navRect.bottom - padding;
+
+      if (isOutOfView) {
+        const targetTop =
+          navEl.scrollTop +
+          (elRect.top - navRect.top) -
+          navEl.clientHeight / 2 +
+          elRect.height / 2;
+
+        navEl.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth'
+        });
+      }
+    });
+
+    return () => window.cancelAnimationFrame(rafId);
+  }, [location.pathname, location.search, location.hash, isExpanded, openMenus]);
 
   useEffect(() => {
     setOpenMenus((prev) => {
@@ -493,7 +563,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
         )}
 
         {/* Navigation Links (design.md: white/70 inactive, solid primary red active) */}
-        <nav className="dls-scrollbar flex-1 space-y-4 overflow-y-auto px-3 py-4">
+        <nav ref={navRef} className="dls-scrollbar flex-1 space-y-4 overflow-y-auto px-3 py-4">
           {filteredGroups.length === 0 && query ? (
             <div className="px-3 py-6 text-center text-white/60">
               <p className="text-xs">Menu &quot;{menuSearch}&quot; tidak ditemukan</p>
@@ -550,6 +620,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                         to={link.baseTo}
                         onClick={() => onClose?.()}
                         title={link.label}
+                        data-sidebar-active={parentActive ? 'true' : undefined}
                         className={`flex items-center justify-center rounded-md px-0 py-2 text-[13px] font-semibold transition-colors ${
                           parentActive
                             ? 'bg-primary text-white shadow-xs'
@@ -566,6 +637,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                       <button
                         type="button"
                         data-dls-action-ignore="true"
+                        data-sidebar-active-parent={parentActive ? 'true' : undefined}
                         aria-expanded={submenuOpen}
                         onClick={() => toggleMenu(link.id)}
                         className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-[13px] font-semibold transition-colors ${
@@ -598,6 +670,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                                 key={child.to}
                                 to={child.to}
                                 state={{ submenuScrollTs: Date.now() }}
+                                data-sidebar-active={childActive ? 'true' : undefined}
                                 onClick={() => {
                                   if (menuSearch) setMenuSearch('');
                                   onClose?.();

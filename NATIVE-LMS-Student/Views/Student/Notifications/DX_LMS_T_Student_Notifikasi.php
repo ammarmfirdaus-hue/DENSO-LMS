@@ -31,7 +31,7 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
                 ?>
             </div>
 
-            <div class="mb-[18px] grid min-w-0 gap-[12px] md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div class="mb-[18px] grid min-w-0 gap-[12px] md:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
                 <label class="relative block min-w-0">
                     <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[#737373]" aria-hidden="true">search</span>
                     <span class="sr-only">Cari notifikasi</span>
@@ -44,6 +44,10 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
                 <button type="button" id="notificationMarkAll" class="fd-btn fd-btn-secondary fd-btn-md shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40">
                     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">done_all</span>
                     Tandai semua dibaca
+                </button>
+                <button type="button" id="notificationClearAll" class="fd-btn fd-btn-secondary fd-btn-md shrink-0 whitespace-nowrap text-[#DC2626] hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-40">
+                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
+                    Hapus Riwayat
                 </button>
             </div>
 

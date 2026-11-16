@@ -4,6 +4,7 @@ ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/includes/Config.php';
+require_once __DIR__ . '/includes/DevLogger.php';
 require_once __DIR__ . '/includes/Security.php';
 require_once __DIR__ . '/Core/DX_LMS_M_Request_Middleware.php';
 require_once __DIR__ . '/Core/DX_LMS_M_Route_Catalog.php';
@@ -27,6 +28,7 @@ if (APP_ENV === 'production' || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] 
 DX_LMS_M_Request_Middleware::handle();
 
 date_default_timezone_set('Asia/Jakarta');
+dlsInstallDevErrorHandlers();
 $router = new DX_LMS_M_Router();
 $router->add('/', 'DX_LMS_M_Auth@login');
 $router->add('/login', 'DX_LMS_M_Auth@login');

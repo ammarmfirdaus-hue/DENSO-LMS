@@ -34,6 +34,9 @@ const { registerNotificationJobHandler } = require('./services/notification-job-
 const { registerBackupJobHandler } = require('./services/backup-job-handler');
 const { loadSystemSettings } = require('./services/system-settings');
 const { closeQuizStore } = require('./services/quiz-store');
+const { logAppEvent, requestLoggerMiddleware, installProcessErrorHandlers } = require('./services/app-logger');
+
+installProcessErrorHandlers();
 
 const app = express();
 app.disable('x-powered-by');
@@ -53,6 +56,7 @@ app.use((req, res, next) => {
   };
   next();
 });
+app.use(requestLoggerMiddleware());
 
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
@@ -112,9 +116,15 @@ async function start() {
   try {
     await pool.connect();
     await loadSystemSettings();
+    logAppEvent({ level: 'INFO', action: 'CONNECT', resource: 'DATABASE', message: 'Database connection established' });
   } catch (error) {
-    console.error('Database connection failed. Check server configuration.');
-    if (env.NODE_ENV !== 'production') console.error(error.message);
+    logAppEvent({
+      level: 'ERROR',
+      action: 'CONNECT',
+      resource: 'DATABASE',
+      message: `Database connection failed: ${env.NODE_ENV !== 'production' ? error.message : 'Check server configuration.'}`,
+      error: env.NODE_ENV !== 'production' ? error : undefined
+    });
     process.exit(1);
     return;
   }
@@ -132,11 +142,22 @@ async function start() {
   try {
     stopSync = await startStudentSync();
   } catch (error) {
-    console.error('Student database sync is unavailable; the Admin/Teacher API will continue without syncing Student data.');
-    if (env.NODE_ENV !== 'production') console.error(error.message);
+    logAppEvent({
+      level: 'WARNING',
+      action: 'SYNC',
+      resource: 'STUDENT_DB',
+      message: `Student database sync unavailable (${env.NODE_ENV !== 'production' ? error.message : 'disabled'})`
+    });
   }
 
-  const server = app.listen(env.PORT, '127.0.0.1', () => console.log(`DLS API listening at http://127.0.0.1:${env.PORT}`));
+  const server = app.listen(env.PORT, '127.0.0.1', () => {
+    logAppEvent({
+      level: 'INFO',
+      action: 'START',
+      resource: 'SERVER',
+      message: `DLS API listening at http://127.0.0.1:${env.PORT}`
+    });
+  });
   const stop = async () => {
     server.close();
     await stopSync();

@@ -1,12 +1,34 @@
+const { logAppEvent, inferActionAndResource } = require('../services/app-logger');
+
 function notFound(_req, res) {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Endpoint tidak ditemukan.' } });
 }
 
-function errorHandler(error, _req, res, _next) {
+function errorHandler(error, req, res, _next) {
   const status = error.code === 'LIMIT_FILE_SIZE' || error.type === 'entity.too.large' ? 413
     : error instanceof SyntaxError && error.status === 400 ? 400
       : (Number.isInteger(error.status) ? error.status : 500);
-  if (status >= 500) console.error(error);
+  const { action, resource, cleanPath } = inferActionAndResource(req?.method || 'GET', req?.originalUrl || '/');
+  if (status >= 500) {
+    logAppEvent({
+      level: 'ERROR',
+      action,
+      resource,
+      message: `${req?.method || 'REQ'} ${cleanPath} failed: ${error.message || 'Internal error'}`,
+      requestId: req?.requestId,
+      user: req?.user?.npk || req?.user?.id,
+      error
+    });
+  } else if (status === 400 || status === 413 || status === 422) {
+    logAppEvent({
+      level: 'WARNING',
+      action: 'VALIDATION',
+      resource,
+      message: `${req?.method || 'REQ'} ${cleanPath} (${status}): ${error.message || 'Validation error'}`,
+      requestId: req?.requestId,
+      user: req?.user?.npk || req?.user?.id
+    });
+  }
   const message = error.code === 'LIMIT_FILE_SIZE'
     ? 'Ukuran file melebihi batas upload.'
     : status === 413

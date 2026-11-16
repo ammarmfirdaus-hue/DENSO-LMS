@@ -361,7 +361,7 @@ export default function ActivityPage() {
                         ) : isCompleted ? (
                           <StatusBadge status="completed" label="Berhasil" dot />
                         ) : isStopped ? (
-                          <StatusBadge status="pending" label="Dihentikan" dot />
+                          <StatusBadge status="dropped" label="Dihentikan" dot />
                         ) : (
                           <span className="rounded-md bg-surface-low px-2.5 py-0.5 text-[11px] font-semibold capitalize text-on-surface-variant dark:bg-slate-800 dark:text-slate-300">
                             {item.activity_type || 'Umum'}

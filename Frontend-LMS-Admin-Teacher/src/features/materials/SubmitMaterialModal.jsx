@@ -18,6 +18,7 @@ import {
 import { api } from '../../api/client';
 import Button from '../../components/Button';
 import SearchableSelect from '../../components/SearchableSelect';
+import StatusBadge from '../../components/StatusBadge';
 import TinyEditor from '../../components/TinyEditor';
 import showAlert from '../../utils/alert';
 
@@ -360,10 +361,11 @@ export default function SubmitMaterialModal({
                   Tambah &amp; Ajukan Materi Pembelajaran
                 </h3>
                 {submittedCount > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    <CheckCircle2 className="size-3.5" />
-                    {submittedCount} materi tersimpan
-                  </span>
+                  <StatusBadge
+                    status="success"
+                    label={`${submittedCount} materi tersimpan`}
+                    dot
+                  />
                 )}
               </div>
               <p className="text-xs text-muted">

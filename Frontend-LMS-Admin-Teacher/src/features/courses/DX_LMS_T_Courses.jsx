@@ -434,7 +434,7 @@ export default function CoursesPage() {
             {coursePage.pagedItems.map((course) => (
               <article
                 key={course.course_id}
-                className="dls-card-surface group flex flex-col overflow-hidden rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="dls-card-surface dls-card-interactive group flex flex-col overflow-hidden rounded-xl"
               >
                 <CourseCoverThumbnail course={course} />
 

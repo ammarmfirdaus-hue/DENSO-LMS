@@ -518,11 +518,89 @@
         return steps;
     }
 
+    var activeStudentDriver = null;
+    var isDestroyingStudentTour = false;
+
+    function pulseStudentBubble(bubbleEl) {
+        if (!bubbleEl || typeof bubbleEl.animate !== 'function') return;
+        bubbleEl.animate(
+            [
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.22)', offset: 0.45 },
+                { transform: 'scale(0.92)', offset: 0.75 },
+                { transform: 'scale(1)' }
+            ],
+            { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        );
+    }
+
+    function animateStudentTourSuckBack(driverInstance) {
+        if (isDestroyingStudentTour) return;
+        isDestroyingStudentTour = true;
+
+        var finishDestroy = function() {
+            try { driverInstance.destroy(); } catch (e) {}
+            if (activeStudentDriver === driverInstance) activeStudentDriver = null;
+            isDestroyingStudentTour = false;
+        };
+
+        var popoverEl = document.querySelector('.driver-popover');
+        var overlayEl = document.querySelector('.driver-overlay');
+        var bubbleEl = document.getElementById('tour-student-guide-btn');
+
+        if (!popoverEl || typeof popoverEl.animate !== 'function') {
+            finishDestroy();
+            return;
+        }
+
+        popoverEl.style.pointerEvents = 'none';
+        var popRect = popoverEl.getBoundingClientRect();
+        var targetRect = bubbleEl
+            ? bubbleEl.getBoundingClientRect()
+            : { left: window.innerWidth - 44, top: window.innerHeight - 44, width: 44, height: 44 };
+
+        var dx = targetRect.left + targetRect.width / 2 - (popRect.left + popRect.width / 2);
+        var dy = targetRect.top + targetRect.height / 2 - (popRect.top + popRect.height / 2);
+
+        if (overlayEl && typeof overlayEl.animate === 'function') {
+            overlayEl.animate([{ opacity: 1 }, { opacity: 0 }], {
+                duration: 360,
+                easing: 'ease-out',
+                fill: 'forwards'
+            });
+        }
+
+        var anim = popoverEl.animate(
+            [
+                { transform: 'translate3d(0px, 0px, 0) scale(1)', opacity: 1, filter: 'blur(0px)' },
+                { transform: 'translate3d(' + (dx * 0.45) + 'px, ' + (dy * 0.45) + 'px, 0) scale(0.55)', opacity: 0.85, offset: 0.45 },
+                { transform: 'translate3d(' + dx + 'px, ' + dy + 'px, 0) scale(0.06)', opacity: 0, filter: 'blur(2px)' }
+            ],
+            {
+                duration: 400,
+                easing: 'cubic-bezier(0.32, 0, 0.24, 1)',
+                fill: 'forwards'
+            }
+        );
+
+        if (bubbleEl) {
+            window.setTimeout(function() { pulseStudentBubble(bubbleEl); }, 280);
+        }
+
+        anim.onfinish = finishDestroy;
+        anim.oncancel = finishDestroy;
+    }
+
     window.startStudentUserGuide = function(startIndex, includeBubble) {
         if (typeof window.driver === 'undefined' || typeof window.driver.js === 'undefined') {
             console.warn('Driver.js belum siap atau gagal dimuat.');
             return;
         }
+        if (activeStudentDriver) {
+            try { activeStudentDriver.destroy(); } catch (e) {}
+            activeStudentDriver = null;
+        }
+        isDestroyingStudentTour = false;
 
         var activeTab = getActiveTab();
         var steps = getAvailableSteps(activeTab).slice();
@@ -560,9 +638,13 @@
                     } catch (e) {}
                 }
             },
+            onDestroyStarted: function() {
+                animateStudentTourSuckBack(driverInstance);
+            },
             steps: steps
         });
 
+        activeStudentDriver = driverInstance;
         driverInstance.drive(idx);
     };
 
@@ -584,6 +666,7 @@
 
         var menu = document.createElement('div');
         menu.id = 'dls-student-guide-menu';
+        menu.setAttribute('data-dls-action-ignore', 'true');
         menu.style.cssText = [
             'display:none',
             'position:fixed',
@@ -599,8 +682,33 @@
         ].join(';');
         document.body.appendChild(menu);
 
-        function closeMenu() {
-            menu.style.display = 'none';
+        var isClosingMenu = false;
+        function closeMenu(immediate) {
+            if (menu.style.display === 'none' || isClosingMenu) return;
+            if (immediate || typeof menu.animate !== 'function') {
+                menu.style.display = 'none';
+                return;
+            }
+            isClosingMenu = true;
+            var mRect = menu.getBoundingClientRect();
+            var bRect = bubble.getBoundingClientRect();
+            var dx = bRect.left + bRect.width / 2 - (mRect.left + mRect.width / 2);
+            var dy = bRect.top + bRect.height / 2 - (mRect.top + mRect.height / 2);
+            var anim = menu.animate(
+                [
+                    { transform: 'translate3d(0px, 0px, 0) scale(1)', opacity: 1 },
+                    { transform: 'translate3d(' + dx + 'px, ' + dy + 'px, 0) scale(0.08)', opacity: 0 }
+                ],
+                { duration: 260, easing: 'cubic-bezier(0.32, 0, 0.24, 1)', fill: 'forwards' }
+            );
+            window.setTimeout(function() { pulseStudentBubble(bubble); }, 170);
+            var done = function() {
+                isClosingMenu = false;
+                menu.style.display = 'none';
+                try { anim.cancel(); } catch (e) {}
+            };
+            anim.onfinish = done;
+            anim.oncancel = done;
         }
 
         function openMenu() {
@@ -642,7 +750,7 @@
                         '<span style="display:inline-block;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;">' + roleText + '</span>' +
                         '<h3 style="margin:6px 0 0;font-size:14px;font-weight:700;">' + meta.title + '</h3>' +
                     '</div>' +
-                    '<button type="button" id="dls-guide-close" aria-label="Tutup" style="border:none;background:transparent;font-size:14px;cursor:pointer;color:#64748b;padding:2px 6px;">&#10005;</button>' +
+                    '<button type="button" id="dls-guide-close" data-dls-action-ignore="true" aria-label="Tutup" style="border:none;background:transparent;font-size:14px;cursor:pointer;color:#64748b;padding:2px 6px;">&#10005;</button>' +
                 '</div>' +
                 '<p style="margin:6px 0 10px;font-size:12px;line-height:1.45;color:#475569;">' + meta.summary + '</p>' +
                 (steps.length ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Sorot Bagian Halaman (Interaktif)</div><div style="max-height:185px;overflow-y:auto;">' + listHtml + '</div>' : '') +
@@ -651,12 +759,12 @@
             menu.style.display = 'block';
 
             var closeBtn = document.getElementById('dls-guide-close');
-            if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+            if (closeBtn) closeBtn.addEventListener('click', function() { closeMenu(false); });
 
             var startAllBtn = document.getElementById('dls-guide-start-all');
             if (startAllBtn) {
                 startAllBtn.addEventListener('click', function() {
-                    closeMenu();
+                    closeMenu(true);
                     window.startStudentUserGuide(0, true);
                 });
             }
@@ -664,7 +772,7 @@
             Array.prototype.forEach.call(menu.querySelectorAll('[data-guide-step]'), function(btn) {
                 btn.addEventListener('click', function() {
                     var idx = parseInt(btn.getAttribute('data-guide-step'), 10) || 0;
-                    closeMenu();
+                    closeMenu(true);
                     window.startStudentUserGuide(idx, false);
                 });
             });

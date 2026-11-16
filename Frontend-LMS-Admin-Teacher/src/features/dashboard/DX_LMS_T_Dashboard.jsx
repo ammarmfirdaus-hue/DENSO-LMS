@@ -617,7 +617,7 @@ export default function DashboardPage() {
       <section
         id="quick-actions"
         aria-labelledby="quick-actions-title"
-        className="rounded-2xl border border-outline bg-surface-lowest p-4 sm:p-5"
+        className="dls-card-surface rounded-xl p-4 sm:p-5"
       >
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -635,7 +635,7 @@ export default function DashboardPage() {
             <Link
               key={key}
               to={to}
-              className="group flex min-h-32 flex-col rounded-xl border border-outline/80 bg-surface-lowest p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-surface-low/60 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="dls-card-surface dls-card-interactive group flex min-h-32 flex-col rounded-xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <span className={`grid size-9 place-items-center rounded-lg ${iconClass}`}>
                 <Icon className="size-4" aria-hidden="true" />

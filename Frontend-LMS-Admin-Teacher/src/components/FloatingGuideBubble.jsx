@@ -24,7 +24,57 @@ export default function FloatingGuideBubble({ role }) {
   const [isDragging, setIsDragging] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isClosingMenu, setIsClosingMenu] = useState(false);
   const [guideInfo, setGuideInfo] = useState(null);
+
+  function closeMenuWithSuck() {
+    if (!menuOpen || isClosingMenu) return;
+    const menuEl = menuRef.current;
+    const bubbleEl = bubbleRef.current;
+    if (!menuEl || typeof menuEl.animate !== 'function') {
+      setMenuOpen(false);
+      return;
+    }
+
+    setIsClosingMenu(true);
+    const mRect = menuEl.getBoundingClientRect();
+    const bRect = bubbleEl?.getBoundingClientRect() || {
+      left: window.innerWidth - 44,
+      top: window.innerHeight - 44,
+      width: 44,
+      height: 44
+    };
+    const dx = bRect.left + bRect.width / 2 - (mRect.left + mRect.width / 2);
+    const dy = bRect.top + bRect.height / 2 - (mRect.top + mRect.height / 2);
+
+    const anim = menuEl.animate(
+      [
+        { transform: 'translate3d(0px, 0px, 0) scale(1)', opacity: 1 },
+        { transform: `translate3d(${dx}px, ${dy}px, 0) scale(0.08)`, opacity: 0 }
+      ],
+      {
+        duration: 260,
+        easing: 'cubic-bezier(0.32, 0, 0.24, 1)',
+        fill: 'forwards'
+      }
+    );
+
+    if (bubbleEl) {
+      window.setTimeout(() => {
+        bubbleEl.classList.remove('dls-guide-absorb-pulse');
+        void bubbleEl.offsetWidth;
+        bubbleEl.classList.add('dls-guide-absorb-pulse');
+        window.setTimeout(() => bubbleEl.classList.remove('dls-guide-absorb-pulse'), 450);
+      }, 170);
+    }
+
+    const done = () => {
+      setIsClosingMenu(false);
+      setMenuOpen(false);
+    };
+    anim.onfinish = done;
+    anim.oncancel = done;
+  }
 
   function clampPosition(x, y, el) {
     const margin = 12;
@@ -40,15 +90,17 @@ export default function FloatingGuideBubble({ role }) {
 
   function toggleMenu() {
     if (!menuOpen) {
+      setIsClosingMenu(false);
       setGuideInfo(getPageGuideInfo(pathname, role));
       setMenuOpen(true);
       setShowTooltip(false);
     } else {
-      setMenuOpen(false);
+      closeMenuWithSuck();
     }
   }
 
   useEffect(() => {
+    setIsClosingMenu(false);
     setMenuOpen(false);
   }, [pathname]);
 
@@ -61,11 +113,11 @@ export default function FloatingGuideBubble({ role }) {
         bubbleRef.current &&
         !bubbleRef.current.contains(e.target)
       ) {
-        setMenuOpen(false);
+        closeMenuWithSuck();
       }
     }
     function handleKey(e) {
-      if (e.key === 'Escape') setMenuOpen(false);
+      if (e.key === 'Escape') closeMenuWithSuck();
     }
     document.addEventListener('pointerdown', handleOutside);
     document.addEventListener('keydown', handleKey);
@@ -199,7 +251,8 @@ export default function FloatingGuideBubble({ role }) {
             </div>
             <button
               type="button"
-              onClick={() => setMenuOpen(false)}
+              data-dls-action-ignore="true"
+              onClick={closeMenuWithSuck}
               className="rounded p-1 text-xs text-muted hover:bg-surface-low"
               aria-label="Tutup panduan"
             >

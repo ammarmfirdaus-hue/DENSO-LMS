@@ -15,6 +15,7 @@ import { API_BASE, api } from '../../api/client';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
 import SearchableSelect from '../../components/SearchableSelect';
+import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
 
 const AWARD_TYPE_OPTIONS = [
@@ -372,9 +373,7 @@ export default function DX_LMS_T_Certificates({ session }) {
                         )}
                       </td>
                       <td className="py-3.5 px-4 align-top">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${meta.badgeClass}`}>
-                          {meta.label}
-                        </span>
+                        <StatusBadge status={item.award_type || 'certificate'} label={meta.label} dot />
                       </td>
                       <td className="py-3.5 px-4 align-top">
                         <div className="font-medium text-gray-900 dark:text-white">

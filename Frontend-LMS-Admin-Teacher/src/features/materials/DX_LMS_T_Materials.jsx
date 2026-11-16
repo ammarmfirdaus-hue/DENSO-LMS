@@ -792,7 +792,7 @@ export default function MaterialsPage() {
               return (
                 <article
                   key={item.material_id}
-                  className="dls-card-surface group relative flex flex-col justify-between overflow-hidden rounded-xl transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="dls-card-surface dls-card-interactive group relative flex flex-col justify-between overflow-hidden rounded-xl"
                 >
                   <div className="h-1 w-full bg-tertiary" />
 

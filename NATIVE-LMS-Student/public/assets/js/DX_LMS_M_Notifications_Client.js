@@ -9,6 +9,7 @@
   const countLabel = document.getElementById('notificationResultCount');
   const unreadLabel = document.querySelector('[data-notification-unread-count]');
   const markAll = document.getElementById('notificationMarkAll');
+  const clearAll = document.getElementById('notificationClearAll');
   const moreButton = document.getElementById('notificationLoadMore');
   const tabs = Array.from(document.querySelectorAll('.notification-filter'));
   const messageBox = document.getElementById('notificationMessage');
@@ -90,12 +91,19 @@
       footerLeft.append(popupBadge);
     }
     footer.append(footerLeft);
+    const footerActions = make('div', 'flex items-center gap-[6px]');
     if (!read) {
       const readButton = make('button', 'fd-btn fd-btn-ghost fd-btn-sm rounded-full text-[#DC2626] font-semibold hover:bg-[#FEF2F2]', 'Tandai dibaca');
       readButton.type = 'button';
       readButton.addEventListener('click', () => markRead(item.notification_id));
-      footer.append(readButton);
+      footerActions.append(readButton);
     }
+    const deleteButton = make('button', 'fd-btn fd-btn-ghost fd-btn-sm rounded-full text-[#737373] font-semibold hover:bg-[#FEF2F2] hover:text-[#DC2626]', 'Hapus');
+    deleteButton.type = 'button';
+    deleteButton.setAttribute('aria-label', `Hapus notifikasi ${item.title || ''}`.trim());
+    deleteButton.addEventListener('click', () => deleteNotification(item.notification_id));
+    footerActions.append(deleteButton);
+    footer.append(footerActions);
     body.append(footer);
     row.append(body);
     card.append(row);
@@ -117,6 +125,7 @@
     const unread = notifications.filter(item => !isRead(item)).length;
     if (unreadLabel) unreadLabel.textContent = String(unread);
     if (markAll) markAll.disabled = busy || unread === 0;
+    if (clearAll) clearAll.disabled = busy || notifications.length === 0;
   }
 
   async function refresh() {
@@ -143,6 +152,44 @@
       if (window.DLS?.error) window.DLS.error('Gagal Memperbarui Notifikasi', error.message);
     }
   }
+
+  async function deleteNotification(id) {
+    try {
+      await request(`/notifications/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (window.DLS?.toast) window.DLS.toast('Notifikasi dihapus dari riwayat Anda', 'success');
+      window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: 'notification_deleted' } }));
+      await refresh();
+    } catch (error) {
+      showMessage(error.message, true);
+      if (window.DLS?.error) window.DLS.error('Gagal Menghapus Notifikasi', error.message);
+    }
+  }
+
+  clearAll?.addEventListener('click', async () => {
+    const confirmed = window.DLS?.confirm
+      ? await window.DLS.confirm({
+          title: 'Hapus Semua Riwayat Notifikasi?',
+          text: 'Seluruh notifikasi di halaman Anda akan dihapus dari riwayat akun Anda. Notifikasi milik pengguna lain tetap aman.',
+          confirmText: 'Ya, Hapus Riwayat',
+          cancelText: 'Batal',
+          danger: true,
+          icon: 'warning'
+        })
+      : window.confirm('Hapus semua riwayat notifikasi Anda?');
+    if (!confirmed) return;
+    busy = true; render();
+    try {
+      await request('/notifications', { method: 'DELETE' });
+      if (window.DLS?.success) window.DLS.success('Riwayat Dihapus', 'Seluruh riwayat notifikasi Anda telah dibersihkan.');
+      window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: 'notification_cleared' } }));
+      await refresh();
+    } catch (error) {
+      showMessage(error.message, true);
+      if (window.DLS?.error) window.DLS.error('Gagal Menghapus Riwayat', error.message);
+    } finally {
+      busy = false; render();
+    }
+  });
 
   tabs.forEach(tab => tab.addEventListener('click', () => {
     activeFilter = tab.dataset.filter || 'all';

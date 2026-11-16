@@ -90,7 +90,7 @@ function apiStudentGrades(int $studentId): array
 function publishedStudentCourse(string $courseCode, int $studentId): ?array
 {
     if ($studentId < 1) return null;
-    $query = db()->prepare("SELECT c.course_id,c.course_code,c.title,c.description,c.category,c.thumbnail_path,
+    $query = db()->prepare("SELECT c.course_id,c.course_code,c.title,c.description,c.category,c.thumbnail_path,c.created_at,c.updated_at,
       COALESCE(e.progress,0) AS progress,COALESCE(e.enrollment_status,'available') AS enrollment_status,e.quiz_score,
       CASE WHEN e.enrollment_status IN ('active','completed') THEN 1 ELSE 0 END AS has_access,
       access_request.status AS access_status,access_request.request_type,access_request.request_note,access_request.decision_note
@@ -112,7 +112,8 @@ function publishedStudentCourse(string $courseCode, int $studentId): ?array
             'id' => $row['course_code'], 'title' => $row['title'], 'description' => $row['description'] ?? '',
             'thumbnail' => $thumbnailUrl, 'thumbnail_icon' => 'school', 'category' => $row['category'],
             'filters' => [$row['category']], 'modules_count' => 0, 'status' => 'belum_dimulai',
-            'progress' => 0, 'last_accessed' => null, 'sessions' => [], 'is_live' => true,
+            'progress' => 0, 'created_at' => $row['created_at'] ?? null, 'updated_at' => $row['updated_at'] ?? null,
+            'last_accessed' => null, 'sessions' => [], 'is_live' => true,
             'has_access' => false, 'access_status' => $accessStatus,
             'request_type' => $row['request_type'] ?? null, 'request_note' => $row['request_note'] ?? null,
             'decision_note' => $row['decision_note'] ?? null, 'enrollment_status' => $row['enrollment_status'],
@@ -193,7 +194,8 @@ function publishedStudentCourse(string $courseCode, int $studentId): ?array
         'id' => $row['course_code'], 'title' => $row['title'], 'description' => $row['description'] ?? '',
         'thumbnail' => $thumbnailUrl, 'thumbnail_icon' => 'school', 'category' => $row['category'],
         'filters' => [$row['category']], 'modules_count' => count($sessions), 'status' => $status,
-        'progress' => $progress, 'last_accessed' => date('Y-m-d H:i:s'), 'sessions' => $sessions, 'is_live' => true,
+        'progress' => $progress, 'created_at' => $row['created_at'] ?? null, 'updated_at' => $row['updated_at'] ?? null,
+        'last_accessed' => date('Y-m-d H:i:s'), 'sessions' => $sessions, 'is_live' => true,
         'has_access' => true, 'access_status' => $accessStatus,
         'quiz' => $quiz, 'quiz_score' => $row['quiz_score'] === null ? null : (float) $row['quiz_score'],
         'final_assessment' => ['status' => 'terkunci', 'history' => []],

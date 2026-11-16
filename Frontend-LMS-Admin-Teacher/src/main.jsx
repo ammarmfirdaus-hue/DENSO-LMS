@@ -22,6 +22,7 @@ const EnrollmentsPage = React.lazy(() => import('./features/enrollments/DX_LMS_T
 const RolesPage = React.lazy(() => import('./features/roles/DX_LMS_M_Role_Access'));
 const ApiSettingsPage = React.lazy(() => import('./features/settings/DX_LMS_M_Settings_Api'));
 const BackupPage = React.lazy(() => import('./features/settings/DX_LMS_M_Backup'));
+const BackupRestorePage = React.lazy(() => import('./features/settings/DX_LMS_M_Backup_Restore'));
 const CertificatesPage = React.lazy(() => import('./features/certificates/DX_LMS_T_Certificates'));
 const ReviewerPortalPage = React.lazy(() => import('./features/reviewer/DX_LMS_M_Reviewer_Portal'));
 import { canAccessStaffPortal, hasPermission } from './utils/access-control';
@@ -172,6 +173,7 @@ function Application() {
           <Route path="roles" element={protect('roles.manage', <RolesPage onPermissionsUpdated={refreshSession} />)} />
           <Route path="settings/api" element={protect('settings.api', <ApiSettingsPage />)} />
           <Route path="settings/backup" element={protect('settings.api', <BackupPage />)} />
+          <Route path="settings/backup/restore" element={protect('settings.api', <BackupRestorePage />)} />
           <Route path="*" element={<Navigate to={fallbackRoute || '/'} replace />} />
         </Route>
       </Routes>

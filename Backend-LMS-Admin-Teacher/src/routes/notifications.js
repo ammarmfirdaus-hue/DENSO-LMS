@@ -37,10 +37,15 @@ router.get('/unread-count', requirePermission('notifications.view'), async (req,
       .input('role', sql.VarChar(20), req.user.role)
       .input('npk', sql.VarChar(50), req.user.sub)
       .query(`SELECT COUNT_BIG(*) AS unread_count FROM dbo.lms_notifications n WITH (NOLOCK)
-        WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk) AND NOT EXISTS (
-          SELECT 1 FROM dbo.lms_notification_reads r WITH (NOLOCK)
-          WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
-        )`);
+        WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_reads r WITH (NOLOCK)
+            WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_deletes d WITH (NOLOCK)
+            WHERE d.notification_id=n.notification_id AND d.recipient_role=@role AND d.recipient_npk=@npk
+          )`);
     res.set('Cache-Control', 'private, no-store');
     res.json({ unreadCount: Number(result.recordset[0]?.unread_count || 0) });
   } catch (error) { next(error); }
@@ -99,6 +104,12 @@ router.get('/', requirePermission('notifications.view'), async (req, res, next) 
           AND r.recipient_npk = @npk
         WHERE n.audience_role = @role
           AND (n.recipient_npk IS NULL OR n.recipient_npk = @npk)
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_deletes d WITH (NOLOCK)
+            WHERE d.notification_id = n.notification_id
+              AND d.recipient_role = @role
+              AND d.recipient_npk = @npk
+          )
         ORDER BY n.created_at DESC, n.notification_id DESC;
 
         SELECT COUNT_BIG(*) AS unread_count
@@ -110,6 +121,12 @@ router.get('/', requirePermission('notifications.view'), async (req, res, next) 
             WHERE r.notification_id = n.notification_id
               AND r.recipient_role = @role
               AND r.recipient_npk = @npk
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_deletes d WITH (NOLOCK)
+            WHERE d.notification_id = n.notification_id
+              AND d.recipient_role = @role
+              AND d.recipient_npk = @npk
           );
       `);
 
@@ -209,7 +226,12 @@ router.post('/read-all', requirePermission('notifications.view'), trustedWriteOr
     await pool.request().input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
       .query(`MERGE dbo.lms_notification_reads WITH (HOLDLOCK) AS target
         USING (SELECT n.notification_id,@role AS recipient_role,@npk AS recipient_npk
-          FROM dbo.lms_notifications n WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)) AS source
+          FROM dbo.lms_notifications n
+          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
+            AND NOT EXISTS (
+              SELECT 1 FROM dbo.lms_notification_deletes d
+              WHERE d.notification_id=n.notification_id AND d.recipient_role=@role AND d.recipient_npk=@npk
+            )) AS source
         ON target.notification_id=source.notification_id AND target.recipient_role=source.recipient_role AND target.recipient_npk=source.recipient_npk
         WHEN NOT MATCHED THEN INSERT(notification_id,recipient_role,recipient_npk)
           VALUES(source.notification_id,source.recipient_role,source.recipient_npk);`);
@@ -224,8 +246,12 @@ router.post('/:id/read', requirePermission('notifications.view'), trustedWriteOr
   try {
     const result = await pool.request().input('id', sql.BigInt, id.data)
       .input('role', sql.VarChar(20), req.user.role).input('npk', sql.VarChar(50), req.user.sub)
-      .query(`IF NOT EXISTS(SELECT 1 FROM dbo.lms_notifications WHERE notification_id=@id AND audience_role=@role
-          AND (recipient_npk IS NULL OR recipient_npk=@npk))
+      .query(`IF NOT EXISTS(SELECT 1 FROM dbo.lms_notifications n WHERE n.notification_id=@id AND n.audience_role=@role
+          AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.lms_notification_deletes d
+            WHERE d.notification_id=n.notification_id AND d.recipient_role=@role AND d.recipient_npk=@npk
+          ))
         SELECT CAST(0 AS BIT) AS available;
       ELSE BEGIN
         MERGE dbo.lms_notification_reads WITH (HOLDLOCK) AS target
@@ -237,6 +263,67 @@ router.post('/:id/read', requirePermission('notifications.view'), trustedWriteOr
     if (!result.recordset[0]?.available) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Notifikasi tidak ditemukan.' } });
     publishNotificationEvent({ roles: [req.user.role], recipientNpk: req.user.sub });
     res.json({ read: true });
+  } catch (error) { next(error); }
+});
+
+router.delete('/', requirePermission('notifications.view'), trustedWriteOrigin, async (req, res, next) => {
+  try {
+    await pool.request()
+      .input('role', sql.VarChar(20), req.user.role)
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .query(`MERGE dbo.lms_notification_deletes WITH (HOLDLOCK) AS target
+        USING (
+          SELECT n.notification_id, @role AS recipient_role, @npk AS recipient_npk
+          FROM dbo.lms_notifications n
+          WHERE n.audience_role = @role
+            AND (n.recipient_npk IS NULL OR n.recipient_npk = @npk)
+        ) AS source
+        ON target.notification_id = source.notification_id
+          AND target.recipient_role = source.recipient_role
+          AND target.recipient_npk = source.recipient_npk
+        WHEN NOT MATCHED THEN
+          INSERT (notification_id, recipient_role, recipient_npk)
+          VALUES (source.notification_id, source.recipient_role, source.recipient_npk);`);
+    publishNotificationEvent({ roles: [req.user.role], recipientNpk: req.user.sub });
+    res.json({ deleted: true });
+  } catch (error) { next(error); }
+});
+
+router.delete('/:id', requirePermission('notifications.view'), trustedWriteOrigin, async (req, res, next) => {
+  const id = z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(req.params.id);
+  if (!id.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'ID notifikasi tidak valid.' } });
+  try {
+    const result = await pool.request()
+      .input('id', sql.BigInt, id.data)
+      .input('role', sql.VarChar(20), req.user.role)
+      .input('npk', sql.VarChar(50), req.user.sub)
+      .query(`IF NOT EXISTS (
+          SELECT 1 FROM dbo.lms_notifications n
+          WHERE n.notification_id = @id
+            AND n.audience_role = @role
+            AND (n.recipient_npk IS NULL OR n.recipient_npk = @npk)
+            AND NOT EXISTS (
+              SELECT 1 FROM dbo.lms_notification_deletes d
+              WHERE d.notification_id = n.notification_id
+                AND d.recipient_role = @role
+                AND d.recipient_npk = @npk
+            )
+        )
+        SELECT CAST(0 AS BIT) AS available;
+      ELSE BEGIN
+        MERGE dbo.lms_notification_deletes WITH (HOLDLOCK) AS target
+        USING (SELECT @id AS notification_id, @role AS recipient_role, @npk AS recipient_npk) AS source
+        ON target.notification_id = source.notification_id
+          AND target.recipient_role = source.recipient_role
+          AND target.recipient_npk = source.recipient_npk
+        WHEN NOT MATCHED THEN
+          INSERT (notification_id, recipient_role, recipient_npk)
+          VALUES (source.notification_id, source.recipient_role, source.recipient_npk);
+        SELECT CAST(1 AS BIT) AS available;
+      END`);
+    if (!result.recordset[0]?.available) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Notifikasi tidak ditemukan.' } });
+    publishNotificationEvent({ roles: [req.user.role], recipientNpk: req.user.sub });
+    res.json({ deleted: true });
   } catch (error) { next(error); }
 });
 

@@ -727,7 +727,102 @@ export function getPageGuideInfo(pathname, role) {
   };
 }
 
+let activeDriver = null;
+let isDestroyingTour = false;
+
+function animateTourSuckBack(driverInstance) {
+  if (isDestroyingTour) return;
+  isDestroyingTour = true;
+
+  const finishDestroy = () => {
+    try {
+      driverInstance.destroy();
+    } catch {}
+    if (activeDriver === driverInstance) {
+      activeDriver = null;
+    }
+    isDestroyingTour = false;
+  };
+
+  const popoverEl = document.querySelector('.driver-popover');
+  const overlayEl = document.querySelector('.driver-overlay');
+  const bubbleEl = document.getElementById('tour-guide-btn');
+
+  if (!popoverEl || typeof popoverEl.animate !== 'function') {
+    finishDestroy();
+    return;
+  }
+
+  popoverEl.style.pointerEvents = 'none';
+
+  const popRect = popoverEl.getBoundingClientRect();
+  const targetRect = bubbleEl?.getBoundingClientRect() || {
+    left: window.innerWidth - 44,
+    top: window.innerHeight - 44,
+    width: 44,
+    height: 44
+  };
+
+  const dx = targetRect.left + targetRect.width / 2 - (popRect.left + popRect.width / 2);
+  const dy = targetRect.top + targetRect.height / 2 - (popRect.top + popRect.height / 2);
+
+  if (overlayEl && typeof overlayEl.animate === 'function') {
+    overlayEl.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 360,
+      easing: 'ease-out',
+      fill: 'forwards'
+    });
+  }
+
+  const anim = popoverEl.animate(
+    [
+      {
+        transform: 'translate3d(0px, 0px, 0) scale(1)',
+        opacity: 1,
+        filter: 'blur(0px)'
+      },
+      {
+        transform: `translate3d(${dx * 0.45}px, ${dy * 0.45}px, 0) scale(0.55)`,
+        opacity: 0.85,
+        offset: 0.45
+      },
+      {
+        transform: `translate3d(${dx}px, ${dy}px, 0) scale(0.06)`,
+        opacity: 0,
+        filter: 'blur(2px)'
+      }
+    ],
+    {
+      duration: 400,
+      easing: 'cubic-bezier(0.32, 0, 0.24, 1)',
+      fill: 'forwards'
+    }
+  );
+
+  if (bubbleEl) {
+    window.setTimeout(() => {
+      bubbleEl.classList.remove('dls-guide-absorb-pulse');
+      // Force reflow so repeat tours replay the absorb pulse
+      void bubbleEl.offsetWidth;
+      bubbleEl.classList.add('dls-guide-absorb-pulse');
+      window.setTimeout(() => {
+        bubbleEl.classList.remove('dls-guide-absorb-pulse');
+      }, 450);
+    }, 280);
+  }
+
+  anim.onfinish = finishDestroy;
+  anim.oncancel = finishDestroy;
+}
+
 export function startUserGuide(pathname, role, startIndex = 0, includeChrome = true) {
+  if (activeDriver) {
+    try {
+      activeDriver.destroy();
+    } catch {}
+    activeDriver = null;
+  }
+  isDestroyingTour = false;
   const info = getPageGuideInfo(pathname, role);
 
   const navEl = findVisibleElement('aside[data-mobile-open]');
@@ -794,8 +889,12 @@ export function startUserGuide(pathname, role, startIndex = 0, includeChrome = t
         } catch {}
       }
     },
+    onDestroyStarted: () => {
+      animateTourSuckBack(driverObj);
+    },
     steps: allSteps
   });
 
+  activeDriver = driverObj;
   driverObj.drive(targetStepIndex);
 }

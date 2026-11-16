@@ -10,6 +10,7 @@ export default function Card({
   action,
   footer,
   noPadding = false,
+  interactive = false,
   className = '',
   children,
   ...rest
@@ -17,7 +18,7 @@ export default function Card({
   return (
     <section
       id={id}
-      className={`dls-card-surface flex flex-col overflow-hidden rounded-xl ${className}`}
+      className={`dls-card-surface ${interactive ? 'dls-card-interactive' : ''} flex flex-col overflow-hidden rounded-xl ${className}`}
       {...rest}
     >
       {(title || subtitle || action) && (

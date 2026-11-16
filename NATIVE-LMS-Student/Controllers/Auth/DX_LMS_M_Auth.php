@@ -11,17 +11,15 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             header('Location: /?route=/student', true, 303);
             exit;
         }
-        $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
+        $claims = verifySsoToken(readStudentSsoToken());
         if ($claims && ($claims['role'] ?? '') === 'student' && isSsoStudentIdentityActive($claims)) {
             createStudentSession($claims);
             header('Location: /?route=/student', true, 303);
             exit;
         }
-        if ($claims && in_array(($claims['role'] ?? ''), ['admin', 'teacher'], true)) {
-            header('Location: ' . SSO_FRONTEND_URL, true, 303);
-            exit;
-        }
-        if (!empty($_COOKIE[SSO_COOKIE_NAME]) && !$claims) clearSsoBrowserCookie();
+        // Admin/Teacher sessions on port 5173 share the 127.0.0.1 host cookie in dev;
+        // never redirect /?route=/login away from the Student login page for those roles.
+        if (!empty($_COOKIE[studentSsoCookieName()]) && !$claims) clearSsoBrowserCookie();
         $this->view('DX_LMS_M_Auth_Login', ['csrf_token' => csrfToken()]);
     }
 
@@ -180,7 +178,10 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             exit('Sesi formulir tidak valid atau kedaluwarsa. Muat ulang halaman lalu coba kembali.');
         }
         $_SESSION = [];
-        clearSsoBrowserCookie();
+        $ssoClaims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
+        if (!$ssoClaims || ($ssoClaims['role'] ?? '') === 'student') {
+            clearSsoBrowserCookie();
+        }
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);

@@ -429,7 +429,7 @@ export default function QuizzesPage() {
               return (
                 <article
                   key={course.course_code}
-                  className="dls-card-surface flex min-w-0 flex-col rounded-xl p-5 transition hover:shadow-md"
+                  className="dls-card-surface dls-card-interactive flex min-w-0 flex-col rounded-xl p-5"
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="flex min-w-0 items-start gap-3">
@@ -452,7 +452,7 @@ export default function QuizzesPage() {
                         </h2>
                       </div>
                     </div>
-                    <StatusBadge status={quiz?.status || 'pending'} label={statusLabel} dot />
+                    <StatusBadge status={quiz?.status || 'not_created'} label={statusLabel} dot />
                   </div>
 
                   {quiz ? (

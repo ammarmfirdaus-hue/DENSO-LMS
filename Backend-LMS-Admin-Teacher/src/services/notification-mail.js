@@ -68,7 +68,7 @@ async function claimEmailBatch() {
     JOIN next_jobs ON next_jobs.email_id=outbox.email_id;
 
     SELECT claimed.email_id,claimed.recipient_email,claimed.recipient_name,claimed.attempts,
-      notification.notification_title,notification.notification_message,
+      notification.title AS notification_title,notification.message AS notification_message,
       notification.category AS notification_category,notification.sender_name
     FROM @claimed AS claimed
     JOIN dbo.lms_notifications AS notification ON notification.notification_id=claimed.notification_id
@@ -108,7 +108,7 @@ async function drainEmailQueue() {
   } catch (error) {
     if (Date.now() - lastQueueErrorAt > 60000) {
       lastQueueErrorAt = Date.now();
-      console.error('Notification email queue unavailable:', error.code || 'DATABASE_ERROR');
+      console.error('Notification email queue unavailable:', error.code || 'DATABASE_ERROR', process.env.NODE_ENV !== 'production' ? error.message : '');
     }
   } finally { inFlight = false; }
 }

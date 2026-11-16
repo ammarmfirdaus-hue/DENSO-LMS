@@ -10,7 +10,8 @@ import {
   Plus,
   Search,
   Send,
-  Settings
+  Settings,
+  Trash2
 } from 'lucide-react';
 import { api } from '../../api/client';
 import PageHeader from '../../components/PageHeader';
@@ -205,6 +206,43 @@ export default function NotificationsPage() {
     }
   }
 
+  async function deleteNotification(id) {
+    try {
+      await api(`/notifications/${id}`, { method: 'DELETE' });
+      showAlert.toast('Notifikasi dihapus dari riwayat Anda', 'success');
+      window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: 'notification_deleted' } }));
+      await loadNotifications();
+    } catch (e) {
+      setError(e.message);
+      showAlert.error('Gagal Menghapus Notifikasi', e.message);
+    }
+  }
+
+  async function clearNotificationHistory() {
+    const confirmed = await showAlert.confirm({
+      title: 'Hapus Semua Riwayat Notifikasi?',
+      text: 'Seluruh notifikasi di halaman Anda akan dihapus dari riwayat akun Anda. Notifikasi milik pengguna lain tetap aman.',
+      confirmText: 'Ya, Hapus Riwayat',
+      cancelText: 'Batal',
+      danger: true,
+      icon: 'warning'
+    });
+    if (!confirmed) return;
+
+    setBusy(true);
+    try {
+      await api('/notifications', { method: 'DELETE' });
+      showAlert.success('Riwayat Dihapus', 'Seluruh riwayat notifikasi Anda telah dibersihkan.');
+      window.dispatchEvent(new CustomEvent('dls_notifications_changed', { detail: { type: 'notification_cleared' } }));
+      await loadNotifications();
+    } catch (e) {
+      setError(e.message);
+      showAlert.error('Gagal Menghapus Riwayat', e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="min-w-0 space-y-6">
       <PageHeader
@@ -394,16 +432,29 @@ export default function NotificationsPage() {
             <h2 className="text-lg font-bold text-on-surface">Notifikasi Terbaru</h2>
             <p className="text-xs text-muted">Menampilkan sampai 100 notifikasi terakhir.</p>
           </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy || unreadCount === 0}
-            icon={<CheckCheck className="size-4" />}
-            onClick={markAllRead}
-          >
-            Tandai Semua Dibaca
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy || unreadCount === 0}
+              icon={<CheckCheck className="size-4" />}
+              onClick={markAllRead}
+            >
+              Tandai Semua Dibaca
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy || items.length === 0}
+              icon={<Trash2 className="size-4" />}
+              onClick={clearNotificationHistory}
+              className="text-red-600 hover:border-red-300 hover:bg-red-50 dark:text-red-400 dark:hover:border-red-900 dark:hover:bg-red-950/40"
+            >
+              Hapus Riwayat
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -475,7 +526,7 @@ export default function NotificationsPage() {
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="break-words font-bold text-on-surface">{item.title}</h3>
                             {item.priority === 'important' && (
-                              <StatusBadge status="rejected" label="Penting" />
+                              <StatusBadge status="important" label="Penting" dot />
                             )}
                           </div>
                           <p className="mt-1 text-xs text-muted">
@@ -509,17 +560,30 @@ export default function NotificationsPage() {
                           )}
                         </div>
 
-                        {!item.is_read && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {!item.is_read && (
+                            <Button
+                              type="button"
+                              size="xs"
+                              variant="ghost"
+                              onClick={() => markRead(item.notification_id)}
+                              className="text-primary hover:bg-primary/10"
+                            >
+                              Tandai Dibaca
+                            </Button>
+                          )}
                           <Button
                             type="button"
                             size="xs"
                             variant="ghost"
-                            onClick={() => markRead(item.notification_id)}
-                            className="text-primary hover:bg-primary/10"
+                            icon={<Trash2 className="size-3.5" />}
+                            onClick={() => deleteNotification(item.notification_id)}
+                            className="text-muted hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                            aria-label={`Hapus notifikasi ${item.title}`}
                           >
-                            Tandai Dibaca
+                            Hapus
                           </Button>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>

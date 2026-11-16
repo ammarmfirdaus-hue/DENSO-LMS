@@ -36,6 +36,8 @@
     }
 
     function decorate(control) {
+        if (control.dataset.dlsActionIgnore === 'true') return;
+        if (control.closest('[data-dls-action-ignore="true"], .driver-popover, #dls-student-guide-menu')) return;
         if (control.dataset.dlsActionDecorated === 'true') return;
         control.dataset.dlsActionDecorated = 'true';
         control.classList.add('dls-action-control');

@@ -673,9 +673,11 @@ export default function ReviewersPage() {
                     {reviewer.total_reviews || 0}
                   </span>
                   {hasActiveReviews && (
-                    <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-                      {reviewer.active_reviews} aktif
-                    </span>
+                    <StatusBadge
+                      status="pending"
+                      label={`${reviewer.active_reviews} aktif`}
+                      className="ml-1.5 text-[11px]"
+                    />
                   )}
                 </td>
                 <td className="min-w-[236px] px-4 py-3.5 text-right align-middle">

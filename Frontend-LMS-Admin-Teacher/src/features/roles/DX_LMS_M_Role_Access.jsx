@@ -501,10 +501,12 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
         </div>
 
         {modifiedRoleKeys.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-300">
-            <Sparkles className="size-3.5" />
-            {modifiedRoleKeys.length} role memiliki perubahan belum disimpan
-          </span>
+          <StatusBadge
+            status="warning"
+            label={`${modifiedRoleKeys.length} role memiliki perubahan belum disimpan`}
+            dot
+            className="px-3 py-1"
+          />
         )}
       </div>
 
@@ -570,15 +572,12 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                     <span className="font-semibold text-on-surface-variant">
                       {draft.permissions?.length || 0} / {totalCatalogCount} izin ({ratio}%)
                     </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 font-semibold ${
-                        draft.can_access_staff_portal
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                      }`}
-                    >
-                      {draft.can_access_staff_portal ? 'Portal Staff Aktif' : 'Non-Portal Staff'}
-                    </span>
+                    <StatusBadge
+                      status={draft.can_access_staff_portal ? 'active' : 'inactive'}
+                      label={draft.can_access_staff_portal ? 'Portal Staff Aktif' : 'Non-Portal Staff'}
+                      dot
+                      className="text-[11px]"
+                    />
                   </div>
                 </button>
               );
@@ -874,49 +873,61 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                   </div>
 
                   {/* Ringkasan Diff & Tombol Simpan */}
-                  <div className="mt-6 rounded-xl border border-outline/60 bg-surface-low/80 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                            Ringkasan Perubahan Draft:
-                          </span>
-                          {!selectedDiff.hasChanges ? (
-                            <span className="text-xs text-muted">
-                              Belum ada perubahan dari konfigurasi tersimpan.
+                  <div className="mt-6 space-y-4 rounded-xl border border-outline/60 bg-surface-low/70 p-4 sm:p-5 dark:border-slate-700 dark:bg-slate-800/50">
+                    <div className="space-y-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                          Ringkasan Perubahan Draft
+                        </span>
+                        <StatusBadge
+                          status={selectedDiff.hasChanges ? 'warning' : 'not_created'}
+                          label={
+                            selectedDiff.hasChanges
+                              ? `${selectedDiff.added.length + selectedDiff.removed.length + (selectedDiff.portalChanged ? 1 : 0) + (selectedDiff.metaChanged ? 1 : 0)} perubahan belum disimpan`
+                              : 'Belum ada perubahan'
+                          }
+                          dot
+                        />
+                      </div>
+
+                      {!selectedDiff.hasChanges ? (
+                        <p className="text-xs text-muted">
+                          Belum ada perubahan dari konfigurasi tersimpan.
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedDiff.added.map((k) => (
+                            <span
+                              key={`add-${k}`}
+                              className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/60 dark:text-emerald-300"
+                            >
+                              + {catalogByKey[k]?.label || k}
                             </span>
-                          ) : (
-                            <div className="flex flex-wrap gap-1.5">
-                              {selectedDiff.added.map((k) => (
-                                <span
-                                  key={`add-${k}`}
-                                  className="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300"
-                                >
-                                  + {catalogByKey[k]?.label || k}
-                                </span>
-                              ))}
-                              {selectedDiff.removed.map((k) => (
-                                <span
-                                  key={`rem-${k}`}
-                                  className="rounded-md bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-800 dark:bg-red-950/70 dark:text-red-300"
-                                >
-                                  - {catalogByKey[k]?.label || k}
-                                </span>
-                              ))}
-                              {selectedDiff.portalChanged && (
-                                <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-800 dark:bg-blue-950/70 dark:text-blue-300">
-                                  Portal Staff: {draftSelected.can_access_staff_portal ? 'Dibuka' : 'Ditutup'}
-                                </span>
-                              )}
-                              {selectedDiff.metaChanged && (
-                                <span className="rounded-md bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-800 dark:bg-slate-700 dark:text-slate-200">
-                                  Profil Role Diubah
-                                </span>
-                              )}
-                            </div>
+                          ))}
+                          {selectedDiff.removed.map((k) => (
+                            <span
+                              key={`rem-${k}`}
+                              className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:border-red-800/60 dark:bg-red-950/60 dark:text-red-300"
+                            >
+                              - {catalogByKey[k]?.label || k}
+                            </span>
+                          ))}
+                          {selectedDiff.portalChanged && (
+                            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/60 dark:text-blue-300">
+                              Portal Staff: {draftSelected.can_access_staff_portal ? 'Dibuka' : 'Ditutup'}
+                            </span>
+                          )}
+                          {selectedDiff.metaChanged && (
+                            <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                              Profil Role Diubah
+                            </span>
                           )}
                         </div>
+                      )}
+                    </div>
 
+                    <div className="flex flex-col gap-3 border-t border-outline/40 pt-3.5 xl:flex-row xl:items-center dark:border-slate-700/70">
+                      <div className="min-w-0 flex-1">
                         <input
                           type="text"
                           maxLength={250}
@@ -927,7 +938,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                         />
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-2.5 shrink-0">
                         <Button
                           type="button"
                           variant="outline"

@@ -72,8 +72,8 @@ export default function StatCard({
     <CardRoot
       {...(to ? { to } : {})}
       {...(onClick ? { onClick } : {})}
-      className={`dls-card-surface relative flex flex-col justify-between overflow-hidden rounded-xl p-5 sm:p-6 transition-shadow hover:shadow-md ${
-        to || onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:ring-2 hover:ring-primary/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary' : ''
+      className={`dls-card-surface relative flex flex-col justify-between overflow-hidden rounded-xl p-5 sm:p-6 ${
+        to || onClick ? 'dls-card-interactive cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary' : ''
       } ${className}`}
     >
       <div className="flex items-start justify-between gap-3">

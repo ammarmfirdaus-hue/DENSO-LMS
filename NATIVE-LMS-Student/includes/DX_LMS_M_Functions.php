@@ -170,3 +170,42 @@ function getNotifIcon(string $type): array
         default => ['notifications', 'bg-surface-container', 'text-on-surface-variant'],
     };
 }
+
+/**
+ * Merender pill status badge yang konsisten di seluruh portal Student.
+ */
+function renderStatusBadge(string $status, ?string $label = null, bool $dot = false, string $extraClass = ''): string
+{
+    $key = strtolower(preg_replace('/[\s-]+/', '_', trim($status)) ?? 'neutral');
+    $chipClass = match ($key) {
+        'not_created', 'belum_dibuat', 'belum_ada', 'not_started', 'belum_mulai', 'unassigned', 'empty', 'none' => 'fd-chip-not-created',
+        'active', 'aktif', 'open', 'terbuka', 'published', 'terbit', 'completed', 'selesai', 'lulus', 'passed', 'success', 'berhasil', 'sent', 'terkirim', 'visible' => 'fd-chip-success',
+        'pending', 'pending_admin', 'waiting', 'menunggu', 'warning', 'under_review', 'retry', 'scheduled', 'terjadwal' => 'fd-chip-warning',
+        'in_review', 'pending_review', 'in_progress', 'processing', 'running', 'berjalan', 'info', 'teacher', 'document' => 'fd-chip-info',
+        'approved', 'disetujui', 'reviewer', 'integrated' => 'fd-chip-purple',
+        'rejected', 'ditolak', 'failed', 'gagal', 'remedial', 'locked', 'terkunci', 'error', 'danger', 'important', 'penting', 'wajib' => 'fd-chip-error',
+        default => 'fd-chip-neutral',
+    };
+    $defaultLabels = [
+        'not_created' => 'Belum dibuat',
+        'belum_dibuat' => 'Belum dibuat',
+        'not_started' => 'Belum dimulai',
+        'active' => 'Aktif',
+        'aktif' => 'Aktif',
+        'inactive' => 'Nonaktif',
+        'nonaktif' => 'Nonaktif',
+        'pending' => 'Menunggu',
+        'in_progress' => 'Berlangsung',
+        'completed' => 'Selesai',
+        'lulus' => 'Lulus',
+        'passed' => 'Lulus',
+        'remedial' => 'Remedial',
+        'rejected' => 'Ditolak',
+        'locked' => 'Terkunci',
+        'draft' => 'Draf',
+    ];
+    $text = $label ?? ($defaultLabels[$key] ?? $status);
+    $dotHtml = $dot ? '<span class="fd-chip-dot" aria-hidden="true"></span>' : '';
+    $classes = trim('fd-chip ' . $chipClass . ' ' . $extraClass);
+    return '<span class="' . e($classes) . '">' . $dotHtml . '<span>' . e($text) . '</span></span>';
+}

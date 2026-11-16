@@ -68,6 +68,7 @@ class DX_LMS_M_Student_Course extends DX_LMS_M_Controller
             'base_path' => '',
             'filters' => $quickFilters,
             'courses' => $courses,
+            'all_courses' => $allCourses,
             'stats' => $stats,
         ];
 

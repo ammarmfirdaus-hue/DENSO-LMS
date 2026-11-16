@@ -31,7 +31,13 @@ function readCookie(req, name) {
 async function authenticate(req, res, next) {
   const value = req.get('authorization') || '';
   const [scheme, token] = value.split(' ');
-  const cookieToken = readCookie(req, env.SSO_COOKIE_NAME);
+  const origin = `${req.get('origin') || ''} ${req.get('referer') || ''}`.toLowerCase();
+  const isStudentPortal = origin.includes(':8082') || origin.includes('/?route=/');
+  const studentCookieToken = readCookie(req, `${env.SSO_COOKIE_NAME}_student`);
+  const sharedCookieToken = readCookie(req, env.SSO_COOKIE_NAME);
+  const cookieToken = isStudentPortal
+    ? (studentCookieToken || sharedCookieToken)
+    : sharedCookieToken;
   const tokens = [scheme === 'Bearer' ? token : '', cookieToken].filter(Boolean);
   if (!tokens.length) return res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Silakan masuk kembali.' } });
   for (const candidate of tokens) {

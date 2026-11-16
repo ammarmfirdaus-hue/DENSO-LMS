@@ -86,10 +86,7 @@ $active_tab = 'profil'; ?>
                                     $profile['role'] ?? 'Student',
                                 ) ?></span>
                             </div>
-                            <div class="inline-flex items-center gap-1.5 bg-[#e8f5e9] px-3 py-1.5 rounded-full">
-                                <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                                <span class="font-label-sm text-success font-bold tracking-wide">Aktif</span>
-                            </div>
+                            <?= renderStatusBadge('active', 'Aktif', true) ?>
                         </div>
                     </div>
                 </div>

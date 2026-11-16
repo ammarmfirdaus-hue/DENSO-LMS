@@ -210,7 +210,7 @@ $isVideoEmbed = $materialType === 'video'
                     <span class="fd-chip fd-chip-promo">
                         <span class="material-symbols-outlined text-[15px]">smart_display</span> Video Pembelajaran
                     </span>
-                    <span class="fd-chip bg-[#F5F5F5] text-[#171717] font-semibold">
+                    <span class="fd-chip fd-chip-neutral">
                         <span class="material-symbols-outlined text-[15px] text-[#EA580C]">schedule</span> <span class="fd-mono"><?= e($material['duration']) ?></span>
                     </span>
                 </div>

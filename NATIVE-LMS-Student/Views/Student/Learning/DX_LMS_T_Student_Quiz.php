@@ -205,7 +205,7 @@ if ($isHistoryMode) $title = 'Riwayat ' . $title;
                             <?php if ($isPg): ?>
                             <span class="fd-chip fd-chip-info">Pilihan Ganda</span>
                             <?php else: ?>
-                            <span class="fd-chip bg-[#F5F5F5] text-[#525252]">Essay</span>
+                            <span class="fd-chip fd-chip-purple">Essay</span>
                             <?php endif; ?>
                         </div>
                         <div class="fd-mono text-[#525252] text-[12px] font-semibold px-[10px] py-[4px] rounded-[6px] bg-[#FAFAFA]">

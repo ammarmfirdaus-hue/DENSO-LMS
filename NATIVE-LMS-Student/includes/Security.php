@@ -170,14 +170,36 @@ function isSsoStudentIdentityActive(array $claims): bool
     return ssoStudentAccountState($claims) !== null;
 }
 
+function studentSsoCookieName(): string
+{
+    return SSO_COOKIE_NAME . '_student';
+}
+
+function readStudentSsoToken(): string
+{
+    $studentCookie = (string) ($_COOKIE[studentSsoCookieName()] ?? '');
+    if ($studentCookie !== '') {
+        return $studentCookie;
+    }
+    $sharedCookie = (string) ($_COOKIE[SSO_COOKIE_NAME] ?? '');
+    if ($sharedCookie !== '') {
+        $claims = verifySsoToken($sharedCookie);
+        if ($claims && ($claims['role'] ?? '') === 'student') {
+            return $sharedCookie;
+        }
+    }
+    return '';
+}
+
 /**
- * Menerbitkan cookie browser untuk sesi SSO.
+ * Menerbitkan cookie browser untuk sesi SSO Student (terpisah dari sesi Admin/Teacher).
  *
  * @param string $token Token JWT yang disematkan ke cookie HttpOnly.
  */
 function setSsoBrowserCookie(string $token): void
 {
-    if (!preg_match('/^[A-Za-z0-9_-]{3,64}$/', SSO_COOKIE_NAME)) return;
+    $cookieName = studentSsoCookieName();
+    if (!preg_match('/^[A-Za-z0-9_-]{3,64}$/', $cookieName)) return;
     $claims = verifySsoToken($token);
     $maxAge = ($claims['mode'] ?? '') === 'teacher_student' ? 1800 : 28800;
     $options = [
@@ -188,11 +210,11 @@ function setSsoBrowserCookie(string $token): void
         'samesite' => 'Lax'
     ];
     if (SSO_COOKIE_DOMAIN !== '') $options['domain'] = SSO_COOKIE_DOMAIN;
-    setcookie(SSO_COOKIE_NAME, $token, $options);
+    setcookie($cookieName, $token, $options);
 }
 
 /**
- * Menghapus cookie browser SSO saat pengguna logout.
+ * Menghapus cookie browser SSO Student saat pengguna logout.
  */
 function clearSsoBrowserCookie(): void
 {
@@ -204,7 +226,15 @@ function clearSsoBrowserCookie(): void
         'samesite' => 'Lax'
     ];
     if (SSO_COOKIE_DOMAIN !== '') $options['domain'] = SSO_COOKIE_DOMAIN;
-    setcookie(SSO_COOKIE_NAME, '', $options);
+    setcookie(studentSsoCookieName(), '', $options);
+
+    $sharedCookie = (string) ($_COOKIE[SSO_COOKIE_NAME] ?? '');
+    if ($sharedCookie !== '') {
+        $claims = verifySsoToken($sharedCookie);
+        if (!$claims || ($claims['role'] ?? '') === 'student') {
+            setcookie(SSO_COOKIE_NAME, '', $options);
+        }
+    }
 }
 
 /**
@@ -240,7 +270,7 @@ function requireStudent(): void
     $isTimedOut = isset($_SESSION['_last_activity']) && ($now - (int) $_SESSION['_last_activity']) > $inactivityLimit;
     $isFingerprintTampered = isset($_SESSION['_fingerprint']) && !hash_equals((string) $_SESSION['_fingerprint'], hash_hmac('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'none'), SSO_JWT_SECRET));
 
-    $claims = verifySsoToken((string) ($_COOKIE[SSO_COOKIE_NAME] ?? ''));
+    $claims = verifySsoToken(readStudentSsoToken());
     $identity = $claims && ($claims['role'] ?? '') === 'student' ? ssoStudentAccountState($claims) : null;
     $promotedToTeacher = $identity === null && $claims && ($claims['role'] ?? '') === 'student'
         && ($claims['mode'] ?? '') !== 'teacher_student'
@@ -260,7 +290,9 @@ function requireStudent(): void
         || !$identity || $isTimedOut || $isFingerprintTampered) {
         $_SESSION = [];
         if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
-        clearSsoBrowserCookie();
+        if (!$claims || ($claims['role'] ?? '') === 'student') {
+            clearSsoBrowserCookie();
+        }
         if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/api/')) {
             jsonResponse(['error' => ['code' => 'UNAUTHENTICATED', 'message' => 'Silakan masuk kembali.']], 401);
         }

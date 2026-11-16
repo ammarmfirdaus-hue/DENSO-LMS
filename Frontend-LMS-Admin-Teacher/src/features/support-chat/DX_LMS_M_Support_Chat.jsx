@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageCircle, Send, Trash2, UserCheck } from 'lucide-react';
 import { API_BASE, api } from '../../api/client';
 import Button from '../../components/Button';
+import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
 
 const CHAT_CACHE_KEY = 'dls_admin_support_chat_cache_v1';
@@ -268,7 +269,7 @@ export default function DX_LMS_M_Support_Chat() {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+      <div className="dls-card-surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400">
             <MessageCircle className="h-5 w-5" />
@@ -278,15 +279,17 @@ export default function DX_LMS_M_Support_Chat() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Balas pesan siswa secara real-time (riwayat cache otomatis dibersihkan setelah 15 menit tanpa interaksi).</p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>{presence.online ? `Admin Online (${presence.online_count})` : 'Menghubungkan...'}</span>
-        </span>
+        <StatusBadge
+          status={presence.online ? 'active' : 'pending'}
+          label={presence.online ? `Admin Online (${presence.online_count})` : 'Menghubungkan...'}
+          dot
+          className="px-3 py-1.5"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
         {/* Conversation List */}
-        <aside className="flex h-[540px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <aside className="dls-card-surface flex h-[540px] flex-col overflow-hidden rounded-xl">
           <div className="border-b border-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:border-slate-800">
             Percakapan Siswa ({conversations.length})
           </div>
@@ -328,7 +331,7 @@ export default function DX_LMS_M_Support_Chat() {
         </aside>
 
         {/* Active Chat Thread */}
-        <div className="flex h-[540px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="dls-card-surface flex h-[540px] flex-col overflow-hidden rounded-xl">
           {activeConversation ? (
             <>
               <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
