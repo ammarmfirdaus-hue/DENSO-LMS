@@ -657,59 +657,92 @@ html.dark .dls-schedule-card.is-neutral {
    Student <-> Admin Live Support Chat Widget (Solid Flat UI, No Gradients)
    ========================================================================== */
 .dls-chat-root {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 950;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
+    position: static;
     font-family: inherit;
+    pointer-events: none;
 }
 
 .dls-chat-launcher {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    height: 48px;
-    padding: 0 18px 0 14px;
-    border-radius: 9999px;
-    border: 1px solid #B91C1C;
+    position: fixed;
+    bottom: 80px;
+    right: 24px;
+    z-index: 9998;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid #FFFFFF;
     background-color: #DC2626;
     color: #FFFFFF;
-    font-size: 13.5px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    box-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.35);
-    transition: background-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    pointer-events: auto;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.dls-chat-launcher:hover {
+.dls-chat-launcher:hover:not(.is-dragging) {
     background-color: #B91C1C;
-    transform: translateY(-1px);
-    box-shadow: 0 14px 28px -6px rgba(15, 23, 42, 0.42);
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.5);
+}
+
+.dls-chat-launcher:active:not(.is-dragging) {
+    transform: scale(0.95);
+}
+
+.dls-chat-launcher.is-dragging {
+    cursor: grabbing !important;
+    transform: scale(1.08) !important;
+    opacity: 0.92;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    transition: none !important;
 }
 
 .dls-chat-launcher.is-active {
     background-color: #181824;
     border-color: #334155;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .dls-chat-launcher {
+    border-color: #1E293B;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .dls-chat-launcher-icon {
-    font-size: 20px !important;
+    font-size: 22px !important;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.dls-chat-launcher-label {
+    display: none !important;
 }
 
 .dls-chat-launcher-dot {
-    width: 9px;
-    height: 9px;
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    width: 10px;
+    height: 10px;
     border-radius: 9999px;
     background-color: #94A3B8;
     border: 2px solid #FFFFFF;
     flex-shrink: 0;
+    pointer-events: none;
+}
+
+html.dark .dls-chat-launcher-dot {
+    border-color: #1E293B;
 }
 
 .dls-chat-launcher-dot.is-online {
@@ -718,22 +751,32 @@ html.dark .dls-schedule-card.is-neutral {
 
 .dls-chat-unread-badge {
     position: absolute;
-    top: -6px;
+    top: -4px;
     right: -4px;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
     border-radius: 9999px;
     background-color: #181824;
     color: #FFFFFF;
     border: 2px solid #FFFFFF;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
+    line-height: 18px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+html.dark .dls-chat-unread-badge {
+    border-color: #1E293B;
 }
 
 .dls-chat-window {
+    position: fixed;
+    z-index: 10040;
     width: 380px;
     max-width: calc(100vw - 24px);
     height: 540px;
@@ -745,8 +788,9 @@ html.dark .dls-schedule-card.is-neutral {
     border: 1px solid #E2E8F0;
     background-color: #FFFFFF;
     box-shadow: 0 22px 48px -12px rgba(15, 23, 42, 0.28);
-    transform-origin: calc(100% - 26px) 100%;
+    transform-origin: calc(100% - 22px) 100%;
     will-change: transform, opacity;
+    pointer-events: auto;
 }
 
 @keyframes dlsChatWindIn {
@@ -1197,8 +1241,7 @@ html.dark .dls-chat-input:focus {
 
 @media (max-width: 640px) {
     .dls-chat-root {
-        right: 12px;
-        bottom: 76px;
+        position: static;
     }
 
     .dls-chat-window {
@@ -1208,20 +1251,22 @@ html.dark .dls-chat-input:focus {
     }
 
     .dls-chat-launcher-label {
-        display: none;
+        display: none !important;
     }
 
     .dls-chat-launcher {
-        width: 50px;
-        height: 50px;
+        bottom: 140px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
         padding: 0;
         justify-content: center;
     }
 
     .dls-chat-launcher-dot {
         position: absolute;
-        right: 4px;
-        bottom: 4px;
+        right: 0px;
+        bottom: 0px;
     }
 }
 

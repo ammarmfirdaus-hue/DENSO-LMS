@@ -127,13 +127,12 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
     id="dlsSupportToggleBtn"
     type="button"
     class="dls-chat-launcher"
-    aria-label="Buka Live Chat Admin"
+    aria-label="Buka Live Chat Admin (Klik / Geser)"
     aria-expanded="false"
     aria-controls="dlsSupportChatBox"
-    title="Chat Admin"
+    title="Live Chat Admin (Klik / Geser)"
   >
     <span class="dls-chat-launcher-icon material-symbols-outlined" aria-hidden="true">chat</span>
-    <span class="dls-chat-launcher-label">Chat Admin</span>
     <span id="dlsSupportLauncherDot" class="dls-chat-launcher-dot" aria-hidden="true"></span>
     <span id="dlsSupportUnreadBadge" class="dls-chat-unread-badge" style="display: none;">0</span>
   </button>
@@ -256,6 +255,67 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
 
     var closeTimer = null;
 
+    function positionChatBox() {
+      var bRect = toggleBtn.getBoundingClientRect();
+      var winW = window.innerWidth;
+      var winH = window.innerHeight;
+      var isMobile = winW < 640;
+
+      chatBox.style.position = 'fixed';
+      chatBox.style.zIndex = '10040';
+
+      if (isMobile) {
+        chatBox.style.left = '12px';
+        chatBox.style.right = '12px';
+        chatBox.style.width = 'auto';
+        chatBox.style.maxWidth = 'calc(100vw - 24px)';
+        chatBox.style.height = 'min(520px, calc(100vh - 140px))';
+        chatBox.style.top = 'auto';
+        chatBox.style.bottom = Math.max(12, Math.min(winH - 120, winH - bRect.top + 8)) + 'px';
+        chatBox.style.transformOrigin = 'calc(100% - 24px) 100%';
+        return;
+      }
+
+      var boxW = 380;
+      var boxH = Math.min(540, winH - 32);
+      chatBox.style.width = boxW + 'px';
+      chatBox.style.maxWidth = 'calc(100vw - 24px)';
+      chatBox.style.height = boxH + 'px';
+
+      var openLeft = bRect.left > winW / 2;
+      var openUp = bRect.top > winH / 2;
+
+      if (openLeft) {
+        var rightDist = Math.max(16, winW - bRect.right);
+        chatBox.style.left = 'auto';
+        chatBox.style.right = rightDist + 'px';
+      } else {
+        var leftDist = Math.max(16, bRect.left);
+        chatBox.style.left = leftDist + 'px';
+        chatBox.style.right = 'auto';
+      }
+
+      if (openUp) {
+        var bottomDist = Math.max(16, winH - bRect.top + 10);
+        if (bottomDist + boxH > winH - 16) {
+          bottomDist = Math.max(16, winH - boxH - 16);
+        }
+        chatBox.style.top = 'auto';
+        chatBox.style.bottom = bottomDist + 'px';
+      } else {
+        var topDist = Math.max(16, bRect.bottom + 10);
+        if (topDist + boxH > winH - 16) {
+          topDist = Math.max(16, winH - boxH - 16);
+        }
+        chatBox.style.top = topDist + 'px';
+        chatBox.style.bottom = 'auto';
+      }
+
+      var originX = openLeft ? 'calc(100% - 22px)' : '22px';
+      var originY = openUp ? '100%' : '0%';
+      chatBox.style.transformOrigin = originX + ' ' + originY;
+    }
+
     function setOpenState(nextOpen) {
       isOpen = Boolean(nextOpen);
       if (closeTimer) {
@@ -268,6 +328,7 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
       toggleBtn.classList.toggle('is-active', isOpen);
 
       if (isOpen) {
+        positionChatBox();
         chatBox.classList.remove('is-closing');
         chatBox.style.display = 'flex';
         void chatBox.offsetWidth;
@@ -538,9 +599,125 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
       }
     }
 
-    // Bind UI handlers unconditionally so clicking the bubble ALWAYS works
-    toggleBtn.addEventListener('click', function () {
-      setOpenState(!isOpen);
+    /* --- Draggable Launcher Bubble (Identical to Guide Bubble) --- */
+    var CHAT_POS_KEY = 'dls_student_chat_bubble_pos';
+    var savedPos = null;
+    try {
+      var rawPos = localStorage.getItem(CHAT_POS_KEY);
+      if (rawPos) savedPos = JSON.parse(rawPos);
+    } catch (_e) {}
+
+    function clampPosition(x, y) {
+      var margin = 12;
+      var w = toggleBtn.offsetWidth || 44;
+      var h = toggleBtn.offsetHeight || 44;
+      var maxX = Math.max(margin, window.innerWidth - w - margin);
+      var maxY = Math.max(margin, window.innerHeight - h - margin);
+      return {
+        x: Math.min(Math.max(margin, x), maxX),
+        y: Math.min(Math.max(margin, y), maxY)
+      };
+    }
+
+    if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+      var initialClamped = clampPosition(savedPos.x, savedPos.y);
+      toggleBtn.style.left = initialClamped.x + 'px';
+      toggleBtn.style.top = initialClamped.y + 'px';
+      toggleBtn.style.right = 'auto';
+      toggleBtn.style.bottom = 'auto';
+    }
+
+    var drag = null;
+    var justDragged = false;
+    var pointerHandled = false;
+
+    toggleBtn.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      pointerHandled = true;
+      var rect = toggleBtn.getBoundingClientRect();
+      drag = {
+        id: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        initialLeft: rect.left,
+        initialTop: rect.top,
+        hasMoved: false
+      };
+      try { toggleBtn.setPointerCapture(e.pointerId); } catch (_err) {}
+    });
+
+    toggleBtn.addEventListener('pointermove', function (e) {
+      if (!drag || drag.id !== e.pointerId) return;
+      var dx = e.clientX - drag.startX;
+      var dy = e.clientY - drag.startY;
+      if (!drag.hasMoved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+        drag.hasMoved = true;
+        toggleBtn.classList.add('is-dragging');
+        if (isOpen) setOpenState(false);
+      }
+      if (drag.hasMoved) {
+        var c = clampPosition(drag.initialLeft + dx, drag.initialTop + dy);
+        toggleBtn.style.left = c.x + 'px';
+        toggleBtn.style.top = c.y + 'px';
+        toggleBtn.style.right = 'auto';
+        toggleBtn.style.bottom = 'auto';
+      }
+    });
+
+    function endDrag(e) {
+      if (!drag || drag.id !== e.pointerId) return;
+      var moved = drag.hasMoved;
+      try {
+        if (toggleBtn.hasPointerCapture(e.pointerId)) {
+          toggleBtn.releasePointerCapture(e.pointerId);
+        }
+      } catch (_err) {}
+      toggleBtn.classList.remove('is-dragging');
+      drag = null;
+
+      if (moved) {
+        justDragged = true;
+        setTimeout(function () { justDragged = false; }, 100);
+        var rect = toggleBtn.getBoundingClientRect();
+        try {
+          localStorage.setItem(CHAT_POS_KEY, JSON.stringify({ x: rect.left, y: rect.top }));
+        } catch (_err) {}
+      } else {
+        setOpenState(!isOpen);
+      }
+    }
+
+    toggleBtn.addEventListener('pointerup', endDrag);
+    toggleBtn.addEventListener('pointercancel', endDrag);
+
+    toggleBtn.addEventListener('click', function (e) {
+      if (justDragged) {
+        e.preventDefault();
+        return;
+      }
+      if (!pointerHandled) {
+        setOpenState(!isOpen);
+      }
+      pointerHandled = false;
+    });
+
+    toggleBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpenState(!isOpen);
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (toggleBtn.style.left && toggleBtn.style.left !== 'auto') {
+        var rect = toggleBtn.getBoundingClientRect();
+        var c = clampPosition(rect.left, rect.top);
+        toggleBtn.style.left = c.x + 'px';
+        toggleBtn.style.top = c.y + 'px';
+      }
+      if (isOpen) {
+        positionChatBox();
+      }
     });
 
     if (minimizeBtn) {
