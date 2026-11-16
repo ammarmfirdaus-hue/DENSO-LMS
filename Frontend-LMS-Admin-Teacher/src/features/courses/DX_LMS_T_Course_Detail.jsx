@@ -33,6 +33,7 @@ import EditMaterialModal from '../materials/EditMaterialModal';
 import SubmitMaterialModal from '../materials/SubmitMaterialModal';
 import FinalMaterialDetailModal from '../materials/FinalMaterialDetailModal';
 import showAlert from '../../utils/alert';
+import { compressImageToWebP } from '../../utils/compress-forum-image';
 import { hasPermission } from '../../utils/access-control';
 
 const STATUS_LABEL = {
@@ -155,8 +156,9 @@ export default function CourseDetailPage() {
     setError('');
     setNotice('');
     try {
+      const optimized = await compressImageToWebP(file);
       const formData = new FormData();
-      formData.append('thumbnail', file);
+      formData.append('thumbnail', optimized);
       await api(`/courses/${id}/thumbnail`, { method: 'POST', body: formData });
       setNotice('Foto sampul course berhasil diperbarui dan disinkronkan ke portal student.');
       showAlert.success('Foto Sampul Diperbarui', 'Sampul course kini tampil di katalog admin maupun student.');

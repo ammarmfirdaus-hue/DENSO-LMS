@@ -21,6 +21,7 @@ import Button from '../../components/Button';
 import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 import showAlert from '../../utils/alert';
+import { compressImageToWebP } from '../../utils/compress-forum-image';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 import { hasPermission } from '../../utils/access-control';
 
@@ -56,7 +57,7 @@ export default function CoursesPage() {
     };
   }, [coverPreview]);
 
-  function handleSelectCover(event) {
+  async function handleSelectCover(event) {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
@@ -69,9 +70,10 @@ export default function CoursesPage() {
       event.target.value = '';
       return;
     }
+    const optimized = await compressImageToWebP(file);
     if (coverPreview) URL.revokeObjectURL(coverPreview);
-    setCoverFile(file);
-    setCoverPreview(URL.createObjectURL(file));
+    setCoverFile(optimized);
+    setCoverPreview(URL.createObjectURL(optimized));
   }
 
   function clearSelectedCover() {

@@ -17,16 +17,20 @@ const loginLimiter = buildLimiter({
   message: 'Terlalu banyak percobaan masuk untuk akun ini. Coba lagi setelah 15 menit.',
   keyGenerator: req => `${ipKeyGenerator(req.ip)}:${crypto.createHash('sha256').update(String(req.body?.npk || '').trim().toLowerCase()).digest('hex')}`
 });
-const loginSchema = z.object({ npk: z.string().trim().min(1).max(254), password: z.string().min(1).max(200) });
+const loginSchema = z.object({
+  npk: z.string().trim().min(1).max(254),
+  password: z.string().min(1).max(200),
+  rememberMe: z.boolean().optional().default(false)
+});
 
 router.post('/login', loginLimiter, async (req, res, next) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'NPK dan kata sandi wajib diisi.' } });
   try {
-    const result = await login(parsed.data.npk, parsed.data.password);
+    const result = await login(parsed.data.npk, parsed.data.password, { rememberMe: parsed.data.rememberMe });
     if (!result) return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'NPK atau kata sandi salah.' } });
     const accessProfile = await getRoleAccessProfile(result.user.role);
-    setSsoCookie(res, result.token);
+    setSsoCookie(res, result.token, { rememberMe: parsed.data.rememberMe });
     res.json({
       ...result,
       user: {

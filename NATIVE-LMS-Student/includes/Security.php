@@ -196,12 +196,13 @@ function readStudentSsoToken(): string
  *
  * @param string $token Token JWT yang disematkan ke cookie HttpOnly.
  */
-function setSsoBrowserCookie(string $token): void
+function setSsoBrowserCookie(string $token, bool $rememberMe = false): void
 {
     $cookieName = studentSsoCookieName();
     if (!preg_match('/^[A-Za-z0-9_-]{3,64}$/', $cookieName)) return;
     $claims = verifySsoToken($token);
-    $maxAge = ($claims['mode'] ?? '') === 'teacher_student' ? 1800 : 28800;
+    $isTeacherMode = ($claims['mode'] ?? '') === 'teacher_student';
+    $maxAge = $isTeacherMode ? 1800 : ($rememberMe ? 30 * 86400 : 28800);
     $options = [
         'expires' => time() + $maxAge,
         'path' => '/',

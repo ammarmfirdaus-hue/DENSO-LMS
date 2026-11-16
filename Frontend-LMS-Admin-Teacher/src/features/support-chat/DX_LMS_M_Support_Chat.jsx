@@ -148,6 +148,17 @@ export default function DX_LMS_M_Support_Chat() {
   }, [selectedStudentId, loadMessages]);
 
   useEffect(() => {
+    const poll = setInterval(() => {
+      if (document.visibilityState === 'hidden') return;
+      loadConversations();
+      if (selectedRef.current) {
+        loadMessages(selectedRef.current);
+      }
+    }, 8000);
+    return () => clearInterval(poll);
+  }, [loadConversations, loadMessages]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       if (!selectedRef.current) return;
       const entry = getStudentCacheEntry(selectedRef.current);
@@ -183,12 +194,14 @@ export default function DX_LMS_M_Support_Chat() {
         if (Number(msg.student_id) === Number(selectedRef.current)) {
           setMessages(prev => {
             const next = prev.some(m => m.message_id === msg.message_id) ? prev : [...prev, msg];
-            saveStudentCacheEntry(msg.student_id, next, { touchActivity: true });
+            saveStudentCacheEntry(msg.student_id, next, { touchActivity: true, cutoffAt: 0 });
             return next;
           });
           if (msg.sender_role === 'student') {
             loadMessages(msg.student_id, { touchActivity: true });
           }
+        } else if (msg.sender_role === 'student') {
+          saveStudentCacheEntry(msg.student_id, [], { touchActivity: true, cutoffAt: 0 });
         }
       } catch {}
     });

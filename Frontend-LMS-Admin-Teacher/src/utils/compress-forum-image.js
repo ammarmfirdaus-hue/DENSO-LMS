@@ -5,6 +5,17 @@ const QUALITY_STEPS = [0.88, 0.84, 0.8];
 
 /** Compress static forum images before upload; keep animated formats untouched. */
 export async function compressForumImage(file) {
+  return compressImageToWebP(file, { forceWebp: false });
+}
+
+/**
+ * Mengompresi dan mengonversi file gambar ke format WebP di sisi browser.
+ * 
+ * @param {File} file File gambar yang dipilih
+ * @param {object} options Opsi (forceWebp: boolean, maxEdge: number)
+ * @returns {Promise<File>} File yang sudah terkonversi ke WebP
+ */
+export async function compressImageToWebP(file, { forceWebp = true, maxEdge = MAX_EDGE } = {}) {
   if (!(file instanceof File) || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > MAX_SOURCE_SIZE) return file;
   if (file.type === 'image/gif' || (file.type === 'image/webp' && await isAnimatedWebP(file))) return file;
 
@@ -23,9 +34,9 @@ export async function compressForumImage(file) {
     const width = image.width || image.naturalWidth;
     const height = image.height || image.naturalHeight;
     if (!width || !height) return file;
-    if (file.size <= SMALL_FILE_LIMIT && Math.max(width, height) <= MAX_EDGE) return file;
+    if (!forceWebp && file.size <= SMALL_FILE_LIMIT && Math.max(width, height) <= maxEdge) return file;
 
-    const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+    const scale = Math.min(1, maxEdge / Math.max(width, height));
     const canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(width * scale));
     canvas.height = Math.max(1, Math.round(height * scale));
@@ -35,9 +46,10 @@ export async function compressForumImage(file) {
 
     for (const quality of QUALITY_STEPS) {
       const blob = await canvasBlob(canvas, quality);
-      if (!blob || blob.type !== 'image/webp' || blob.size >= file.size) return file;
+      if (!blob || blob.type !== 'image/webp') continue;
+      if (!forceWebp && blob.size >= file.size) return file;
       if (blob.size <= 2 * 1024 * 1024 || quality === QUALITY_STEPS[QUALITY_STEPS.length - 1]) {
-        const baseName = file.name.replace(/\.[^.]+$/, '') || 'forum-image';
+        const baseName = file.name.replace(/\.[^.]+$/, '') || 'image';
         return new File([blob], `${baseName}.webp`, { type: 'image/webp', lastModified: file.lastModified });
       }
     }

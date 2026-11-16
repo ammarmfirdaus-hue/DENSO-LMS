@@ -11,6 +11,7 @@ const { forumUploadLimiter } = require('../middleware/rate-limit');
 const { studentHasCourseAccess, studentHasSessionAccess, getStudentIdentity } = require('../services/student-auth');
 const { forumEvents, publishForumEvent } = require('../services/forum-events');
 const { parseForumImageBuffer } = require('../services/forum-image');
+const { convertImageBufferToWebP } = require('../services/image-converter');
 
 const router = express.Router();
 router.use(authenticate);
@@ -93,9 +94,11 @@ async function storeImage(file) {
     error.status = 415;
     throw error;
   }
+  const webp = await convertImageBufferToWebP(file.buffer, { quality: 85, maxEdge: 1920 });
+  const fileName = `${crypto.randomUUID()}${webp.extension}`;
   await fs.mkdir(uploadDirectory, { recursive: true });
-  await fs.writeFile(path.join(uploadDirectory, parsed.name), file.buffer, { flag: 'wx', mode: 0o640 });
-  return `/forum/uploads/${parsed.name}`;
+  await fs.writeFile(path.join(uploadDirectory, fileName), webp.buffer, { flag: 'wx', mode: 0o640 });
+  return `/forum/uploads/${fileName}`;
 }
 
 function inputError(res, message) {

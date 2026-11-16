@@ -166,8 +166,14 @@ $base_path = '';
                     </div>
                 </div>
 
-                <!-- Forgot Password Link -->
-                <p class="text-[12px] leading-[18px] text-[#737373]">Perlu reset password? Hubungi Admin LMS.</p>
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <label for="inputRememberMe" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;" class="text-[13px] font-medium text-[#404040] dark:text-slate-300">
+                        <input type="checkbox" name="remember_me" id="inputRememberMe" value="1" style="width:16px;height:16px;min-width:16px;min-height:16px;padding:0;margin:0;border:none;background:transparent;box-shadow:none;outline:none;accent-color:#DC2626;cursor:pointer;flex-shrink:0;">
+                        <span>Ingat saya</span>
+                    </label>
+                    <p class="text-[12px] leading-[18px] text-[#737373] dark:text-slate-400">Perlu reset password? Hubungi Admin LMS.</p>
+                </div>
 
                 <!-- Submit Button (FoodDash Pill LG CTA) -->
                 <button type="submit" class="fd-btn fd-btn-primary fd-btn-lg w-full h-[50px] rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-[16px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]" id="btnLogin">
@@ -204,8 +210,25 @@ $base_path = '';
             }
 
             const form = document.getElementById('loginForm');
+            const npkInput = document.getElementById('inputNpk');
+            const rememberInput = document.getElementById('inputRememberMe');
             const inputs = form.querySelectorAll('input[required]');
             const submitButton = document.getElementById('btnLogin');
+
+            try {
+                const rememberedNpk = localStorage.getItem('dls_student_remember_npk');
+                if (rememberedNpk && npkInput && !npkInput.value) {
+                    npkInput.value = rememberedNpk;
+                    if (rememberInput) rememberInput.checked = true;
+                }
+                form.addEventListener('submit', function() {
+                    if (rememberInput && rememberInput.checked && npkInput && npkInput.value.trim()) {
+                        localStorage.setItem('dls_student_remember_npk', npkInput.value.trim());
+                    } else {
+                        localStorage.removeItem('dls_student_remember_npk');
+                    }
+                });
+            } catch {}
 
             inputs.forEach(input => {
                 input.addEventListener('blur', function() {

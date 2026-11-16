@@ -15,6 +15,7 @@ const { syncStudentNow, deleteStudentMaterial } = require('../services/student-s
 const { studentHasCourseAccess } = require('../services/student-auth');
 const { getSubmissionEditDecision } = require('../services/material-workflow-rules');
 const { encodePublicId } = require('../services/public-route-id');
+const { convertDiskImageToWebP } = require('../services/image-converter');
 
 const router = express.Router();
 const materialTypes = ['text', 'video', 'pdf', 'image', 'link', 'audio', 'document'];
@@ -101,6 +102,15 @@ router.post('/sessions/:sessionId/submissions', authenticate, requirePermission(
       if (!await hasExpectedFileSignature(req.file.path, extension)) {
         cleanFile(req.file);
         return res.status(415).json({ error: { code: 'INVALID_FILE_CONTENT', message: 'Isi file tidak cocok dengan format yang dipilih.' } });
+      }
+      if (type === 'image' || typeExtensions.image.has(extension)) {
+        const webpConversion = await convertDiskImageToWebP(req.file.path);
+        if (webpConversion) {
+          req.file.path = webpConversion.filePath;
+          req.file.filename = webpConversion.filename;
+          req.file.mimetype = webpConversion.mimeType;
+          req.file.size = webpConversion.size;
+        }
       }
     } catch (error) {
       cleanFile(req.file);
@@ -282,6 +292,15 @@ router.put('/submissions/:id', authenticate, requirePermission('materials.submit
       if (!await hasExpectedFileSignature(req.file.path, extension)) {
         cleanFile(req.file);
         return res.status(415).json({ error: { code: 'INVALID_FILE_CONTENT', message: 'Isi file tidak cocok dengan format yang dipilih.' } });
+      }
+      if (type === 'image' || typeExtensions.image.has(extension)) {
+        const webpConversion = await convertDiskImageToWebP(req.file.path);
+        if (webpConversion) {
+          req.file.path = webpConversion.filePath;
+          req.file.filename = webpConversion.filename;
+          req.file.mimetype = webpConversion.mimeType;
+          req.file.size = webpConversion.size;
+        }
       }
     } catch (error) {
       cleanFile(req.file);

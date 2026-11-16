@@ -8,6 +8,7 @@ import PageHeader from '../../components/PageHeader';
 import SearchableSelect from '../../components/SearchableSelect';
 import showAlert from '../../utils/alert';
 import { hasPermission } from '../../utils/access-control';
+import { compressImageToWebP } from '../../utils/compress-forum-image';
 
 const FIELD_CLASS =
   'h-10 w-full rounded-md border border-outline bg-surface-lowest px-3 text-sm text-on-surface outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
@@ -34,7 +35,7 @@ export default function CreateCoursePage() {
 
   useEffect(() => () => coverPreview && URL.revokeObjectURL(coverPreview), [coverPreview]);
 
-  function handleSelectCover(event) {
+  async function handleSelectCover(event) {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
@@ -47,9 +48,10 @@ export default function CreateCoursePage() {
       event.target.value = '';
       return;
     }
+    const optimized = await compressImageToWebP(file);
     if (coverPreview) URL.revokeObjectURL(coverPreview);
-    setCoverFile(file);
-    setCoverPreview(URL.createObjectURL(file));
+    setCoverFile(optimized);
+    setCoverPreview(URL.createObjectURL(optimized));
   }
 
   function clearSelectedCover() {

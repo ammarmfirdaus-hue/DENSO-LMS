@@ -38,6 +38,7 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
         }
         $npk = trim($npkInput);
         $password = $passwordInput;
+        $rememberMe = (($_POST['remember_me'] ?? '') === '1');
         // Bcrypt rejects NUL bytes; reject them before either password_hash() or
         // password_verify() can receive attacker-controlled input.
         if ($npk === '' || strlen($npk) > 254 || $password === '' || strlen($password) > 200 || str_contains($password, "\0")) {
@@ -58,7 +59,7 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             exit;
         }
         $pdo->commit();
-        $requestBody = json_encode(['npk' => $npk, 'password' => $password], JSON_THROW_ON_ERROR);
+        $requestBody = json_encode(['npk' => $npk, 'password' => $password, 'rememberMe' => $rememberMe], JSON_THROW_ON_ERROR);
         $context = stream_context_create(['http' => [
             'method' => 'POST',
             'header' => "Content-Type: application/json\r\nAccept: application/json\r\nConnection: close\r\n",
@@ -97,8 +98,17 @@ class DX_LMS_M_Auth extends DX_LMS_M_Controller
             exit;
         }
         $pdo->prepare('UPDATE login_rate_limits SET attempts=0,locked_until=NULL,window_started_at=UTC_TIMESTAMP() WHERE ip_hash=:ip')->execute(['ip' => $ipHash]);
-        setSsoBrowserCookie($ssoToken);
+        setSsoBrowserCookie($ssoToken, $rememberMe);
         createStudentSession($claims);
+        if ($rememberMe && session_id() !== '') {
+            setcookie(session_name(), session_id(), [
+                'expires' => time() + (30 * 86400),
+                'path' => '/',
+                'secure' => APP_ENV === 'production',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
         header('Location: /?route=/student', true, 303);
         exit;
     }

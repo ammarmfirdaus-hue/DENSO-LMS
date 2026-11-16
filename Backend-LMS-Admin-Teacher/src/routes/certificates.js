@@ -9,6 +9,7 @@ const { materialUpload, uploadDirectory, hasExpectedFileSignature } = require('.
 const { uploadLimiter } = require('../middleware/rate-limit');
 const { publishNotificationEvent } = require('../services/notification-events');
 const { getStudentManagementPool } = require('../services/student-auth');
+const { convertDiskImageToWebP } = require('../services/image-converter');
 
 const router = express.Router();
 router.use(authenticate);
@@ -138,6 +139,16 @@ router.post('/', trustedWriteOrigin, allowRoles('admin', 'teacher'), uploadLimit
     if (!(await hasExpectedFileSignature(req.file.path, sigCategory, ext))) {
       cleanFile(req.file);
       return res.status(400).json({ error: { code: 'INVALID_FILE_SIGNATURE', message: 'Isi file tidak sesuai dengan ekstensi dokumen yang diizinkan.' } });
+    }
+
+    if (sigCategory === 'image') {
+      const webpConversion = await convertDiskImageToWebP(req.file.path);
+      if (webpConversion) {
+        req.file.path = webpConversion.filePath;
+        req.file.filename = webpConversion.filename;
+        req.file.mimetype = webpConversion.mimeType;
+        req.file.size = webpConversion.size;
+      }
     }
 
     const parsed = certificateBodySchema.safeParse(req.body || {});

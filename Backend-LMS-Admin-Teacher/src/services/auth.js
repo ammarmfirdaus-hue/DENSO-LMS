@@ -7,7 +7,7 @@ const { authenticateStudent } = require('./student-auth');
 // Keep the password verification cost similar for unknown and known accounts.
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync('DLS-invalid-account-password', 12);
 
-async function login(npk, password) {
+async function login(npk, password, options = {}) {
   const result = await pool.request().input('identifier', sql.NVarChar(254), npk)
     .query(`SELECT TOP 1 employee_npk, fullname, email, password_hash, role, status
             FROM dbo.employee_accounts WHERE (employee_npk = @identifier OR email = @identifier) AND status = 'active'`);
@@ -23,7 +23,8 @@ async function login(npk, password) {
   }
   const claims = { sub: user.employee_npk, role: user.role, name: user.fullname };
   if (user.role === 'student') claims.student_id = user.student_id;
-  const token = issueToken(claims, env.JWT_TTL);
+  const ttl = options.rememberMe ? '30d' : env.JWT_TTL;
+  const token = issueToken(claims, ttl);
   return { token, user: { npk: user.employee_npk, name: user.fullname, email: user.email, role: user.role } };
 }
 
@@ -33,13 +34,19 @@ function issueToken(claims, expiresIn = env.JWT_TTL) {
   });
 }
 
-function setSsoCookie(res, token) {
+function setSsoCookie(res, token, options = {}) {
   const decoded = jwt.decode(token);
   const { iat: _iat, exp: _exp, aud: _aud, iss: _iss, ...claims } = decoded || {};
   const teacherStudyMode = claims.mode === 'teacher_student' && claims.source_role === 'teacher';
-  const maxAge = teacherStudyMode ? 30 * 60 * 1000 : 8 * 60 * 60 * 1000;
+  const rememberMe = Boolean(options.rememberMe) && !teacherStudyMode;
+  const maxAge = teacherStudyMode
+    ? 30 * 60 * 1000
+    : rememberMe
+      ? 30 * 24 * 60 * 60 * 1000
+      : 8 * 60 * 60 * 1000;
+  const expiresIn = teacherStudyMode ? '30m' : rememberMe ? '30d' : '8h';
   const sessionToken = jwt.sign(claims, env.JWT_SECRET, {
-    algorithm: 'HS256', expiresIn: teacherStudyMode ? '30m' : '8h', issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
+    algorithm: 'HS256', expiresIn, issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE
   });
   res.cookie(env.SSO_COOKIE_NAME, sessionToken, {
     httpOnly: true,

@@ -9,6 +9,7 @@ const { paginateCollection } = require('../middleware/pagination');
 const { courseCoverUpload } = require('../middleware/forum-upload');
 const { uploadLimiter } = require('../middleware/rate-limit');
 const { parseImageBuffer } = require('../services/forum-image');
+const { convertImageBufferToWebP } = require('../services/image-converter');
 const { syncStudentNow } = require('../services/student-sync');
 const { encodePublicId, decodePublicId } = require('../services/public-route-id');
 
@@ -149,11 +150,12 @@ router.post('/:id/thumbnail', requirePermission('courses.manage_cover'), uploadL
     const courseRow = existing.recordset[0];
     if (!courseRow) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Course tidak ditemukan.' } });
 
-    const filename = `${crypto.randomUUID()}${parsed.extension}`;
+    const webp = await convertImageBufferToWebP(req.file.buffer, { quality: 85, maxEdge: 1920 });
+    const filename = `${crypto.randomUUID()}${webp.extension}`;
     const publicPath = `${THUMBNAIL_PATH_PREFIX}${filename}`;
     savedPath = path.join(courseUploadDir, filename);
     await fs.mkdir(courseUploadDir, { recursive: true });
-    await fs.writeFile(savedPath, req.file.buffer, { flag: 'wx', mode: 0o640 });
+    await fs.writeFile(savedPath, webp.buffer, { flag: 'wx', mode: 0o640 });
 
     await pool.request()
       .input('id', sql.BigInt, id.data)

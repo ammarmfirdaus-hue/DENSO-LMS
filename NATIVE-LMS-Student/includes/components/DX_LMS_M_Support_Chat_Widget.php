@@ -36,12 +36,6 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
         </div>
         <div class="dls-chat-header-meta">
           <div class="dls-chat-title">Live Chat Admin</div>
-          <div class="dls-chat-status-row">
-            <span id="dlsSupportPresenceBadge" class="dls-chat-status-pill is-offline">
-              <span id="dlsSupportPresenceDot" class="dls-chat-status-dot"></span>
-              <span id="dlsSupportPresenceText">Mengecek status...</span>
-            </span>
-          </div>
         </div>
       </div>
 
@@ -82,16 +76,16 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
           Selamat datang di Live Support DENSO LMS. Ada kendala belajar atau teknis? Pilih topik cepat di bawah atau tulis pesan langsung ke Admin.
         </p>
         <div id="dlsSupportQuickTopics" class="dls-chat-topics">
-          <button type="button" class="dls-chat-topic-btn" data-topic="Halo Admin, saya mengalami kendala akses course.">
+          <button type="button" data-dls-action-ignore="true" class="dls-chat-topic-btn" data-topic="Halo Admin, saya mengalami kendala akses course.">
             Kendala Akses Course
           </button>
-          <button type="button" class="dls-chat-topic-btn" data-topic="Halo Admin, saya ingin bertanya terkait quiz atau nilai.">
+          <button type="button" data-dls-action-ignore="true" class="dls-chat-topic-btn" data-topic="Halo Admin, saya ingin bertanya terkait quiz atau nilai.">
             Pertanyaan Quiz / Nilai
           </button>
-          <button type="button" class="dls-chat-topic-btn" data-topic="Halo Admin, saya butuh bantuan teknis atau akun.">
+          <button type="button" data-dls-action-ignore="true" class="dls-chat-topic-btn" data-topic="Halo Admin, saya butuh bantuan teknis atau akun.">
             Masalah Akun / Teknis
           </button>
-          <button type="button" class="dls-chat-topic-btn" data-topic="Halo Admin, saya ingin berkonsultasi langsung.">
+          <button type="button" data-dls-action-ignore="true" class="dls-chat-topic-btn" data-topic="Halo Admin, saya ingin berkonsultasi langsung.">
             Hubungi Admin
           </button>
         </div>
@@ -124,7 +118,6 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
       </div>
       <div class="dls-chat-footer-hint">
         <span>Tekan Enter untuk kirim</span>
-        <span id="dlsSupportConnMode">Realtime</span>
       </div>
     </form>
   </section>
@@ -319,16 +312,6 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
 
     function updatePresence(presence) {
       var online = Boolean(presence && presence.online);
-      var onlineCount = Number(presence && presence.online_count ? presence.online_count : 0);
-      if (presenceBadge) {
-        presenceBadge.classList.toggle('is-online', online);
-        presenceBadge.classList.toggle('is-offline', !online);
-      }
-      if (presenceText) {
-        presenceText.textContent = online
-          ? (onlineCount > 1 ? 'Online (' + onlineCount + ' Admin)' : 'Online · Terhubung')
-          : 'Admin Offline · Tinggalkan pesan';
-      }
       if (avatarDot) avatarDot.classList.toggle('is-online', online);
       if (launcherDot) launcherDot.classList.toggle('is-online', online);
     }
@@ -451,8 +434,10 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
       }
 
       isSending = true;
+      cutoffAt = 0;
       if (sendBtn) sendBtn.disabled = true;
       if (input) input.disabled = true;
+      topicButtons.forEach(function (b) { b.disabled = true; });
 
       try {
         var res = await requestApi(apiBase + '/support-chat/messages', {
@@ -466,7 +451,8 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
 
         var payload = await res.json().catch(function () { return {}; });
         if (!res.ok) {
-          showNotice(payload.message || 'Gagal mengirim pesan (' + res.status + ').', true);
+          var errMsg = (payload && payload.error && payload.error.message) || payload.message || ('Gagal mengirim pesan (' + res.status + ').');
+          showNotice(errMsg, true);
           return;
         }
 
@@ -483,6 +469,7 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
       } finally {
         isSending = false;
         if (sendBtn) sendBtn.disabled = false;
+        topicButtons.forEach(function (b) { b.disabled = false; });
         if (input) {
           input.disabled = false;
           if (isOpen) input.focus();
@@ -492,7 +479,6 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
 
     function startPollingFallback() {
       if (pollTimer) return;
-      if (connModeEl) connModeEl.textContent = 'Sinkronisasi otomatis';
       pollTimer = setInterval(function () {
         if (document.visibilityState === 'hidden') return;
         syncMessages(isOpen);
@@ -509,7 +495,6 @@ $dlsLogoDark = $dlsAssetPrefix . 'assets/img/icon/denso-vector-logo-dark.png';
 
       try {
         sseSource = new EventSource(apiBase + '/support-chat/stream', { withCredentials: true });
-        if (connModeEl) connModeEl.textContent = 'Realtime';
 
         sseSource.addEventListener('ready', function (evt) {
           try {
