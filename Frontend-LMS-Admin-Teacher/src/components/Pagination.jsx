@@ -35,7 +35,23 @@ export function usePagination(items, initialPageSize = 10) {
 }
 
 /**
- * Pagination controls following design.md compact surface geometry.
+ * Menghasilkan susunan nomor halaman yang rapi dan mudah dibaca (dengan elipsis).
+ */
+function getPageNumbers(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, '...', total];
+  }
+  if (current >= total - 3) {
+    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, '...', current - 1, current, current + 1, '...', total];
+}
+
+/**
+ * Pagination controls yang rapi, modern, dan family-friendly.
  */
 export default function Pagination({
   page,
@@ -56,11 +72,7 @@ export default function Pagination({
 
   const start = (page - 1) * pageSize + 1;
   const end = Math.min(page * pageSize, total);
-
-  const pages = Array.from({ length: Math.min(pageCount, 5) }, (_, index) => {
-    const first = Math.min(Math.max(page - 2, 1), Math.max(pageCount - 4, 1));
-    return first + index;
-  });
+  const pages = getPageNumbers(page, pageCount);
 
   const handleJumpSubmit = (e) => {
     e.preventDefault();
@@ -79,64 +91,71 @@ export default function Pagination({
   return (
     <nav
       aria-label="Navigasi halaman data"
-      className="flex flex-col gap-3 border-t border-outline px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-3 border-t border-outline/60 bg-surface-lowest/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900/50"
     >
+      {/* Sisi Kiri: Informasi Data & Baris Per Halaman */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted">
-        <span aria-live="polite">
+        <span aria-live="polite" className="select-none">
           Menampilkan <strong className="font-semibold text-on-surface">{start}–{end}</strong> dari{' '}
           <strong className="font-semibold text-on-surface">{total}</strong> data
         </span>
 
-        <label className="flex items-center gap-2">
-          <span>Baris:</span>
+        <label className="flex items-center gap-1.5 select-none">
+          <span>Tampilkan:</span>
           <select
-            aria-label="Pilih jumlah baris per halaman"
+            aria-label="Pilih jumlah data per halaman"
             value={pageSize}
             onChange={event => onPageSizeChange?.(Number(event.target.value))}
-            className="h-8 cursor-pointer rounded-md border border-outline bg-white px-2 text-xs font-semibold text-on-surface outline-none transition focus:border-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            className="h-7 cursor-pointer rounded-lg border border-outline bg-white px-2 text-xs font-semibold text-on-surface outline-none transition focus:border-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
           >
             {pageSizes.map(size => (
               <option key={size} value={size}>
-                {size}
+                {size} / hal
               </option>
             ))}
           </select>
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/* phpMyAdmin style: Form Cari/Lompat Nomor Halaman */}
-        <form onSubmit={handleJumpSubmit} className="flex items-center gap-1.5 text-xs text-muted">
-          <label htmlFor="jump-page-input" className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-300">
-            Halaman:
-          </label>
-          <input
-            id="jump-page-input"
-            type="number"
-            min={1}
-            max={pageCount}
-            value={jumpPage}
-            onChange={(e) => setJumpPage(e.target.value)}
-            onBlur={() => {
-              if (!jumpPage || isNaN(parseInt(jumpPage, 10))) {
-                setJumpPage(String(page));
-              }
-            }}
-            placeholder={String(page)}
-            title={`Masukkan nomor halaman (1 - ${pageCount})`}
-            aria-label="Cari nomor halaman"
-            className="h-8 w-14 rounded-md border border-outline bg-white px-1.5 text-center text-xs font-semibold text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-          />
-          <span className="font-medium text-slate-500 dark:text-slate-400">/ {pageCount}</span>
-          <button
-            type="submit"
-            className="h-8 cursor-pointer rounded-md border border-slate-300/80 bg-slate-100 px-2.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-200 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            title="Buka halaman yang dicari"
-          >
-            Go
-          </button>
-        </form>
+      {/* Sisi Kanan: Lompat Halaman & Tombol Navigasi Angka */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* Form Cari/Lompat Nomor Halaman yang Terapit Rapi */}
+        {pageCount > 1 && (
+          <form onSubmit={handleJumpSubmit} className="flex items-center gap-1.5 text-xs text-muted">
+            <span className="whitespace-nowrap font-medium text-on-surface-variant select-none">
+              Ke hal:
+            </span>
+            <div className="flex items-center rounded-lg border border-outline bg-white p-0.5 transition focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 dark:border-slate-700 dark:bg-slate-800">
+              <input
+                id="jump-page-input"
+                type="number"
+                min={1}
+                max={pageCount}
+                value={jumpPage}
+                onChange={(e) => setJumpPage(e.target.value)}
+                onBlur={() => {
+                  if (!jumpPage || isNaN(parseInt(jumpPage, 10))) {
+                    setJumpPage(String(page));
+                  }
+                }}
+                placeholder={String(page)}
+                title={`Ketik nomor halaman (1 - ${pageCount}) lalu tekan Enter`}
+                aria-label="Cari nomor halaman"
+                className="h-6 w-11 bg-transparent px-1 text-center text-xs font-semibold text-on-surface outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <span className="pr-1 text-[11px] font-medium text-muted select-none">/ {pageCount}</span>
+              <button
+                type="submit"
+                className="h-6 cursor-pointer rounded-md bg-surface-low px-2 text-[11px] font-semibold text-on-surface-variant transition hover:bg-primary hover:text-white active:scale-95 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-primary dark:hover:text-white"
+                title="Buka halaman yang dicari"
+              >
+                Tuju
+              </button>
+            </div>
+          </form>
+        )}
 
+        {/* Tombol Nomor & Panah Navigasi */}
         <div className="flex items-center gap-1" role="group" aria-label="Pilih nomor halaman">
           {/* Halaman Pertama (<<) */}
           <button
@@ -145,10 +164,10 @@ export default function Pagination({
             aria-label="Halaman pertama"
             disabled={page <= 1}
             onClick={() => onPageChange?.(1)}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg border border-slate-300/80 bg-slate-100 text-slate-800 transition hover:bg-slate-200/90 disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="grid size-8 cursor-pointer place-items-center rounded-lg border border-outline/70 bg-white text-on-surface-variant transition hover:border-primary/50 hover:bg-surface-low hover:text-on-surface disabled:pointer-events-none disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             title="Halaman pertama (awal)"
           >
-            <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+            <ChevronsLeft className="size-3.5" aria-hidden="true" />
           </button>
 
           {/* Halaman Sebelumnya (<) */}
@@ -158,13 +177,26 @@ export default function Pagination({
             aria-label="Halaman sebelumnya"
             disabled={page <= 1}
             onClick={() => onPageChange?.(page - 1)}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg border border-slate-300/80 bg-slate-100 text-slate-800 transition hover:bg-slate-200/90 disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="grid size-8 cursor-pointer place-items-center rounded-lg border border-outline/70 bg-white text-on-surface-variant transition hover:border-primary/50 hover:bg-surface-low hover:text-on-surface disabled:pointer-events-none disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             title="Halaman sebelumnya"
           >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            <ChevronLeft className="size-3.5" aria-hidden="true" />
           </button>
 
-          {pages.map(value => {
+          {/* Deretan Nomor Halaman */}
+          {pages.map((value, idx) => {
+            if (value === '...') {
+              return (
+                <span
+                  key={`ellipsis-${idx}`}
+                  className="grid size-8 select-none place-items-center text-xs font-semibold text-muted"
+                  aria-hidden="true"
+                >
+                  …
+                </span>
+              );
+            }
+
             const isActive = value === page;
             return (
               <button
@@ -174,10 +206,10 @@ export default function Pagination({
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={`Halaman ${value}`}
                 onClick={() => onPageChange?.(value)}
-                className={`h-9 min-w-9 cursor-pointer rounded-lg border px-2.5 text-xs font-semibold transition ${
+                className={`h-8 min-w-8 cursor-pointer rounded-lg border px-2 text-xs font-semibold transition ${
                   isActive
-                    ? 'border-primary bg-primary text-white shadow-xs'
-                    : 'border-slate-300/80 bg-slate-100 text-slate-800 hover:bg-slate-200/90 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                    ? 'border-primary bg-primary text-white shadow-xs font-bold'
+                    : 'border-outline/70 bg-white text-on-surface-variant hover:border-primary/50 hover:bg-surface-low hover:text-on-surface dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                 }`}
               >
                 {value}
@@ -192,10 +224,10 @@ export default function Pagination({
             aria-label="Halaman berikutnya"
             disabled={page >= pageCount}
             onClick={() => onPageChange?.(page + 1)}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg border border-slate-300/80 bg-slate-100 text-slate-800 transition hover:bg-slate-200/90 disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="grid size-8 cursor-pointer place-items-center rounded-lg border border-outline/70 bg-white text-on-surface-variant transition hover:border-primary/50 hover:bg-surface-low hover:text-on-surface disabled:pointer-events-none disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             title="Halaman berikutnya"
           >
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            <ChevronRight className="size-3.5" aria-hidden="true" />
           </button>
 
           {/* Halaman Terakhir (>>) */}
@@ -205,10 +237,10 @@ export default function Pagination({
             aria-label="Halaman terakhir"
             disabled={page >= pageCount}
             onClick={() => onPageChange?.(pageCount)}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg border border-slate-300/80 bg-slate-100 text-slate-800 transition hover:bg-slate-200/90 disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="grid size-8 cursor-pointer place-items-center rounded-lg border border-outline/70 bg-white text-on-surface-variant transition hover:border-primary/50 hover:bg-surface-low hover:text-on-surface disabled:pointer-events-none disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             title="Halaman terakhir (akhir)"
           >
-            <ChevronsRight className="h-4 w-4" aria-hidden="true" />
+            <ChevronsRight className="size-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>
