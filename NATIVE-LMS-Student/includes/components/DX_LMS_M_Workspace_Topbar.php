@@ -165,9 +165,9 @@ $wtCanReturnTeacher = !empty($_SESSION['can_return_teacher']) || (
             btn.dataset.index = String(idx);
 
             var iconWrap = document.createElement('span');
-            iconWrap.className = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#FEF2F2] text-[#DC2626]';
+            iconWrap.className = 'flex shrink-0 items-center justify-center text-[#DC2626]';
             var icon = document.createElement('span');
-            icon.className = 'material-symbols-outlined text-[17px]';
+            icon.className = 'material-symbols-outlined text-[20px]';
             icon.textContent = item.icon || 'search';
             iconWrap.appendChild(icon);
 

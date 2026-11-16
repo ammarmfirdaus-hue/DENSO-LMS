@@ -221,9 +221,7 @@ export default function CreateUserPage() {
                       onChange={() => setSelectedRole(value)}
                       className="sr-only"
                     />
-                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/80 dark:bg-slate-800">
-                      <Icon className="size-5" />
-                    </span>
+                    <Icon className={`size-5 shrink-0 ${selected ? 'text-primary' : 'text-muted'}`} />
                     <span className="min-w-0">
                       <span className="block text-sm font-semibold text-on-surface">{label}</span>
                       <span className="mt-0.5 block text-xs font-normal text-muted">{description}</span>

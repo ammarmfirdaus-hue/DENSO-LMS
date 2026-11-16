@@ -49,15 +49,7 @@ export default function ModalNotif({ isOpen, notification, onClose }) {
           }`}
         >
           <div className="flex min-w-0 items-center gap-3">
-            <span
-              className={`grid size-11 shrink-0 place-items-center rounded-lg ${
-                isImportant
-                  ? 'bg-primary text-white'
-                  : 'bg-primary/10 text-primary dark:bg-primary/20'
-              }`}
-            >
-              <IconComp className="h-5 w-5" aria-hidden="true" />
-            </span>
+            <IconComp className="h-6 w-6 shrink-0 text-primary dark:text-red-400" aria-hidden="true" />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-outline bg-white px-2.5 py-0.5 text-xs font-semibold text-on-surface">

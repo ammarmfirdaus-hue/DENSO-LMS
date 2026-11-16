@@ -352,9 +352,7 @@ export default function SubmitMaterialModal({
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-outline/40 bg-surface-low/60 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800 dark:bg-slate-800/60">
           <div className="flex items-center gap-3.5">
-            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300">
-              <FilePlus2 className="size-5" />
-            </span>
+            <FilePlus2 className="size-6 shrink-0 text-primary dark:text-red-400" />
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
                 <h3 className="text-base font-bold text-on-surface sm:text-lg">
@@ -635,9 +633,7 @@ export default function SubmitMaterialModal({
                 onClick={() => fileInputRef.current?.click()}
                 className="flex cursor-pointer items-center gap-3.5 rounded-xl border-2 border-dashed border-outline bg-surface-low/50 p-5 transition hover:border-primary/60 dark:border-slate-700 dark:bg-slate-800/40"
               >
-                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <UploadCloud className="size-6" />
-                </span>
+                <UploadCloud className="size-8 shrink-0 text-primary dark:text-red-400" />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-on-surface sm:text-sm">
                     {file ? file.name : 'Klik untuk memilih file materi'}

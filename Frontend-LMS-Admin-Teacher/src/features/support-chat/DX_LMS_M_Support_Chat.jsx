@@ -284,9 +284,7 @@ export default function DX_LMS_M_Support_Chat() {
     <section className="space-y-4">
       <div className="dls-card-surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400">
-            <MessageCircle className="h-5 w-5" />
-          </span>
+          <MessageCircle className="h-7 w-7 shrink-0 text-red-600 dark:text-red-400" />
           <div>
             <h1 className="text-lg font-bold text-slate-900 dark:text-white">Pusat Bantuan</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">Balas pesan siswa secara real-time (riwayat cache otomatis dibersihkan setelah 15 menit tanpa interaksi).</p>

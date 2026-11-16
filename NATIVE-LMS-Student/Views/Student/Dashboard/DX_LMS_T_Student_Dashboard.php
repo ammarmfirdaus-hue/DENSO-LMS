@@ -130,8 +130,8 @@ $courses = array_map(static function (array $course): array {
             </div>
             <div class="lms-card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3.5 min-w-0">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FEF2F2] text-[#DC2626]">
-                        <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1;">play_circle</span>
+                    <div class="flex shrink-0 items-center justify-center text-[#DC2626]">
+                        <span class="material-symbols-outlined text-[32px]" style="font-variation-settings:'FILL' 1;">play_circle</span>
                     </div>
                     <div class="min-w-0">
                         <p class="truncate text-[14px] font-bold text-[#181824] dark:text-white"><?= e((string) $quickResumeCourse['title']) ?></p>

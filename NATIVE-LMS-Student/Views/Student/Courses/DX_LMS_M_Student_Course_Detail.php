@@ -425,8 +425,8 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             <section class="fd-card rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
                 <button type="button" onclick="toggleAccordion('riwayat-aktivitas')" class="w-full flex items-center justify-between p-[18px] text-left hover:bg-[#FAFAFA] transition-colors duration-200 gap-[12px]">
                     <div class="flex flex-wrap items-center gap-[10px] min-w-0">
-                        <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#DBEAFE] text-[#2563EB]">
-                            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">timeline</span>
+                        <span class="inline-flex shrink-0 items-center justify-center text-[#2563EB]">
+                            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">timeline</span>
                         </span>
                         <span class="fd-h3 text-[#171717]">1. Aktivitas</span>
                         <span class="fd-chip fd-chip-neutral text-[11px]"><?= count($activities) ?> aktivitas</span>
@@ -472,8 +472,8 @@ $all_sessions_completed = $all_sessions_completed ?? false;
             <section class="fd-card rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
                 <button type="button" onclick="toggleAccordion('riwayat-qa')" class="w-full flex items-center justify-between p-[18px] text-left hover:bg-[#FAFAFA] transition-colors duration-200 gap-[12px]">
                     <div class="flex flex-wrap items-center gap-[10px] min-w-0">
-                        <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#FEF2F2] text-[#DC2626]">
-                            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+                        <span class="inline-flex shrink-0 items-center justify-center text-[#DC2626]">
+                            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
                         </span>
                         <span class="fd-h3 text-[#171717]">2. Quiz &amp; Assessment</span>
                         <?php $qaCount = count($assessments['quiz'] ?? []) + count($assessments['final'] ?? []); ?>
@@ -494,9 +494,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                                     <?php foreach ($assessments['quiz'] as $qIdx => $h): ?>
                                     <div class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] riwayat-item <?= $qIdx >= 5 ? 'riwayat-hidden' : '' ?>" <?= $qIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
-                                            <div class="w-8 h-8 bg-[#FEF2F2] text-[#DC2626] rounded-full flex items-center justify-center shrink-0">
-                                                <span class="material-symbols-outlined text-[16px]">quiz</span>
-                                            </div>
+                                            <span class="flex shrink-0 items-center justify-center text-[#DC2626]">
+                                                <span class="material-symbols-outlined text-[20px]">quiz</span>
+                                            </span>
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#171717]">Percobaan <?= e((string) $h['attempt']) ?></p>
                                                 <p class="fd-mono text-[#737373] text-[11px] mt-0.5"><?= date('d M Y, H:i', strtotime($h['date'])) ?></p>
@@ -536,9 +536,9 @@ $all_sessions_completed = $all_sessions_completed ?? false;
                                     ?>
                                     <div class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] riwayat-item <?= $fIdx >= 5 ? 'riwayat-hidden' : '' ?>" <?= $fIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
-                                            <div class="w-8 h-8 <?= $isPassed ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#EF4444]' ?> rounded-full flex items-center justify-center shrink-0">
-                                                <span class="material-symbols-outlined text-[16px]"><?= $isPassed ? 'check_circle' : 'cancel' ?></span>
-                                            </div>
+                                            <span class="flex shrink-0 items-center justify-center <?= $isPassed ? 'text-[#16A34A]' : 'text-[#EF4444]' ?>">
+                                                <span class="material-symbols-outlined text-[20px]"><?= $isPassed ? 'check_circle' : 'cancel' ?></span>
+                                            </span>
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#171717]">Percobaan <?= e((string) $h['attempt']) ?></p>
                                                 <p class="fd-mono text-[#737373] text-[11px] mt-0.5"><?= date('d M Y, H:i', strtotime($h['date'])) ?></p>
@@ -696,8 +696,8 @@ $all_sessions_completed = $all_sessions_completed ?? false;
         <div class="p-[18px] space-y-[18px] mt-[6px]">
 
             <div class="fd-card bg-white rounded-[12px] p-[18px] sm:p-[24px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-start gap-[12px]">
-                <div class="w-12 h-12 rounded-[12px] bg-[#DBEAFE] text-[#2563EB] flex shrink-0 items-center justify-center">
-                    <span class="material-symbols-outlined text-[24px]">forum</span>
+                <div class="flex shrink-0 items-center justify-center text-[#2563EB]">
+                    <span class="material-symbols-outlined text-[32px]">forum</span>
                 </div>
                 <div>
                     <h3 class="fd-h3 text-[#171717] mb-[3px]">Forum Diskusi Course</h3>

@@ -63,12 +63,7 @@ export default function DataTable({
               <tr>
                 <td colSpan={columns.length || 1} className="px-6 py-12 text-center">
                   <div className="mx-auto flex max-w-sm flex-col items-center justify-center text-center">
-                    <span
-                      className="grid size-12 place-items-center rounded-xl bg-surface-low text-muted"
-                      aria-hidden="true"
-                    >
-                      <FolderOpen className="h-6 w-6 stroke-[1.75]" />
-                    </span>
+                    <FolderOpen className="size-10 stroke-[1.5] text-muted/60" aria-hidden="true" />
                     <p className="mt-3 text-sm font-medium text-muted">
                       {emptyMessage}
                     </p>

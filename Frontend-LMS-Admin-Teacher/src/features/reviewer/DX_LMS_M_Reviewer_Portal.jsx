@@ -500,9 +500,7 @@ export default function ReviewerPortalPage() {
             ) : (
               <div className="grid min-h-64 place-items-center p-8 text-center">
                 <div>
-                  <span className="mx-auto grid size-12 place-items-center rounded-xl bg-surface-low text-muted">
-                    <ClipboardCheck className="h-6 w-6" />
-                  </span>
+                  <ClipboardCheck className="mx-auto size-10 text-muted/60" />
                   <h2 className="mt-3 text-base font-bold text-on-surface">Pilih materi untuk ditinjau</h2>
                   <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-muted">
                     Klik salah satu item pada daftar di sebelah kiri untuk membaca isi materi dan memberikan keputusan.

@@ -729,9 +729,7 @@ export default function CourseDetailPage() {
         ) : (
           <Card className="border-dashed text-center">
             <div className="mx-auto flex max-w-md flex-col items-center py-8">
-              <div className="mb-3 grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
-                <CalendarDays className="size-6" />
-              </div>
+              <CalendarDays className="mb-3 size-10 text-muted/60" />
               <h3 className="font-bold text-on-surface">
                 {sessions.length ? 'Tidak ada sesi atau materi yang cocok' : 'Belum ada sesi'}
               </h3>

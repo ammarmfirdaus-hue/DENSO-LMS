@@ -327,18 +327,18 @@ export default function ActivityPage() {
                     isFailed ? 'bg-red-50/30 dark:bg-red-950/15' : ''
                   }`}
                 >
-                  <span
-                    className={`grid size-11 shrink-0 place-items-center rounded-xl ${
-                      isFailed
-                        ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                        : isCompleted
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : isStopped
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                            : 'bg-primary/10 text-primary dark:bg-red-950/50 dark:text-red-300'
-                    }`}
-                  >
-                    <IconComp className="size-5" />
+                  <span className="mt-1 flex shrink-0 items-center justify-center">
+                    <IconComp
+                      className={`size-6 shrink-0 ${
+                        isFailed
+                          ? 'text-red-600 dark:text-red-400'
+                          : isCompleted
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : isStopped
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-primary dark:text-red-400'
+                      }`}
+                    />
                   </span>
 
                   <div className="min-w-0 flex-1 space-y-2">
@@ -426,9 +426,7 @@ export default function ActivityPage() {
           </div>
         ) : (
           <div className="px-6 py-12 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-surface-low text-muted dark:bg-slate-800">
-              <History className="size-6" />
-            </div>
+            <History className="mx-auto size-10 text-muted/60" />
             <h3 className="mt-3 font-bold text-on-surface">
               {loading
                 ? 'Memuat aktivitas...'

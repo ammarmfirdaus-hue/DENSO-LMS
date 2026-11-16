@@ -480,8 +480,8 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
             <section class="fd-card rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
                 <button type="button" onclick="toggleAccordion('rd-riwayat-aktivitas')" class="w-full flex items-center justify-between p-[18px] text-left hover:bg-[#FAFAFA] transition-colors duration-200 gap-[12px]">
                     <div class="flex flex-wrap items-center gap-[10px] min-w-0">
-                        <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#DBEAFE] text-[#2563EB]">
-                            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">timeline</span>
+                        <span class="inline-flex shrink-0 items-center justify-center text-[#2563EB]">
+                            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">timeline</span>
                         </span>
                         <span class="fd-h3 text-[#171717]">1. Aktivitas</span>
                         <span class="fd-chip fd-chip-neutral text-[11px]"><?= count($activities) ?> aktivitas</span>
@@ -527,8 +527,8 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
             <section class="fd-card rounded-[12px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
                 <button type="button" onclick="toggleAccordion('rd-riwayat-qa')" class="w-full flex items-center justify-between p-[18px] text-left hover:bg-[#FAFAFA] transition-colors duration-200 gap-[12px]">
                     <div class="flex flex-wrap items-center gap-[10px] min-w-0">
-                        <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#FEF2F2] text-[#DC2626]">
-                            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+                        <span class="inline-flex shrink-0 items-center justify-center text-[#DC2626]">
+                            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
                         </span>
                         <span class="fd-h3 text-[#171717]">2. Quiz &amp; Assessment</span>
                         <?php $qaCount = count($assessments['quiz'] ?? []) + count($assessments['final'] ?? []); ?>
@@ -549,9 +549,9 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                                     <?php foreach ($assessments['quiz'] as $qIdx => $h): ?>
                                     <a href="?route=/student/quiz&id=<?= urlencode($coursePublicId) ?>&type=quiz&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $qIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $qIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
-                                            <div class="w-8 h-8 bg-[#FEF2F2] text-[#DC2626] rounded-full flex items-center justify-center shrink-0">
-                                                <span class="material-symbols-outlined text-[16px]">quiz</span>
-                                            </div>
+                                            <span class="flex shrink-0 items-center justify-center text-[#DC2626]">
+                                                <span class="material-symbols-outlined text-[20px]">quiz</span>
+                                            </span>
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#171717] group-hover:text-[#DC2626] transition-colors">Percobaan <?= e((string) $h['attempt']) ?></p>
                                                 <p class="fd-mono text-[#737373] text-[11px] mt-0.5"><?= date('d M Y, H:i', strtotime($h['date'])) ?></p>
@@ -592,9 +592,9 @@ $nilaiFa = (int) ($course['quiz_score'] ?? 100);
                                     ?>
                                     <a href="?route=/student/quiz&id=<?= urlencode($coursePublicId) ?>&type=final_assessment&attempt=<?= e((string) $h['attempt']) ?>" class="bg-white rounded-[10px] p-[12px] flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow riwayat-item <?= $fIdx >= 5 ? 'riwayat-hidden' : '' ?> group" <?= $fIdx >= 5 ? 'style="display:none;"' : '' ?>>
                                         <div class="flex items-center gap-[10px]">
-                                            <div class="w-8 h-8 <?= $isPassed ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#EF4444]' ?> rounded-full flex items-center justify-center shrink-0">
-                                                <span class="material-symbols-outlined text-[16px]"><?= $isPassed ? 'check_circle' : 'cancel' ?></span>
-                                            </div>
+                                            <span class="flex shrink-0 items-center justify-center <?= $isPassed ? 'text-[#16A34A]' : 'text-[#EF4444]' ?>">
+                                                <span class="material-symbols-outlined text-[20px]"><?= $isPassed ? 'check_circle' : 'cancel' ?></span>
+                                            </span>
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#171717] group-hover:text-[#DC2626] transition-colors">Percobaan <?= e((string) $h['attempt']) ?></p>
                                                 <p class="fd-mono text-[#737373] text-[11px] mt-0.5"><?= date('d M Y, H:i', strtotime($h['date'])) ?></p>

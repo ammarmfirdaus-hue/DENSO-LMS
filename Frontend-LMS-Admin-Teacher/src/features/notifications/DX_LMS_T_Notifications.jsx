@@ -510,14 +510,14 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div className="flex min-w-0 items-start gap-3.5">
-                    <span
-                      className={`grid size-10 shrink-0 place-items-center rounded-lg ${
-                        item.is_read
-                          ? 'bg-surface-low text-muted dark:bg-slate-800'
-                          : 'bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300'
-                      }`}
-                    >
-                      <IconComp className="size-5" />
+                    <span className="mt-0.5 flex shrink-0 items-center justify-center">
+                      <IconComp
+                        className={`size-6 shrink-0 ${
+                          item.is_read
+                            ? 'text-muted'
+                            : 'text-primary dark:text-red-400'
+                        }`}
+                      />
                     </span>
 
                     <div className="min-w-0 flex-1">

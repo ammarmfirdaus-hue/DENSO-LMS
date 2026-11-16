@@ -138,7 +138,7 @@ export default function DashboardPage() {
       count: pipelinePendingTotal,
       countLabel: 'menunggu',
       Icon: FileCheck2,
-      iconClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
+      iconColor: 'text-blue-600 dark:text-blue-400'
     },
     hasPermission(user, 'materials.submit') && {
       key: 'submit-material',
@@ -146,7 +146,7 @@ export default function DashboardPage() {
       title: 'Ajukan materi',
       description: 'Kirim materi baru untuk ditinjau oleh reviewer.',
       Icon: PlusCircle,
-      iconClass: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300'
+      iconColor: 'text-cyan-600 dark:text-cyan-400'
     },
     hasPermission(user, 'courses.create') && {
       key: 'course-create',
@@ -154,7 +154,7 @@ export default function DashboardPage() {
       title: 'Buat course',
       description: 'Tambahkan course baru ke katalog pembelajaran.',
       Icon: PlusCircle,
-      iconClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+      iconColor: 'text-emerald-600 dark:text-emerald-400'
     },
     hasPermission(user, 'courses.view') && !hasPermission(user, 'courses.create') && {
       key: 'courses',
@@ -164,7 +164,7 @@ export default function DashboardPage() {
       count: activeCoursesValue,
       countLabel: 'course aktif',
       Icon: BookOpen,
-      iconClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+      iconColor: 'text-emerald-600 dark:text-emerald-400'
     },
     hasPermission(user, 'enrollments.view') && {
       key: 'enrollments',
@@ -174,7 +174,7 @@ export default function DashboardPage() {
       count: Number(s.pendingEnrollmentRequests || 0),
       countLabel: 'permintaan',
       Icon: ClipboardCheck,
-      iconClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+      iconColor: 'text-amber-600 dark:text-amber-400'
     },
     isAdmin && hasPermission(user, 'users.manage') && {
       key: 'users',
@@ -182,7 +182,7 @@ export default function DashboardPage() {
       title: 'Tambah pengguna',
       description: 'Buat akun Student, Teacher, Admin, atau Reviewer.',
       Icon: UserPlus,
-      iconClass: 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300'
+      iconColor: 'text-purple-600 dark:text-purple-400'
     },
     hasPermission(user, 'quizzes.view') && {
       key: 'quizzes',
@@ -190,7 +190,7 @@ export default function DashboardPage() {
       title: 'Kelola quiz',
       description: 'Buat atau periksa quiz dalam course.',
       Icon: Award,
-      iconClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+      iconColor: 'text-indigo-600 dark:text-indigo-400'
     },
     hasPermission(user, 'grades.view') && {
       key: 'grades',
@@ -198,7 +198,7 @@ export default function DashboardPage() {
       title: 'Lihat nilai',
       description: 'Pantau nilai dan progres peserta.',
       Icon: BarChart3,
-      iconClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+      iconColor: 'text-slate-600 dark:text-slate-400'
     }
   ].filter(Boolean);
 
@@ -569,21 +569,13 @@ export default function DashboardPage() {
                   String(item.activity_type || '').toLowerCase().includes('gagal');
                 return (
                   <div key={item.activity_id || index} className="flex items-start gap-3 px-6 py-3.5">
-                    <span
-                      className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg ${
-                        isFailed
-                          ? 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                          : isJob
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                            : 'bg-surface-low text-on-surface'
-                      }`}
-                    >
+                    <span className="mt-0.5 flex shrink-0 items-center justify-center">
                       {isFailed ? (
-                        <XCircle className="h-4 w-4" aria-hidden="true" />
+                        <XCircle className="size-5 text-red-600 dark:text-red-400" aria-hidden="true" />
                       ) : isJob ? (
-                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                        <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                       ) : (
-                        <Clock className="h-4 w-4 text-muted" aria-hidden="true" />
+                        <Clock className="size-5 text-slate-400 dark:text-slate-500" aria-hidden="true" />
                       )}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -631,15 +623,13 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {quickActions.map(({ key, to, title, description, count, countLabel, Icon, iconClass }) => (
+          {quickActions.map(({ key, to, title, description, count, countLabel, Icon, iconColor }) => (
             <Link
               key={key}
               to={to}
               className="dls-card-surface dls-card-interactive group flex min-h-32 flex-col rounded-xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <span className={`grid size-9 place-items-center rounded-lg ${iconClass}`}>
-                <Icon className="size-4" aria-hidden="true" />
-              </span>
+              <Icon className={`size-6 shrink-0 ${iconColor}`} aria-hidden="true" />
               <span className="mt-3 flex items-start justify-between gap-2">
                 <span className="text-sm font-semibold text-on-surface">{title}</span>
                 <ArrowRight className="mt-0.5 size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />

@@ -226,9 +226,7 @@ export default function FinalMaterialDetailModal({ material, onClose, onDelete, 
           {material.material_type === 'audio' && (
             <div className="space-y-4 rounded-xl border border-outline/40 bg-surface-low/40 p-6 dark:border-slate-800 dark:bg-slate-900/50">
               <div className="flex items-center gap-4">
-                <span className="grid size-12 place-items-center rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
-                  <Headphones className="size-6" />
-                </span>
+                <Headphones className="size-8 shrink-0 text-purple-600 dark:text-purple-400" />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-on-surface">{material.title}</p>
                   <p className="text-xs text-muted">
@@ -248,9 +246,7 @@ export default function FinalMaterialDetailModal({ material, onClose, onDelete, 
             <div className="rounded-xl border border-outline/40 bg-surface-low/40 p-6 dark:border-slate-800 dark:bg-slate-900/50">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="grid size-12 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                    <File className="size-6" />
-                  </span>
+                  <File className="size-8 shrink-0 text-blue-600 dark:text-blue-400" />
                   <div>
                     <p className="font-bold text-on-surface">
                       {material.original_file_name || material.title}

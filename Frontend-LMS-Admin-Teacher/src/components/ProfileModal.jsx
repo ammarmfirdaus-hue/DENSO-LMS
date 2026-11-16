@@ -100,9 +100,11 @@ export default function ProfileModal({ user, onClose, onUserUpdated }) {
         <form onSubmit={handleSave} className="flex-1 space-y-5 overflow-y-auto p-6">
           <div className="flex items-center justify-between rounded-lg border border-outline bg-surface-low/70 p-4">
             <div className="flex items-center gap-3">
-              <span className={`grid size-10 place-items-center rounded-lg ${isDark ? 'bg-amber-400/20 text-amber-300' : 'bg-primary/10 text-primary'}`}>
-                {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              </span>
+              {isDark ? (
+                <Moon className="h-6 w-6 shrink-0 text-amber-400" />
+              ) : (
+                <Sun className="h-6 w-6 shrink-0 text-primary" />
+              )}
               <div>
                 <p className="text-sm font-semibold text-on-surface">Tema Tampilan Workspace</p>
                 <p className="text-xs text-muted">

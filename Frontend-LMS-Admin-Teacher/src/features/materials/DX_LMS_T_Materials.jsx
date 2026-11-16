@@ -673,9 +673,7 @@ export default function MaterialsPage() {
           </div>
         ) : (
           <div className="px-6 py-12 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-surface-low text-muted dark:bg-slate-800">
-              <Inbox className="size-6" />
-            </div>
+            <Inbox className="mx-auto size-10 text-muted/60" />
             <h3 className="mt-3 text-base font-bold text-on-surface">
               {submissions.length ? 'Tidak ada pengajuan yang cocok' : 'Antrean pengajuan masih kosong'}
             </h3>
@@ -816,9 +814,7 @@ export default function MaterialsPage() {
 
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-2 pr-8">
-                      <span className="grid size-10 place-items-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
-                        <IconComp className="size-5" />
-                      </span>
+                      <IconComp className="size-6 text-emerald-600 dark:text-emerald-400" />
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-md bg-surface-low px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted dark:bg-slate-800 dark:text-slate-300">
                           {item.material_type}
@@ -885,9 +881,7 @@ export default function MaterialsPage() {
           </div>
         ) : (
           <div className="px-6 py-12 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-surface-low text-muted dark:bg-slate-800">
-              <CheckCircle2 className="size-6" />
-            </div>
+            <CheckCircle2 className="mx-auto size-10 text-muted/60" />
             <h3 className="mt-3 text-base font-bold text-on-surface">
               {publishedMaterials.length
                 ? 'Tidak ada materi final yang cocok'

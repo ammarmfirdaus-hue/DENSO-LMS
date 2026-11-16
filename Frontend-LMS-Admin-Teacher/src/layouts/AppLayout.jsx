@@ -353,9 +353,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         >
           <div className="dls-card-surface overflow-hidden rounded-xl border-l-4 border-l-primary shadow-[0_12px_28px_rgba(0,0,0,0.16)]">
             <div className="flex items-start gap-3 p-3.5 sm:p-4">
-              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                <BellRing className="h-4 w-4" aria-hidden="true" />
-              </span>
+              <BellRing className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <p className="pt-0.5 text-sm font-bold text-on-surface">
@@ -412,9 +410,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         >
           <div className="dls-card-surface overflow-hidden rounded-xl border-l-4 border-l-secondary shadow-[0_12px_28px_rgba(0,0,0,0.16)]">
             <div className="flex items-start gap-3 p-3.5 sm:p-4">
-              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-secondary/10 text-secondary">
-                <History className="h-4 w-4" aria-hidden="true" />
-              </span>
+              <History className="mt-0.5 size-5 shrink-0 text-secondary dark:text-slate-300" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <p className="pt-0.5 text-sm font-bold text-on-surface">

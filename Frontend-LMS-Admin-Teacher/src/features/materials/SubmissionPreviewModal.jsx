@@ -97,9 +97,7 @@ export default function SubmissionPreviewModal({
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-outline/40 bg-surface-low/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
           <div className="flex items-start gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300">
-              <TypeIcon className="size-5" />
-            </span>
+            <TypeIcon className="size-6 shrink-0 text-primary dark:text-red-400" />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-surface-lowest px-2 py-0.5 text-[11px] font-semibold text-on-surface-variant ring-1 ring-outline/40 dark:bg-slate-900 dark:text-slate-300">
@@ -290,9 +288,7 @@ export default function SubmissionPreviewModal({
           {submission.material_type === 'audio' && (
             <div className="rounded-xl border border-outline/50 bg-surface-low/50 p-6 dark:border-slate-800 dark:bg-slate-900/50">
               <div className="mb-4 flex items-center gap-4">
-                <span className="grid size-12 place-items-center rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
-                  <Headphones className="size-6" />
-                </span>
+                <Headphones className="size-8 shrink-0 text-purple-600 dark:text-purple-400" />
                 <div>
                   <h4 className="font-bold text-on-surface">{submission.title}</h4>
                   <p className="text-xs text-muted">
@@ -309,9 +305,7 @@ export default function SubmissionPreviewModal({
           {submission.material_type === 'document' && (
             <div className="rounded-xl border border-outline/50 bg-surface-low/30 p-6 dark:border-slate-800 dark:bg-slate-900/50">
               <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <span className="grid size-14 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                  <File className="size-7" />
-                </span>
+                <File className="size-10 shrink-0 text-blue-600 dark:text-blue-400" />
                 <div className="min-w-0 flex-1 text-center sm:text-left">
                   <h4 className="text-base font-bold text-on-surface">{submission.title}</h4>
                   <p className="mt-1 truncate text-xs text-muted">
@@ -337,9 +331,7 @@ export default function SubmissionPreviewModal({
           {submission.material_type === 'link' && (
             <div className="rounded-xl border border-outline/50 bg-surface-low/30 p-6 dark:border-slate-800 dark:bg-slate-900/50">
               <div className="flex items-start gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
-                  <Link2 className="size-6" />
-                </span>
+                <Link2 className="size-8 shrink-0 text-teal-600 dark:text-teal-400" />
                 <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-on-surface">{submission.title}</h4>
                   <p className="mt-1 text-xs text-muted">Tautan Web Eksternal:</p>

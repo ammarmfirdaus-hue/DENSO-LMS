@@ -32,25 +32,25 @@ import showAlert from '../../utils/alert';
 const ROLE_VISUALS = {
   admin: {
     Icon: ShieldAlert,
-    accent: 'bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300',
+    iconColor: 'text-primary dark:text-red-400',
     ring: 'border-primary/40 ring-2 ring-primary/15',
     badgeLabel: 'Administrator'
   },
   teacher: {
     Icon: GraduationCap,
-    accent: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300',
+    iconColor: 'text-blue-600 dark:text-blue-400',
     ring: 'border-blue-500/40 ring-2 ring-blue-500/15',
     badgeLabel: 'Teacher'
   },
   reviewer: {
     Icon: Eye,
-    accent: 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300',
+    iconColor: 'text-purple-600 dark:text-purple-400',
     ring: 'border-purple-500/40 ring-2 ring-purple-500/15',
     badgeLabel: 'Reviewer'
   },
   student: {
     Icon: Users,
-    accent: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    iconColor: 'text-slate-600 dark:text-slate-400',
     ring: 'border-slate-400/50 ring-2 ring-slate-400/15',
     badgeLabel: 'Student'
   }
@@ -545,9 +545,7 @@ export default function RoleAccessPage({ onPermissionsUpdated }) {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className={`grid size-10 shrink-0 place-items-center rounded-lg ${visual.accent}`}>
-                        <RoleIcon className="size-5" />
-                      </span>
+                      <RoleIcon className={`size-6 shrink-0 ${visual.iconColor}`} />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold text-on-surface">
                           {draft.display_name}

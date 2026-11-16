@@ -130,8 +130,8 @@ if (isset($courses) && is_array($courses)) {
     <div class="space-y-2.5 mt-auto pt-1">
         <h3 class="text-[14.5px] font-bold text-[#181824] dark:text-white">Pengingat</h3>
         <a href="?route=/student/notifikasi" class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-3 transition hover:border-red-200 dark:border-slate-800 dark:bg-slate-800/60">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FEF2F2] text-[#DC2626]">
-                <span class="material-symbols-outlined text-[19px]">notifications_active</span>
+            <span class="flex shrink-0 items-center justify-center text-[#DC2626]">
+                <span class="material-symbols-outlined text-[24px]">notifications_active</span>
             </span>
             <div class="min-w-0 flex-1">
                 <p class="truncate text-[12.5px] font-bold text-[#181824] dark:text-white">
@@ -141,8 +141,8 @@ if (isset($courses) && is_array($courses)) {
             </div>
         </a>
         <a href="?route=/student/nilai" class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-3 transition hover:border-red-200 dark:border-slate-800 dark:bg-slate-800/60">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-200/70 text-[#181824] dark:bg-slate-700 dark:text-white">
-                <span class="material-symbols-outlined text-[19px]">assignment_turned_in</span>
+            <span class="flex shrink-0 items-center justify-center text-[#0F2744] dark:text-slate-300">
+                <span class="material-symbols-outlined text-[24px]">assignment_turned_in</span>
             </span>
             <div class="min-w-0 flex-1">
                 <p class="truncate text-[12.5px] font-bold text-[#181824] dark:text-white">Evaluasi & Nilai Quiz</p>

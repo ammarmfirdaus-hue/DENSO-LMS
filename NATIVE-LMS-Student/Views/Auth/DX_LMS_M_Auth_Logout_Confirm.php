@@ -9,8 +9,8 @@ $page_title = 'Konfirmasi Keluar - DENSO Learning';
 <body class="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4 text-[#171717]">
     <main class="w-full max-w-md rounded-[12px] bg-white p-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.12)] sm:p-[30px]">
         <div class="mb-[18px] flex items-center gap-[12px]">
-            <div class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] bg-[#FEF2F2] p-2">
-                <img src="assets/img/icon/denso-vector-logo.png" alt="DENSO" class="h-8 w-8 object-contain">
+            <div class="inline-flex shrink-0 items-center justify-center">
+                <img src="assets/img/icon/denso-vector-logo.png" alt="DENSO" class="h-10 w-10 object-contain">
             </div>
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#DC2626]">DENSO Learning</p>

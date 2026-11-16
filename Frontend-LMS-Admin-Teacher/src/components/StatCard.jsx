@@ -26,32 +26,38 @@ export default function StatCard({
 }) {
   const toneStyles = {
     primary: {
-      badge: 'bg-primary/10 text-primary dark:bg-red-950/50 dark:text-red-300',
+      iconColor: 'text-primary dark:text-red-400',
+      badge: 'text-primary dark:text-red-400',
       stroke: '#d71920',
       fill: 'rgba(215, 25, 32, 0.14)'
     },
     secondary: {
-      badge: 'bg-secondary/10 text-secondary dark:bg-slate-800 dark:text-slate-200',
+      iconColor: 'text-secondary dark:text-slate-300',
+      badge: 'text-secondary dark:text-slate-300',
       stroke: '#173e67',
       fill: 'rgba(23, 62, 103, 0.14)'
     },
     tertiary: {
-      badge: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      badge: 'text-emerald-600 dark:text-emerald-400',
       stroke: '#26734d',
       fill: 'rgba(38, 115, 77, 0.14)'
     },
     info: {
-      badge: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      badge: 'text-blue-600 dark:text-blue-400',
       stroke: '#2563eb',
       fill: 'rgba(37, 99, 235, 0.14)'
     },
     warning: {
-      badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      badge: 'text-amber-600 dark:text-amber-400',
       stroke: '#d97706',
       fill: 'rgba(217, 119, 6, 0.16)'
     },
     neutral: {
-      badge: 'bg-surface-low text-muted dark:bg-slate-800 dark:text-slate-300',
+      iconColor: 'text-slate-500 dark:text-slate-400',
+      badge: 'text-slate-500 dark:text-slate-400',
       stroke: '#666d75',
       fill: 'rgba(102, 109, 117, 0.14)'
     }
@@ -109,9 +115,9 @@ export default function StatCard({
         </div>
 
         {icon && (
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${activeTone.badge}`}>
+          <div className={`flex shrink-0 items-center justify-center ${activeTone.iconColor}`}>
             {typeof icon === 'string' ? (
-              <span className="material-symbol text-[20px]">{icon}</span>
+              <span className="material-symbol text-2xl">{icon}</span>
             ) : (
               icon
             )}

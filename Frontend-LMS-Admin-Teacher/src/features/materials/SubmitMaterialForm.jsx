@@ -187,9 +187,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
   return (
     <div className="border-t border-outline/40 bg-surface-lowest px-5 py-5 dark:border-slate-800 dark:bg-slate-900">
       <div className="mb-4 flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary dark:bg-red-950/60 dark:text-red-300">
-          <ActiveIcon className="size-4" />
-        </span>
+        <ActiveIcon className="size-6 shrink-0 text-primary dark:text-red-400" />
         <div>
           <h4 className="text-sm font-bold text-on-surface">Ajukan Materi Baru</h4>
           <p className="text-xs text-muted">Dikirim ke antrean persetujuan Admin setelah diajukan.</p>
@@ -340,9 +338,7 @@ export default function SubmitMaterialForm({ sessionId, busy, onSubmit }) {
             </label>
             <div className="mt-1.5 rounded-xl border border-dashed border-outline bg-surface-low/50 p-4 transition hover:border-primary/50 dark:border-slate-700 dark:bg-slate-800/40">
               <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                  <UploadCloud className="size-5" />
-                </span>
+                <UploadCloud className="size-7 shrink-0 text-primary dark:text-red-400" />
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-primary">Pilih atau unggah berkas</p>
                   <p className="mt-0.5 text-[11px] text-muted">
