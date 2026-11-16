@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import JobsCenter from '../components/JobsCenter';
 import FloatingGuideBubble from '../components/FloatingGuideBubble';
 import GlobalSearchEnhancer from '../components/GlobalSearchEnhancer';
+import Footer from '../components/Footer';
 import showAlert from '../utils/alert';
 import ModalNotif from '../components/ModalNotif';
 import useSubmenuAutoScroll from '../utils/useSubmenuAutoScroll';
@@ -27,7 +28,9 @@ const ROUTE_TITLES = [
   ['/users', 'Kelola Pengguna'],
   ['/enrollments', 'Persetujuan Course'],
   ['/roles', 'Role & Hak Akses'],
-  ['/settings/api', 'Atur API']
+  ['/settings/api', 'Atur API'],
+  ['/help', 'Pusat Panduan LMS'],
+  ['/locations', 'Peta Fasilitas DENSO (3D)']
 ];
 
 export default function AppLayout({ user: initialUser, onLogout }) {
@@ -259,7 +262,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         badges={menuBadges}
       />
 
-      <div className={`min-h-screen transition-[padding] duration-200 ease-in-out ${desktopCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+      <div className={`min-h-screen flex flex-col transition-[padding] duration-200 ease-in-out ${desktopCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
         {/* Sticky 64px Dark Frosted Application Header (design.md shell) */}
         <header className="dls-shell-chrome sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/10 bg-[#10141a]/92 px-4 text-white backdrop-blur-md">
           <div className="flex min-w-0 items-center gap-3">
@@ -334,12 +337,13 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         </header>
 
         {/* Workspace Container: 1400px max-width, 32px desktop padding */}
-        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <GlobalSearchEnhancer />
           <Suspense fallback={<PageSkeleton />}>
             <Outlet context={user} />
           </Suspense>
         </main>
+        <Footer />
       </div>
 
       {/* Live Toast Notification */}

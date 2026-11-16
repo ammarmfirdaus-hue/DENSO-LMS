@@ -25,6 +25,8 @@ const BackupPage = React.lazy(() => import('./features/settings/DX_LMS_M_Backup'
 const BackupRestorePage = React.lazy(() => import('./features/settings/DX_LMS_M_Backup_Restore'));
 const CertificatesPage = React.lazy(() => import('./features/certificates/DX_LMS_T_Certificates'));
 const ReviewerPortalPage = React.lazy(() => import('./features/reviewer/DX_LMS_M_Reviewer_Portal'));
+const HelpCenterPage = React.lazy(() => import('./features/help/DX_LMS_M_Help_Center'));
+const DensoLocationsPage = React.lazy(() => import('./features/locations/DX_LMS_M_Denso_Locations'));
 import { canAccessStaffPortal, hasPermission } from './utils/access-control';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { registerPwaServiceWorker } from './pwa/registerServiceWorker';
@@ -174,6 +176,8 @@ function Application() {
           <Route path="settings/api" element={protect('settings.api', <ApiSettingsPage />)} />
           <Route path="settings/backup" element={protect('settings.api', <BackupPage />)} />
           <Route path="settings/backup/restore" element={protect('settings.api', <BackupRestorePage />)} />
+          <Route path="help" element={<HelpCenterPage />} />
+          <Route path="locations" element={<DensoLocationsPage />} />
           <Route path="*" element={<Navigate to={fallbackRoute || '/'} replace />} />
         </Route>
       </Routes>

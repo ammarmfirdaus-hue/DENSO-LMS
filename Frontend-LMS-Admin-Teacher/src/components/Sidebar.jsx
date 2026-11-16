@@ -22,7 +22,8 @@ import {
   UserCog,
   Sun,
   Moon,
-  ChevronUp
+  ChevronUp,
+  MapPin
 } from 'lucide-react';
 import ProfileModal from './ProfileModal';
 import showAlert from '../utils/alert';
@@ -213,8 +214,30 @@ const MENU_GROUPS = [
         id: 'support-chat',
         to: '/support-chat',
         Icon: MessagesSquare,
-        label: 'Pusat Bantuan',
+        label: 'Live Chat Siswa',
         adminOnly: true
+      }
+    ]
+  },
+  {
+    title: 'Bantuan & Lokasi',
+    links: [
+      {
+        id: 'help-center',
+        baseTo: '/help',
+        Icon: HelpCircle,
+        label: 'Panduan & Bantuan',
+        children: [
+          { to: '/help', label: 'Ringkasan Panduan', end: true },
+          { to: '/help#overview', label: 'Panduan Modul LMS' },
+          { to: '/help#faq', label: 'Tanya Jawab (FAQ)' }
+        ]
+      },
+      {
+        id: 'denso-locations',
+        to: '/locations',
+        Icon: MapPin,
+        label: 'Peta Fasilitas DENSO (3D)'
       }
     ]
   }
