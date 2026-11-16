@@ -309,7 +309,21 @@ function isParentRouteActive(item, location) {
   return false;
 }
 
-export default function Sidebar({ user, onLogout, open, onClose, collapsed, onToggleCollapse, onUserUpdated }) {
+function getChildBadge(linkId, childTo, badges) {
+  if (!badges) return null;
+  if (linkId === 'materials' && childTo.includes('status=pending_admin') && badges.materials) {
+    return badges.materials;
+  }
+  if (linkId === 'enrollments' && childTo.includes('status=pending') && badges.enrollments) {
+    return badges.enrollments;
+  }
+  if (linkId === 'notifications' && childTo.includes('filter=unread') && badges.notifications) {
+    return badges.notifications;
+  }
+  return null;
+}
+
+export default function Sidebar({ user, onLogout, open, onClose, collapsed, onToggleCollapse, onUserUpdated, badges = {} }) {
   const location = useLocation();
   const isAdmin = user?.role === 'admin';
   const [showDropup, setShowDropup] = useState(false);
@@ -563,6 +577,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
 
                 {group.links.map(link => {
                   const Icon = link.Icon;
+                  const badge = badges?.[link.id];
 
                   if (!link.children?.length) {
                     return (
@@ -574,7 +589,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                           if (menuSearch) setMenuSearch('');
                           onClose?.();
                         }}
-                        title={!isExpanded ? link.label : undefined}
+                        title={!isExpanded ? (badge ? `${link.label} (${badge})` : link.label) : undefined}
                         className={({ isActive }) =>
                           `flex items-center rounded-md text-[13px] font-semibold transition-colors ${
                             isExpanded ? 'gap-3 px-3 py-2' : 'justify-center px-0 py-2'
@@ -585,8 +600,30 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                           }`
                         }
                       >
-                        <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                        {isExpanded && <span className="truncate">{link.label}</span>}
+                        <span className="relative flex items-center justify-center">
+                          <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                          {!isExpanded && badge && (
+                            <span className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white ring-2 ring-[#0e1218] ${
+                              badge === 'NEW' ? 'bg-blue-500 text-[8px] animate-pulse' : 'bg-red-500'
+                            }`}>
+                              {badge}
+                            </span>
+                          )}
+                        </span>
+                        {isExpanded && (
+                          <div className="flex flex-1 items-center justify-between min-w-0">
+                            <span className="truncate">{link.label}</span>
+                            {badge && (
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-2xs ${
+                                badge === 'NEW'
+                                  ? 'bg-blue-500 text-white animate-pulse'
+                                  : 'bg-red-500 text-white'
+                              }`}>
+                                {badge}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </NavLink>
                     );
                   }
@@ -600,7 +637,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                         key={link.id}
                         to={link.baseTo}
                         onClick={() => onClose?.()}
-                        title={link.label}
+                        title={badge ? `${link.label} (${badge})` : link.label}
                         data-sidebar-active={parentActive ? 'true' : undefined}
                         className={`flex items-center justify-center rounded-md px-0 py-2 text-[13px] font-semibold transition-colors ${
                           parentActive
@@ -608,7 +645,16 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                         }`}
                       >
-                        <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                        <span className="relative flex items-center justify-center">
+                          <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                          {badge && (
+                            <span className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white ring-2 ring-[#0e1218] ${
+                              badge === 'NEW' ? 'bg-blue-500 text-[8px] animate-pulse' : 'bg-red-500'
+                            }`}>
+                              {badge}
+                            </span>
+                          )}
+                        </span>
                       </Link>
                     );
                   }
@@ -634,18 +680,30 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                           />
                           <span className="truncate">{link.label}</span>
                         </span>
-                        <ChevronDown
-                          className={`h-4 w-4 shrink-0 text-white/55 transition-transform duration-150 ${
-                            submenuOpen ? 'rotate-180 text-white' : ''
-                          }`}
-                          aria-hidden="true"
-                        />
+                        <div className="flex items-center gap-2">
+                          {badge && (
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-2xs ${
+                              badge === 'NEW'
+                                ? 'bg-blue-500 text-white animate-pulse'
+                                : 'bg-red-500 text-white'
+                            }`}>
+                              {badge}
+                            </span>
+                          )}
+                          <ChevronDown
+                            className={`h-4 w-4 shrink-0 text-white/55 transition-transform duration-150 ${
+                              submenuOpen ? 'rotate-180 text-white' : ''
+                            }`}
+                            aria-hidden="true"
+                          />
+                        </div>
                       </button>
 
                       {submenuOpen && (
                         <div className="ml-[19px] mt-1 space-y-0.5 border-l border-white/15 pl-3">
                           {link.children.map(child => {
                             const childActive = isSubmenuMatch(child.to, location, link.children);
+                            const childBadge = getChildBadge(link.id, child.to, badges);
                             return (
                               <Link
                                 key={child.to}
@@ -668,7 +726,12 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                                   }`}
                                   aria-hidden="true"
                                 />
-                                <span className="truncate">{child.label}</span>
+                                <span className="truncate flex-1">{child.label}</span>
+                                {childBadge && (
+                                  <span className="ml-auto inline-flex items-center rounded-full bg-red-500/90 px-1.5 py-0.2 text-[9px] font-bold text-white shadow-2xs">
+                                    {childBadge}
+                                  </span>
+                                )}
                               </Link>
                             );
                           })}

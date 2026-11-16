@@ -38,6 +38,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     try { return localStorage.getItem('dls_desktop_sidebar_collapsed') === 'true'; } catch { return false; }
   });
   const [user, setUser] = useState(initialUser);
+  const [menuBadges, setMenuBadges] = useState({});
 
   useEffect(() => {
     setUser(initialUser);
@@ -118,6 +119,34 @@ export default function AppLayout({ user: initialUser, onLogout }) {
     }
     setModalNotification(null);
   };
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadBadges() {
+      try {
+        const res = await api('/dashboard/menu-badges');
+        if (mounted && res?.badges) {
+          setMenuBadges(res.badges);
+          if (res.badges.notifications !== undefined) {
+            setNotificationCount(Number(res.badges.notifications) || 0);
+          }
+        }
+      } catch {}
+    }
+    loadBadges();
+    const interval = setInterval(loadBadges, 20000);
+    const onRefresh = () => loadBadges();
+    window.addEventListener('dls_notifications_changed', onRefresh);
+    window.addEventListener('dls_activity_changed', onRefresh);
+    window.addEventListener('focus', onRefresh);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+      window.removeEventListener('dls_notifications_changed', onRefresh);
+      window.removeEventListener('dls_activity_changed', onRefresh);
+      window.removeEventListener('focus', onRefresh);
+    };
+  }, [user?.role, user?.npk]);
 
   const canViewNotifications = hasPermission(user, 'notifications.view');
   const canViewActivity = hasPermission(user, 'activity.view');
@@ -227,6 +256,7 @@ export default function AppLayout({ user: initialUser, onLogout }) {
         collapsed={desktopCollapsed}
         onToggleCollapse={toggleDesktopSidebar}
         onUserUpdated={updated => setUser(prev => ({ ...prev, ...updated }))}
+        badges={menuBadges}
       />
 
       <div className={`min-h-screen transition-[padding] duration-200 ease-in-out ${desktopCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>

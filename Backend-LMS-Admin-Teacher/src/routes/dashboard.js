@@ -5,9 +5,83 @@ const { paginateCollection } = require('../middleware/pagination');
 const { getActivityFeed } = require('../services/activity-feed');
 const { getDashboardAnalytics } = require('../services/dashboard-analytics');
 const { encodePublicId } = require('../services/public-route-id');
+const { getStudentManagementPool } = require('../services/student-auth');
 
 const router = express.Router();
 router.use(authenticate);
+
+router.get('/menu-badges', async (req, res, next) => {
+  try {
+    const role = req.user.role;
+    const npk = req.user.sub;
+    const isAdmin = role === 'admin';
+    const isReviewer = role === 'reviewer';
+
+    const badges = {};
+
+    // 1. Notifikasi belum dibaca
+    try {
+      const notifRes = await pool.request()
+        .input('role', sql.VarChar(20), role)
+        .input('npk', sql.VarChar(50), npk)
+        .query(`SELECT COUNT_BIG(*) AS count FROM dbo.lms_notifications n WITH (NOLOCK)
+          WHERE n.audience_role=@role AND (n.recipient_npk IS NULL OR n.recipient_npk=@npk)
+            AND NOT EXISTS (
+              SELECT 1 FROM dbo.lms_notification_reads r WITH (NOLOCK)
+              WHERE r.notification_id=n.notification_id AND r.recipient_role=@role AND r.recipient_npk=@npk
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM dbo.lms_notification_deletes d WITH (NOLOCK)
+              WHERE d.notification_id=n.notification_id AND d.recipient_role=@role AND d.recipient_npk=@npk
+            )`);
+      const notifCount = Number(notifRes.recordset[0]?.count || 0);
+      if (notifCount > 0) badges['notifications'] = notifCount > 99 ? '99+' : notifCount;
+    } catch {}
+
+    // 2. Materi menunggu persetujuan (Admin: pending_admin, Reviewer: pending_reviewer)
+    try {
+      if (isAdmin) {
+        const matRes = await pool.request()
+          .query(`SELECT COUNT_BIG(*) AS count FROM dbo.material_submissions WITH (NOLOCK) WHERE status = 'pending_admin'`);
+        const matCount = Number(matRes.recordset[0]?.count || 0);
+        if (matCount > 0) badges['materials'] = matCount > 99 ? '99+' : matCount;
+      } else if (isReviewer) {
+        const matRes = await pool.request()
+          .input('npk', sql.VarChar(50), npk)
+          .query(`SELECT COUNT_BIG(*) AS count FROM dbo.material_submissions WITH (NOLOCK) WHERE status = 'pending_reviewer' AND reviewer_npk = @npk`);
+        const matCount = Number(matRes.recordset[0]?.count || 0);
+        if (matCount > 0) badges['materials'] = matCount > 99 ? '99+' : matCount;
+      }
+    } catch {}
+
+    // 3. Persetujuan Course / Enrollment menunggu keputusan
+    try {
+      const studentPool = getStudentManagementPool();
+      if (studentPool) {
+        const [enrollRows] = await studentPool.execute(
+          "SELECT COUNT(*) AS count FROM course_enrollment_requests WHERE status = 'pending'"
+        );
+        const enrollCount = Number(enrollRows[0]?.count || 0);
+        if (enrollCount > 0) badges['enrollments'] = enrollCount > 99 ? '99+' : enrollCount;
+      }
+    } catch {}
+
+    // 4. Pusat Bantuan (Chat belum terbaca dari student, khusus Admin)
+    try {
+      if (isAdmin) {
+        const chatRes = await pool.request()
+          .query(`SELECT COUNT_BIG(*) AS count FROM dbo.support_chat_messages WITH (NOLOCK) WHERE sender_role = 'student' AND is_read = 0`);
+        const chatCount = Number(chatRes.recordset[0]?.count || 0);
+        if (chatCount > 0) badges['support-chat'] = 'NEW';
+      }
+    } catch {}
+
+    res.set('Cache-Control', 'private, no-store');
+    res.json({ badges });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/analytics', requirePermission('dashboard.view'), async (req, res, next) => {
   try {
