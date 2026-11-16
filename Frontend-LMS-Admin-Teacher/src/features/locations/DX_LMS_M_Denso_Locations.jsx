@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Building2,
   Compass,
@@ -68,6 +68,14 @@ export default function DensoLocationsPage() {
   const directUrl = useMemo(() => {
     return buildGoogleMapsDirectUrl(selectedLocation);
   }, [selectedLocation]);
+
+  useEffect(() => {
+    setMapLoading(true);
+    const timer = setTimeout(() => {
+      setMapLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [selectedId, viewMode, zoomLevel]);
 
   function handleSelectLocation(id) {
     if (id === selectedId) return;
@@ -198,18 +206,16 @@ export default function DensoLocationsPage() {
               title={`Peta 3D ${selectedLocation.name}`}
               className="h-full w-full border-0 bg-slate-900"
               allowFullScreen=""
-              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               onLoad={() => setMapLoading(false)}
+              onError={() => setMapLoading(false)}
             />
 
-            {/* Overlay Status Loading */}
+            {/* Floating Status Loading (non-blocking) */}
             {mapLoading && (
-              <div className="absolute inset-0 grid place-items-center bg-slate-950/40 backdrop-blur-xs">
-                <div className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-medium text-white shadow-xl">
-                  <Compass className="size-4 animate-spin text-red-500" />
-                  <span>Memuat perspektif 3D lokasi...</span>
-                </div>
+              <div className="pointer-events-none absolute right-4 top-16 z-20 flex items-center gap-2 rounded-xl bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-white shadow-xl backdrop-blur-md transition-opacity">
+                <Compass className="size-4 animate-spin text-red-500" />
+                <span>Memuat perspektif 3D...</span>
               </div>
             )}
           </div>
@@ -379,3 +385,4 @@ export default function DensoLocationsPage() {
     </div>
   );
 }
+

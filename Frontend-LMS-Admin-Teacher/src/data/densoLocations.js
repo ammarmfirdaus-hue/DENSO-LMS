@@ -181,12 +181,14 @@ export const MAP_VIEW_MODES = [
 ];
 
 export function buildGoogleMapsEmbedUrl(location, viewMode = 'satellite', zoom = 17) {
-  const query = encodeURIComponent(location.googleQuery || `${location.name} ${location.address}`);
   const mode = MAP_VIEW_MODES.find(m => m.id === viewMode)?.modeParam || 'k';
-  return `https://www.google.com/maps?q=${query}&t=${mode}&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+  const lat = location?.coordinates?.lat || -6.1362;
+  const lng = location?.coordinates?.lng || 106.8834;
+  return `https://maps.google.com/maps?q=${lat},${lng}&hl=id&t=${mode}&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
 }
 
 export function buildGoogleMapsDirectUrl(location) {
   const query = encodeURIComponent(location.googleQuery || `${location.name} ${location.address}`);
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
+
