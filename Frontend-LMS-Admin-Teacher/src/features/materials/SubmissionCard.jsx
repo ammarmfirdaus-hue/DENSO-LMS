@@ -241,7 +241,14 @@ export default function SubmissionCard({
   const TypeIcon = TYPE_ICON[item.material_type] || FileText;
 
   return (
-    <article className="dls-card-surface dls-card-interactive flex h-full min-w-0 flex-col overflow-hidden rounded-xl">
+    <article
+      onClick={(e) => {
+        if (e.target.closest('button, a, input, select, label')) return;
+        onPreview();
+      }}
+      title="Klik untuk melihat pratinjau detail materi"
+      className="dls-card-surface dls-card-interactive flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl"
+    >
       <MediaCover item={item} onPreview={onPreview} />
 
       <div className="flex min-w-0 flex-1 flex-col p-4">

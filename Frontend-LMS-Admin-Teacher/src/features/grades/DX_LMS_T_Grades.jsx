@@ -61,6 +61,7 @@ export default function GradesPage() {
   const [selectedGrades, setSelectedGrades] = useState(() => new Set());
   const [editing, setEditing] = useState(null);
   const [notifying, setNotifying] = useState(null);
+  const [viewingGrade, setViewingGrade] = useState(null);
   const [sendEmail, setSendEmail] = useState(false);
 
   async function load() {
@@ -431,7 +432,15 @@ export default function GradesPage() {
           className="mx-4 mb-4 rounded-lg shadow-none sm:mx-6 sm:mb-5"
         >
           {page.pagedItems.map((row, index) => (
-            <tr key={`${row.student_npk}-${row.course_code}-${index}`}>
+            <tr
+              key={`${row.student_npk}-${row.course_code}-${index}`}
+              onClick={(e) => {
+                if (e.target.closest('input, button, a, select')) return;
+                setViewingGrade(row);
+              }}
+              className="cursor-pointer transition hover:bg-surface-low/70 dark:hover:bg-slate-800/40"
+              title="Klik untuk melihat detail nilai"
+            >
               {isAdmin && (
                 <td>
                   <input
@@ -677,6 +686,140 @@ export default function GradesPage() {
               </Button>
             </div>
           </form>
+        )}
+      </Modal>
+
+      {/* Modal Detail Nilai Student */}
+      <Modal
+        isOpen={Boolean(viewingGrade)}
+        onClose={() => setViewingGrade(null)}
+        title="Detail Nilai & Progres Belajar"
+        subtitle="Rincian hasil evaluasi, quiz, dan progres belajar student pada course."
+        maxWidth="lg"
+      >
+        {viewingGrade && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 rounded-xl border border-outline/60 bg-surface-low/40 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-lg font-bold text-primary dark:bg-red-950/40 dark:text-red-300">
+                <Award className="size-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold text-on-surface truncate">
+                    {viewingGrade.course_title || viewingGrade.course_code}
+                  </h3>
+                  <StatusBadge status={viewingGrade.status || 'in_progress'} dot />
+                </div>
+                <p className="mt-0.5 font-mono text-xs text-muted">
+                  NPK: {viewingGrade.student_npk} · Kode: {viewingGrade.course_code}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Nilai Quiz</span>
+                <span className="font-bold text-primary text-base mt-0.5 block tabular-nums">
+                  {viewingGrade.quiz_score != null
+                    ? Number(viewingGrade.quiz_score).toLocaleString('id-ID')
+                    : 'Belum dikerjakan'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Nilai Akhir Course</span>
+                <span className="font-bold text-on-surface text-base mt-0.5 block tabular-nums">
+                  {viewingGrade.score != null
+                    ? Number(viewingGrade.score).toLocaleString('id-ID')
+                    : 'Belum dinilai'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900 sm:col-span-2">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-muted">Progres Materi</span>
+                  <span className="font-bold text-on-surface">
+                    {viewingGrade.progress_percent || 0}% ({viewingGrade.completed_sessions || 0}/{viewingGrade.total_sessions || 0} sesi)
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-surface-low dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
+                    style={{ width: `${Math.min(100, viewingGrade.progress_percent || 0)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Status Sertifikat</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingGrade.certificate_issued ? 'Sudah Diterbitkan' : 'Belum Diterbitkan'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Terakhir Diperbarui</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingGrade.updated_at
+                    ? new Date(viewingGrade.updated_at).toLocaleString('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })
+                    : '—'}
+                </span>
+              </div>
+
+              {viewingGrade.grade_feedback && (
+                <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900 sm:col-span-2">
+                  <span className="text-muted block">Catatan / Feedback Guru</span>
+                  <p className="mt-1 whitespace-pre-wrap font-medium text-on-surface leading-5">
+                    {viewingGrade.grade_feedback}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-outline/40 pt-4 dark:border-slate-800">
+              <div className="flex gap-2">
+                {canEditGrades && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<Pencil className="size-3.5" />}
+                    onClick={() => {
+                      const g = viewingGrade;
+                      setViewingGrade(null);
+                      setEditing(g);
+                    }}
+                  >
+                    Ubah Nilai
+                  </Button>
+                )}
+                {canSendNotification && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<Mail className="size-3.5" />}
+                    onClick={() => {
+                      const g = viewingGrade;
+                      setViewingGrade(null);
+                      setNotifying(g);
+                    }}
+                  >
+                    Kirim Pesan
+                  </Button>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setViewingGrade(null)}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
     </div>

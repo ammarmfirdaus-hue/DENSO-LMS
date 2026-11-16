@@ -47,6 +47,7 @@ export default function ReviewersPage() {
   const [editStatus, setEditStatus] = useState('active');
   const [emailTarget, setEmailTarget] = useState(null);
   const [transferTarget, setTransferTarget] = useState(null);
+  const [viewingReviewer, setViewingReviewer] = useState(null);
 
   async function load() {
     try {
@@ -628,7 +629,12 @@ export default function ReviewersPage() {
             return (
               <tr
                 key={reviewer.employee_npk}
-                className="transition-colors hover:bg-surface-low/60 dark:hover:bg-slate-800/40"
+                onClick={(e) => {
+                  if (e.target.closest('input, button, a, select')) return;
+                  setViewingReviewer(reviewer);
+                }}
+                className="cursor-pointer transition-colors hover:bg-surface-low/70 dark:hover:bg-slate-800/40"
+                title="Klik untuk melihat detail reviewer"
               >
                 <td className="px-4 py-3.5">
                   <input
@@ -1175,6 +1181,95 @@ export default function ReviewersPage() {
               </Button>
             </div>
           </form>
+        )}
+      </Modal>
+
+      {/* Modal Detail Reviewer */}
+      <Modal
+        isOpen={Boolean(viewingReviewer)}
+        onClose={() => setViewingReviewer(null)}
+        title="Detail Reviewer"
+        subtitle="Informasi akun dan riwayat peninjauan materi reviewer."
+        maxWidth="lg"
+      >
+        {viewingReviewer && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 rounded-xl border border-outline/60 bg-surface-low/40 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-[#173e67]/10 text-xl font-bold text-[#173e67] dark:bg-sky-900/40 dark:text-sky-300">
+                {viewingReviewer.fullname?.charAt(0)?.toUpperCase() || 'R'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold text-on-surface truncate">{viewingReviewer.fullname}</h3>
+                  <StatusBadge status={viewingReviewer.status} dot />
+                </div>
+                <p className="mt-1 font-mono text-xs text-muted">NPK: {viewingReviewer.employee_npk}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-md bg-surface-low px-2 py-0.5 text-xs font-medium text-on-surface dark:bg-slate-800">
+                    {viewingReviewer.position || 'Reviewer'}
+                  </span>
+                  <span className="rounded-md bg-surface-low px-2 py-0.5 text-xs font-medium text-muted dark:bg-slate-800 dark:text-slate-300">
+                    {viewingReviewer.department || 'Manajemen'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Alamat Email</span>
+                <span className="font-semibold text-on-surface break-words mt-0.5 block">
+                  {viewingReviewer.email || '—'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Nomor Telepon</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingReviewer.phone_number || '—'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Tugas Review Aktif</span>
+                <span className="font-bold text-primary mt-0.5 block text-sm">
+                  {Number(viewingReviewer.active_reviews || 0)} tugas
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Total Materi Ditinjau</span>
+                <span className="font-bold text-on-surface mt-0.5 block text-sm">
+                  {Number(viewingReviewer.total_reviews || 0)} materi
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-outline/40 pt-4 dark:border-slate-800">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<Pencil className="size-3.5" />}
+                onClick={() => {
+                  const r = viewingReviewer;
+                  setViewingReviewer(null);
+                  setEditTarget(r);
+                  setEditStatus(r.status);
+                }}
+              >
+                Edit Akun
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setViewingReviewer(null)}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
     </div>

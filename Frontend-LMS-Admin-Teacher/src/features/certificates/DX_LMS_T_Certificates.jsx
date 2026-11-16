@@ -78,6 +78,7 @@ export default function DX_LMS_T_Certificates({ session }) {
   const [certificateNo, setCertificateNo] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+  const [viewingCert, setViewingCert] = useState(null);
 
   const loadCertificates = useCallback(async () => {
     setLoading(true);
@@ -351,7 +352,15 @@ export default function DX_LMS_T_Certificates({ session }) {
                   const downloadUrl = `${API_BASE}/certificates/${item.certificate_id}/file?download=1`;
 
                   return (
-                    <tr key={item.certificate_id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <tr
+                      key={item.certificate_id}
+                      onClick={(e) => {
+                        if (e.target.closest('a, button, input, select')) return;
+                        setViewingCert(item);
+                      }}
+                      title="Klik untuk melihat detail sertifikat"
+                      className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/50"
+                    >
                       <td className="py-3.5 px-4 align-top">
                         <div className="font-semibold text-gray-900 dark:text-white">
                           {item.title}
@@ -578,6 +587,133 @@ export default function DX_LMS_T_Certificates({ session }) {
           </div>
         </form>
       </Modal>
+
+      {/* Modal Detail Sertifikat / Penghargaan */}
+      {viewingCert && (
+        <Modal
+          isOpen={Boolean(viewingCert)}
+          onClose={() => setViewingCert(null)}
+          title="Detail Dokumen & Penghargaan"
+          maxWidth="lg"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50/70 p-3.5 dark:border-slate-700 dark:bg-slate-800/40">
+              <Award className="size-8 text-[#E60012] shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge
+                    status={viewingCert.award_type || 'certificate'}
+                    label={AWARD_TYPE_META[viewingCert.award_type]?.label || 'Sertifikat'}
+                    dot
+                  />
+                  {viewingCert.certificate_no && (
+                    <span className="font-mono text-xs text-gray-500 dark:text-slate-400">
+                      No: {viewingCert.certificate_no}
+                    </span>
+                  )}
+                </div>
+                <h4 className="mt-1 font-bold text-gray-900 dark:text-white">
+                  {viewingCert.title}
+                </h4>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50/70 p-3.5 sm:grid-cols-2 dark:border-slate-700 dark:bg-slate-800/40">
+              <div>
+                <span className="text-xs text-gray-500 dark:text-slate-400">Penerima (Student)</span>
+                <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
+                  {viewingCert.student_name}
+                </p>
+                <span className="font-mono text-xs text-gray-500 dark:text-slate-400">
+                  NPK: {viewingCert.student_npk}
+                </span>
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 dark:text-slate-400">Terkait Course</span>
+                <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
+                  {viewingCert.course_title || 'Umum (Tanpa Course Spesifik)'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 dark:text-slate-400">Diterbitkan Oleh</span>
+                <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
+                  {viewingCert.issued_by_name || '—'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 dark:text-slate-400">Tanggal Terbit</span>
+                <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
+                  {formatDateTime(viewingCert.issued_at)}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50/70 p-3 dark:border-slate-700 dark:bg-slate-800/40">
+              <span className="text-xs text-gray-500 dark:text-slate-400">File Lampiran:</span>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-slate-200">
+                  <FileText className="size-4 text-gray-400 shrink-0" />
+                  <span className="truncate">{viewingCert.original_filename || 'Dokumen'}</span>
+                  <span className="text-xs text-gray-400">({formatFileSize(viewingCert.file_size)})</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <a
+                    href={`${API_BASE}/certificates/${viewingCert.certificate_id}/file`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="info" size="sm" icon={<ExternalLink className="size-3.5" />}>
+                      Buka
+                    </Button>
+                  </a>
+                  <a
+                    href={`${API_BASE}/certificates/${viewingCert.certificate_id}/file?download=1`}
+                    download={viewingCert.original_filename || true}
+                  >
+                    <Button variant="teal" size="sm" icon={<Download className="size-3.5" />}>
+                      Unduh
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {viewingCert.description && (
+              <div>
+                <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                  Keterangan / Deskripsi:
+                </span>
+                <p className="mt-1 rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                  {viewingCert.description}
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-slate-700">
+              {currentRole === 'admin' ||
+              (currentRole === 'teacher' && currentNpk && String(viewingCert.issued_by_npk || '') === currentNpk) ? (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={<Trash2 className="size-3.5" />}
+                  onClick={() => {
+                    const toDelete = viewingCert;
+                    setViewingCert(null);
+                    handleDelete(toDelete);
+                  }}
+                >
+                  Hapus Dokumen
+                </Button>
+              ) : (
+                <div />
+              )}
+              <Button type="button" variant="secondary" onClick={() => setViewingCert(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

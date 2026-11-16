@@ -11,6 +11,7 @@ import Button from '../../components/Button';
 import SearchableSelect from '../../components/SearchableSelect';
 import StatusBadge from '../../components/StatusBadge';
 import DataTable from '../../components/DataTable';
+import Modal from '../../components/Modal';
 import Pagination, { usePagination } from '../../components/Pagination';
 
 const INPUT_CLASS =
@@ -43,6 +44,7 @@ export default function EnrollmentsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [viewingRequest, setViewingRequest] = useState(null);
   const searchVersion = useRef(0);
 
   async function loadRequests(silent = false) {
@@ -447,7 +449,15 @@ export default function EnrollmentsPage() {
           className="mx-4 my-4 rounded-lg shadow-none sm:mx-6 sm:my-5"
         >
           {page.pagedItems.map((request) => (
-            <tr key={request.request_id} className="align-top">
+            <tr
+              key={request.request_id}
+              onClick={(e) => {
+                if (e.target.closest('input, button, a, select')) return;
+                setViewingRequest(request);
+              }}
+              className="align-top cursor-pointer transition hover:bg-surface-low/70 dark:hover:bg-slate-800/40"
+              title="Klik untuk melihat detail permintaan"
+            >
               <td className="w-[240px] min-w-[240px]">
                 <p className="font-semibold text-on-surface">{request.student_name}</p>
                 <p className="mt-0.5 font-mono text-xs text-muted">NPK: {request.student_npk}</p>
@@ -524,6 +534,129 @@ export default function EnrollmentsPage() {
           />
         )}
       </Card>
+
+      {/* Modal Detail Permintaan Akses Course */}
+      <Modal
+        isOpen={Boolean(viewingRequest)}
+        onClose={() => setViewingRequest(null)}
+        title="Detail Permintaan Akses Course"
+        subtitle="Informasi lengkap pengajuan akses course pembelajaran."
+        maxWidth="lg"
+      >
+        {viewingRequest && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 rounded-xl border border-outline/60 bg-surface-low/40 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-lg font-bold text-primary dark:bg-red-950/40 dark:text-red-300">
+                {viewingRequest.student_name?.charAt(0)?.toUpperCase() || 'S'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold text-on-surface truncate">{viewingRequest.student_name}</h3>
+                  <StatusBadge status={viewingRequest.status} dot />
+                </div>
+                <p className="mt-0.5 font-mono text-xs text-muted">NPK: {viewingRequest.student_npk}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900 sm:col-span-2">
+                <span className="text-muted block">Course Dituju</span>
+                <span className="font-semibold text-on-surface text-sm mt-0.5 block">
+                  {viewingRequest.course_title}
+                </span>
+                <span className="font-mono text-muted text-[11px] block mt-0.5">
+                  Kode: {viewingRequest.course_code}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Sumber Pengajuan</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingRequest.request_type === 'teacher_recommendation'
+                    ? 'Rekomendasi Teacher'
+                    : 'Permintaan Mandiri Student'}
+                </span>
+                <span className="font-mono text-muted text-[11px] block mt-0.5">
+                  Oleh NPK: {viewingRequest.requested_by_npk || '—'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Waktu Pengajuan</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {formatDate(viewingRequest.requested_at)}
+                </span>
+              </div>
+
+              {viewingRequest.request_note && (
+                <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900 sm:col-span-2">
+                  <span className="text-muted block">Catatan Pengajuan</span>
+                  <p className="mt-1 whitespace-pre-wrap font-medium text-on-surface leading-5">
+                    {viewingRequest.request_note}
+                  </p>
+                </div>
+              )}
+
+              {viewingRequest.decision_note && (
+                <div className="rounded-lg border border-red-200 bg-red-50/70 p-3 dark:border-red-900/60 dark:bg-red-950/30 sm:col-span-2">
+                  <span className="text-red-700 dark:text-red-300 font-semibold block">Catatan Keputusan</span>
+                  <p className="mt-1 whitespace-pre-wrap text-red-900 dark:text-red-200 leading-5">
+                    {viewingRequest.decision_note}
+                  </p>
+                  {viewingRequest.decision_by_npk && (
+                    <span className="text-muted text-[11px] block mt-1">
+                      Diputus oleh NPK: {viewingRequest.decision_by_npk}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-outline/40 pt-4 dark:border-slate-800">
+              <div className="flex gap-2">
+                {canDecide && viewingRequest.status === 'pending' && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="success"
+                      disabled={busy}
+                      icon={<Check className="size-3.5" />}
+                      onClick={() => {
+                        const req = viewingRequest;
+                        setViewingRequest(null);
+                        decide(req, 'approved');
+                      }}
+                    >
+                      Setujui
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      disabled={busy}
+                      icon={<X className="size-3.5" />}
+                      onClick={() => {
+                        const req = viewingRequest;
+                        setViewingRequest(null);
+                        decide(req, 'rejected');
+                      }}
+                    >
+                      Tolak
+                    </Button>
+                  </>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setViewingRequest(null)}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

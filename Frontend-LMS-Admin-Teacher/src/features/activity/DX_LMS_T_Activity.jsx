@@ -23,6 +23,7 @@ import StatCard from '../../components/StatCard';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import StatusBadge from '../../components/StatusBadge';
+import Modal from '../../components/Modal';
 import showAlert from '../../utils/alert';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 
@@ -60,6 +61,7 @@ export default function ActivityPage() {
   const [search, setSearch] = useState('');
   const [type, setType] = useState('all');
   const [statusTab, setStatusTab] = useQueryParamState('tab', 'all');
+  const [viewingActivity, setViewingActivity] = useState(null);
 
   const load = () =>
     api('/dashboard/activity?limit=100')
@@ -323,7 +325,17 @@ export default function ActivityPage() {
               return (
                 <article
                   key={item.activity_id}
-                  className={`flex gap-4 p-5 transition hover:bg-surface-low/50 dark:hover:bg-slate-800/40 ${
+                  onClick={() => setViewingActivity(item)}
+                  title="Klik untuk melihat detail aktivitas"
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setViewingActivity(item);
+                    }
+                  }}
+                  className={`flex cursor-pointer gap-4 p-5 transition hover:bg-surface-low/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:hover:bg-slate-800/40 ${
                     isFailed ? 'bg-red-50/30 dark:bg-red-950/15' : ''
                   }`}
                 >
@@ -444,6 +456,135 @@ export default function ActivityPage() {
 
         <Pagination {...page} onPageChange={page.setPage} onPageSizeChange={page.setPageSize} />
       </Card>
+
+      {/* Modal Detail Aktivitas & Log Sistem */}
+      {viewingActivity && (
+        <Modal
+          isOpen={Boolean(viewingActivity)}
+          onClose={() => setViewingActivity(null)}
+          title="Detail Aktivitas & Log Sistem"
+          size="md"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-lg border border-outline/40 bg-surface-low p-3.5 dark:border-slate-800 dark:bg-slate-800/40">
+              <span className="flex shrink-0 items-center justify-center">
+                {(() => {
+                  const IconComp = getActivityIcon(
+                    viewingActivity.activity_type,
+                    viewingActivity.activity_source,
+                    viewingActivity.item_status
+                  );
+                  const isFailed =
+                    viewingActivity.item_status === 'failed' ||
+                    String(viewingActivity.activity_type).toLowerCase().includes('gagal');
+                  const isCompleted =
+                    viewingActivity.item_status === 'completed' ||
+                    String(viewingActivity.activity_type).toLowerCase().includes('berhasil');
+                  const isStopped = viewingActivity.item_status === 'stopped';
+                  return (
+                    <IconComp
+                      className={`size-8 ${
+                        isFailed
+                          ? 'text-red-600 dark:text-red-400'
+                          : isCompleted
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : isStopped
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-primary'
+                      }`}
+                    />
+                  );
+                })()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-muted">
+                    ID #{viewingActivity.activity_id || '—'}
+                  </span>
+                  {viewingActivity.activity_source === 'job' && viewingActivity.job_id && (
+                    <span className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-[11px] font-bold text-white dark:bg-slate-700">
+                      Antrean #{viewingActivity.job_id}
+                    </span>
+                  )}
+                  {viewingActivity.item_status ? (
+                    <StatusBadge
+                      status={
+                        viewingActivity.item_status === 'failed'
+                          ? 'failed'
+                          : viewingActivity.item_status === 'completed'
+                            ? 'completed'
+                            : 'pending'
+                      }
+                      label={viewingActivity.item_status}
+                    />
+                  ) : (
+                    <span className="rounded bg-surface-container px-2 py-0.5 text-xs font-semibold capitalize text-on-surface-variant">
+                      {viewingActivity.activity_type || 'Aktivitas'}
+                    </span>
+                  )}
+                </div>
+                <h4 className="mt-1 break-words font-semibold text-on-surface">
+                  {viewingActivity.description || viewingActivity.activity_type}
+                </h4>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 rounded-lg border border-outline/40 bg-surface-low p-3.5 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-800/40">
+              <div>
+                <span className="text-xs text-muted">Pelaku / Operator</span>
+                <p className="mt-0.5 text-sm font-semibold text-on-surface">
+                  {viewingActivity.actor_name || 'Sistem Otomatis'}
+                </p>
+                {viewingActivity.actor_role && (
+                  <span className="text-xs capitalize text-muted">
+                    Peran: {viewingActivity.actor_role}
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="text-xs text-muted">NPK</span>
+                <p className="mt-0.5 font-mono text-sm font-semibold text-on-surface">
+                  {viewingActivity.employee_npk || viewingActivity.actor_npk || '—'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-muted">Sumber Log</span>
+                <p className="mt-0.5 text-sm font-semibold capitalize text-on-surface">
+                  {viewingActivity.activity_source || 'Portal LMS'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-muted">Waktu Pencatatan</span>
+                <p className="mt-0.5 text-sm font-semibold text-on-surface">
+                  {formatDate(viewingActivity.created_at)}
+                </p>
+              </div>
+            </div>
+
+            {viewingActivity.item_label && (
+              <div className="rounded-lg border border-outline/40 bg-surface-low p-3 text-xs text-on-surface-variant dark:border-slate-800 dark:bg-slate-800/40">
+                <span className="font-semibold text-muted">Target Item / Resource: </span>
+                <span className="font-mono font-medium text-on-surface">{viewingActivity.item_label}</span>
+              </div>
+            )}
+
+            {viewingActivity.message && (
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted">Pesan Log / Detail Output:</span>
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-outline/40 bg-white p-3 font-mono text-xs leading-relaxed text-on-surface dark:border-slate-800 dark:bg-slate-900">
+                  <pre className="whitespace-pre-wrap break-words font-mono">{viewingActivity.message}</pre>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2">
+              <Button type="button" variant="outline" onClick={() => setViewingActivity(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import StatusBadge from '../../components/StatusBadge';
 import Pagination, { usePagination } from '../../components/Pagination';
+import Modal from '../../components/Modal';
 import showAlert from '../../utils/alert';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 import { hasPermission } from '../../utils/access-control';
@@ -44,6 +45,26 @@ export default function QuizzesPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedCourses, setSelectedCourses] = useState(() => new Set());
+  const [viewingQuizCourse, setViewingQuizCourse] = useState(null);
+  const [viewingQuizDetails, setViewingQuizDetails] = useState(null);
+  const [loadingQuizDetails, setLoadingQuizDetails] = useState(false);
+
+  async function openQuizDetail(course) {
+    setViewingQuizCourse(course);
+    if (!course.quiz) {
+      setViewingQuizDetails(null);
+      return;
+    }
+    setLoadingQuizDetails(true);
+    try {
+      const res = await api(`/quizzes/${encodeURIComponent(course.course_code)}`);
+      setViewingQuizDetails(res.quiz || null);
+    } catch {
+      setViewingQuizDetails(course.quiz);
+    } finally {
+      setLoadingQuizDetails(false);
+    }
+  }
 
   async function load() {
     try {
@@ -429,7 +450,12 @@ export default function QuizzesPage() {
               return (
                 <article
                   key={course.course_code}
-                  className="dls-card-surface dls-card-interactive flex min-w-0 flex-col rounded-xl p-5"
+                  onClick={(e) => {
+                    if (e.target.closest('button, a, input, select')) return;
+                    openQuizDetail(course);
+                  }}
+                  title="Klik untuk melihat detail quiz course ini"
+                  className="dls-card-surface dls-card-interactive flex min-w-0 cursor-pointer flex-col rounded-xl p-5"
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="flex min-w-0 items-start gap-3">
@@ -791,6 +817,183 @@ export default function QuizzesPage() {
             </footer>
           </form>
         </div>
+      )}
+
+      {/* Modal Detail Quiz Course */}
+      {viewingQuizCourse && (
+        <Modal
+          isOpen={Boolean(viewingQuizCourse)}
+          onClose={() => {
+            setViewingQuizCourse(null);
+            setViewingQuizDetails(null);
+          }}
+          title="Detail Quiz Course"
+          size="lg"
+        >
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-3 rounded-lg border border-outline/40 bg-surface-low p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="min-w-0">
+                <span className="inline-block rounded-md bg-surface-container px-2 py-0.5 font-mono text-xs font-bold text-on-surface-variant">
+                  {viewingQuizCourse.course_code}
+                </span>
+                <h4 className="mt-1.5 font-bold text-on-surface">
+                  {viewingQuizCourse.title}
+                </h4>
+                {viewingQuizCourse.quiz?.title && (
+                  <p className="mt-0.5 text-xs text-muted">
+                    Judul: <span className="font-semibold text-on-surface">{viewingQuizCourse.quiz.title}</span>
+                  </p>
+                )}
+              </div>
+              <StatusBadge
+                status={viewingQuizCourse.quiz?.status || 'not_created'}
+                label={
+                  { published: 'Terbit', draft: 'Draft', inactive: 'Nonaktif' }[viewingQuizCourse.quiz?.status] ||
+                  'Belum Dibuat'
+                }
+                dot
+              />
+            </div>
+
+            {viewingQuizCourse.quiz ? (
+              <>
+                <div className="grid grid-cols-2 gap-3 rounded-lg border border-outline/40 bg-surface-low p-3.5 text-xs sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-800/40">
+                  <div>
+                    <span className="text-muted">Nilai Kelulusan</span>
+                    <strong className="mt-0.5 block font-mono text-sm font-bold text-primary">
+                      {Number(viewingQuizCourse.quiz.passing_score || 75).toLocaleString('id-ID')}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-muted">Jumlah Soal</span>
+                    <strong className="mt-0.5 block font-mono text-sm font-bold text-on-surface">
+                      {viewingQuizCourse.quiz.question_count ?? 0} soal
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-muted">Total Dikerjakan</span>
+                    <strong className="mt-0.5 block font-mono text-sm font-bold text-on-surface">
+                      {viewingQuizCourse.quiz.attempt_count ?? 0} peserta
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-muted">Terakhir Diperbarui</span>
+                    <strong className="mt-0.5 block text-xs font-semibold text-on-surface">
+                      {viewingQuizCourse.quiz.updated_at
+                        ? new Date(viewingQuizCourse.quiz.updated_at).toLocaleDateString('id-ID')
+                        : '—'}
+                    </strong>
+                  </div>
+                </div>
+
+                {viewingQuizDetails?.description && (
+                  <div>
+                    <span className="text-xs font-semibold text-muted">Petunjuk / Deskripsi:</span>
+                    <p className="mt-1 rounded-lg border border-outline/40 bg-white p-3 text-xs leading-relaxed text-on-surface dark:border-slate-800 dark:bg-slate-900">
+                      {viewingQuizDetails.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      Daftar Pertanyaan ({viewingQuizDetails?.questions?.length || viewingQuizCourse.quiz.question_count || 0})
+                    </span>
+                    {loadingQuizDetails && (
+                      <span className="text-xs text-muted">Memuat pertanyaan...</span>
+                    )}
+                  </div>
+
+                  {loadingQuizDetails ? (
+                    <div className="space-y-2 py-4">
+                      {[1, 2].map((idx) => (
+                        <div key={idx} className="h-16 animate-pulse rounded-lg bg-surface-container" />
+                      ))}
+                    </div>
+                  ) : viewingQuizDetails?.questions?.length ? (
+                    <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                      {viewingQuizDetails.questions.map((q, qIdx) => (
+                        <div
+                          key={qIdx}
+                          className="rounded-lg border border-outline/40 bg-surface-low/80 p-3.5 text-xs dark:border-slate-800 dark:bg-slate-800/40"
+                        >
+                          <p className="font-semibold text-on-surface">
+                            <span className="text-primary font-bold">#{qIdx + 1}. </span>
+                            {q.text}
+                          </p>
+                          <div className="mt-2.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                            {(Array.isArray(q.options) ? q.options : []).map((opt, oIdx) => {
+                              const isCorrect = Number(q.correct_option) === oIdx;
+                              return (
+                                <div
+                                  key={oIdx}
+                                  className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs ${
+                                    isCorrect
+                                      ? 'border border-emerald-300 bg-emerald-50 font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                      : 'border border-outline/30 bg-white text-muted dark:border-slate-700 dark:bg-slate-900'
+                                  }`}
+                                >
+                                  <span className="font-mono font-bold">
+                                    {String.fromCharCode(65 + oIdx)}.
+                                  </span>
+                                  <span className="truncate">{opt}</span>
+                                  {isCorrect && (
+                                    <CheckCircle2 className="ml-auto size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-outline/60 p-4 text-center text-xs text-muted">
+                      Rincian butir soal belum dimuat. Buka editor untuk meninjau opsi soal.
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-lg border border-dashed border-outline/60 p-6 text-center text-sm text-muted">
+                <ClipboardCheck className="mx-auto size-8 text-muted/60" />
+                <p className="mt-2 font-medium">Belum ada quiz yang dikonfigurasi untuk course ini.</p>
+                <p className="mt-0.5 text-xs">Klik tombol Buat Quiz untuk membuat soal evaluasi bagi peserta.</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between border-t border-outline/40 pt-3 dark:border-slate-800">
+              {canManageQuiz && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  icon={viewingQuizCourse.quiz ? <Pencil className="size-3.5" /> : <Plus className="size-3.5" />}
+                  onClick={() => {
+                    const c = viewingQuizCourse;
+                    setViewingQuizCourse(null);
+                    setViewingQuizDetails(null);
+                    openEditor(c);
+                  }}
+                >
+                  {viewingQuizCourse.quiz ? 'Edit Quiz' : 'Buat Quiz'}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setViewingQuizCourse(null);
+                  setViewingQuizDetails(null);
+                }}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

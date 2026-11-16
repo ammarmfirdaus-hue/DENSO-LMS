@@ -790,7 +790,12 @@ export default function MaterialsPage() {
               return (
                 <article
                   key={item.material_id}
-                  className="dls-card-surface dls-card-interactive group relative flex flex-col justify-between overflow-hidden rounded-xl"
+                  onClick={(e) => {
+                    if (e.target.closest('button, a, input, select, label')) return;
+                    setSelectedDetailMaterial(item);
+                  }}
+                  title="Klik untuk melihat detail materi"
+                  className="dls-card-surface dls-card-interactive group relative flex flex-col justify-between overflow-hidden rounded-xl cursor-pointer"
                 >
                   <div className="h-1 w-full bg-tertiary" />
 

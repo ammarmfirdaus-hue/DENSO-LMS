@@ -88,6 +88,7 @@ export default function NotificationsPage() {
   const [membersLoading, setMembersLoading] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [memberSearch, setMemberSearch] = useState('');
+  const [viewingMemberDetail, setViewingMemberDetail] = useState(null);
 
   // Image attachment state
   const [imageFile, setImageFile] = useState(null);
@@ -593,9 +594,23 @@ export default function NotificationsPage() {
                                 <span className="text-[11px] text-muted truncate block">NPK: {member.npk}</span>
                               </div>
                             </div>
-                            <span className="shrink-0 rounded bg-surface-low px-1.5 py-0.5 text-[10px] font-medium text-muted dark:bg-slate-800">
-                              {member.department || member.role}
-                            </span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="rounded bg-surface-low px-1.5 py-0.5 text-[10px] font-medium text-muted dark:bg-slate-800">
+                                {member.department || member.role}
+                              </span>
+                              <button
+                                type="button"
+                                title="Lihat detail anggota"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setViewingMemberDetail(member);
+                                }}
+                                className="rounded p-1 text-muted hover:bg-surface-lowest hover:text-primary transition cursor-pointer"
+                              >
+                                <Eye className="size-3.5" />
+                              </button>
+                            </div>
                           </label>
                         );
                       })
@@ -795,7 +810,12 @@ export default function NotificationsPage() {
               return (
                 <article
                   key={item.notification_id}
-                  className={`dls-card-surface min-w-0 rounded-xl p-5 transition ${
+                  onClick={(e) => {
+                    if (e.target.closest('button, a, input, select, img')) return;
+                    setSelectedDetail(item);
+                  }}
+                  title="Klik untuk melihat detail notifikasi"
+                  className={`dls-card-surface dls-card-interactive min-w-0 cursor-pointer rounded-xl p-5 transition ${
                     !item.is_read ? 'ring-1 ring-primary/35 dark:ring-primary/45' : ''
                   }`}
                 >
@@ -934,6 +954,90 @@ export default function NotificationsPage() {
         notification={selectedDetail}
         onClose={() => setSelectedDetail(null)}
       />
+
+      {/* Modal Detail Anggota (Penerima Notifikasi) */}
+      {viewingMemberDetail && (
+        <Modal
+          isOpen={Boolean(viewingMemberDetail)}
+          onClose={() => setViewingMemberDetail(null)}
+          title="Detail Anggota"
+          size="md"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-lg border border-outline/40 bg-surface-low p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/10 font-mono text-base font-bold text-primary">
+                {String(viewingMemberDetail.name || 'U').charAt(0).toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-on-surface">{viewingMemberDetail.name}</span>
+                  <StatusBadge
+                    status={viewingMemberDetail.role || 'student'}
+                    label={viewingMemberDetail.role || 'Student'}
+                  />
+                </div>
+                <p className="mt-0.5 font-mono text-xs text-muted">
+                  NPK: {viewingMemberDetail.npk || '—'}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 rounded-lg border border-outline/40 bg-surface-low p-3.5 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-800/40">
+              <div>
+                <span className="text-xs text-muted">Departemen / Divisi</span>
+                <p className="mt-0.5 text-sm font-semibold text-on-surface">
+                  {viewingMemberDetail.department || '—'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-muted">Email</span>
+                <p className="mt-0.5 break-all text-xs font-semibold text-on-surface">
+                  {viewingMemberDetail.email || '—'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-muted">Peran Sistem</span>
+                <p className="mt-0.5 text-sm font-semibold capitalize text-on-surface">
+                  {viewingMemberDetail.role || 'Student'}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-muted">Status Akun</span>
+                <p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  Aktif
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-outline/40 pt-3 dark:border-slate-800">
+              <Button
+                type="button"
+                variant={
+                  selectedMembers.some((m) => m.npk === viewingMemberDetail.npk)
+                    ? 'outline'
+                    : 'primary'
+                }
+                size="sm"
+                onClick={() => {
+                  toggleMember(viewingMemberDetail);
+                }}
+              >
+                {selectedMembers.some((m) => m.npk === viewingMemberDetail.npk)
+                  ? 'Batalkan Pilihan'
+                  : 'Pilih Anggota Ini'}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setViewingMemberDetail(null)}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

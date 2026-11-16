@@ -115,6 +115,7 @@ export default function UsersPage() {
   const [editStatus, setEditStatus] = useState('');
   const [transferTarget, setTransferTarget] = useState(null);
   const [emailTarget, setEmailTarget] = useState(null);
+  const [viewingUser, setViewingUser] = useState(null);
 
   const filteredUsers = useMemo(
     () =>
@@ -929,7 +930,15 @@ export default function UsersPage() {
           className="mx-4 mb-4 rounded-lg shadow-none sm:mx-6 sm:mb-5"
         >
           {userPage.pagedItems.map((user) => (
-            <tr key={user.employee_npk}>
+            <tr
+              key={user.employee_npk}
+              onClick={(e) => {
+                if (e.target.closest('input, button, a, select')) return;
+                setViewingUser(user);
+              }}
+              className="cursor-pointer transition hover:bg-surface-low/70 dark:hover:bg-slate-800/40"
+              title="Klik untuk melihat detail pengguna"
+            >
               <td>
                 {user.status === 'active' && (
                   <input
@@ -1299,6 +1308,101 @@ export default function UsersPage() {
               </Button>
             </div>
           </form>
+        )}
+      </Modal>
+
+      {/* Modal Detail Pengguna */}
+      <Modal
+        isOpen={Boolean(viewingUser)}
+        onClose={() => setViewingUser(null)}
+        title="Detail Pengguna"
+        subtitle="Informasi lengkap akun dan profil pengguna portal LMS."
+        maxWidth="lg"
+      >
+        {viewingUser && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 rounded-xl border border-outline/60 bg-surface-low/40 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-primary/10 text-xl font-bold text-primary dark:bg-red-950/40 dark:text-red-300">
+                {viewingUser.fullname?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold text-on-surface truncate">{viewingUser.fullname}</h3>
+                  <StatusBadge status={viewingUser.status} dot />
+                </div>
+                <p className="mt-1 font-mono text-xs text-muted">NPK: {viewingUser.employee_npk}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <StatusBadge status={viewingUser.role} />
+                  <span className="rounded-md bg-surface-low px-2 py-0.5 text-xs font-medium text-muted dark:bg-slate-800 dark:text-slate-300">
+                    {viewingUser.department || (viewingUser.role === 'student' ? 'Student' : 'Umum')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Alamat Email</span>
+                <span className="font-semibold text-on-surface break-words mt-0.5 block">
+                  {viewingUser.email || '—'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Nomor Telepon</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingUser.phone_number || '—'}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Jabatan / Posisi</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingUser.position || (viewingUser.role === 'student' ? 'Peserta Belajar' : 'Staf')}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-outline/50 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900">
+                <span className="text-muted block">Terdaftar Pada</span>
+                <span className="font-semibold text-on-surface mt-0.5 block">
+                  {viewingUser.created_at
+                    ? new Date(viewingUser.created_at).toLocaleString('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })
+                    : '—'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-outline/40 pt-4 dark:border-slate-800">
+              {canManageUserAccounts && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  icon={<Pencil className="size-3.5" />}
+                  onClick={() => {
+                    const u = viewingUser;
+                    setViewingUser(null);
+                    setEditing(u);
+                    setEditRole(u.role);
+                    setEditStatus(u.status);
+                  }}
+                >
+                  Edit Akun
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setViewingUser(null)}
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
     </div>
