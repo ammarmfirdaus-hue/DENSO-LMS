@@ -16,8 +16,6 @@ import {
   MessagesSquare,
   Bell,
   ChevronDown,
-  ChevronLeft,
-  Pin,
   Search,
   X,
   LogOut,
@@ -317,7 +315,6 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
   const [showDropup, setShowDropup] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isDark, setIsDark] = useState(() => getInitialTheme() === 'dark');
-  const [isHovered, setIsHovered] = useState(false);
   const [menuSearch, setMenuSearch] = useState('');
   const [openMenus, setOpenMenus] = useState(() => {
     const initial = {};
@@ -331,7 +328,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
     return initial;
   });
 
-  const isExpanded = !collapsed || isHovered || open;
+  const isExpanded = open ? true : !collapsed;
   const navRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
 
@@ -475,14 +472,11 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
 
       <aside
         data-mobile-open={open ? 'true' : 'false'}
-        onMouseEnter={() => { if (collapsed) setIsHovered(true); }}
-        onMouseLeave={() => { setIsHovered(false); setShowDropup(false); }}
+        onMouseLeave={() => setShowDropup(false)}
         className={`dls-shell-chrome-strong fixed inset-y-0 left-0 z-40 flex flex-col rounded-none border-r border-white/10 bg-[#0e1218]/95 text-white backdrop-blur-md transition-all duration-200 ease-in-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 ${
           isExpanded ? 'w-64' : 'w-16'
-        } ${
-          collapsed && isHovered ? 'shadow-2xl z-50' : ''
         }`}
       >
         {/* 64px Header matching shell header height */}
@@ -506,19 +500,6 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
               </div>
             )}
           </Link>
-
-          {isExpanded && (
-            <button
-              type="button"
-              data-dls-action-ignore="true"
-              onClick={onToggleCollapse}
-              className="hidden h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white lg:flex"
-              title={collapsed ? 'Sematkan sidebar terbuka' : 'Ciutkan sidebar ke ikon'}
-              aria-label="Toggle sidebar"
-            >
-              {collapsed ? <Pin className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </button>
-          )}
 
           <button
             type="button"

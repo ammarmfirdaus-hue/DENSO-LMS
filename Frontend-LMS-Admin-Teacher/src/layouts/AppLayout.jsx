@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Bell, Calendar, GraduationCap, Menu, PanelLeftOpen, History, BellRing, Maximize2, Minimize2, X, HelpCircle, Search } from 'lucide-react';
+import { Bell, Calendar, GraduationCap, Menu, History, BellRing, Maximize2, Minimize2, X, HelpCircle, Search } from 'lucide-react';
 import { API_BASE, api } from '../api/client';
 import Sidebar from '../components/Sidebar';
 import JobsCenter from '../components/JobsCenter';
@@ -96,6 +96,14 @@ export default function AppLayout({ user: initialUser, onLogout }) {
       try { localStorage.setItem('dls_desktop_sidebar_collapsed', String(next)); } catch {}
       return next;
     });
+  }
+
+  function handleToggleSidebar() {
+    if (window.innerWidth < 1024) {
+      setMobileOpen(prev => !prev);
+    } else {
+      toggleDesktopSidebar();
+    }
   }
 
   const handleCloseModalNotification = async () => {
@@ -228,23 +236,12 @@ export default function AppLayout({ user: initialUser, onLogout }) {
             <button
               type="button"
               data-dls-action-ignore="true"
-              onClick={() => setMobileOpen(true)}
-              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-lg text-white/75 transition hover:bg-white/10 hover:text-white lg:hidden"
-              aria-label="Buka menu navigasi"
-              title="Buka menu"
+              onClick={handleToggleSidebar}
+              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-lg text-white/75 transition hover:bg-white/10 hover:text-white"
+              aria-label={desktopCollapsed ? 'Tampilkan sidebar' : 'Ciutkan sidebar'}
+              title={desktopCollapsed ? 'Tampilkan sidebar' : 'Ciutkan sidebar'}
             >
               <Menu className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              data-dls-action-ignore="true"
-              onClick={toggleDesktopSidebar}
-              className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/75 transition hover:bg-white/10 hover:text-white lg:inline-flex"
-              aria-label={desktopCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'}
-              title={desktopCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'}
-            >
-              {desktopCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
             <div className="flex min-w-0 items-center gap-2 text-sm">
