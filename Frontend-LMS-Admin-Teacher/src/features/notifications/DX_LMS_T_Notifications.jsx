@@ -5,24 +5,30 @@ import {
   BookOpen,
   CheckCheck,
   ClipboardCheck,
+  Eye,
+  Image as ImageIcon,
   Megaphone,
   MessageSquare,
   Plus,
   Search,
   Send,
   Settings,
-  Trash2
+  Trash2,
+  Users,
+  X
 } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, resolveNotificationImageUrl } from '../../api/client';
 import PageHeader from '../../components/PageHeader';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
+import ModalNotif from '../../components/ModalNotif';
 import StatusBadge from '../../components/StatusBadge';
 import Pagination, { usePagination } from '../../components/Pagination';
 import { useQueryParamState } from '../../utils/useQueryParamState';
 import showAlert from '../../utils/alert';
 import { hasPermission } from '../../utils/access-control';
+import { compressImageToWebP } from '../../utils/compress-forum-image';
 
 const CATEGORIES = [
   ['all', 'Semua'],
@@ -74,9 +80,26 @@ export default function NotificationsPage() {
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+
+  // Target modes: 'role' atau 'members' (pilihan anggota checklist)
+  const [targetMode, setTargetMode] = useState('role');
   const [targetRoles, setTargetRoles] = useState(['student']);
+  const [membersList, setMembersList] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [memberSearch, setMemberSearch] = useState('');
+
+  // Image attachment state
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageCompressing, setImageCompressing] = useState(false);
+
+  // Popup & Email
   const [sendEmail, setSendEmail] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+
+  // Modal detail preview
+  const [selectedDetail, setSelectedDetail] = useState(null);
 
   async function loadNotifications() {
     try {
@@ -89,6 +112,19 @@ export default function NotificationsPage() {
       showAlert.error('Gagal Memuat Notifikasi', e.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchMembers() {
+    if (membersList.length > 0 || membersLoading) return;
+    setMembersLoading(true);
+    try {
+      const res = await api('/notifications/members');
+      setMembersList(res.members || []);
+    } catch (err) {
+      showAlert.error('Gagal Memuat Daftar Anggota', err.message);
+    } finally {
+      setMembersLoading(false);
     }
   }
 
@@ -107,6 +143,72 @@ export default function NotificationsPage() {
       navigate(`${location.pathname}${location.search}`, { replace: true });
     }
   }, [canSendNotifications, location.hash, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    if (sendModalOpen && targetMode === 'members') {
+      fetchMembers();
+    }
+  }, [sendModalOpen, targetMode]);
+
+  const filteredMembers = useMemo(() => {
+    const q = memberSearch.trim().toLowerCase();
+    if (!q) return membersList;
+    return membersList.filter(
+      (m) =>
+        (m.name && m.name.toLowerCase().includes(q)) ||
+        (m.npk && String(m.npk).toLowerCase().includes(q)) ||
+        (m.department && m.department.toLowerCase().includes(q)) ||
+        (m.role && m.role.toLowerCase().includes(q))
+    );
+  }, [membersList, memberSearch]);
+
+  function selectAllFilteredMembers() {
+    setSelectedMembers((prev) => {
+      const currentNpks = new Set(prev.map((m) => m.npk));
+      const newlyAdded = filteredMembers.filter((m) => !currentNpks.has(m.npk));
+      return [...prev, ...newlyAdded];
+    });
+  }
+
+  function deselectAllMembers() {
+    setSelectedMembers([]);
+  }
+
+  function toggleMember(member) {
+    setSelectedMembers((prev) => {
+      const exists = prev.some((m) => m.npk === member.npk);
+      if (exists) {
+        return prev.filter((m) => m.npk !== member.npk);
+      }
+      return [...prev, member];
+    });
+  }
+
+  async function handleImageSelect(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showAlert.warning('Format Tidak Didukung', 'Hanya menerima file gambar (JPG, PNG, GIF, WebP).');
+      return;
+    }
+    setImageCompressing(true);
+    try {
+      const webpFile = await compressImageToWebP(file, { forceWebp: true });
+      setImageFile(webpFile);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImagePreview(URL.createObjectURL(webpFile));
+    } catch (err) {
+      showAlert.error('Gagal Mengonversi Gambar', err.message);
+    } finally {
+      setImageCompressing(false);
+    }
+  }
+
+  function removeImage() {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  }
 
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('id');
@@ -138,38 +240,73 @@ export default function NotificationsPage() {
   async function sendNotification(event) {
     event.preventDefault();
     const form = event.currentTarget;
-    if (!targetRoles.length) {
+    if (targetMode === 'role' && !targetRoles.length) {
       const msg = 'Pilih setidaknya satu role penerima.';
       setError(msg);
       showAlert.warning('Penerima Belum Dipilih', msg);
       return;
     }
+    if (targetMode === 'members' && !selectedMembers.length) {
+      const msg = 'Pilih setidaknya satu anggota penerima notifikasi.';
+      setError(msg);
+      showAlert.warning('Anggota Belum Dipilih', msg);
+      return;
+    }
+
     setBusy(true);
     setError('');
     setNotice('');
     try {
+      let uploadedImageUrl = null;
+      if (imageFile) {
+        const imgData = new FormData();
+        imgData.append('image', imageFile);
+        const uploadRes = await api('/notifications/upload-image', {
+          method: 'POST',
+          body: imgData
+        });
+        uploadedImageUrl = uploadRes.imageUrl;
+      }
+
       const data = new FormData(form);
+      const payload = {
+        title: data.get('title'),
+        message: data.get('message'),
+        category: data.get('category'),
+        priority: data.get('priority'),
+        targetMode,
+        targetRoles: targetMode === 'role' ? targetRoles : undefined,
+        targetMembers:
+          targetMode === 'members'
+            ? selectedMembers.map((m) => ({
+                npk: m.npk,
+                name: m.name,
+                role: m.role || 'student',
+                email: m.email || undefined
+              }))
+            : undefined,
+        sendEmail,
+        showPopup,
+        imageUrl: uploadedImageUrl
+      };
+
       const result = await api('/notifications', {
         method: 'POST',
-        body: JSON.stringify({
-          title: data.get('title'),
-          message: data.get('message'),
-          category: data.get('category'),
-          priority: data.get('priority'),
-          targetRoles,
-          sendEmail,
-          showPopup
-        })
+        body: JSON.stringify(payload)
       });
+
       form.reset();
       setTargetRoles(['student']);
+      setSelectedMembers([]);
+      removeImage();
       setSendEmail(false);
       setShowPopup(false);
       setSendModalOpen(false);
       const emailNote = sendEmail
         ? ` ${result.emailQueued || 0} email masuk antrean pengiriman.`
         : '';
-      const successMsg = `Notifikasi terkirim ke ${result.recipients.join(', ')}.${emailNote}`;
+      const recipientCount = targetMode === 'members' ? selectedMembers.length : result.recipients.length;
+      const successMsg = `Notifikasi terkirim ke ${recipientCount} penerima.${emailNote}`;
       setNotice(successMsg);
       showAlert.success('Notifikasi Terkirim', successMsg);
       await loadNotifications();
@@ -294,7 +431,7 @@ export default function NotificationsPage() {
           onClose={() => !busy && setSendModalOpen(false)}
           title="Kirim Notifikasi Baru"
           subtitle="Penerima akan langsung melihat pesan di pusat notifikasi portal mereka."
-          maxWidth="2xl"
+          maxWidth="3xl"
         >
           <form onSubmit={sendNotification} className="space-y-4">
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -342,31 +479,184 @@ export default function NotificationsPage() {
               </label>
             </div>
 
-            <fieldset className="min-w-0">
-              <legend className="mb-2 text-xs font-semibold text-on-surface-variant">
-                Kirim Kepada
-              </legend>
-              <div className="flex flex-wrap gap-2">
-                {AUDIENCES.filter(([role]) => isAdmin || role === 'student').map(([role, label]) => (
-                  <label
-                    key={role}
-                    className={`inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
-                      targetRoles.includes(role)
-                        ? 'border-primary/40 bg-primary/10 text-primary dark:bg-red-950/40 dark:text-red-300'
-                        : 'border-outline/60 bg-surface-lowest text-on-surface-variant hover:bg-surface-low dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={targetRoles.includes(role)}
-                      onChange={() => toggleAudience(role)}
-                      className="size-4 accent-primary"
-                    />
-                    {label}
-                  </label>
-                ))}
+            {/* Mode Pemilihan Penerima: Role vs Checklist Anggota */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-on-surface-variant">
+                Penerima Notifikasi *
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTargetMode('role')}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition cursor-pointer ${
+                    targetMode === 'role'
+                      ? 'border-primary bg-primary/10 text-primary dark:bg-red-950/40 dark:text-red-300'
+                      : 'border-outline/60 bg-surface-lowest text-muted hover:bg-surface-low'
+                  }`}
+                >
+                  Kirim Berdasarkan Role
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTargetMode('members')}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition cursor-pointer ${
+                    targetMode === 'members'
+                      ? 'border-primary bg-primary/10 text-primary dark:bg-red-950/40 dark:text-red-300'
+                      : 'border-outline/60 bg-surface-lowest text-muted hover:bg-surface-low'
+                  }`}
+                >
+                  Pilih Anggota Spesifik ({selectedMembers.length} dipilih)
+                </button>
               </div>
-            </fieldset>
+
+              {targetMode === 'role' ? (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {AUDIENCES.filter(([role]) => isAdmin || role === 'student').map(([role, label]) => (
+                    <label
+                      key={role}
+                      className={`inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
+                        targetRoles.includes(role)
+                          ? 'border-primary/40 bg-primary/10 text-primary dark:bg-red-950/40 dark:text-red-300'
+                          : 'border-outline/60 bg-surface-lowest text-on-surface-variant hover:bg-surface-low dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={targetRoles.includes(role)}
+                        onChange={() => toggleAudience(role)}
+                        className="size-4 accent-primary"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2 rounded-lg border border-outline/60 bg-surface-lowest p-3 dark:border-slate-800 dark:bg-slate-900/50">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted" />
+                      <input
+                        type="text"
+                        value={memberSearch}
+                        onChange={(e) => setMemberSearch(e.target.value)}
+                        placeholder="Cari nama, NPK, atau divisi..."
+                        className="h-8 w-full rounded-md border border-outline bg-white pl-8 pr-2.5 text-xs text-on-surface outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-800"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <button
+                        type="button"
+                        onClick={selectAllFilteredMembers}
+                        className="rounded px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/10 transition cursor-pointer"
+                      >
+                        Pilih Semua
+                      </button>
+                      <span className="text-muted">·</span>
+                      <button
+                        type="button"
+                        onClick={deselectAllMembers}
+                        className="rounded px-2 py-1 text-xs font-semibold text-muted hover:text-on-surface transition cursor-pointer"
+                      >
+                        Kosongkan
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-muted">
+                    {selectedMembers.length} anggota terpilih dari {membersList.length} total anggota
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto space-y-1 rounded border border-outline/40 bg-surface-low/30 p-1.5 dark:border-slate-800">
+                    {membersLoading ? (
+                      <p className="p-4 text-center text-xs text-muted">Memuat daftar anggota...</p>
+                    ) : filteredMembers.length ? (
+                      filteredMembers.map((member) => {
+                        const isChecked = selectedMembers.some((m) => m.npk === member.npk);
+                        return (
+                          <label
+                            key={member.npk}
+                            className={`flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-xs transition ${
+                              isChecked
+                                ? 'bg-primary/10 text-primary dark:bg-red-950/30 dark:text-red-300'
+                                : 'hover:bg-surface-low text-on-surface'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleMember(member)}
+                                className="size-3.5 accent-primary"
+                              />
+                              <div className="min-w-0">
+                                <span className="font-semibold truncate block">{member.name}</span>
+                                <span className="text-[11px] text-muted truncate block">NPK: {member.npk}</span>
+                              </div>
+                            </div>
+                            <span className="shrink-0 rounded bg-surface-low px-1.5 py-0.5 text-[10px] font-medium text-muted dark:bg-slate-800">
+                              {member.department || member.role}
+                            </span>
+                          </label>
+                        );
+                      })
+                    ) : (
+                      <p className="p-4 text-center text-xs text-muted">Tidak ada anggota yang cocok dengan pencarian.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Lampiran Gambar (Auto WebP) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-on-surface-variant">Lampiran Gambar</span>
+                <span className="text-[11px] text-muted">Otomatis dioptimalkan ke WebP</span>
+              </div>
+
+              {imagePreview ? (
+                <div className="relative overflow-hidden rounded-lg border border-outline bg-surface-low/40 p-3">
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={imagePreview}
+                      alt="Preview lampiran"
+                      className="h-20 w-28 rounded-md object-cover border border-outline/50 bg-white"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-on-surface truncate">
+                        {imageFile?.name || 'lampiran.webp'}
+                      </p>
+                      <p className="text-[11px] text-muted mt-0.5">
+                        Ukuran: {imageFile ? `${(imageFile.size / 1024).toFixed(1)} KB` : '-'} · Format WebP
+                      </p>
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700 transition cursor-pointer"
+                      >
+                        <Trash2 className="size-3" />
+                        Hapus Gambar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline/70 p-4 text-center hover:border-primary/50 hover:bg-surface-low/40 transition">
+                  <ImageIcon className="size-6 text-muted mb-1" />
+                  <span className="text-xs font-medium text-on-surface">
+                    {imageCompressing ? 'Mengonversi gambar ke WebP...' : 'Klik untuk unggah gambar lampiran'}
+                  </span>
+                  <span className="text-[11px] text-muted mt-0.5">JPG, PNG, GIF, atau WebP</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageSelect}
+                    disabled={imageCompressing}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-outline/50 bg-surface-low/50 p-3 text-xs text-on-surface-variant dark:border-slate-800 dark:bg-slate-800/40">
@@ -414,7 +704,7 @@ export default function NotificationsPage() {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={busy}
+                disabled={busy || imageCompressing}
                 loading={busy}
                 icon={<Send className="size-4" />}
               >
@@ -547,6 +837,18 @@ export default function NotificationsPage() {
                         {item.message}
                       </p>
 
+                      {item.image_url && (
+                        <div className="mt-3 max-w-sm overflow-hidden rounded-lg border border-outline bg-surface-lowest">
+                          <img
+                            src={resolveNotificationImageUrl(item.image_url)}
+                            alt={item.title}
+                            className="max-h-48 w-full object-contain bg-slate-50 dark:bg-slate-900/50 cursor-pointer hover:opacity-90 transition"
+                            onClick={() => setSelectedDetail(item)}
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-outline/40 pt-3 dark:border-slate-800">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="rounded-md bg-surface-low px-2.5 py-1 text-xs font-medium text-muted dark:bg-slate-800 dark:text-slate-300">
@@ -561,6 +863,16 @@ export default function NotificationsPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-1.5">
+                          <Button
+                            type="button"
+                            size="xs"
+                            variant="ghost"
+                            icon={<Eye className="size-3.5" />}
+                            onClick={() => setSelectedDetail(item)}
+                            className="text-on-surface-variant hover:bg-surface-low"
+                          >
+                            Detail
+                          </Button>
                           {!item.is_read && (
                             <Button
                               type="button"
@@ -615,6 +927,13 @@ export default function NotificationsPage() {
           </Card>
         )}
       </section>
+
+      {/* Modal Popup Detail Notifikasi */}
+      <ModalNotif
+        isOpen={Boolean(selectedDetail)}
+        notification={selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+      />
     </div>
   );
 }

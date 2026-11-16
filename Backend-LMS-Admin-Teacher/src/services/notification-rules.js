@@ -7,15 +7,31 @@ const notificationInputSchema = z.object({
   message: z.string().trim().min(1).max(2000),
   category: z.enum(['announcement', 'course', 'assessment', 'forum', 'system']).default('announcement'),
   priority: z.enum(['normal', 'important']).default('normal'),
-  targetRoles: z.array(z.enum(permittedRoles)).min(1).max(3),
+  targetMode: z.enum(['role', 'members']).optional().default('role'),
+  targetRoles: z.array(z.enum(permittedRoles)).optional().default(['student']),
+  targetMembers: z.array(
+    z.object({
+      npk: z.string().trim().min(1).max(50),
+      name: z.string().trim().max(150).optional(),
+      role: z.enum(permittedRoles).optional().default('student'),
+      email: z.string().trim().max(254).optional()
+    })
+  ).optional().default([]),
   sendEmail: z.boolean().default(false),
-  showPopup: z.boolean().default(false)
+  showPopup: z.boolean().default(false),
+  imageUrl: z.string().trim().max(500).optional().nullable()
 }).strict();
 
 function canSendToRoles(senderRole, targetRoles) {
   if (!Array.isArray(targetRoles) || targetRoles.length === 0) return false;
   if (senderRole === 'admin') return targetRoles.every(role => permittedRoles.includes(role));
   return senderRole === 'teacher' && targetRoles.every(role => role === 'student');
+}
+
+function canSendToMembers(senderRole, targetMembers) {
+  if (!Array.isArray(targetMembers) || targetMembers.length === 0) return false;
+  if (senderRole === 'admin') return true;
+  return senderRole === 'teacher' && targetMembers.every(m => (m.role || 'student') === 'student');
 }
 
 function audienceLabel(role) {
@@ -35,4 +51,4 @@ function emailBatches(recipients, max = 5000) {
   return unique;
 }
 
-module.exports = { permittedRoles, notificationInputSchema, canSendToRoles, audienceLabel, emailBatches };
+module.exports = { permittedRoles, notificationInputSchema, canSendToRoles, canSendToMembers, audienceLabel, emailBatches };

@@ -118,19 +118,19 @@
     backdrop.setAttribute('aria-labelledby', 'modalNotifTitle');
 
     const card = document.createElement('div');
-    card.className = 'relative flex w-full max-w-lg flex-col overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-2xl ring-1 ring-black/10';
+    card.className = 'relative flex w-full max-w-2xl sm:max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10';
 
     const isImportant = notification.priority === 'important';
     const header = document.createElement('div');
-    header.className = `flex items-center justify-between border-b border-slate-100 p-5 sm:p-6 ${isImportant ? 'bg-red-50/80' : 'bg-slate-50/80'}`;
+    header.className = `flex items-center justify-between border-b border-slate-100 p-5 sm:p-6 ${isImportant ? 'bg-red-50/70' : 'bg-slate-50/70'}`;
 
     const headerLeft = document.createElement('div');
     headerLeft.className = 'flex items-center gap-3 min-w-0';
 
     const iconSpan = document.createElement('span');
-    iconSpan.className = `grid size-11 shrink-0 place-items-center rounded-2xl ${isImportant ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'bg-red-50 text-red-700'}`;
+    iconSpan.className = `grid size-10 shrink-0 place-items-center rounded-xl ${isImportant ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700'}`;
     const iconName = isImportant ? 'notifications_active' : (notification.category === 'course' ? 'school' : notification.category === 'assessment' ? 'assignment' : notification.category === 'forum' ? 'forum' : notification.category === 'system' ? 'settings' : 'campaign');
-    iconSpan.innerHTML = `<span class="material-symbols-outlined text-2xl" aria-hidden="true">${iconName}</span>`;
+    iconSpan.innerHTML = `<span class="material-symbols-outlined text-xl" aria-hidden="true">${iconName}</span>`;
 
     const meta = document.createElement('div');
     meta.className = 'min-w-0';
@@ -139,7 +139,7 @@
     badgesWrap.className = 'flex flex-wrap items-center gap-2';
 
     const catBadge = document.createElement('span');
-    catBadge.className = 'rounded-md bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-xs border border-slate-200';
+    catBadge.className = 'rounded-md bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200';
     catBadge.textContent = notification.category === 'announcement' ? 'Pengumuman' : notification.category === 'course' ? 'Course' : notification.category === 'assessment' ? 'Assessment' : notification.category === 'forum' ? 'Forum' : notification.category === 'system' ? 'Sistem' : 'Pemberitahuan';
     badgesWrap.append(catBadge);
 
@@ -149,11 +149,6 @@
       impBadge.textContent = 'Penting';
       badgesWrap.append(impBadge);
     }
-
-    const popupBadge = document.createElement('span');
-    popupBadge.className = 'rounded-md bg-amber-100 text-amber-800 px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1';
-    popupBadge.innerHTML = '<span class="material-symbols-outlined text-xs">campaign</span> Pemberitahuan';
-    badgesWrap.append(popupBadge);
 
     const senderText = document.createElement('p');
     senderText.className = 'mt-1 text-xs text-slate-500 truncate';
@@ -172,18 +167,36 @@
     header.append(headerLeft, closeBtn);
 
     const body = document.createElement('div');
-    body.className = 'p-5 sm:p-6 space-y-4 max-h-[60vh] overflow-y-auto';
+    body.className = 'p-5 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto';
 
     const titleEl = document.createElement('h3');
     titleEl.id = 'modalNotifTitle';
     titleEl.className = 'text-lg sm:text-xl font-bold text-slate-900 break-words leading-snug';
     titleEl.textContent = notification.title || 'Pemberitahuan';
 
+    body.append(titleEl);
+
+    if (notification.image_url) {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'overflow-hidden rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center';
+      const img = document.createElement('img');
+      const rawUrl = notification.image_url;
+      const fullImgUrl = /^https?:\/\//i.test(rawUrl)
+        ? rawUrl
+        : `${apiBase}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+      img.src = fullImgUrl;
+      img.alt = notification.title || 'Lampiran notifikasi';
+      img.className = 'max-h-96 w-full object-contain';
+      img.loading = 'lazy';
+      imgWrap.append(img);
+      body.append(imgWrap);
+    }
+
     const msgBox = document.createElement('div');
     msgBox.className = 'rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 sm:p-5 text-sm sm:text-base leading-relaxed text-slate-700 whitespace-pre-wrap break-words';
     msgBox.textContent = notification.message || '';
 
-    body.append(titleEl, msgBox);
+    body.append(msgBox);
 
     const footer = document.createElement('div');
     footer.className = 'flex flex-col-reverse sm:flex-row items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/50 p-4 sm:px-6';

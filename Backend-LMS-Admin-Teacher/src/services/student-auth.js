@@ -194,7 +194,7 @@ async function listStudentAccounts() {
     charset: 'utf8mb4', timezone: 'Z'
   });
   try {
-    const [rows] = await connection.query(`SELECT npk AS employee_npk,fullname,email,'student' AS role,status,created_at
+    const [rows] = await connection.query(`SELECT npk AS employee_npk,fullname,email,'student' AS role,status,department,position_name,created_at
       FROM student_accounts WHERE account_type='student' ORDER BY fullname`);
     return rows;
   } finally { await connection.end(); }

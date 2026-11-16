@@ -83,6 +83,20 @@
     if (!read) heading.append(make('span', 'mt-1 size-2.5 shrink-0 rounded-full bg-[#DC2626]'));
     body.append(heading);
     body.append(make('p', 'mt-[10px] whitespace-pre-wrap break-words text-[14px] leading-[22px] text-[#525252]', item.message || ''));
+    if (item.image_url) {
+      const imgWrap = make('div', 'mt-[10px] max-w-md overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-[#FAFAFA]');
+      const img = document.createElement('img');
+      const rawUrl = item.image_url;
+      const fullImgUrl = /^https?:\/\//i.test(rawUrl)
+        ? rawUrl
+        : `${apiBase}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+      img.src = fullImgUrl;
+      img.alt = item.title || 'Lampiran notifikasi';
+      img.className = 'max-h-56 w-full object-contain';
+      img.loading = 'lazy';
+      imgWrap.append(img);
+      body.append(imgWrap);
+    }
     const footer = make('div', 'mt-[12px] flex flex-wrap items-center justify-between gap-[8px] border-t border-[#F5F5F5] pt-[10px]');
     const footerLeft = make('div', 'flex items-center gap-[6px]');
     footerLeft.append(make('span', 'fd-chip fd-chip-neutral text-[11px]', labels[item.category] || 'Notifikasi'));

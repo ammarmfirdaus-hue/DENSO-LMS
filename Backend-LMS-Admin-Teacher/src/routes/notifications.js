@@ -1,16 +1,34 @@
+const path = require('path');
+const fs = require('fs/promises');
+const crypto = require('crypto');
 const express = require('express');
 const { z } = require('zod');
 const { sql, pool } = require('../config/database');
 const env = require('../config/env');
 const { authenticate, requirePermission } = require('../middleware/auth');
 const { buildLimiter } = require('../middleware/rate-limit');
-const { listActiveStudentRecipients } = require('../services/student-auth');
+const { createImageUpload } = require('../middleware/forum-upload');
+const { convertImageBufferToWebP } = require('../services/image-converter');
+const { listActiveStudentRecipients, listStudentAccounts } = require('../services/student-auth');
 const { isMailConfigured } = require('../services/notification-mail');
 const { notificationEvents, publishNotificationEvent } = require('../services/notification-events');
-const { permittedRoles, notificationInputSchema, canSendToRoles, audienceLabel, emailBatches } = require('../services/notification-rules');
+const {
+  permittedRoles,
+  notificationInputSchema,
+  canSendToRoles,
+  canSendToMembers,
+  audienceLabel,
+  emailBatches
+} = require('../services/notification-rules');
 const { paginateCollection } = require('../middleware/pagination');
 
 const router = express.Router();
+const uploadDirectory = path.resolve(__dirname, '../../uploads/notifications');
+const notificationImageUpload = createImageUpload({
+  errorMessage: 'Lampiran notifikasi hanya menerima file gambar JPG, PNG, GIF, atau WebP.',
+  fieldSize: 10 * 1024 * 1024
+});
+
 const sendLimiter = buildLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 10,
@@ -28,6 +46,34 @@ function trustedWriteOrigin(req, res, next) {
   }
   next();
 }
+
+/**
+ * Public serving of notification images.
+ * Validates that the requested image is referenced in dbo.lms_notifications.
+ */
+router.get('/uploads/:filename', async (req, res, next) => {
+  const filename = z.string().regex(/^[0-9a-f-]{36}\.(jpg|png|gif|webp)$/i).safeParse(req.params.filename);
+  if (!filename.success) return res.sendStatus(404);
+  try {
+    const publicPath = `/notifications/uploads/${filename.data}`;
+    const found = await pool.request()
+      .input('path', sql.NVarChar(500), publicPath)
+      .query(`SELECT TOP 1 notification_id FROM dbo.lms_notifications WHERE image_url=@path`);
+    if (!found.recordset[0]) return res.sendStatus(404);
+    const filePath = path.join(uploadDirectory, filename.data);
+    await fs.access(filePath);
+    res.set({
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cache-Control': 'public, max-age=86400',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    res.type(path.extname(filePath));
+    res.sendFile(filePath, error => { if (error && !res.headersSent) next(error); });
+  } catch (error) {
+    if (error.code === 'ENOENT') return res.sendStatus(404);
+    next(error);
+  }
+});
 
 router.use(authenticate);
 
@@ -49,6 +95,65 @@ router.get('/unread-count', requirePermission('notifications.view'), async (req,
     res.set('Cache-Control', 'private, no-store');
     res.json({ unreadCount: Number(result.recordset[0]?.unread_count || 0) });
   } catch (error) { next(error); }
+});
+
+router.get('/members', requirePermission('notifications.send'), async (req, res, next) => {
+  try {
+    const isTeacher = req.user.role === 'teacher';
+    let students = [];
+    try {
+      students = await listStudentAccounts();
+    } catch {
+      students = [];
+    }
+    const activeStudents = (students || [])
+      .filter(s => s.status === 'active')
+      .map(s => ({
+        npk: String(s.employee_npk || s.npk),
+        name: s.fullname || s.name || s.employee_npk,
+        email: s.email || null,
+        role: 'student',
+        department: s.department || 'Student'
+      }));
+
+    if (isTeacher) {
+      return res.json({ members: activeStudents });
+    }
+
+    const employeesResult = await pool.request().query(`
+      SELECT employee_npk, fullname, email, role, department
+      FROM dbo.employee_accounts
+      WHERE status = 'active'
+      ORDER BY fullname ASC
+    `);
+
+    const employees = (employeesResult.recordset || []).map(e => ({
+      npk: String(e.employee_npk),
+      name: e.fullname,
+      email: e.email || null,
+      role: e.role,
+      department: e.department || (e.role === 'admin' ? 'Administrator' : e.role === 'teacher' ? 'Instructor' : 'Employee')
+    }));
+
+    res.json({ members: [...employees, ...activeStudents] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/upload-image', requirePermission('notifications.send'), trustedWriteOrigin, notificationImageUpload.single('image'), async (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'File gambar wajib disertakan.' } });
+  }
+  try {
+    const webp = await convertImageBufferToWebP(req.file.buffer, { quality: 85, maxEdge: 1920 });
+    const fileName = `${crypto.randomUUID()}${webp.extension}`;
+    await fs.mkdir(uploadDirectory, { recursive: true });
+    await fs.writeFile(path.join(uploadDirectory, fileName), webp.buffer, { flag: 'wx', mode: 0o640 });
+    res.status(201).json({ imageUrl: `/notifications/uploads/${fileName}` });
+  } catch (error) {
+    next(error);
+  }
 });
 
 const activeStreams = new Map();
@@ -94,7 +199,7 @@ router.get('/', requirePermission('notifications.view'), async (req, res, next) 
       .input('limit', sql.Int, parsed.data)
       .query(`
         SELECT TOP (@limit) n.notification_id, n.title, n.message, n.category, n.priority,
-            n.sender_npk, n.sender_name, n.sender_role, n.created_at,
+            n.sender_npk, n.sender_name, n.sender_role, n.created_at, n.image_url,
             CAST(ISNULL(n.show_popup, 0) AS BIT) AS show_popup,
             CAST(CASE WHEN r.notification_id IS NULL THEN 0 ELSE 1 END AS BIT) AS is_read
         FROM dbo.lms_notifications n WITH (NOLOCK)
@@ -142,82 +247,169 @@ router.post('/', requirePermission('notifications.send'), trustedWriteOrigin, se
   const parsed = notificationInputSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Lengkapi judul, isi, kategori, dan penerima notifikasi.' } });
   const input = parsed.data;
-  const targetRoles = [...new Set(input.targetRoles)];
-  if (!canSendToRoles(req.user.role, targetRoles)) {
-    return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Teacher hanya dapat mengirim notifikasi kepada Student.' } });
+
+  const isMembersMode = input.targetMode === 'members';
+
+  if (isMembersMode) {
+    if (!input.targetMembers || input.targetMembers.length === 0) {
+      return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih setidaknya satu anggota penerima.' } });
+    }
+    if (!canSendToMembers(req.user.role, input.targetMembers)) {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Teacher hanya dapat mengirim notifikasi kepada Student.' } });
+    }
+  } else {
+    const targetRoles = [...new Set(input.targetRoles)];
+    if (!targetRoles.length) {
+      return res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Pilih setidaknya satu role penerima.' } });
+    }
+    if (!canSendToRoles(req.user.role, targetRoles)) {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Teacher hanya dapat mengirim notifikasi kepada Student.' } });
+    }
   }
+
   if (input.sendEmail && !isMailConfigured()) {
     return res.status(503).json({ error: { code: 'EMAIL_UNAVAILABLE', message: 'SMTP belum dikonfigurasi; notifikasi belum dikirim.' } });
   }
 
   try {
-    let recipients = [];
-    if (input.sendEmail && targetRoles.includes('student')) {
-      recipients.push(...await listActiveStudentRecipients(5001));
-    }
-    const employeeRoles = targetRoles.filter(role => role === 'admin' || role === 'teacher');
-    if (input.sendEmail && employeeRoles.length) {
-      const employeeQuery = pool.request();
-      const roleParameters = employeeRoles.map((role, index) => {
-        employeeQuery.input(`role${index}`, sql.VarChar(20), role);
-        return `@role${index}`;
-      });
-      const employees = await employeeQuery.query(`SELECT TOP (5001) employee_npk AS npk,fullname,email,role
-        FROM dbo.employee_accounts WHERE status='active' AND role IN (${roleParameters.join(',')})
-          AND email IS NOT NULL AND LTRIM(RTRIM(email))<>'' ORDER BY employee_npk`);
-      recipients.push(...employees.recordset.map(row => ({ npk: row.npk, fullname: row.fullname, email: row.email, role: row.role })));
-    }
-    recipients = emailBatches(recipients);
-    if (input.sendEmail && recipients.length >= 5001) {
-      return res.status(413).json({ error: { code: 'EMAIL_RECIPIENT_LIMIT', message: 'Jumlah penerima email melebihi batas 5.000 akun per pengiriman.' } });
-    }
-
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
     const created = [];
+
     try {
-      for (const role of targetRoles) {
-        const row = await new sql.Request(transaction)
-          .input('audience', sql.VarChar(20), role)
-          .input('title', sql.NVarChar(180), input.title)
-          .input('message', sql.NVarChar(2000), input.message)
-          .input('category', sql.VarChar(30), input.category)
-          .input('priority', sql.VarChar(20), input.priority)
-          .input('npk', sql.VarChar(50), req.user.sub)
-          .input('senderRole', sql.VarChar(20), req.user.role)
-          .input('senderName', sql.NVarChar(150), String(req.user.name || req.user.sub).slice(0, 150))
-          .input('emailRequested', sql.Bit, input.sendEmail)
-          .input('showPopup', sql.Bit, input.showPopup)
-          .query(`INSERT INTO dbo.lms_notifications(audience_role,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested,show_popup)
-            OUTPUT INSERTED.notification_id,INSERTED.audience_role
-            VALUES(@audience,@title,@message,@category,@priority,@npk,@senderRole,@senderName,@emailRequested,@showPopup)`);
-        created.push(row.recordset[0]);
-      }
-
-      if (input.sendEmail && recipients.length) {
-        const idByRole = new Map(created.map(row => [row.audience_role, row.notification_id]));
-        for (let offset = 0; offset < recipients.length; offset += 500) {
-          const request = new sql.Request(transaction);
-          const values = recipients.slice(offset, offset + 500).map((recipient, index) => {
-            const notificationId = idByRole.get(recipient.role || 'student') || idByRole.get('student');
-            request.input(`notification${index}`, sql.BigInt, notificationId)
-              .input(`email${index}`, sql.NVarChar(254), recipient.email)
-              .input(`name${index}`, sql.NVarChar(150), String(recipient.fullname || recipient.name || recipient.npk || 'Pengguna').slice(0, 150));
-            return `(@notification${index},@email${index},@name${index})`;
-          });
-          await request.query(`INSERT INTO dbo.lms_notification_email_outbox(notification_id,recipient_email,recipient_name)
-            VALUES ${values.join(',')}`);
+      if (isMembersMode) {
+        let emailRecipients = [];
+        if (input.sendEmail) {
+          emailRecipients = emailBatches(input.targetMembers.filter(m => Boolean(m.email)));
+          if (emailRecipients.length >= 5001) {
+            await transaction.rollback().catch(() => {});
+            return res.status(413).json({ error: { code: 'EMAIL_RECIPIENT_LIMIT', message: 'Jumlah penerima email melebihi batas 5.000 akun per pengiriman.' } });
+          }
         }
-      }
-      await transaction.commit();
-    } catch (error) { await transaction.rollback().catch(() => {}); throw error; }
 
-    publishNotificationEvent({ roles: targetRoles, type: 'notification_created', showPopup: Boolean(input.showPopup) });
-    res.status(201).json({
-      created: targetRoles.length,
-      recipients: targetRoles.map(audienceLabel),
-      emailQueued: input.sendEmail ? recipients.length : 0
-    });
+        for (const member of input.targetMembers) {
+          const row = await new sql.Request(transaction)
+            .input('audience', sql.VarChar(20), member.role || 'student')
+            .input('recipientNpk', sql.VarChar(50), String(member.npk))
+            .input('title', sql.NVarChar(180), input.title)
+            .input('message', sql.NVarChar(2000), input.message)
+            .input('category', sql.VarChar(30), input.category)
+            .input('priority', sql.VarChar(20), input.priority)
+            .input('npk', sql.VarChar(50), req.user.sub)
+            .input('senderRole', sql.VarChar(20), req.user.role)
+            .input('senderName', sql.NVarChar(150), String(req.user.name || req.user.sub).slice(0, 150))
+            .input('emailRequested', sql.Bit, input.sendEmail)
+            .input('showPopup', sql.Bit, input.showPopup)
+            .input('imageUrl', sql.NVarChar(500), input.imageUrl || null)
+            .query(`INSERT INTO dbo.lms_notifications(audience_role,recipient_npk,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested,show_popup,image_url)
+              OUTPUT INSERTED.notification_id,INSERTED.audience_role,INSERTED.recipient_npk
+              VALUES(@audience,@recipientNpk,@title,@message,@category,@priority,@npk,@senderRole,@senderName,@emailRequested,@showPopup,@imageUrl)`);
+          created.push({ ...row.recordset[0], member });
+        }
+
+        if (input.sendEmail && emailRecipients.length) {
+          const idByNpk = new Map(created.map(item => [item.recipient_npk, item.notification_id]));
+          for (let offset = 0; offset < emailRecipients.length; offset += 500) {
+            const request = new sql.Request(transaction);
+            const values = emailRecipients.slice(offset, offset + 500).map((recipient, index) => {
+              const notificationId = idByNpk.get(recipient.npk);
+              request.input(`notification${index}`, sql.BigInt, notificationId)
+                .input(`email${index}`, sql.NVarChar(254), recipient.email)
+                .input(`name${index}`, sql.NVarChar(150), String(recipient.name || recipient.npk || 'Pengguna').slice(0, 150));
+              return `(@notification${index},@email${index},@name${index})`;
+            });
+            await request.query(`INSERT INTO dbo.lms_notification_email_outbox(notification_id,recipient_email,recipient_name)
+              VALUES ${values.join(',')}`);
+          }
+        }
+
+        await transaction.commit();
+
+        for (const member of input.targetMembers) {
+          publishNotificationEvent({
+            roles: [member.role || 'student'],
+            recipientNpk: member.npk,
+            type: 'notification_created',
+            showPopup: Boolean(input.showPopup)
+          });
+        }
+
+        return res.status(201).json({
+          created: input.targetMembers.length,
+          recipients: input.targetMembers.map(m => m.name || m.npk),
+          emailQueued: input.sendEmail ? emailRecipients.length : 0
+        });
+      } else {
+        const targetRoles = [...new Set(input.targetRoles)];
+        let recipients = [];
+        if (input.sendEmail && targetRoles.includes('student')) {
+          recipients.push(...await listActiveStudentRecipients(5001));
+        }
+        const employeeRoles = targetRoles.filter(role => role === 'admin' || role === 'teacher');
+        if (input.sendEmail && employeeRoles.length) {
+          const employeeQuery = pool.request();
+          const roleParameters = employeeRoles.map((role, index) => {
+            employeeQuery.input(`role${index}`, sql.VarChar(20), role);
+            return `@role${index}`;
+          });
+          const employees = await employeeQuery.query(`SELECT TOP (5001) employee_npk AS npk,fullname,email,role
+            FROM dbo.employee_accounts WHERE status='active' AND role IN (${roleParameters.join(',')})
+              AND email IS NOT NULL AND LTRIM(RTRIM(email))<>'' ORDER BY employee_npk`);
+          recipients.push(...employees.recordset.map(row => ({ npk: row.npk, fullname: row.fullname, email: row.email, role: row.role })));
+        }
+        recipients = emailBatches(recipients);
+        if (input.sendEmail && recipients.length >= 5001) {
+          await transaction.rollback().catch(() => {});
+          return res.status(413).json({ error: { code: 'EMAIL_RECIPIENT_LIMIT', message: 'Jumlah penerima email melebihi batas 5.000 akun per pengiriman.' } });
+        }
+
+        for (const role of targetRoles) {
+          const row = await new sql.Request(transaction)
+            .input('audience', sql.VarChar(20), role)
+            .input('title', sql.NVarChar(180), input.title)
+            .input('message', sql.NVarChar(2000), input.message)
+            .input('category', sql.VarChar(30), input.category)
+            .input('priority', sql.VarChar(20), input.priority)
+            .input('npk', sql.VarChar(50), req.user.sub)
+            .input('senderRole', sql.VarChar(20), req.user.role)
+            .input('senderName', sql.NVarChar(150), String(req.user.name || req.user.sub).slice(0, 150))
+            .input('emailRequested', sql.Bit, input.sendEmail)
+            .input('showPopup', sql.Bit, input.showPopup)
+            .input('imageUrl', sql.NVarChar(500), input.imageUrl || null)
+            .query(`INSERT INTO dbo.lms_notifications(audience_role,title,message,category,priority,sender_npk,sender_role,sender_name,email_requested,show_popup,image_url)
+              OUTPUT INSERTED.notification_id,INSERTED.audience_role
+              VALUES(@audience,@title,@message,@category,@priority,@npk,@senderRole,@senderName,@emailRequested,@showPopup,@imageUrl)`);
+          created.push(row.recordset[0]);
+        }
+
+        if (input.sendEmail && recipients.length) {
+          const idByRole = new Map(created.map(row => [row.audience_role, row.notification_id]));
+          for (let offset = 0; offset < recipients.length; offset += 500) {
+            const request = new sql.Request(transaction);
+            const values = recipients.slice(offset, offset + 500).map((recipient, index) => {
+              const notificationId = idByRole.get(recipient.role || 'student') || idByRole.get('student');
+              request.input(`notification${index}`, sql.BigInt, notificationId)
+                .input(`email${index}`, sql.NVarChar(254), recipient.email)
+                .input(`name${index}`, sql.NVarChar(150), String(recipient.fullname || recipient.name || recipient.npk || 'Pengguna').slice(0, 150));
+              return `(@notification${index},@email${index},@name${index})`;
+            });
+            await request.query(`INSERT INTO dbo.lms_notification_email_outbox(notification_id,recipient_email,recipient_name)
+              VALUES ${values.join(',')}`);
+          }
+        }
+        await transaction.commit();
+
+        publishNotificationEvent({ roles: targetRoles, type: 'notification_created', showPopup: Boolean(input.showPopup) });
+        return res.status(201).json({
+          created: targetRoles.length,
+          recipients: targetRoles.map(audienceLabel),
+          emailQueued: input.sendEmail ? recipients.length : 0
+        });
+      }
+    } catch (error) {
+      await transaction.rollback().catch(() => {});
+      throw error;
+    }
   } catch (error) { next(error); }
 });
 

@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { notificationInputSchema, canSendToRoles, emailBatches, audienceLabel } = require('../../src/services/notification-rules');
+const { notificationInputSchema, canSendToRoles, canSendToMembers, emailBatches, audienceLabel } = require('../../src/services/notification-rules');
 
 test('notification payload validation applies defaults and rejects unsafe extra fields', async t => {
   await t.test('trims content and applies normal priority defaults', () => {
@@ -10,6 +10,7 @@ test('notification payload validation applies defaults and rejects unsafe extra 
     assert.equal(result.data.message, 'Periksa jadwal Anda.');
     assert.equal(result.data.category, 'announcement');
     assert.equal(result.data.priority, 'normal');
+    assert.equal(result.data.targetMode, 'role');
     assert.equal(result.data.sendEmail, false);
     assert.equal(result.data.showPopup, false);
 
@@ -17,10 +18,25 @@ test('notification payload validation applies defaults and rejects unsafe extra 
       title: 'Pemberitahuan Mendesak',
       message: 'Harap segera cek modul.',
       targetRoles: ['student', 'teacher'],
-      showPopup: true
+      showPopup: true,
+      imageUrl: '/notifications/uploads/example.webp'
     });
     assert.equal(withPopup.success, true);
     assert.equal(withPopup.data.showPopup, true);
+    assert.equal(withPopup.data.imageUrl, '/notifications/uploads/example.webp');
+
+    const withMembers = notificationInputSchema.safeParse({
+      title: 'Pemberitahuan Khusus',
+      message: 'Khusus anggota terpilih.',
+      targetMode: 'members',
+      targetMembers: [
+        { npk: 'STD001', name: 'Budi Santoso', role: 'student', email: 'budi@example.com' },
+        { npk: 'STD002', name: 'Ani Wijaya', role: 'student' }
+      ]
+    });
+    assert.equal(withMembers.success, true);
+    assert.equal(withMembers.data.targetMode, 'members');
+    assert.equal(withMembers.data.targetMembers.length, 2);
   });
 
   await t.test('rejects blank, multiline, too long, and unknown fields', () => {
@@ -41,6 +57,12 @@ test('notification audience rules enforce teacher and admin boundaries', () => {
   assert.equal(audienceLabel('student'), 'Student');
   assert.equal(audienceLabel('teacher'), 'Teacher');
   assert.equal(audienceLabel('admin'), 'Admin');
+
+  // Member-targeted rules
+  assert.equal(canSendToMembers('teacher', [{ npk: '123', role: 'student' }]), true);
+  assert.equal(canSendToMembers('teacher', [{ npk: '123', role: 'admin' }]), false);
+  assert.equal(canSendToMembers('admin', [{ npk: '123', role: 'admin' }, { npk: '456', role: 'student' }]), true);
+  assert.equal(canSendToMembers('teacher', []), false);
 });
 
 test('email recipients are validated, normalized, deduplicated, and bounded', () => {

@@ -22,6 +22,14 @@ export function resolveCourseThumbnailUrl(thumbnailPath, apiBase = API_BASE) {
   return `${base}${value.startsWith('/') ? value : `/${value}`}`;
 }
 
+export function resolveNotificationImageUrl(imagePath, apiBase = API_BASE) {
+  const value = String(imagePath || '').trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  const base = String(apiBase || '').replace(/\/+$/, '');
+  return `${base}${value.startsWith('/') ? value : `/${value}`}`;
+}
+
 export function storeApiBaseUrl(value) {
   const normalized = String(value || '').replace(/\/+$/, '');
   API_BASE = normalized;
