@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutGrid,
@@ -323,6 +323,75 @@ function getChildBadge(linkId, childTo, badges) {
   return null;
 }
 
+function SidebarBadge({ badge, isDismissed, mode = 'inline' }) {
+  if (!badge) return null;
+
+  const isNew = badge === 'NEW';
+  const isSingleDigit = !isNew && String(badge).length === 1;
+
+  if (mode === 'collapsed') {
+    return (
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute -top-1.5 -right-2 z-10 inline-flex items-center justify-center rounded-full font-bold leading-none text-white ring-2 ring-[#0e1218] shadow-xs select-none tabular-nums transition-all duration-300 ease-out ${
+          isDismissed
+            ? 'scale-0 opacity-0 pointer-events-none'
+            : 'scale-100 opacity-100'
+        } ${
+          isNew
+            ? 'h-4 min-w-[20px] px-1 text-[8px] font-black uppercase tracking-wider bg-blue-600 animate-pulse'
+            : isSingleDigit
+              ? 'h-4 w-4 text-[9px] bg-[#DC2626]'
+              : 'h-4 min-w-[18px] px-1 text-[9px] bg-[#DC2626]'
+        }`}
+      >
+        <span className="flex items-center justify-center text-center leading-none">{badge}</span>
+      </span>
+    );
+  }
+
+  if (mode === 'submenu') {
+    return (
+      <span
+        aria-hidden="true"
+        className={`ml-auto inline-flex items-center justify-center rounded-full font-bold leading-none text-white shadow-xs select-none tabular-nums transition-all duration-300 ease-out ${
+          isDismissed
+            ? 'scale-75 opacity-0 max-w-0 overflow-hidden pointer-events-none'
+            : 'scale-100 opacity-100 max-w-16'
+        } ${
+          isNew
+            ? 'h-4.5 min-w-[22px] px-1.5 text-[8.5px] font-black uppercase tracking-wider bg-blue-600 animate-pulse ring-1 ring-white/20'
+            : isSingleDigit
+              ? 'h-4.5 w-4.5 text-[9.5px] bg-[#DC2626] ring-1 ring-white/20'
+              : 'h-4.5 min-w-[19px] px-1.5 text-[9.5px] bg-[#DC2626] ring-1 ring-white/20'
+        }`}
+      >
+        <span className="flex items-center justify-center text-center leading-none">{badge}</span>
+      </span>
+    );
+  }
+
+  // mode === 'inline' (default for expanded menu item)
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex items-center justify-center rounded-full font-bold leading-none text-white shadow-xs select-none tabular-nums transition-all duration-300 ease-out ${
+        isDismissed
+          ? 'scale-75 opacity-0 max-w-0 overflow-hidden pointer-events-none'
+          : 'scale-100 opacity-100 max-w-16'
+      } ${
+        isNew
+          ? 'h-5 min-w-[26px] px-1.5 text-[9px] font-black uppercase tracking-wider bg-blue-600 animate-pulse ring-1 ring-white/20'
+          : isSingleDigit
+            ? 'h-5 w-5 text-[10.5px] bg-[#DC2626] ring-1 ring-white/20'
+            : 'h-5 min-w-[20px] px-1.5 text-[10.5px] bg-[#DC2626] ring-1 ring-white/20'
+      }`}
+    >
+      <span className="flex items-center justify-center text-center leading-none">{badge}</span>
+    </span>
+  );
+}
+
 export default function Sidebar({ user, onLogout, open, onClose, collapsed, onToggleCollapse, onUserUpdated, badges = {} }) {
   const location = useLocation();
   const isAdmin = user?.role === 'admin';
@@ -330,6 +399,53 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isDark, setIsDark] = useState(() => getInitialTheme() === 'dark');
   const [menuSearch, setMenuSearch] = useState('');
+  const [dismissedBadges, setDismissedBadges] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('dls_dismissed_sidebar_badges');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const dismissBadge = useCallback((badgeKey, value, parentKey = null) => {
+    if (!badgeKey) return;
+    setDismissedBadges((prev) => {
+      const next = { ...prev, [badgeKey]: value ?? true };
+      if (parentKey && badges[parentKey]) {
+        next[parentKey] = badges[parentKey];
+      }
+      try {
+        sessionStorage.setItem('dls_dismissed_sidebar_badges', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, [badges]);
+
+  useEffect(() => {
+    MENU_GROUPS.forEach((group) => {
+      group.links.forEach((link) => {
+        const isCurrentRouteActive = !link.children?.length
+          ? (link.to === '/' ? location.pathname === '/' : (location.pathname === link.to || location.pathname.startsWith(`${link.to}/`)))
+          : isParentRouteActive(link, location);
+
+        if (isCurrentRouteActive && badges?.[link.id]) {
+          dismissBadge(link.id, badges[link.id]);
+        }
+
+        if (link.children?.length) {
+          link.children.forEach((child) => {
+            if (isSubmenuMatch(child.to, location, link.children)) {
+              const childBadge = getChildBadge(link.id, child.to, badges);
+              if (childBadge) {
+                dismissBadge(`${link.id}_${child.to}`, childBadge, link.id);
+              }
+            }
+          });
+        }
+      });
+    });
+  }, [location.pathname, location.search, location.hash, badges, dismissBadge]);
   const [openMenus, setOpenMenus] = useState(() => {
     const initial = {};
     MENU_GROUPS.forEach((group) => {
@@ -578,6 +694,14 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                 {group.links.map(link => {
                   const Icon = link.Icon;
                   const badge = badges?.[link.id];
+                  const isCurrentRouteActive = !link.children?.length
+                    ? (link.to === '/' ? location.pathname === '/' : (location.pathname === link.to || location.pathname.startsWith(`${link.to}/`)))
+                    : isParentRouteActive(link, location);
+
+                  const isDismissed = Boolean(
+                    isCurrentRouteActive ||
+                    (badge && dismissedBadges[link.id] !== undefined && dismissedBadges[link.id] === badge)
+                  );
 
                   if (!link.children?.length) {
                     return (
@@ -587,9 +711,10 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                         end={link.to === '/'}
                         onClick={() => {
                           if (menuSearch) setMenuSearch('');
+                          if (badge) dismissBadge(link.id, badge);
                           onClose?.();
                         }}
-                        title={!isExpanded ? (badge ? `${link.label} (${badge})` : link.label) : undefined}
+                        title={!isExpanded ? (badge && !isDismissed ? `${link.label} (${badge})` : link.label) : undefined}
                         className={({ isActive }) =>
                           `flex items-center rounded-md text-[13px] font-semibold transition-colors ${
                             isExpanded ? 'gap-3 px-3 py-2' : 'justify-center px-0 py-2'
@@ -602,26 +727,14 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                       >
                         <span className="relative flex items-center justify-center">
                           <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                          {!isExpanded && badge && (
-                            <span className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white ring-2 ring-[#0e1218] ${
-                              badge === 'NEW' ? 'bg-blue-500 text-[8px] animate-pulse' : 'bg-red-500'
-                            }`}>
-                              {badge}
-                            </span>
+                          {!isExpanded && (
+                            <SidebarBadge badge={badge} isDismissed={isDismissed} mode="collapsed" />
                           )}
                         </span>
                         {isExpanded && (
                           <div className="flex flex-1 items-center justify-between min-w-0">
                             <span className="truncate">{link.label}</span>
-                            {badge && (
-                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-2xs ${
-                                badge === 'NEW'
-                                  ? 'bg-blue-500 text-white animate-pulse'
-                                  : 'bg-red-500 text-white'
-                              }`}>
-                                {badge}
-                              </span>
-                            )}
+                            <SidebarBadge badge={badge} isDismissed={isDismissed} mode="inline" />
                           </div>
                         )}
                       </NavLink>
@@ -636,8 +749,11 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                       <Link
                         key={link.id}
                         to={link.baseTo}
-                        onClick={() => onClose?.()}
-                        title={badge ? `${link.label} (${badge})` : link.label}
+                        onClick={() => {
+                          if (badge) dismissBadge(link.id, badge);
+                          onClose?.();
+                        }}
+                        title={badge && !isDismissed ? `${link.label} (${badge})` : link.label}
                         data-sidebar-active={parentActive ? 'true' : undefined}
                         className={`flex items-center justify-center rounded-md px-0 py-2 text-[13px] font-semibold transition-colors ${
                           parentActive
@@ -647,13 +763,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                       >
                         <span className="relative flex items-center justify-center">
                           <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                          {badge && (
-                            <span className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white ring-2 ring-[#0e1218] ${
-                              badge === 'NEW' ? 'bg-blue-500 text-[8px] animate-pulse' : 'bg-red-500'
-                            }`}>
-                              {badge}
-                            </span>
-                          )}
+                          <SidebarBadge badge={badge} isDismissed={isDismissed} mode="collapsed" />
                         </span>
                       </Link>
                     );
@@ -681,15 +791,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                           <span className="truncate">{link.label}</span>
                         </span>
                         <div className="flex items-center gap-2">
-                          {badge && (
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-2xs ${
-                              badge === 'NEW'
-                                ? 'bg-blue-500 text-white animate-pulse'
-                                : 'bg-red-500 text-white'
-                            }`}>
-                              {badge}
-                            </span>
-                          )}
+                          <SidebarBadge badge={badge} isDismissed={isDismissed} mode="inline" />
                           <ChevronDown
                             className={`h-4 w-4 shrink-0 text-white/55 transition-transform duration-150 ${
                               submenuOpen ? 'rotate-180 text-white' : ''
@@ -704,6 +806,13 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                           {link.children.map(child => {
                             const childActive = isSubmenuMatch(child.to, location, link.children);
                             const childBadge = getChildBadge(link.id, child.to, badges);
+                            const childBadgeKey = `${link.id}_${child.to}`;
+                            const isChildDismissed = Boolean(
+                              childActive ||
+                              isParentRouteActive(link, location) ||
+                              (childBadge && dismissedBadges[childBadgeKey] !== undefined && dismissedBadges[childBadgeKey] === childBadge) ||
+                              (badge && dismissedBadges[link.id] !== undefined && dismissedBadges[link.id] === badge)
+                            );
                             return (
                               <Link
                                 key={child.to}
@@ -712,6 +821,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                                 data-sidebar-active={childActive ? 'true' : undefined}
                                 onClick={() => {
                                   if (menuSearch) setMenuSearch('');
+                                  if (childBadge) dismissBadge(childBadgeKey, childBadge, link.id);
                                   onClose?.();
                                 }}
                                 className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12.5px] transition-colors ${
@@ -727,11 +837,7 @@ export default function Sidebar({ user, onLogout, open, onClose, collapsed, onTo
                                   aria-hidden="true"
                                 />
                                 <span className="truncate flex-1">{child.label}</span>
-                                {childBadge && (
-                                  <span className="ml-auto inline-flex items-center rounded-full bg-red-500/90 px-1.5 py-0.2 text-[9px] font-bold text-white shadow-2xs">
-                                    {childBadge}
-                                  </span>
-                                )}
+                                <SidebarBadge badge={childBadge} isDismissed={isChildDismissed} mode="submenu" />
                               </Link>
                             );
                           })}

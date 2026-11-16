@@ -121,7 +121,7 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         <span class="dls-nav-label font-label-sm text-label-sm lg:text-[13.5px]"><?= $tab['label'] ?></span>
 
         <?php if ($tab['id'] === 'notifikasi'): ?>
-        <span data-notification-count class="dls-sidebar-notif-pill" aria-hidden="true"<?= (int) ($notif_count ?? 0) > 0 ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
+        <span data-notification-count class="dls-sidebar-notif-pill" aria-hidden="true"<?= ((int) ($notif_count ?? 0) > 0 && $active_tab !== 'notifikasi') ? '' : ' hidden' ?>><?= (int) ($notif_count ?? 0) > 99 ? '99+' : (int) ($notif_count ?? 0) ?></span>
         <?php endif; ?>
     </a>
     <?php endif; ?>
@@ -136,7 +136,7 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
         <a href="?route=/student/notifikasi" class="dls-mobile-profile-menu-item flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low" role="menuitem"<?= $active_tab === 'notifikasi' ? ' aria-current="page"' : '' ?>>
             <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">notifications</span>
             <span class="flex-1">Notifikasi</span>
-            <?php if ((int) ($notif_count ?? 0) > 0): ?><span class="dls-mobile-profile-unread"><?= (int) $notif_count > 99 ? '99+' : (int) $notif_count ?></span><?php endif; ?>
+            <?php if ((int) ($notif_count ?? 0) > 0 && $active_tab !== 'notifikasi'): ?><span class="dls-mobile-profile-unread"><?= (int) $notif_count > 99 ? '99+' : (int) $notif_count ?></span><?php endif; ?>
         </a>
         <a href="?route=/student/profil" class="dls-mobile-profile-menu-item flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low" role="menuitem"<?= $active_tab === 'profil' ? ' aria-current="page"' : '' ?>>
             <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">person</span>
