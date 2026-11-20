@@ -57,6 +57,9 @@ $backUrl = '?route=/student/course/detail&id=' . rawurlencode($coursePublicId) .
                 <div data-forum-list class="min-w-0 space-y-[12px]" aria-live="polite">
                     <div class="fd-card rounded-[12px] bg-white p-[32px] text-center text-[14px] text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Memuat diskusi…</div>
                 </div>
+                <div class="mt-4">
+                    <?php include APP_ROOT . '/includes/components/DX_LMS_M_Pagination.php'; ?>
+                </div>
             </div>
         </div>
     </main>

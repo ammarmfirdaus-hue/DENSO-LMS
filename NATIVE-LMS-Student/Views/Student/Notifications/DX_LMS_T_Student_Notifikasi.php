@@ -103,8 +103,8 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
             <div id="studentNotifications" class="min-w-0 space-y-[12px]" aria-live="polite">
                 <div class="fd-card rounded-[12px] bg-white p-8 text-center text-sm text-[#525252] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">Memuat notifikasi...</div>
             </div>
-            <div class="mt-4 flex justify-center">
-                <button type="button" id="notificationLoadMore" class="fd-btn fd-btn-secondary fd-btn-md hidden">Muat lainnya</button>
+            <div class="mt-4">
+                <?php include APP_ROOT . '/includes/components/DX_LMS_M_Pagination.php'; ?>
             </div>
         </div>
     </main>

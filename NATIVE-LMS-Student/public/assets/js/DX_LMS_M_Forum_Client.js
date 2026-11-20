@@ -14,6 +14,8 @@
   const sessionPath = `/forum/courses/${encodeURIComponent(courseCode)}/sessions/${encodeURIComponent(sessionCode)}`;
   let forumOpen = false;
   let eventSource;
+  let categoryPage = 1;
+  let cachedThreads = [];
 
   const roleName = role => role === 'teacher' ? 'Teacher' : role === 'admin' ? 'Admin' : 'Student';
   const dateText = value => {
@@ -148,19 +150,54 @@
     if (newTopicLink) newTopicLink.hidden = !forumOpen || readOnly;
     const list = root.querySelector('[data-forum-list]');
     if (!list) return;
-    list.replaceChildren();
-    const threads = data.threads || [];
+
+    if (data && data.threads) {
+      cachedThreads = data.threads;
+    }
+    const threads = cachedThreads || [];
     const threadCount = document.querySelector('[data-thread-count]');
     if (threadCount) threadCount.textContent = `${threads.length} diskusi`;
-    if (!threads.length) list.append(make('div', 'rounded-xl border border-dashed border-outline-variant/50 bg-surface-container-lowest p-8 text-center text-sm text-on-surface-variant', 'Belum ada diskusi di sesi ini. Mulai percakapan pertama.'));
-    threads.forEach(thread => {
-      const post = renderPost(thread);
-      const link = document.createElement('a');
-      link.href = `?route=/student/forum/thread&id=${encodeURIComponent(thread.thread_id)}&course_id=${encodeURIComponent(courseCode)}&session_id=${encodeURIComponent(sessionCode)}${readOnly ? '&is_riwayat=true' : ''}`;
-      link.className = 'mt-3 inline-flex text-sm font-semibold text-primary hover:underline';
-      link.textContent = 'Buka diskusi';
-      post.append(link); list.append(post);
-    });
+
+    const pagContainer = document.getElementById('paginationContainer');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+
+    const pageSize = Number(pageSizeSelect?.value) || 10;
+    const totalPages = Math.ceil(threads.length / pageSize) || 1;
+    if (categoryPage > totalPages) categoryPage = totalPages;
+    if (categoryPage < 1) categoryPage = 1;
+
+    const start = (categoryPage - 1) * pageSize;
+    const end = start + pageSize;
+    const shown = threads.slice(start, end);
+
+    list.replaceChildren();
+    if (!threads.length) {
+      list.append(make('div', 'rounded-xl border border-dashed border-outline-variant/50 bg-surface-container-lowest p-8 text-center text-sm text-on-surface-variant', 'Belum ada diskusi di sesi ini. Mulai percakapan pertama.'));
+    } else {
+      shown.forEach(thread => {
+        const post = renderPost(thread);
+        const link = document.createElement('a');
+        link.href = `?route=/student/forum/thread&id=${encodeURIComponent(thread.thread_id)}&course_id=${encodeURIComponent(courseCode)}&session_id=${encodeURIComponent(sessionCode)}${readOnly ? '&is_riwayat=true' : ''}`;
+        link.className = 'mt-3 inline-flex text-sm font-semibold text-primary hover:underline';
+        link.textContent = 'Buka diskusi';
+        post.append(link);
+        list.append(post);
+      });
+    }
+
+    if (pagContainer) {
+      if (threads.length > 5) {
+        pagContainer.classList.remove('hidden');
+        if (pageIndicator) pageIndicator.textContent = `Halaman ${categoryPage} dari ${totalPages}`;
+        if (prevPageBtn) prevPageBtn.disabled = categoryPage === 1;
+        if (nextPageBtn) nextPageBtn.disabled = categoryPage === totalPages;
+      } else {
+        pagContainer.classList.add('hidden');
+      }
+    }
   }
   async function refresh() {
     if (!apiBase) { showMessage('Alamat layanan forum belum dikonfigurasi.'); return; }
@@ -300,6 +337,31 @@
   }
 
   if (view === 'new') wireNewTopic();
+  if (view === 'category') {
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    pageSizeSelect?.addEventListener('change', () => {
+      categoryPage = 1;
+      renderCategory({ isOpen: forumOpen, threads: cachedThreads });
+    });
+    prevPageBtn?.addEventListener('click', () => {
+      if (categoryPage > 1) {
+        categoryPage--;
+        renderCategory({ isOpen: forumOpen, threads: cachedThreads });
+        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+    nextPageBtn?.addEventListener('click', () => {
+      const pageSize = Number(pageSizeSelect?.value) || 10;
+      const totalPages = Math.ceil(cachedThreads.length / pageSize) || 1;
+      if (categoryPage < totalPages) {
+        categoryPage++;
+        renderCategory({ isOpen: forumOpen, threads: cachedThreads });
+        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
   if (view === 'category' && locked) {
     const status = document.querySelector('[data-forum-status]');
     if (status) status.textContent = 'Sesi belum selesai';

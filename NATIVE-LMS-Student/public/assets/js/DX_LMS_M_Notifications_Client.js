@@ -10,14 +10,18 @@
   const unreadLabel = document.querySelector('[data-notification-unread-count]');
   const markAll = document.getElementById('notificationMarkAll');
   const clearAll = document.getElementById('notificationClearAll');
-  const moreButton = document.getElementById('notificationLoadMore');
+  const pagContainer = document.getElementById('paginationContainer');
+  const pageSizeSelect = document.getElementById('pageSizeSelect');
+  const pageIndicator = document.getElementById('pageIndicator');
+  const prevPageBtn = document.getElementById('prevPageBtn');
+  const nextPageBtn = document.getElementById('nextPageBtn');
   const tabs = Array.from(document.querySelectorAll('.notification-filter'));
   const messageBox = document.getElementById('notificationMessage');
   const labels = { announcement: 'Pengumuman', course: 'Course', assessment: 'Assessment', forum: 'Forum', system: 'System' };
   const icons = { announcement: 'campaign', course: 'school', assessment: 'assignment', forum: 'forum', system: 'settings' };
   let notifications = [];
   let activeFilter = 'all';
-  let limit = 20;
+  let currentPage = 1;
   let busy = false;
 
   async function request(path, options = {}) {
@@ -126,16 +130,42 @@
 
   function render() {
     const result = filteredItems();
-    const shown = result.slice(0, limit);
+    const pageSize = Number(pageSizeSelect?.value) || 10;
+    const totalPages = Math.ceil(result.length / pageSize) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    const shown = result.slice(start, end);
+
     list.replaceChildren();
     if (!shown.length) {
       const empty = make('div', 'rounded-xl border border-dashed border-outline-variant/50 bg-surface-container-lowest p-10 text-center');
       empty.append(make('p', 'font-semibold text-on-surface', notifications.length ? 'Tidak ada hasil' : 'Belum ada notifikasi'));
       empty.append(make('p', 'mt-1 text-sm text-on-surface-variant', notifications.length ? 'Coba kata kunci atau kategori lain.' : 'Notifikasi baru akan muncul di sini.'));
       list.append(empty);
-    } else shown.forEach(item => list.append(renderCard(item)));
-    if (countLabel) countLabel.textContent = result.length ? `Menampilkan ${shown.length} dari ${result.length} notifikasi` : `${notifications.length} notifikasi`;
-    if (moreButton) moreButton.classList.toggle('hidden', shown.length >= result.length);
+    } else {
+      shown.forEach(item => list.append(renderCard(item)));
+    }
+
+    if (countLabel) {
+      countLabel.textContent = result.length
+        ? `Menampilkan ${start + 1}–${start + shown.length} dari ${result.length} notifikasi`
+        : `${notifications.length} notifikasi`;
+    }
+
+    if (pagContainer) {
+      if (result.length > 0) {
+        pagContainer.classList.remove('hidden');
+        if (pageIndicator) pageIndicator.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
+      } else {
+        pagContainer.classList.add('hidden');
+      }
+    }
+
     const unread = notifications.filter(item => !isRead(item)).length;
     if (unreadLabel) unreadLabel.textContent = String(unread);
     if (markAll) markAll.disabled = busy || unread === 0;
@@ -144,9 +174,8 @@
 
   async function refresh() {
     try {
-      const result = await request('/notifications?limit=100');
+      const result = await request('/notifications?limit=200');
       notifications = result.notifications || [];
-      limit = Math.max(20, limit);
       showMessage('');
       render();
     } catch (error) {
@@ -207,7 +236,7 @@
 
   tabs.forEach(tab => tab.addEventListener('click', () => {
     activeFilter = tab.dataset.filter || 'all';
-    limit = 20;
+    currentPage = 1;
     tabs.forEach(item => {
       const active = item === tab;
       item.setAttribute('aria-selected', String(active));
@@ -218,9 +247,33 @@
     });
     render();
   }));
-  search?.addEventListener('input', () => { limit = 20; render(); });
-  dateFilter?.addEventListener('change', () => { limit = 20; render(); });
-  moreButton?.addEventListener('click', () => { limit += 20; render(); });
+
+  search?.addEventListener('input', () => { currentPage = 1; render(); });
+  dateFilter?.addEventListener('change', () => { currentPage = 1; render(); });
+
+  pageSizeSelect?.addEventListener('change', () => {
+    currentPage = 1;
+    render();
+  });
+
+  prevPageBtn?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      render();
+      list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  nextPageBtn?.addEventListener('click', () => {
+    const pageSize = Number(pageSizeSelect?.value) || 10;
+    const totalPages = Math.ceil(filteredItems().length / pageSize) || 1;
+    if (currentPage < totalPages) {
+      currentPage++;
+      render();
+      list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
   markAll?.addEventListener('click', async () => {
     busy = true; render();
     try {
