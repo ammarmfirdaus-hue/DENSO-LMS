@@ -258,11 +258,11 @@ export default function HelpCenterPage() {
             >
               Mulai Tur Interaktif Halaman
             </Button>
-            <Link to="/locations">
+            <a href="#denso-footer-map">
               <Button variant="primary" icon={<MapPin className="size-4" />}>
                 Peta Fasilitas DENSO (3D)
               </Button>
-            </Link>
+            </a>
           </div>
         }
       />
@@ -460,11 +460,11 @@ export default function HelpCenterPage() {
               Buka Live Chat
             </Button>
           </Link>
-          <Link to="/locations">
+          <a href="#denso-footer-map">
             <Button variant="outline" size="sm" icon={<MapPin className="size-3.5" />}>
               Peta DENSO 3D
             </Button>
-          </Link>
+          </a>
         </div>
       </section>
     </div>

@@ -1123,66 +1123,6 @@ function buildPageConfig(currentPath, role) {
     };
   }
 
-  // 21. Denso Locations (3D Maps)
-  if (currentPath === '/locations') {
-    return {
-      pageName: 'Peta Fasilitas PT DENSO di Seluruh Indonesia',
-      roleSummary: 'Jelajahi pabrik manufaktur (Sunter, Bekasi, Fajar) dan technical hub pelatihan DENSO di seluruh Indonesia melalui tampilan 3D Satelit interaktif.',
-      steps: [
-        {
-          label: 'Header & Petunjuk Arah',
-          element: 'main header',
-          popover: {
-            title: '1. Peta Fasilitas Resmi PT DENSO Indonesia',
-            description: 'Akses visualisasi citra 3D satelit beresolusi tinggi dan tombol "Petunjuk Arah" untuk membuka navigasi langsung di Google Maps.',
-            side: 'bottom',
-            align: 'start'
-          }
-        },
-        {
-          label: 'Filter Wilayah & Mode Tampilan 3D',
-          element: 'main .dls-card-surface:first-of-type',
-          popover: {
-            title: '2. Filter Provinsi & Pilihan Tampilan Peta',
-            description: 'Saring berdasarkan provinsi (DKI Jakarta, Jawa Barat, Jawa Timur, Jawa Tengah, Sumatera Utara) dan pilih tampilan "3D Satelit Perspektif", "Hybrid", atau "Peta Standar".',
-            side: 'bottom',
-            align: 'start'
-          }
-        },
-        {
-          label: 'Frame Interaktif Peta Google Maps 3D',
-          element: 'main iframe',
-          popover: {
-            title: '3. Navigasi Peta 3D Satelit Interaktif',
-            description: 'Peta satelit interaktif dengan kontrol zoom (+ / -) yang menampilkan kontur bangunan fasilitas pabrik dan area manufaktur DENSO secara akurat.',
-            side: 'top',
-            align: 'center'
-          }
-        },
-        {
-          label: 'Panel Rincian Fasilitas & Kontak',
-          element: 'main section:has(button[title="Salin alamat"])',
-          popover: {
-            title: '4. Informasi Lengkap Alamat & Spesialisasi',
-            description: 'Menampilkan alamat presisi, nomor telepon resmi, jam operasional kantor, spesialisasi produk (AC Mobil, Busi, Radiator, ECU), dan tombol salin alamat.',
-            side: 'top',
-            align: 'start'
-          }
-        },
-        {
-          label: 'Grid Switcher Fasilitas Seluruh Indonesia',
-          element: 'main section:last-of-type',
-          popover: {
-            title: '5. Pengalih Lokasi Instan se-Indonesia',
-            description: 'Pilih kartu pabrik Sunter, Bekasi MM2100, Fajar MM2100, atau Regional Hub Surabaya, Semarang, dan Medan untuk mengalihkan peta secara instan.',
-            side: 'top',
-            align: 'start'
-          }
-        }
-      ]
-    };
-  }
-
   // Fallback generic
   return {
     pageName: 'Halaman Portal LMS',

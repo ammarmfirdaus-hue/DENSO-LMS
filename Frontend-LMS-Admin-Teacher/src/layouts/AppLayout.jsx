@@ -29,8 +29,7 @@ const ROUTE_TITLES = [
   ['/enrollments', 'Persetujuan Course'],
   ['/roles', 'Role & Hak Akses'],
   ['/settings/api', 'Atur API'],
-  ['/help', 'Pusat Panduan LMS'],
-  ['/locations', 'Peta Fasilitas DENSO (3D)']
+  ['/help', 'Pusat Panduan LMS']
 ];
 
 export default function AppLayout({ user: initialUser, onLogout }) {

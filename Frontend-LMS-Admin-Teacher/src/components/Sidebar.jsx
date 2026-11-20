@@ -232,12 +232,6 @@ const MENU_GROUPS = [
           { to: '/help#overview', label: 'Panduan Modul LMS' },
           { to: '/help#faq', label: 'Tanya Jawab (FAQ)' }
         ]
-      },
-      {
-        id: 'denso-locations',
-        to: '/locations',
-        Icon: MapPin,
-        label: 'Peta Fasilitas DENSO (3D)'
       }
     ]
   }
