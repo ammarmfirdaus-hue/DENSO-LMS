@@ -173,7 +173,9 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
 <?php include APP_ROOT . '/includes/components/DX_LMS_M_Right_Panel.php'; ?>
 <script>document.body.classList.add('dls-has-right-panel');</script>
 <?php endif; ?>
+<?php if (empty($hide_footer)): ?>
 <?php include APP_ROOT . '/includes/components/DX_LMS_M_Student_Footer.php'; ?>
+<?php endif; ?>
 <?php include APP_ROOT . '/includes/components/DX_LMS_M_Support_Chat_Widget.php'; ?>
 
 <script>
