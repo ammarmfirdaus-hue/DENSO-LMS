@@ -326,12 +326,29 @@ body.dls-app-shell .fd-h3 {
     font-size: 12px;
     font-weight: 700;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
-    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .dls-help-card-btn:hover {
-    background-color: #FEE2E2;
-    color: #B91C1C;
+    background-color: #FEE2E2 !important;
+    color: #B91C1C !important;
+    transform: translateY(-1px);
+}
+
+/* Dark Mode Help Center Button & Card */
+html.dark .dls-help-card-btn,
+[data-theme="dark"] .dls-help-card-btn {
+    background-color: #2D3142 !important;
+    color: #F1F5F9 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .dls-help-card-btn:hover,
+[data-theme="dark"] .dls-help-card-btn:hover {
+    background-color: #DC2626 !important;
+    color: #FFFFFF !important;
+    border-color: #DC2626 !important;
     transform: translateY(-1px);
 }
 

@@ -148,6 +148,21 @@ $current_date_str = "{$current_day_name}, {$current_day_num} {$current_month_nam
     <div class="hidden lg:flex flex-col gap-3 mt-auto w-full pt-2">
         <!-- Help Center Card (Reference Image Style with DENSO Red Badge) -->
         <div class="dls-help-card">
+            <style>
+                html.dark .dls-help-card-btn,
+                [data-theme="dark"] .dls-help-card-btn {
+                    background-color: #2D3142 !important;
+                    color: #F1F5F9 !important;
+                    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+                }
+                html.dark .dls-help-card-btn:hover,
+                [data-theme="dark"] .dls-help-card-btn:hover {
+                    background-color: #DC2626 !important;
+                    color: #FFFFFF !important;
+                    border-color: #DC2626 !important;
+                }
+            </style>
             <div class="dls-help-card-badge" aria-hidden="true">
                 <span class="material-symbols-outlined text-[20px]">help</span>
             </div>
