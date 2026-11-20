@@ -29,12 +29,6 @@ export default function Footer() {
             </p>
 
             <div className="space-y-1.5 pt-1 text-xs text-muted dark:text-slate-400">
-              <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#E60012]" />
-                <span>
-                  <strong>Kantor Pusat:</strong> Jl. Gaya Motor I No. 6, Sunter II, Jakarta Utara 14330
-                </span>
-              </div>
               <div className="flex items-center gap-4 pt-0.5 text-[11.5px]">
                 <span className="flex items-center gap-1.5">
                   <Phone className="size-3.5 shrink-0 text-muted" />

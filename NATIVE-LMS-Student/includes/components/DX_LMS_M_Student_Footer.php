@@ -75,23 +75,6 @@ $current_year = date('Y');
         html.dark .dls-footer-links a:hover {
             color: #EF4444;
         }
-        .dls-footer-info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            font-size: 12px;
-            color: #64748B;
-            line-height: 1.45;
-        }
-        html.dark .dls-footer-info-item {
-            color: #94A3B8;
-        }
-        .dls-footer-info-item .material-symbols-outlined {
-            font-size: 16px;
-            color: #94A3B8;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
         .dls-footer-badge {
             display: inline-flex;
             align-items: center;
@@ -126,17 +109,6 @@ $current_year = date('Y');
             <p class="text-[12px] leading-relaxed text-[#64748B] dark:text-[#94A3B8] max-w-md">
                 Platform pembelajaran dan pelatihan digital mandiri karyawan untuk mendukung keunggulan operasional, keselamatan kerja (K3), dan inovasi berkelanjutan.
             </p>
-
-            <div class="space-y-1.5 pt-0.5">
-                <div class="dls-footer-info-item">
-                    <span class="material-symbols-outlined text-[#DC2626]!" style="color:#DC2626;">location_on</span>
-                    <span><strong>Sunter Plant (HQ):</strong> Jl. Gaya Motor I No. 6, Sunter II, Jakarta Utara 14330</span>
-                </div>
-                <div class="dls-footer-info-item">
-                    <span class="material-symbols-outlined">factory</span>
-                    <span><strong>Bekasi Plant:</strong> MM2100 Industrial Town Blok E, Cikarang Barat 17520</span>
-                </div>
-            </div>
 
             <div class="pt-1">
                 <div class="dls-footer-badge">

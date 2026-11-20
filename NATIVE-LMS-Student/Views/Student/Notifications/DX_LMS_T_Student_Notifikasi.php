@@ -30,27 +30,58 @@ $notif_count = (int) ($stats['unread_notifs'] ?? 0);
                 include APP_ROOT . '/includes/components/DX_LMS_M_Page_Header.php';
                 ?>
             </div>
+                    
+        <section class="w-full max-w-5xl">
+            <div class="flex flex-nowrap items-center gap-3 overflow-x-auto rounded-xl border border-[#E5E7EB] bg-white p-3 shadow-sm">
 
-            <div class="mb-[18px] grid min-w-0 gap-[12px] md:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
-                <label class="relative block min-w-0">
-                    <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[#737373]" aria-hidden="true">search</span>
+                <!-- Search -->
+                <label class="relative block min-w-[240px] flex-1">
+                    <span
+                        class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-[#737373]"
+                        aria-hidden="true">
+                        search
+                    </span>
                     <span class="sr-only">Cari notifikasi</span>
-                    <input type="search" id="notificationSearch" placeholder="Cari notifikasi..." class="fd-input fd-search-input h-[42px] w-full min-w-0">
+                    <input
+                        type="search"
+                        id="notificationSearch"
+                        placeholder="Cari notifikasi..."
+                        class="fd-input fd-search-input h-[42px] w-full rounded-lg pl-11 text-sm">
                 </label>
-                <label class="block min-w-0">
+
+                <!-- Date Filter -->
+                <label class="block w-[165px] shrink-0">
                     <span class="sr-only">Filter berdasarkan tanggal</span>
-                    <input type="date" id="notificationDate" class="fd-input h-[42px] w-full min-w-0">
+                    <input
+                        type="date"
+                        id="notificationDate"
+                        class="fd-input h-[42px] w-full rounded-lg text-sm">
                 </label>
-                <button type="button" id="notificationMarkAll" class="fd-btn fd-btn-secondary fd-btn-md shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40">
-                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">done_all</span>
+
+                <!-- Mark All as Read -->
+                <button
+                    type="button"
+                    id="notificationMarkAll"
+                    class="fd-btn fd-btn-secondary fd-btn-md inline-flex h-[42px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm disabled:cursor-not-allowed disabled:opacity-40">
+                    <span class="material-symbols-outlined text-[19px]" aria-hidden="true">
+                        done_all
+                    </span>
                     Tandai semua dibaca
                 </button>
-                <button type="button" id="notificationClearAll" class="fd-btn fd-btn-secondary fd-btn-md shrink-0 whitespace-nowrap text-[#DC2626] hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-40">
-                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
+
+                <!-- Clear History -->
+                <button
+                    type="button"
+                    id="notificationClearAll"
+                    class="fd-btn fd-btn-secondary fd-btn-md inline-flex h-[42px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm text-[#DC2626] hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-40">
+                    <span class="material-symbols-outlined text-[19px]" aria-hidden="true">
+                        delete
+                    </span>
                     Hapus Riwayat
                 </button>
-            </div>
 
+            </div>
+        </section>
             <div class="mb-[18px] -mx-4 max-w-full px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
                 <div class="max-w-full overflow-x-auto overscroll-x-contain pb-1 hide-scrollbar" role="region" aria-label="Kategori notifikasi" tabindex="0">
                     <div class="flex w-max min-w-full gap-[6px] rounded-full bg-[#F5F5F5] p-[6px]" role="tablist" aria-label="Filter kategori">
