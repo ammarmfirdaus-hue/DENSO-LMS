@@ -25,6 +25,7 @@ $icon_path = $base_path . 'assets/img/icon/denso-vector-logo.png';
 <meta name="description" content="Learning Management System DENSO untuk pembelajaran dan pelatihan.">
 <meta name="application-name" content="DENSO LMS">
 <meta name="theme-color" content="#d71920">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DENSO LMS">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">

@@ -22,7 +22,7 @@ final class DX_LMS_M_Request_Middleware
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: strict-origin-when-cross-origin');
-        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=()');
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
         header('X-XSS-Protection: 1; mode=block');

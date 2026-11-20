@@ -16,12 +16,12 @@ require_once __DIR__ . '/Core/DX_LMS_M_Controller.php';
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('X-Frame-Options: DENY');
-header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=()');
 $apiParts = parse_url(SSO_API_URL);
 $apiOrigin = isset($apiParts['scheme'], $apiParts['host'])
     ? $apiParts['scheme'] . '://' . $apiParts['host'] . (isset($apiParts['port']) ? ':' . $apiParts['port'] : '')
     : "'self'";
-header("Content-Security-Policy: base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; connect-src 'self' {$apiOrigin}; img-src 'self' data: {$apiOrigin}; frame-src 'self' https://youtube.com https://www.youtube.com https://youtube-nocookie.com https://www.youtube-nocookie.com https://youtu.be https://www.youtu.be https://vimeo.com https://www.vimeo.com https://player.vimeo.com");
+header("Content-Security-Policy: base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; connect-src 'self' {$apiOrigin}; img-src 'self' data: {$apiOrigin} https://*.google.com https://*.googleapis.com; frame-src 'self' https://maps.google.com https://www.google.com https://youtube.com https://www.youtube.com https://youtube-nocookie.com https://www.youtube-nocookie.com https://youtu.be https://www.youtu.be https://vimeo.com https://www.vimeo.com https://player.vimeo.com");
 if (APP_ENV === 'production' || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }

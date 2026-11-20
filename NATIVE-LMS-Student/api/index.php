@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('Allow: GET');
     jsonResponse(['error' => ['code' => 'METHOD_NOT_ALLOWED', 'message' => 'API ini hanya menerima GET.']], 405);
 }
-header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(self)');
 header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
 if (APP_ENV === 'production') header('Strict-Transport-Security: max-age=31536000');
 DX_LMS_M_Request_Middleware::handle();
