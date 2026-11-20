@@ -460,11 +460,6 @@ export default function HelpCenterPage() {
               Buka Live Chat
             </Button>
           </Link>
-          <a href="#denso-footer-map">
-            <Button variant="outline" size="sm" icon={<MapPin className="size-3.5" />}>
-              Peta DENSO 3D
-            </Button>
-          </a>
         </div>
       </section>
     </div>
